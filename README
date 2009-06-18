@@ -1,0 +1,6 @@
+INSTALL:
+  Run 'sudo ./setup install' in the buildnotify directory. This would copy the executables and resources to the appropriate directories.
+  Execute /usr/share/buildnotify/buildnotify.py  to start buildnotify.
+CONFIGURATION:
+  Save buildnotify.example as ~/.buildnotify file. Update as appropriate with your cruisecontrol server urls.
+

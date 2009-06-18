@@ -1,0 +1,20 @@
+# This is a sample configuration file for buildnotify 
+# The configuration file should be located at  ~/.buildnotify
+
+[connection]
+
+### Comma seperated list of urls
+#urls = file:///home/anay/appl2/cctray1.xml
+
+### Timeout duration if the server is unavailable
+#timeout     = 10
+### Polling interval (Dont set this to a very small value)
+#interval     = 60
+
+[misc]
+
+### Browser which should be used to display the build information
+#browser     = firefox
+### Location where the icons are located.
+#icons     = /usr/share/buildnotify/pixmaps/
+

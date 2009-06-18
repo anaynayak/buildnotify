@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Projects>
+<Project name="cleanup-artifacts-B" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.828" lastBuildTime="2009-06-12T06:54:35" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/cleanup-artifacts-B"/>
+<Project name="ganymatic-R3.0-I" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.716" lastBuildTime="2009-02-28T04:58:57" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/ganymatic-R3.0-I"/>
+<Project name="ganymaticPack-R3.0-I" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.132" lastBuildTime="2009-02-28T02:27:35" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/ganymaticPack-R3.0-I"/>
+<Project name="orbit-I" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.459" lastBuildTime="2009-05-12T19:52:41" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/orbit-I"/>
+<Project name="orbit-M" activity="Sleeping" lastBuildStatus="Failure" lastBuildLabel="build.17" lastBuildTime="2008-08-07T15:23:15" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/orbit-M"/>
+<Project name="orbit-R" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.18" lastBuildTime="2008-09-01T11:44:56" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/orbit-R"/>
+<Project name="orbit-S" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="build.172" lastBuildTime="2009-05-29T13:54:07" webUrl="http://build.eclipse.org:9777/dashboard/tab/build/detail/orbit-S"/>
+
+</Projects>
