@@ -7,9 +7,9 @@
 #urls = file:///home/anay/appl2/cctray1.xml
 
 ### Timeout duration if the server is unavailable
-#timeout     = 10
-### Polling interval (Dont set this to a very small value)
-#interval     = 60
+#timeout     = 5
+### Polling interval 
+#interval     = 10
 
 [misc]
 

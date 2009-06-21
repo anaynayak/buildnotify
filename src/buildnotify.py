@@ -52,7 +52,7 @@ class BuildNotify:
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
         self.tooltip.set_tip(self.tray, self.lastcheck)        
         self.events_pending()
-        self.menu.update(projects.projects)
+        self.menu.update(projects.all_projects)
         self.show_notifications(projects.get_failing_builds())
         
     def show_notifications(self, failing_builds):

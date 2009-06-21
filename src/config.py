@@ -7,10 +7,10 @@ import ConfigParser
 class Config:
     def __init__(self):
         config = ConfigParser.SafeConfigParser()
-        urls = self.from_properties(config, "connection","urls", "file:///home/anay/appl2/cctray.xml")
+        urls = self.from_properties(config, "connection","urls", "file:///tmp/cctray.xml")
         self.urls = urls.split(",")
-        self.timeout = float(self.from_properties(config, "connection","timeout", 10))
-        self.check_interval = int(self.from_properties(config, "connection", "interval", 60))
+        self.timeout = float(self.from_properties(config, "connection","timeout", 5))
+        self.check_interval = int(self.from_properties(config, "connection", "interval", 10))
         self.browser = self.from_properties(config, "misc", "browser", "firefox")
         self.icon_dir = self.from_properties(config, "misc", "icons", "/usr/share/buildnotify/pixmaps/")
     

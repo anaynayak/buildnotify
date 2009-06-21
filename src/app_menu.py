@@ -11,6 +11,7 @@ class AppMenu:
         self.menu.popup(None, None, self.func, event.button,event.time)
     
     def update(self, projects):
+        self.menu = gtk.Menu() 
         for project in projects:
             self.menu.append(self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url));
         self.menu.show_all()
