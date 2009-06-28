@@ -9,8 +9,8 @@ class Config:
         config = ConfigParser.SafeConfigParser()
         urls = self.from_properties(config, "connection","urls", "file:///tmp/cctray.xml")
         self.urls = urls.split(",")
-        self.timeout = float(self.from_properties(config, "connection","timeout", 5))
-        self.check_interval = int(self.from_properties(config, "connection", "interval", 10))
+        self.timeout = float(self.from_properties(config, "connection","timeout", 2))
+        self.check_interval = int(self.from_properties(config, "connection", "interval", 5))
         self.browser = self.from_properties(config, "misc", "browser", "firefox")
         self.icon_dir = self.from_properties(config, "misc", "icons", "/usr/share/buildnotify/pixmaps/")
     

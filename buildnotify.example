@@ -4,7 +4,7 @@
 [connection]
 
 ### Comma seperated list of urls
-#urls = file:///home/anay/appl2/cctray1.xml
+urls = file:///tmp/cctray.xml
 
 ### Timeout duration if the server is unavailable
 #timeout     = 5

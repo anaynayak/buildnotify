@@ -8,6 +8,7 @@ from time import strftime
 from config import Config
 from app_menu import AppMenu
 from app_menu import OtherMenu
+from project_status_notification import ProjectStatusNotification
 import projects
 import build_icons
 import projects
@@ -20,7 +21,8 @@ class BuildNotify:
 
     def __init__(self):
         self.conf = Config()
-        self.projects = projects.Projects(self.conf.urls)
+        self.projects_populator = projects.ProjectsPopulator(self.conf.urls)
+        self.projects = None
         self.build_icons = build_icons.BuildIcons(self.conf.icon_dir)
         self.tray = pytrayicon.TrayIcon("buildnotify");
         self.eventbox = gtk.EventBox()
@@ -42,31 +44,22 @@ class BuildNotify:
         self.tray.show_all()
         self.check_nodes()
         self.events_pending()
-        self.maintimer = gobject.timeout_add(self.conf.check_interval * 1000, self.check_nodes)
         self.notification.update("Build failed", "message", None)
+   
     def check_nodes(self):
-        self.projects.load_from_server(self.conf, self.update_with_response)
+        self.maintimer = gobject.timeout_add(self.conf.check_interval * 1000, self.check_nodes)
+        self.projects_populator.load_from_server(self.conf, self.update_with_response)
         
-    def update_with_response(self, projects):
-        self.imageicon.set_from_file(self.build_icons.for_status(projects.get_build_status()))
+    def update_with_response(self, updated_projects):
+        self.imageicon.set_from_file(self.build_icons.for_status(updated_projects.get_build_status()))
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
         self.tooltip.set_tip(self.tray, self.lastcheck)        
         self.events_pending()
-        self.menu.update(projects.all_projects)
-        self.show_notifications(projects.get_failing_builds())
+        self.menu.update(updated_projects.all_projects)
+        if self.projects is not None :
+            ProjectStatusNotification(self.projects, updated_projects, self.notification).show_notifications()
+        self.projects = updated_projects
         
-    def show_notifications(self, failing_builds):
-        if failing_builds == []:
-            return True
-        message = ""
-        for failing_build in failing_builds:
-            message += failing_build.name + "\n"
-        self.notification.update("Build failed", message, None)
-        if not self.notification.show():
-            print "Failed to send notification."
-            gtk.main_quit()
-        return True
-
     def button_pressed(self, signal, event, n):
         if event.type == gtk.gdk.BUTTON_PRESS and event.button == 2:
             sys.exit()

@@ -5,24 +5,17 @@ import socket
 class Project:
     def __init__(self, props):
         self.name = props['name']
-	self.status = props['lastBuildStatus']
+        self.status = props['lastBuildStatus']
         self.activity = props['activity']
-	self.lastBuildTime = props['lastBuildTime']
-	self.url = props['url']
+        self.lastBuildTime = props['lastBuildTime']
+        self.url = props['url']
+
     def get_build_status(self):
-	return self.status + "." + self.activity
+        return self.status + "." + self.activity
 	
 class Projects: 
-    def __init__(self, urls):
-        self.urls = urls
-        self.all_projects = []
-        
-    def load_from_server(self, conf, callback):
-        self.all_projects = []
-        for url in self.urls:
-        	self.check_nodes(conf, url)
-        if not self.all_projects == []:
-            callback(self)
+    def __init__(self, all_projects):
+        self.all_projects = all_projects
         
     def get_build_status(self):
         if (self.all_projects == []):
@@ -37,7 +30,23 @@ class Projects:
             if project.status == 'Failure':
                 failing_builds.append(project)
         return failing_builds
-        
+    
+    def to_map(self):
+        status = dict(Failure=[], Success=[])
+        for project in self.all_projects:
+            status[project.status].append(project.name)
+        return status
+
+class ProjectsPopulator:    
+    def __init__(self,urls):
+        self.urls = urls
+    
+    def load_from_server(self, conf, callback):
+        self.all_projects = []
+        for url in self.urls:
+        	self.check_nodes(conf, url)
+        callback(Projects(self.all_projects))
+    
     def check_nodes(self, conf, url):
         socket.setdefaulttimeout(conf.timeout)
         try:
