@@ -14,17 +14,23 @@ class ProjectStatusNotificationTest(unittest.TestCase):
         self.assertEquals("proj2", failing_builds[0])
         
     def testShouldIdentifyFixedBuilds(self):
-        old_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'proj2', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
-        new_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'proj2', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
+        old_projects = [Project({'name':'proj1', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'proj2', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
+        new_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'proj2', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
         successful_builds = ProjectStatus(Projects(old_projects), Projects(new_projects)).successful_builds()
         self.assertEquals(1,len(successful_builds))
-        self.assertEquals("proj2", successful_builds[0])
+        self.assertEquals("proj1", successful_builds[0])
     def testShouldIdentifyStillFailingBuilds(self):
         old_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'stillfailingbuild', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
         new_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'stillfailingbuild', 'lastBuildStatus':'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:47'})]    
         still_failing_builds = ProjectStatus(Projects(old_projects), Projects(new_projects)).still_failing_builds()
         self.assertEquals(1,len(still_failing_builds))
         self.assertEquals("stillfailingbuild", still_failing_builds[0])
+    def testShouldIdentifyStillSuccessfulBuilds(self):
+        old_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'Successbuild', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
+        new_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'Successbuild', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:47'})]    
+        still_successful_builds = ProjectStatus(Projects(old_projects), Projects(new_projects)).still_successful_builds()
+        self.assertEquals(1,len(still_successful_builds))
+        self.assertEquals("Successbuild", still_successful_builds[0])
 if __name__ == '__main__':
     unittest.main()
 
