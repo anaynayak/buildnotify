@@ -29,12 +29,14 @@ class BuildNotify:
         self.hb = gtk.HBox(False, 0)
         self.tooltip = gtk.Tooltips()
         self.imageicon = gtk.Image()
+        self.failing_build_count = gtk.Label()
         self.imageicon.set_from_file(self.build_icons.for_status(""))
-        self.hb.add(self.eventbox)
-        self.tray.add(self.hb)
+        self.eventbox.add(self.hb)
+        self.tray.add(self.eventbox)
         self.menu = AppMenu(self.conf, self.build_icons, self.imageicon)
         self.other_menu = OtherMenu(self.imageicon)
-        self.eventbox.add(self.imageicon)
+        self.hb.add(self.imageicon)
+        self.hb.add(self.failing_build_count)
         if not pynotify.init(" buildnotify "):
             sys.exit(1)
         self.notification = pynotify.Notification("buildnotify", "buildnotify", None, self.eventbox)
@@ -52,6 +54,10 @@ class BuildNotify:
         
     def update_with_response(self, updated_projects):
         self.imageicon.set_from_file(self.build_icons.for_status(updated_projects.get_build_status()))
+        count = str(len(updated_projects.get_failing_builds()))
+        if count is "0":
+            count = ""
+        self.failing_build_count.set_label(count)
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
         self.tooltip.set_tip(self.tray, self.lastcheck)        
         self.events_pending()
