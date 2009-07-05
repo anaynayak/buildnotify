@@ -14,10 +14,11 @@ setup (name='BuildNotify',
         ('share/buildnotify/pixmaps',['src/icons/icon-success.png']),
         ('share/buildnotify/pixmaps',['src/icons/icon-inactive.png']),
         ('share/buildnotify/pixmaps',['src/icons/icon-success-building.png']),
-        ('share/buildnotify',['src/buildnotify.py']),
-        ('share/buildnotify',['src/build_icons.py']),
         ('share/buildnotify',['src/app_menu.py']),
+        ('share/buildnotify',['src/build_icons.py']),
+        ('share/buildnotify',['src/buildnotify.py']),
         ('share/buildnotify',['src/config.py']),
         ('share/buildnotify',['src/projects.py']),
+        ('share/buildnotify',['src/project_status_notification.py']),
         ('share/buildnotify',['src/pytrayicon.so'])])
 
