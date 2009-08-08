@@ -31,6 +31,13 @@ class ProjectStatusNotificationTest(unittest.TestCase):
         still_successful_builds = ProjectStatus(Projects(old_projects), Projects(new_projects)).still_successful_builds()
         self.assertEquals(1,len(still_successful_builds))
         self.assertEquals("Successbuild", still_successful_builds[0])
+    def testShouldIdentifyNewBuilds(self):
+        old_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'})]
+        new_projects = [Project({'name':'proj1', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}), Project({'name':'Successbuild', 'lastBuildStatus':'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:47'})]    
+        still_successful_builds = ProjectStatus(Projects(old_projects), Projects(new_projects)).still_successful_builds()
+        self.assertEquals(1, len(still_successful_builds))
+        self.assertEquals("Successbuild", still_successful_builds[0])
+
 if __name__ == '__main__':
     unittest.main()
 

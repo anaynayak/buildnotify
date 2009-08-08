@@ -35,9 +35,10 @@ class AppMenu:
         os.system(self.conf.browser + " " + url + " &")
 
 class OtherMenu:
-    def __init__(self, imageicon):
+    def __init__(self, conf, imageicon):
     	self.about_dialog = about_dialog(imageicon)
     	self.window = gtk.Menu()    
+    	self.conf = conf
         self.imageicon = imageicon
         menu_item_separator = gtk.SeparatorMenuItem()
         menu_item_about = gtk.ImageMenuItem('gtk-about',None)
@@ -59,7 +60,7 @@ class OtherMenu:
 	    self.about_dialog.create()     
                  
     def preferences_clicked(self, widget):
-        self.preferences_dialog = PreferencesDialog()
+        self.preferences_dialog = PreferencesDialog(self.conf)
         self.preferences_dialog.show()
     
     def func(menu, user_data):

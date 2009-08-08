@@ -54,11 +54,11 @@ class ProjectTuple:
     def has_succeeded(self):
         return self.status('Success','Failure')
     def has_been_successful(self):
-        return self.status('Success','Success') and self.different_builds()
+        return (self.old_project == None) or (self.status('Success','Success') and self.different_builds())
     def has_been_failing(self):
         return self.status('Failure','Failure') and self.different_builds()
     def status(self, new_status, old_status):
-        return self.current_project.status == new_status and self.old_project.status == old_status
+        return self.current_project.status == new_status and self.old_project != None and self.old_project.status == old_status
     def different_builds(self):
         return self.current_project.lastBuildTime != self.old_project.lastBuildTime    
         

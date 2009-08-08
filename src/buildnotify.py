@@ -21,7 +21,7 @@ class BuildNotify:
 
     def __init__(self):
         self.conf = Config()
-        self.projects_populator = projects.ProjectsPopulator(self.conf.urls)
+        self.projects_populator = projects.ProjectsPopulator(self.conf)
         self.projects = None
         self.build_icons = build_icons.BuildIcons(self.conf.icon_dir)
         self.tray = pytrayicon.TrayIcon("buildnotify");
@@ -34,7 +34,7 @@ class BuildNotify:
         self.eventbox.add(self.hb)
         self.tray.add(self.eventbox)
         self.menu = AppMenu(self.conf, self.build_icons, self.imageicon)
-        self.other_menu = OtherMenu(self.imageicon)
+        self.other_menu = OtherMenu(self.conf, self.imageicon)
         self.hb.add(self.imageicon)
         self.hb.add(self.failing_build_count)
         if not pynotify.init(" buildnotify "):

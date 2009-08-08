@@ -2,10 +2,12 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 import gtk.glade
+from config import Config
 
 class PreferencesDialog:
-    def __init__(self):
+    def __init__(self, config):
         self.gladefile = 'preferences.glade'
+        self.config = config 
     def show(self):
         self.wTree = gtk.glade.XML(self.gladefile)
     	self.serverList = self.wTree.get_widget("serverList")
@@ -19,6 +21,8 @@ class PreferencesDialog:
     	self.serverListModel = gtk.ListStore(str)
     	self.selectedRow = None
     	self.serverList.set_model(self.serverListModel)
+    	for url in self.config.get_urls():
+        	self.serverListModel.append([url])
         dic = {"on_mainWindow_destroy" : gtk.main_quit, 
         "on_addButton_clicked" : self.on_addButton_clicked,
         "on_removeButton_clicked": self.on_removeButton_clicked}
@@ -33,13 +37,20 @@ class PreferencesDialog:
         self.selectedRow = treeIter
     def on_addButton_clicked(self, widget):
         addServerDialog = AddServerDialog()
-        result, server = addServerDialog.run()        
+        result, server = addServerDialog.run()
         if (result == 0):
             self.serverListModel.append([server])        
+            self.updateUrls()
     def on_removeButton_clicked(self, widget):
         if self.selectedRow != None: 
             self.serverListModel.remove(self.selectedRow)
             self.selectedRow = None
+            self.updateUrls()
+    def updateUrls(self):
+        values = [r[0] for r in self.serverListModel]
+        self.config.update_urls(values)
+        
+            
 class AddServerDialog:
     def __init__(self):
         self.gladefile = "add_server.glade"
@@ -54,5 +65,5 @@ class AddServerDialog:
         return self.result, self.server    
 
 if __name__ == "__main__":
-    preferencesDialog = PreferencesDialog()
+    preferencesDialog = PreferencesDialog(Config())
     

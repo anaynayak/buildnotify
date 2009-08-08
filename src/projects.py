@@ -38,12 +38,12 @@ class Projects:
         return status
 
 class ProjectsPopulator:    
-    def __init__(self,urls):
-        self.urls = urls
+    def __init__(self, config):
+        self.config = config
     
     def load_from_server(self, conf, callback):
         self.all_projects = []
-        for url in self.urls:
+        for url in self.config.get_urls():
         	self.check_nodes(conf, url)
         callback(Projects(self.all_projects))
     
