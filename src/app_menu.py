@@ -1,5 +1,6 @@
 import os
 import gtk
+from preferences import PreferencesDialog
 class AppMenu:
     def __init__(self, conf, build_icons, imageicon):
         self.menu = gtk.Menu()
@@ -41,18 +42,26 @@ class OtherMenu:
         menu_item_separator = gtk.SeparatorMenuItem()
         menu_item_about = gtk.ImageMenuItem('gtk-about',None)
         menu_item_about.connect('activate',self.about_clicked)
-        self.window.add(menu_item_about)
-        self.window.add(menu_item_separator)
         menu_item_quit = gtk.ImageMenuItem('gtk-quit',None)
         menu_item_quit.connect('activate',self.exit)
+        menu_item_preferences = gtk.ImageMenuItem('gtk-preferences', None)
+        menu_item_preferences.connect('activate', self.preferences_clicked)
+        self.window.add(menu_item_about)
+        self.window.add(menu_item_preferences)
+        self.window.add(menu_item_separator)
         self.window.add(menu_item_quit)
         self.window.show_all()         
 
     def show(self,event):
         self.window.popup(None, None, self.func, event.button,event.time)
+
     def about_clicked(self,widget):
 	    self.about_dialog.create()     
                  
+    def preferences_clicked(self, widget):
+        self.preferences_dialog = PreferencesDialog()
+        self.preferences_dialog.show()
+    
     def func(menu, user_data):
         coordinates=menu.imageicon.window.get_origin()
         return (coordinates[0],coordinates[1], gtk.TRUE)
