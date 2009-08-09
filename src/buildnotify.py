@@ -19,12 +19,12 @@ class BuildNotify:
     lastcheck = None        #Time of last  check.
     maintimer = None        #Main check timer.   
 
-    def __init__(self):
+    def __init__(self, tray):
         self.conf = Config()
         self.projects_populator = projects.ProjectsPopulator(self.conf)
         self.projects = None
         self.build_icons = build_icons.BuildIcons(self.conf.icon_dir)
-        self.tray = pytrayicon.TrayIcon("buildnotify");
+        self.tray = tray
         self.eventbox = gtk.EventBox()
         self.hb = gtk.HBox(False, 0)
         self.tooltip = gtk.Tooltips()
@@ -80,12 +80,12 @@ class BuildNotify:
 
     def events_pending(self):
         while gtk.events_pending():
-            gtk.main_iteration(gtk.TRUE)
+            gtk.main_iteration(True)
 
     def main(self):
         gtk.main()
 
 if __name__ == "__main__":
     warnings.filterwarnings(action = "ignore", category = DeprecationWarning)
-    buildnotify = BuildNotify()
+    buildnotify = BuildNotify(pytrayicon.TrayIcon("buildnotify"))
     buildnotify.main()

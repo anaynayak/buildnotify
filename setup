@@ -18,10 +18,12 @@ setup (name='BuildNotify',
         ('share/buildnotify',['src/app_menu.py']),
         ('share/buildnotify',['src/build_icons.py']),
         ('share/buildnotify',['src/buildnotify.py']),
+        ('share/buildnotify',['src/buildnotifyapplet.py']),
         ('share/buildnotify',['src/config.py']),
         ('share/buildnotify',['src/preferences.glade']),
         ('share/buildnotify',['src/preferences.py']),
         ('share/buildnotify',['src/projects.py']),
+        ('/usr/lib/bonobo/servers',['src/GNOME_BuildNotifyApplet.server']),
         ('share/buildnotify',['src/project_status_notification.py']),
         ('share/buildnotify',['src/pytrayicon.so'])])
 

@@ -30,7 +30,7 @@ class AppMenu:
    
     def func(menu, user_data):
         coordinates=menu.imageicon.window.get_origin()
-        return (coordinates[0],coordinates[1], gtk.TRUE)
+        return (coordinates[0],coordinates[1], True)
     def launch_browser(self, url):
         os.system(self.conf.browser + " " + url + " &")
 
@@ -65,7 +65,7 @@ class OtherMenu:
     
     def func(menu, user_data):
         coordinates=menu.imageicon.window.get_origin()
-        return (coordinates[0],coordinates[1], gtk.TRUE)
+        return (coordinates[0],coordinates[1], True)
     def exit(self,widget):
         gtk.main_quit()   
 
