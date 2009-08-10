@@ -6,7 +6,7 @@ from config import Config
 
 class PreferencesDialog:
     def __init__(self, config):
-        self.gladefile = 'preferences.glade'
+        self.gladefile = config.preferences_glade()
         self.config = config 
     def show(self):
         self.wTree = gtk.glade.XML(self.gladefile)
@@ -36,7 +36,7 @@ class PreferencesDialog:
         model, treeIter = treeSelection.get_selected()
         self.selectedRow = treeIter
     def on_addButton_clicked(self, widget):
-        addServerDialog = AddServerDialog()
+        addServerDialog = AddServerDialog(self.config)
         result, server = addServerDialog.run()
         if (result == 0):
             self.serverListModel.append([server])        
@@ -52,8 +52,8 @@ class PreferencesDialog:
         
             
 class AddServerDialog:
-    def __init__(self):
-        self.gladefile = "add_server.glade"
+    def __init__(self, config):
+        self.gladefile = config.add_server_glade()
         self.server = ""
     def run(self):
         self.addServerDialogXml = gtk.glade.XML(self.gladefile)

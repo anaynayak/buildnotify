@@ -7,10 +7,10 @@ import pynotify
 from time import strftime
 from config import Config
 from app_menu import AppMenu
-from app_menu import OtherMenu
 from project_status_notification import ProjectStatusNotification
 import projects
 import build_icons
+
 import projects
 pygtk.require("2.0")
 
@@ -34,7 +34,6 @@ class BuildNotify:
         self.eventbox.add(self.hb)
         self.tray.add(self.eventbox)
         self.menu = AppMenu(self.conf, self.build_icons, self.imageicon)
-        self.other_menu = OtherMenu(self.conf, self.imageicon)
         self.hb.add(self.imageicon)
         self.hb.add(self.failing_build_count)
         if not pynotify.init(" buildnotify "):
@@ -67,11 +66,7 @@ class BuildNotify:
         self.projects = updated_projects
         
     def button_pressed(self, signal, event, n):
-        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 2:
-            sys.exit()
-        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
-            self.other_menu.show(event)
-        else:
+        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 1:
             self.menu.show(event);
     
     #For pynotify 
