@@ -10,8 +10,10 @@ class BuildIcons:
     def __init__(self, root_dir):
         self.root_dir = root_dir
         self.all_status = {'Success.Sleeping':self.success_sleeping,
-         'Failure.Sleeping':self.failure_sleeping, 
+         'Success.CheckingModifications': self.success_building,
          'Success.Building':self.success_building, 
+         'Failure.Sleeping':self.failure_sleeping, 
+         'Failure.CheckingModifications': self.failure_building,
          'Failure.Building': self.failure_building, 
          'unavailable':self.unavailable }
         

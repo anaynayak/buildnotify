@@ -14,10 +14,12 @@ class Config:
         self.timeout = float(self.from_properties("connection","timeout", "2"))
         self.check_interval = int(self.from_properties("connection", "interval", "5"))
         self.browser = self.from_properties("misc", "browser", "firefox")
-        self.icon_dir = self.from_properties("misc", "icons", "/usr/share/buildnotify/pixmaps/")
+        self.icon_dir = self.from_properties("misc", "icons", "/usr/local/share/buildnotify/pixmaps/")
     
     def from_properties(self, category, prop, val):
         if not self.config.has_option(category, prop):
+            if not self.config.has_section(category):
+                self.config.add_section(category)
             self.config.set(category, prop, val)
         return self.config.get(category,prop)
     
