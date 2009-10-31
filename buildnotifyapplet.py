@@ -2,11 +2,11 @@
 
 import gtk
 import gnomeapplet as applet
-from buildnotify import BuildNotify 
+import buildnotifylib
 import sys
 
 def buildnotify_factory(applet, iid):
-    buildnotify = BuildNotify(applet)
+    buildnotify = buildnotifylib.BuildNotify(applet)
     return True
 
 def main():

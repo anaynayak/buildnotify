@@ -2,7 +2,6 @@
 
 import pygtk, gtk, gobject
 import sys, os, time, warnings, string
-import pytrayicon
 import pynotify
 from time import strftime
 from config import Config
@@ -80,7 +79,3 @@ class BuildNotify:
     def main(self):
         gtk.main()
 
-if __name__ == "__main__":
-    warnings.filterwarnings(action = "ignore", category = DeprecationWarning)
-    buildnotify = BuildNotify(pytrayicon.TrayIcon("buildnotify"))
-    buildnotify.main()
