@@ -1,7 +1,7 @@
 <oaf_info>
 <oaf_server iid="OAFIID:GNOME_BuildNotifyApplet_Factory"
             type="exe"
-            location="/usr/local/bin/buildnotifyapplet.py">
+            location="@EXEC_PREFIX@/bin/buildnotifyapplet.py">
 
         <oaf_attribute name="repo_ids" type="stringv">
                 <item value="IDL:Bonobo/GenericFactory:1.0"/>
@@ -22,7 +22,7 @@
         </oaf_attribute>
         <oaf_attribute name="name" type="string" value="BuildNotify"/>
         <oaf_attribute name="description" type="string" value="BuildNotify - CI build notification applet"/>
-        <oaf_attribute name="panel:icon" type="string" value="/usr/local/share/buildnotify/pixmaps/icon-success.png"/>
+        <oaf_attribute name="panel:icon" type="string" value="@ICON_PREFIX@/share/buildnotify/pixmaps/icon-success.png"/>
 </oaf_server>
 
 </oaf_info>

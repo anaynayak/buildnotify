@@ -16,5 +16,5 @@ urls = file:///tmp/cctray.xml
 ### Browser which should be used to display the build information
 #browser     = firefox
 ### Location where the icons are located.
-#icons     = /usr/share/buildnotify/pixmaps/
+icons     = @ICON_PREFIX@/share/buildnotify/pixmaps/
 

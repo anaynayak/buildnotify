@@ -1,7 +1,30 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import sys
+import os
+import user
 
+print "Environment details:"
+print sys.version
+print sys.platform
+print sys.path
+
+prefix = sys.prefix
+bonobo_prefix = prefix
+icon_prefix = prefix + "/local"
+exec_prefix = sys.prefix + "/local"
+
+# Update bonobo script with environ values
+infile = open(os.path.join('data', 'GNOME_BuildNotifyApplet.server.in'))
+data = infile.read().replace('@EXEC_PREFIX@', exec_prefix).replace('@ICON_PREFIX@', icon_prefix)
+infile.close()
+
+outfile = open(os.path.join('data','GNOME_BuildNotifyApplet.server'), 'w')
+outfile.write(data)
+outfile.close()
+
+print "Installing applet:"
 setup (name='BuildNotify',
        version='0.01',
        description='Cruise Control build monitor',
@@ -17,5 +40,13 @@ setup (name='BuildNotify',
             'icons/icon-inactive.png',
             'icons/icon-success-building.png']),
         ('share/buildnotify',['data/add_server.glade', 'data/preferences.glade']),
-        ('lib/bonobo/servers',['data/GNOME_BuildNotifyApplet.server'])])
+        (os.path.join(bonobo_prefix, 'lib/bonobo/servers'),['data/GNOME_BuildNotifyApplet.server'])])
+
+infile = open('buildnotify.example')
+data = infile.read().replace('@ICON_PREFIX@', icon_prefix)
+infile.close()
+
+outfile = open(os.path.join(user.home, '.buildnotify'), 'w')
+outfile.write(data)
+outfile.close()
 
