@@ -48,6 +48,7 @@ class AppMenu:
         image = gtk.Image()
         image.set_from_file(iconName)
         menu_item.set_image(image)
+        menu_item.set_use_underline(False)
         menu_item.connect("activate", self.menu_item_selected, url)
         return menu_item
 
