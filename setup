@@ -46,7 +46,8 @@ infile = open('buildnotify.example')
 data = infile.read().replace('@ICON_PREFIX@', icon_prefix)
 infile.close()
 
-outfile = open(os.path.join(user.home, '.buildnotify'), 'w')
-outfile.write(data)
-outfile.close()
+if not os.path.exists(os.path.join(user.home, '.buildnotify')):
+    outfile = open(os.path.join(user.home, '.buildnotify'), 'w')
+    outfile.write(data)
+    outfile.close()
 

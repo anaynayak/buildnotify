@@ -9,7 +9,7 @@ class AppMenu:
         self.imageicon = imageicon
             
     def show(self, event):
-        self.menu.popup(None, None, self.func, event.button,event.time)
+        self.menu.popup(None, None, None, event.button,event.time)
     
     def update(self, projects):
         self.menu = gtk.Menu() 
@@ -36,10 +36,6 @@ class AppMenu:
         self.preferences_dialog = PreferencesDialog(self.conf)
         self.preferences_dialog.show()
     
-    def func(menu, user_data):
-        coordinates=menu.imageicon.window.get_origin()
-        return (coordinates[0],coordinates[1], True)
-
     def exit(self,widget):
         gtk.main_quit()   
 
