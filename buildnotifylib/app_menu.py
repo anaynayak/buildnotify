@@ -1,6 +1,9 @@
 import os
 import gtk
 from preferences import PreferencesDialog
+from distance_of_time import DistanceOfTime
+from dateutil.parser import parse
+
 class AppMenu:
     def __init__(self, conf, build_icons, imageicon):
         self.menu = gtk.Menu()
@@ -14,7 +17,7 @@ class AppMenu:
     def update(self, projects):
         self.menu = gtk.Menu() 
         for project in projects:
-            self.menu.append(self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url));
+            self.menu.append(self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, parse(project.lastBuildTime)));
         self.create_default_menu_items()
         self.menu.show_all()
             
@@ -39,8 +42,8 @@ class AppMenu:
     def exit(self,widget):
         gtk.main_quit()   
 
-    def create_menu_item(self, label, iconName, url):
-        menu_item = gtk.ImageMenuItem(label, None);
+    def create_menu_item(self, label, iconName, url, lastBuildTime):
+        menu_item = gtk.ImageMenuItem(label + ", " + DistanceOfTime(lastBuildTime).age() + " ago", None);
         image = gtk.Image()
         image.set_from_file(iconName)
         menu_item.set_image(image)
