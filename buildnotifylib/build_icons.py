@@ -1,4 +1,3 @@
-import sys, os
 
 class BuildIcons:
     success_sleeping = '/icon-success.png'

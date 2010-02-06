@@ -1,7 +1,4 @@
-# File: config.py
-# Class: Config
-
-import sys, os
+import os
 import ConfigParser
 
 class Config:
@@ -33,6 +30,7 @@ class Config:
         
     def preferences_glade(self):
         return os.path.join(self.glade_root, 'preferences.glade')
+
     def add_server_glade(self):
         return os.path.join(self.glade_root, 'add_server.glade')
 
