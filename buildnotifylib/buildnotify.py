@@ -18,9 +18,5 @@ class BuildNotify:
         self.maintimer = gobject.timeout_add(self.conf.check_interval * 1000, self.check_nodes)
         self.projects_populator.load_from_server(self.conf)
         
-    def button_pressed(self, signal, event, n):
-        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 1:
-            self.menu.show(event);
-    
     def main(self):
         gtk.main()

@@ -25,6 +25,7 @@ class AppUi:
         self.tray.show_all()
 
     def button_pressed(self, signal, event, n):
+        self.menu.update(self.projects.all_projects)
         if event.type == gtk.gdk.BUTTON_PRESS and event.button == 1:
             self.menu.show(event);
 
@@ -36,5 +37,4 @@ class AppUi:
         self.failing_build_count.set_label(count)
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
         self.tooltip.set_tip(self.tray, self.lastcheck)
-        self.menu.update(updated_projects.all_projects)
         self.projects = updated_projects
