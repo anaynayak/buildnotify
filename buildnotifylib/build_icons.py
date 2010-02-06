@@ -1,3 +1,4 @@
+from PyQt4 import QtGui
 
 class BuildIcons:
     success_sleeping = '/icon-success.png'
@@ -18,6 +19,11 @@ class BuildIcons:
         
  
     def for_status(self, status):
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(self.get_path(status)))
+        return icon
+
+    def get_path(self, status):
         if self.all_status.has_key(status):
             return self.root_dir + self.all_status[status]
         else: 

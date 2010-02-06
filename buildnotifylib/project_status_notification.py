@@ -15,7 +15,7 @@ class ProjectStatusNotification:
         self.notification.update(message, "\n".join(builds), None)
         if not self.notification.show():
             print "Failed to send notification."
-            gtk.main_quit()
+            sys.exit()
         
 class ProjectStatus:
     def __init__(self, old_projects, current_projects): 
