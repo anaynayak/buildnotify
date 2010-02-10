@@ -4,6 +4,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from distance_of_time import DistanceOfTime
 from dateutil.parser import parse
+from preferences_ui import Ui_Preferences
 
 class AppMenu:
     def __init__(self, tray, widget, conf, build_icons):
@@ -59,4 +60,3 @@ class AboutBuildNotifyDialog:
 #    def close(self):
 #        self.window.destroy()
         
-
