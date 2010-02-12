@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>303</height>
+    <width>441</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,9 +26,6 @@
     <item row="2" column="0">
      <widget class="QListView" name="cctrayPathList"/>
     </item>
-    <item row="1" column="0">
-     <widget class="QLineEdit" name="cctrayPath"/>
-    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="cctrayPathLabel">
       <property name="text">
@@ -43,9 +40,40 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLineEdit" name="cctrayPath"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addButton">
+        <property name="text">
+         <string>&amp;Add</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cctrayPath</sender>
+   <signal>returnPressed()</signal>
+   <receiver>addButton</receiver>
+   <slot>animateClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>56</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
