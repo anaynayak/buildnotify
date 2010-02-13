@@ -31,4 +31,5 @@ class BuildIcons:
         pixmap.fill(QtCore.Qt.transparent)
         painter = QtGui.QPainter(pixmap)
         painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
+        painter.end()
         return QtGui.QIcon(pixmap)
