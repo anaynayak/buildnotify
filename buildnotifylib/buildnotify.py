@@ -19,10 +19,10 @@ class BuildNotify:
             sys.exit(1)
 
         QtGui.QApplication.setQuitOnLastWindowClosed(False)
-        self.runApp(app, buildIcons)
+        self.run_app(app, buildIcons)
         sys.exit(app.exec_())
 
-    def runApp(self, app, buildIcons):
+    def run_app(self, app, buildIcons):
         self.projects_populator = ProjectsPopulator(self.conf)
         self.app_ui = AppUi(self.conf, buildIcons)
         self.app_notification = AppNotification()

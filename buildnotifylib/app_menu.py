@@ -3,7 +3,6 @@ import sys
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from distance_of_time import DistanceOfTime
-from dateutil.parser import parse
 from preferences import PreferencesDialog
 
 class AppMenu:
@@ -16,7 +15,7 @@ class AppMenu:
     def update(self, projects):
         self.menu.clear()
         for project in projects:
-            self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, parse(project.lastBuildTime))
+            self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.lastBuildTime)
         self.create_default_menu_items()
             
     def create_default_menu_items(self):

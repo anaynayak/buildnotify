@@ -1,4 +1,5 @@
 from xml.dom import minidom
+from dateutil.parser import parse
 import urllib2
 import socket
 
@@ -7,7 +8,7 @@ class Project:
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
-        self.lastBuildTime = props['lastBuildTime']
+        self.lastBuildTime = parse(props['lastBuildTime'])
         self.url = props['url']
 
     def get_build_status(self):
@@ -49,6 +50,7 @@ class ProjectsPopulator:
         self.all_projects = []
         for url in self.config.get_urls():
         	self.check_nodes(conf, str(url))
+        self.all_projects.sort(lambda x,y : (x.lastBuildTime - y.lastBuildTime).days)
         self.notify_listeners(Projects(self.all_projects))
     
     def notify_listeners(self, projects):
