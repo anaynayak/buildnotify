@@ -33,7 +33,8 @@ class BuildNotify:
 if __name__== '__main__':
     app = QtGui.QApplication(sys.argv)
     buildIcons = build_icons.BuildIcons()
-    app.setWindowIcon(buildIcons.for_status("Success.Sleeping"))
+    icon = buildIcons.for_status("Success.Sleeping")
+    app.setWindowIcon(icon)
     if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
         QtGui.QMessageBox.critical(None, "BuildNotify",
                 "I couldn't detect any system tray on this system.")

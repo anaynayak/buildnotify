@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import icons_rc
 
 class BuildIcons:
@@ -25,3 +25,10 @@ class BuildIcons:
         if self.all_status.has_key(status):
             return self.resource_path % self.all_status[status]
         return self.resource_path % self.all_status['unavailable']
+
+    def for_count(self, count):
+        pixmap = QtGui.QPixmap(24, 24)
+        pixmap.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(pixmap)
+        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
+        return QtGui.QIcon(pixmap)
