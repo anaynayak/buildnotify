@@ -1,7 +1,8 @@
-from xml.dom import minidom
-from dateutil.parser import parse
-import urllib2
 import socket
+import urllib2
+from xml.dom import minidom
+
+from dateutil.parser import parse
 
 class Project:
     def __init__(self, props):
@@ -19,11 +20,12 @@ class Projects:
         self.all_projects = all_projects
         
     def get_build_status(self):
-        if (self.all_projects == []):
-            return "unavailable"
-        if (self.get_failing_builds() == []):
-            return 'Success.Sleeping' 
-        return "Failure.Sleeping"
+        map = self.to_map()
+        seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping']
+        for status in seq:
+            if len(map[status]) > 0:
+                return status
+        return None
            
     def get_failing_builds(self):
         failing_builds = []
@@ -33,9 +35,9 @@ class Projects:
         return failing_builds
     
     def to_map(self):
-        status = dict(Failure=[], Success=[])
+        status = dict([('Success.Sleeping', []), ('Success.Building', []), ('Failure.Sleeping', []), ('Failure.Building', [])])
         for project in self.all_projects:
-            status[project.status].append(project.name)
+            status[project.get_build_status()].append(project)
         return status
 
 class ProjectsPopulator:    
@@ -49,8 +51,8 @@ class ProjectsPopulator:
     def load_from_server(self, conf):
         self.all_projects = []
         for url in self.config.get_urls():
-        	self.check_nodes(conf, str(url))
-        self.all_projects.sort(lambda x,y : (x.lastBuildTime - y.lastBuildTime).days)
+            self.check_nodes(conf, str(url))
+        self.all_projects.sort(lambda x, y: (x.lastBuildTime - y.lastBuildTime).days)
         self.notify_listeners(Projects(self.all_projects))
     
     def notify_listeners(self, projects):
@@ -60,12 +62,12 @@ class ProjectsPopulator:
     def check_nodes(self, conf, url):
         socket.setdefaulttimeout(conf.timeout)
         try:
-            data=urllib2.urlopen(url)
+            data = urllib2.urlopen(url)
         except (Exception), e:
             print e
             return
         dom = minidom.parse(data)
         for node in dom.getElementsByTagName('Project'):
             self.all_projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
-                'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
+                                     'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
 
