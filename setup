@@ -10,33 +10,13 @@ print sys.version
 print sys.platform
 print sys.path
 
-prefix = sys.prefix
-icon_prefix = prefix + "/local"
-exec_prefix = sys.prefix + "/local"
-
 print "Installing applet:"
 setup (name='BuildNotify',
-       version='0.01',
+       version='0.1',
        description='Cruise Control build monitor',
        author='Anay Nayak',
        author_email='anayak007@gmail.com',
        license='GPL',
        packages=['buildnotifylib'],
-       scripts = ['buildnotifyapplet.py'],
-       data_files=[
-        ('share/buildnotify/pixmaps',['icons/icon-failure.png', 
-            'icons/icon-failure-building.png',
-            'icons/icon-success.png',
-            'icons/icon-inactive.png',
-            'icons/icon-success-building.png']),
-        ('share/buildnotify',['data/add_server.glade', 'data/preferences.glade'])])
-
-infile = open('buildnotify.example')
-data = infile.read().replace('@ICON_PREFIX@', icon_prefix)
-infile.close()
-
-if not os.path.exists(os.path.join(user.home, '.buildnotify')):
-    outfile = open(os.path.join(user.home, '.buildnotify'), 'w')
-    outfile.write(data)
-    outfile.close()
+       scripts = ['buildnotifyapplet.py'])
 
