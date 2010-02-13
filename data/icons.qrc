@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="status" >
+    <file>../icons/icon-success.png</file>
+    <file>../icons/icon-failure-building.png</file>
+    <file>../icons/icon-inactive.png</file>
+    <file>../icons/icon-success-building.png</file>
+    <file>../icons/icon-failure.png</file>
+  </qresource>
+</RCC>

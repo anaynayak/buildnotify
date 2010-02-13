@@ -29,10 +29,10 @@ class AppMenu:
         pass
 
     def preferences_clicked(self, widget):
-        self.preferences_dialog = PreferencesDialog(self.conf)
+        self.preferences_dialog = PreferencesDialog(self.conf.get_urls())
         self.preferences_dialog.show()
         if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
-            print "accept"
+            self.conf.update_urls(self.preferences_dialog.get_urls())
             
     def exit(self,widget):
         sys.exit()

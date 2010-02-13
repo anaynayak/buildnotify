@@ -1,14 +1,15 @@
 from PyQt4 import QtGui
+import icons_rc
 
 class BuildIcons:
     success_sleeping = '/icon-success.png'
     success_building = '/icon-success-building.png'
     failure_sleeping = '/icon-failure.png'
     failure_building = '/icon-failure-building.png'
-    unavailable = '/icon-inactive.png' 
+    unavailable = '/icon-inactive.png'
+    resource_path = ":/status/icons/%s"
     
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
+    def __init__(self):
         self.all_status = {'Success.Sleeping':self.success_sleeping,
          'Success.CheckingModifications': self.success_sleeping,
          'Success.Building':self.success_building, 
@@ -16,15 +17,11 @@ class BuildIcons:
          'Failure.CheckingModifications': self.failure_sleeping,
          'Failure.Building': self.failure_building, 
          'unavailable':self.unavailable }
-        
  
     def for_status(self, status):
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(self.get_path(status)))
-        return icon
+        return QtGui.QIcon(self.get_path(status))
 
     def get_path(self, status):
         if self.all_status.has_key(status):
-            return self.root_dir + self.all_status[status]
-        else: 
-            return self.root_dir + self.all_status['unavailable']
+            return self.resource_path % self.all_status[status]
+        return self.resource_path % self.all_status['unavailable']

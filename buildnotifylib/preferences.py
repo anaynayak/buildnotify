@@ -1,25 +1,19 @@
 from PyQt4 import QtCore, QtGui
 from preferences_ui import Ui_Preferences
-import sys
-from config import Config
+
 class PreferencesDialog(QtGui.QDialog):
-    def __init__(self, config=None):
+    def __init__(self, cctrayUrls=[]):
         QtGui.QDialog.__init__(self)
 
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
-        self.config = config
         self.cctrayUrlsModel = QtGui.QStringListModel()
-        self.cctrayUrls = QtCore.QStringList()
-        urls = self.config.get_urls()
-        print urls
-        for url in urls:
-            self.cctrayUrls.append(url)
+        self.cctrayUrls = cctrayUrls
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
         self.cctrayUrlsModel.setStringList(self.cctrayUrls)
 
         # Connect up the buttons.
-        self.connect(self.ui.addButton, QtCore.SIGNAL("returnPressed()"),
+        self.connect(self.ui.addButton, QtCore.SIGNAL("clicked()"),
                      self.return_pressed)
         self.connect(self.ui.removeButton, QtCore.SIGNAL("clicked()"),
                      self.remove_element)
@@ -36,6 +30,5 @@ class PreferencesDialog(QtGui.QDialog):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
         self.ui.cctrayPathList.model().removeRow(index.row(), index.parent())
 
-    def save_changes(self):
-        cctrayPaths = self.ui.cctrayPathList.model().stringList()
-        self.config.update_urls(cctrayPaths.join(","))
+    def get_urls(self):
+        return self.ui.cctrayPathList.model().stringList()

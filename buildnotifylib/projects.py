@@ -48,17 +48,19 @@ class ProjectsPopulator:
     def load_from_server(self, conf):
         self.all_projects = []
         for url in self.config.get_urls():
-        	self.check_nodes(conf, url)
+        	self.check_nodes(conf, str(url))
         self.notify_listeners(Projects(self.all_projects))
     
     def notify_listeners(self, projects):
         for listener in self.listeners:
             listener.update_projects(projects)
+
     def check_nodes(self, conf, url):
         socket.setdefaulttimeout(conf.timeout)
         try:
             data=urllib2.urlopen(url)
         except (Exception), e:
+            print e
             return
         dom = minidom.parse(data)
         for node in dom.getElementsByTagName('Project'):

@@ -57,7 +57,9 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>cctrayPath</sender>
