@@ -4,12 +4,13 @@ from config import Config
 from projects import ProjectsPopulator
 from PyQt4 import QtGui, QtCore
 import sys
+import build_icons
 
 class BuildNotify:
-    def __init__(self, app):
+    def __init__(self, app, buildIcons):
         self.conf = Config()
         self.projects_populator = ProjectsPopulator(self.conf)
-        self.app_ui = AppUi(self.conf)
+        self.app_ui = AppUi(self.conf, buildIcons)
         self.app_notification = AppNotification()
         self.projects_populator.add_listener(self.app_notification)
         self.projects_populator.add_listener(self.app_ui)
@@ -31,12 +32,14 @@ class BuildNotify:
 
 if __name__== '__main__':
     app = QtGui.QApplication(sys.argv)
+    buildIcons = build_icons.BuildIcons()
+    app.setWindowIcon(buildIcons.for_status("Success.Sleeping"))
     if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
         QtGui.QMessageBox.critical(None, "BuildNotify",
                 "I couldn't detect any system tray on this system.")
         sys.exit(1)
 
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
-    buildnotify = BuildNotify(app)
+    buildnotify = BuildNotify(app, buildIcons)
     sys.exit(app.exec_())
     

@@ -25,9 +25,9 @@ class AppMenu:
         self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
         
     def about_clicked(self,widget):
-        QtGui.QMessageBox.about(self, "About BuildNotify",
+        QtGui.QMessageBox.about(self.menu, "About BuildNotify",
         "<b>BuildNotify</b> v 0.1 has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," +
-        "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\" and provide your feedback.")
+        "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf.get_urls())

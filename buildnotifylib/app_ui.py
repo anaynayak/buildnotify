@@ -1,14 +1,12 @@
 from PyQt4 import QtGui
 from time import strftime
-import build_icons
 from app_menu import AppMenu
 
 class AppUi:
-    def __init__(self, conf):
+    def __init__(self, conf, build_icons):
         self.widget = QtGui.QWidget()
-        self.build_icons = build_icons.BuildIcons()
+        self.build_icons = build_icons
         self.tray = QtGui.QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
-        print "show"
         self.tray.show()
         self.app_menu = AppMenu(self.tray, self.widget, conf, self.build_icons);
 
@@ -18,7 +16,6 @@ class AppUi:
         if count is "0":
             count = ""
         self.app_menu.update(updated_projects.all_projects)
-#        self.failing_build_count.set_label(count)
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
 #        self.tray.showMessage("self.lastcheck", "asdasd", QtGui.QSystemTrayIcon.Information,1000)
         self.tray.setToolTip(self.lastcheck)
