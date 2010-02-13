@@ -7,10 +7,8 @@ class PreferencesDialog(QtGui.QDialog):
 
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
-        self.cctrayUrlsModel = QtGui.QStringListModel()
-        self.cctrayUrls = cctrayUrls
+        self.cctrayUrlsModel = QtGui.QStringListModel(cctrayUrls)
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
-        self.cctrayUrlsModel.setStringList(self.cctrayUrls)
 
         # Connect up the buttons.
         self.connect(self.ui.addButton, QtCore.SIGNAL("clicked()"),
@@ -23,12 +21,18 @@ class PreferencesDialog(QtGui.QDialog):
     def return_pressed(self):
         str = self.ui.cctrayPath.text()
         self.ui.cctrayPath.clear()
-        self.cctrayUrls.append(str);
-        self.cctrayUrlsModel.setStringList(self.cctrayUrls)
+        urls = self.ui.cctrayPathList.model().stringList()
+        urls.append(str)
+        self.ui.cctrayPathList.model().setStringList(urls)
+        return
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
-        self.ui.cctrayPathList.model().removeRow(index.row(), index.parent())
-
+        urls = self.ui.cctrayPathList.model().stringList()
+        urls.removeAt(index.row())
+        self.ui.cctrayPathList.model().setStringList(urls)
+        return
+    
     def get_urls(self):
         return self.ui.cctrayPathList.model().stringList()
+
