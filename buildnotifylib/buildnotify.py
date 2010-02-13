@@ -2,22 +2,19 @@ from app_ui import AppUi
 from app_notification import AppNotification
 from config import Config
 from projects import ProjectsPopulator
-import gobject
 from PyQt4 import QtGui, QtCore
 import sys
 
 class BuildNotify:
-    def __init__(self):
+    def __init__(self, app):
         self.conf = Config()
         self.projects_populator = ProjectsPopulator(self.conf)
-        app = QtGui.QApplication(sys.argv)
-        self.app_ui = AppUi(self.conf, app)
+        self.app_ui = AppUi(self.conf)
         self.app_notification = AppNotification()
         self.projects_populator.add_listener(self.app_notification)
         self.projects_populator.add_listener(self.app_ui)
         self.auto_poll(app)
         self.check_nodes()
-        sys.exit(app.exec_())
 
     def auto_poll(self, app):
         self.timer = QtCore.QTimer()
@@ -33,4 +30,13 @@ class BuildNotify:
         self.timer.start()
 
 if __name__== '__main__':
-    BuildNotify()
+    app = QtGui.QApplication(sys.argv)
+    if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
+        QtGui.QMessageBox.critical(None, "BuildNotify",
+                "I couldn't detect any system tray on this system.")
+        sys.exit(1)
+
+    QtGui.QApplication.setQuitOnLastWindowClosed(False)
+    buildnotify = BuildNotify(app)
+    sys.exit(app.exec_())
+    

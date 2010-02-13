@@ -21,9 +21,9 @@ class Config:
         return self.config.get(category,prop)
     
     def update_urls(self, urls):
-        self.config.set("connection","urls", urls)
-        self.config.write(open(os.path.expanduser('~/.buildnotify'), "w"))
-
+#        self.config.set("connection","urls", urls)
+#        self.config.write(open(os.path.expanduser('~/.buildnotify'), "w"))
+        pass
     def get_urls(self):
         return self.urls
         

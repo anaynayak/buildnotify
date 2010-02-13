@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from preferences_ui import Ui_Preferences
-
+import sys
+from config import Config
 class PreferencesDialog(QtGui.QDialog):
     def __init__(self, config=None):
         QtGui.QDialog.__init__(self)
@@ -22,8 +23,6 @@ class PreferencesDialog(QtGui.QDialog):
                      self.return_pressed)
         self.connect(self.ui.removeButton, QtCore.SIGNAL("clicked()"),
                      self.remove_element)
-        self.connect(self.ui.buttonBox, QtCore.SIGNAL("accepted()"),
-                     self.save_changes)
         self.connect(self.ui.buttonBox, QtCore.SIGNAL("accepted()"),
                      QtCore.SLOT("accept()"))
 

@@ -4,10 +4,11 @@ import build_icons
 from app_menu import AppMenu
 
 class AppUi:
-    def __init__(self, conf, app):
+    def __init__(self, conf):
         self.widget = QtGui.QWidget()
         self.build_icons = build_icons.BuildIcons(conf.icon_dir)
         self.tray = QtGui.QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
+        print "show"
         self.tray.show()
         self.app_menu = AppMenu(self.tray, self.widget, conf, self.build_icons);
 

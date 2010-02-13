@@ -30,8 +30,10 @@ class AppMenu:
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf)
-        self.preferences_dialog.exec_()
-    
+        self.preferences_dialog.show()
+        if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
+            print "accept"
+            
     def exit(self,widget):
         sys.exit()
 
