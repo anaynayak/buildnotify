@@ -20,13 +20,14 @@ class AppMenu:
         self.create_default_menu_items()
             
     def create_default_menu_items(self):
-#        self.menu.addAction(QtGui.QAction("About", self.menu, triggered=self.about_clicked))
+        self.menu.addAction(QtGui.QAction("About", self.menu, triggered=self.about_clicked))
         self.menu.addAction(QtGui.QAction("Preferences", self.menu, triggered=self.preferences_clicked))
         self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
         
     def about_clicked(self,widget):
-#        self.about_dialog.create()
-        pass
+        QtGui.QMessageBox.about(self, "About BuildNotify",
+        "<b>BuildNotify</b> v 0.1 has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," +
+        "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\" and provide your feedback.")
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf.get_urls())
