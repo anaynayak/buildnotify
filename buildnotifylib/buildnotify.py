@@ -7,8 +7,22 @@ import sys
 import build_icons
 
 class BuildNotify:
-    def __init__(self, app, buildIcons):
+    def __init__(self):
         self.conf = Config()
+        app = QtGui.QApplication(sys.argv)
+        buildIcons = build_icons.BuildIcons()
+        icon = buildIcons.for_status("Success.Sleeping")
+        app.setWindowIcon(icon)
+        if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
+            QtGui.QMessageBox.critical(None, "BuildNotify",
+                    "I couldn't detect any system tray on this system.")
+            sys.exit(1)
+
+        QtGui.QApplication.setQuitOnLastWindowClosed(False)
+        self.runApp(app, buildIcons)
+        sys.exit(app.exec_())
+
+    def runApp(self, app, buildIcons):
         self.projects_populator = ProjectsPopulator(self.conf)
         self.app_ui = AppUi(self.conf, buildIcons)
         self.app_notification = AppNotification()
@@ -31,16 +45,4 @@ class BuildNotify:
         self.timer.start()
 
 if __name__== '__main__':
-    app = QtGui.QApplication(sys.argv)
-    buildIcons = build_icons.BuildIcons()
-    icon = buildIcons.for_status("Success.Sleeping")
-    app.setWindowIcon(icon)
-    if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
-        QtGui.QMessageBox.critical(None, "BuildNotify",
-                "I couldn't detect any system tray on this system.")
-        sys.exit(1)
-
-    QtGui.QApplication.setQuitOnLastWindowClosed(False)
-    buildnotify = BuildNotify(app, buildIcons)
-    sys.exit(app.exec_())
-    
+    BuildNotify()
