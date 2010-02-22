@@ -19,6 +19,7 @@ class AppMenu:
         self.create_default_menu_items()
             
     def create_default_menu_items(self):
+        self.menu.addSeparator()
         self.menu.addAction(QtGui.QAction("About", self.menu, triggered=self.about_clicked))
         self.menu.addAction(QtGui.QAction("Preferences", self.menu, triggered=self.preferences_clicked))
         self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
