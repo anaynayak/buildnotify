@@ -21,6 +21,18 @@ class BuildIcons:
     def for_status(self, status):
         return QtGui.QIcon(self.get_path(status))
 
+    def for_aggregate_status(self, status, count):
+        if count is "0":
+            return self.for_status(status)
+        self.textFont = QtGui.QFont()
+        self.textFont.setPixelSize(12)
+        pixmap = QtGui.QPixmap(self.get_path(status))
+        painter = QtGui.QPainter(pixmap)
+        painter.setFont(self.textFont)
+        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
+        painter.end()
+        return QtGui.QIcon(pixmap)
+
     def get_path(self, status):
         if self.all_status.has_key(status):
             return self.resource_path % self.all_status[status]
