@@ -14,10 +14,15 @@ class Project:
 
     def get_build_status(self):
         return self.status + "." + self.activity
-	
-class Projects: 
-    def __init__(self, all_projects):
-        self.all_projects = all_projects
+
+class ContinuousIntegrationServer:
+    def __init__(self, url, projects):
+        self.url = url
+        self.projects = projects
+
+class OverallIntegrationStatus:
+    def __init__(self, servers):
+        self.servers = servers
         
     def get_build_status(self):
         map = self.to_map()
@@ -29,16 +34,26 @@ class Projects:
            
     def get_failing_builds(self):
         failing_builds = []
-        for project in self.all_projects:
+        for project in self.get_projects():
             if project.status == 'Failure':
                 failing_builds.append(project)
         return failing_builds
     
     def to_map(self):
         status = dict([('Success.Sleeping', []), ('Success.Building', []), ('Failure.Sleeping', []), ('Failure.Building', [])])
-        for project in self.all_projects:
+        for project in self.get_projects():
             status[project.get_build_status()].append(project)
         return status
+
+    def get_projects(self):
+        all_projects = []
+        for server in self.servers:
+            if server.projects is not None:
+                all_projects.extend(server.projects)
+        return all_projects
+
+    def unavailable_servers(self):
+        return filter(lambda server: server.projects is None, self.servers)
 
 class ProjectsPopulator:    
     def __init__(self, config):
@@ -49,15 +64,14 @@ class ProjectsPopulator:
         self.listeners.append(listener)
     
     def load_from_server(self, conf):
-        self.all_projects = []
+        overall_status = [];
         for url in self.config.get_urls():
-            self.check_nodes(conf, str(url))
-        self.all_projects.sort(lambda x, y: (x.lastBuildTime - y.lastBuildTime).days)
-        self.notify_listeners(Projects(self.all_projects))
+            overall_status.append(self.check_nodes(conf, str(url)))
+        self.notify_listeners(OverallIntegrationStatus(overall_status))
     
-    def notify_listeners(self, projects):
+    def notify_listeners(self, integration_status):
         for listener in self.listeners:
-            listener.update_projects(projects)
+            listener.update_projects(integration_status)
 
     def check_nodes(self, conf, url):
         socket.setdefaulttimeout(conf.timeout)
@@ -65,9 +79,10 @@ class ProjectsPopulator:
             data = urllib2.urlopen(url)
         except (Exception), e:
             print e
-            return
+            return ContinuousIntegrationServer(url, None)
         dom = minidom.parse(data)
+        projects = []
         for node in dom.getElementsByTagName('Project'):
-            self.all_projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
+            projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
                                      'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
-
+        return ContinuousIntegrationServer(url, projects)

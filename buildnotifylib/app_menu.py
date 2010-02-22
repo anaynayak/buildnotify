@@ -13,6 +13,7 @@ class AppMenu:
         self.build_icons = build_icons
 
     def update(self, projects):
+        projects.sort(lambda x, y: (x.lastBuildTime - y.lastBuildTime).days)
         self.menu.clear()
         for project in projects:
             self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.lastBuildTime)

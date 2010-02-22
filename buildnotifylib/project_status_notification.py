@@ -1,13 +1,17 @@
 class ProjectStatusNotification:
-    def __init__(self, old_projects, current_projects, notification):
-        self.project_status = ProjectStatus(old_projects, current_projects)
+    def __init__(self, old_integration_status, current_integration_status, notification):
+        self.old_integration_status = old_integration_status
+        self.current_integration_status = current_integration_status
         self.notification = notification
 
     def show_notifications(self):
-        self.show_notification_msg(self.project_status.successful_builds(), "Fixed builds")
-        self.show_notification_msg(self.project_status.failing_builds(), "Broken builds")
-        self.show_notification_msg(self.project_status.still_failing_builds(), "Build is still failing")
-        #self.show_notification_msg(self.project_status.still_successful_builds(), "Yet another successful build")
+        project_status = ProjectStatus(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
+        self.show_notification_msg(project_status.successful_builds(), "Fixed builds")
+        self.show_notification_msg(project_status.failing_builds(), "Broken builds")
+        self.show_notification_msg(project_status.still_failing_builds(), "Build is still failing")
+        if self.current_integration_status.unavailable_servers() is not []:
+            self.show_notification_msg(map(lambda server: server.url, self.current_integration_status.unavailable_servers()), "Connectivity issues")
+        #self.show_notification_msg(project_status.still_successful_builds(), "Yet another successful build")
     
     def show_notification_msg(self, builds, message):
         if builds == []:
@@ -35,12 +39,12 @@ class ProjectStatus:
         return self.filter_all(lambda project_tuple: project_tuple.has_been_successful())
     
     def filter_all(self, filter_fn):
-        project_tuples = map(lambda current_project: self.tuple_for(current_project), self.current_projects.all_projects)
+        project_tuples = map(lambda current_project: self.tuple_for(current_project), self.current_projects)
         project_tuples = filter(filter_fn, project_tuples)
         return map(lambda project_tuple: project_tuple.current_project.name, project_tuples)
                
     def tuple_for(self, new_project):
-        for project in self.old_projects.all_projects:
+        for project in self.old_projects:
             if project.name == new_project.name:
                 return ProjectTuple(new_project, project)
         return ProjectTuple(new_project, None)

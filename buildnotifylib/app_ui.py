@@ -10,10 +10,9 @@ class AppUi:
         self.tray.show()
         self.app_menu = AppMenu(self.tray, self.widget, conf, self.build_icons);
 
-    def update_projects(self,updated_projects):
-        count = str(len(updated_projects.get_failing_builds()))
-        self.tray.setIcon(self.build_icons.for_aggregate_status(updated_projects.get_build_status(), count))
-        self.app_menu.update(updated_projects.all_projects)
+    def update_projects(self,integration_status):
+        count = str(len(integration_status.get_failing_builds()))
+        self.tray.setIcon(self.build_icons.for_aggregate_status(integration_status.get_build_status(), count))
+        self.app_menu.update(integration_status.get_projects())
         self.lastcheck = "Last checked: " + strftime("%Y-%m-%d %H:%M:%S")
         self.tray.setToolTip(self.lastcheck)
-        self.projects = updated_projects
