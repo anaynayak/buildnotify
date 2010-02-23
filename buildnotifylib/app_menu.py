@@ -45,4 +45,4 @@ class AppMenu:
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
     def open_url(self, something, url) :
-        os.system(self.conf.browser + " " + url + " &")
+        os.system(str(self.conf.browser.toString()) + " " + url + " &")
