@@ -12,8 +12,8 @@ print sys.path
 
 print "Installing applet:"
 setup (name='BuildNotify',
-       version='0.1',
-       description='Cruise Control build monitor',
+       version='0.1.1',
+       description='Cruise Control build monitor for Windows/Linux/Mac',
        keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
        author='Anay Nayak',
        requires = ['pytz'],
