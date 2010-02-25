@@ -16,10 +16,7 @@ class ProjectStatusNotification:
     def show_notification_msg(self, builds, message):
         if builds == []:
             return
-        self.notification.update(message, "\n".join(builds), None)
-        if not self.notification.show():
-            print "Failed to send notification."
-            sys.exit()
+        self.notification.show_message(message, "\n".join(builds))
         
 class ProjectStatus:
     def __init__(self, old_projects, current_projects): 

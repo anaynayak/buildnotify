@@ -2,8 +2,6 @@
 
 from setuptools import setup
 import sys
-import os
-import user
 
 print "Environment details:"
 print sys.version
