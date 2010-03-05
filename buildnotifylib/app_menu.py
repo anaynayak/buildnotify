@@ -31,11 +31,11 @@ class AppMenu:
         "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
-        self.preferences_dialog = PreferencesDialog(self.conf.get_urls())
+        self.preferences_dialog = PreferencesDialog(self.conf)
         self.preferences_dialog.show()
         if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
-            self.conf.update_urls(self.preferences_dialog.get_urls())
-            
+            self.preferences_dialog.save()
+                
     def exit(self,widget):
         sys.exit()
 
@@ -45,4 +45,4 @@ class AppMenu:
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
     def open_url(self, something, url) :
-        os.system(str(self.conf.browser.toString()) + " " + url + " &")
+        os.system(self.conf.get_browser() + " " + url + " &")

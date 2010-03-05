@@ -6,76 +6,285 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
-    <height>300</height>
+    <width>470</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>423</width>
-     <height>281</height>
+     <width>451</width>
+     <height>331</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
-     <widget class="QListView" name="cctrayPathList"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="cctrayPathLabel">
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <widget class="QWidget" name="serversTab">
+    <attribute name="title">
+     <string>Servers</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>431</width>
+       <height>271</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Monitored servers</string>
+     </property>
+     <widget class="QListView" name="cctrayPathList">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>21</y>
+        <width>419</width>
+        <height>211</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addButton">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>240</y>
+        <width>41</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="toolTip">
+       <string>Add</string>
+      </property>
       <property name="text">
-       <string>Path to cctray.xml</string>
+       <string>+</string>
       </property>
      </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QDialogButtonBox" name="buttonBox">
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Ok</set>
+     <widget class="QPushButton" name="removeButton">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>240</y>
+        <width>41</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="toolTip">
+       <string>Remove</string>
+      </property>
+      <property name="text">
+       <string>-</string>
       </property>
      </widget>
-    </item>
-    <item row="1" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+    </widget>
+   </widget>
+   <widget class="QWidget" name="miscTab">
+    <attribute name="title">
+     <string>Misc</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>421</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Notification settings</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>30</y>
+        <width>401</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="successfulBuildsCheckbox">
+         <property name="text">
+          <string>successful builds</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="brokenBuildsCheckbox">
+         <property name="text">
+          <string>broken builds</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="fixedBuildsCheckbox">
+         <property name="text">
+          <string>fixed builds</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="stillFailingBuildsCheckbox">
+         <property name="text">
+          <string>still failing builds</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="connectivityIssuesCheckbox">
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>connectivity issues</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QCheckBox" name="showLastBuildTimeCheckbox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>200</y>
+       <width>351</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>show last build time for each project</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>421</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
       <item>
-       <widget class="QLineEdit" name="cctrayPath"/>
+       <widget class="QLabel" name="timezoneLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>210</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Server timezone</string>
+        </property>
+        <property name="buddy">
+         <cstring>timezoneList</cstring>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="addButton">
-        <property name="text">
-         <string>&amp;Add</string>
+       <widget class="QComboBox" name="timezoneList">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
         </property>
        </widget>
       </item>
      </layout>
-    </item>
-   </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>240</y>
+       <width>301</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+      <item>
+       <widget class="QLabel" name="BrowserPathLabel">
+        <property name="text">
+         <string>Browser path</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="browserPath"/>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>350</y>
+     <width>421</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Ok</set>
+   </property>
   </widget>
  </widget>
  <resources>
   <include location="icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>cctrayPath</sender>
-   <signal>returnPressed()</signal>
-   <receiver>addButton</receiver>
-   <slot>animateClick()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>243</x>
-     <y>59</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>374</x>
-     <y>56</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
