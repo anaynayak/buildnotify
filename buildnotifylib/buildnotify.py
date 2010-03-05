@@ -25,7 +25,7 @@ class BuildNotify:
     def run_app(self, app, buildIcons):
         self.projects_populator = ProjectsPopulator(self.conf)
         self.app_ui = AppUi(self.conf, buildIcons)
-        self.app_notification = AppNotification(self.app_ui.tray)
+        self.app_notification = AppNotification(self.conf, self.app_ui.tray)
         self.projects_populator.add_listener(self.app_notification)
         self.projects_populator.add_listener(self.app_ui)
         self.auto_poll(app)

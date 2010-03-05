@@ -1,20 +1,22 @@
 class ProjectStatusNotification:
-    def __init__(self, old_integration_status, current_integration_status, notification):
+    def __init__(self, config, old_integration_status, current_integration_status, notification):
+        self.config = config
         self.old_integration_status = old_integration_status
         self.current_integration_status = current_integration_status
         self.notification = notification
 
     def show_notifications(self):
         project_status = ProjectStatus(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
-        self.show_notification_msg(project_status.successful_builds(), "Fixed builds")
-        self.show_notification_msg(project_status.failing_builds(), "Broken builds")
-        self.show_notification_msg(project_status.still_failing_builds(), "Build is still failing")
+        
+        self.show_notification_msg(self.config.get_value("fixedBuild"), project_status.successful_builds(), "Fixed builds")
+        self.show_notification_msg(self.config.get_value("brokenBuild"), project_status.failing_builds(), "Broken builds")
+        self.show_notification_msg(self.config.get_value("stillFailingBuild"), project_status.still_failing_builds(), "Build is still failing")
         if self.current_integration_status.unavailable_servers() is not []:
-            self.show_notification_msg(map(lambda server: server.url, self.current_integration_status.unavailable_servers()), "Connectivity issues")
-        #self.show_notification_msg(project_status.still_successful_builds(), "Yet another successful build")
+            self.show_notification_msg(self.config.get_value("connectivityIssues"), map(lambda server: server.url, self.current_integration_status.unavailable_servers()), "Connectivity issues")
+        self.show_notification_msg(self.config.get_value("successfulBuild"), project_status.still_successful_builds(), "Yet another successful build")
     
-    def show_notification_msg(self, builds, message):
-        if builds == []:
+    def show_notification_msg(self, show_notification, builds, message):
+        if show_notification == False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
         
