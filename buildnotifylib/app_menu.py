@@ -40,7 +40,11 @@ class AppMenu:
         sys.exit()
 
     def create_menu_item(self, label, icon, url, lastBuildTime):
-        action = self.menu.addAction(icon, label + ", " + DistanceOfTime(lastBuildTime).age() + " ago")
+        menu_item_label = label
+        if self.conf.get_value("lastBuildTimeForProject") == True:
+            menu_item_label = label + ", " + DistanceOfTime(lastBuildTime, self.conf.get_timezone()).age() + " ago"
+            
+        action = self.menu.addAction(icon, menu_item_label)
         receiver = lambda url=url: self.open_url(self, url)
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
