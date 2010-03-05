@@ -27,7 +27,7 @@ class AppMenu:
         
     def about_clicked(self,widget):
         QtGui.QMessageBox.about(self.menu, "About BuildNotify",
-        "<b>BuildNotify</b> v 0.1 has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," +
+        "<b>BuildNotify</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," +
         "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
