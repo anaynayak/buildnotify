@@ -48,15 +48,15 @@ class PreferencesDialog(QtGui.QDialog):
             return
         urls = self.ui.cctrayPathList.model().stringList()
         urls.append(str)
-        self.ui.cctrayPathList.model().setStringList(urls)
-        return
+        self.cctrayUrlsModel = QtGui.QStringListModel(urls)
+        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
         urls = self.ui.cctrayPathList.model().stringList()
         urls.removeAt(index.row())
-        self.ui.cctrayPathList.model().setStringList(urls)
-        return
+        self.cctrayUrlsModel = QtGui.QStringListModel(urls)
+        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
     
     def get_urls(self):
         return self.ui.cctrayPathList.model().stringList()
