@@ -46,8 +46,7 @@ class PreferencesDialog(QtGui.QDialog):
         str = self.add_server_dialog.get_url()
         if str == "":
             return
-        urls = self.ui.cctrayPathList.model().stringList()
-        urls.append(str)
+        urls = self.ui.cctrayPathList.model().stringList() + [str]
         self.cctrayUrlsModel = QtGui.QStringListModel(urls)
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 

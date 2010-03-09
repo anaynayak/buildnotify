@@ -9,7 +9,7 @@ class Project:
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
-        self.lastBuildTime = parse(props['lastBuildTime'])
+        self.lastBuildTime = parse(props['lastBuildTime']).replace(tzinfo=None)
         self.url = props['url']
 
     def get_build_status(self):
@@ -26,7 +26,7 @@ class OverallIntegrationStatus:
         
     def get_build_status(self):
         map = self.to_map()
-        seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping']
+        seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping', 'Failure.CheckingModifications', 'Success.CheckingModifications']
         for status in seq:
             if len(map[status]) > 0:
                 return status
@@ -40,7 +40,9 @@ class OverallIntegrationStatus:
         return failing_builds
     
     def to_map(self):
-        status = dict([('Success.Sleeping', []), ('Success.Building', []), ('Failure.Sleeping', []), ('Failure.Building', [])])
+        status = dict([('Success.Sleeping', []), ('Success.Building', []),
+        ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []),
+        ('Failure.Sleeping', []), ('Failure.Building', [])])
         for project in self.get_projects():
             status[project.get_build_status()].append(project)
         return status
