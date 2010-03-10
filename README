@@ -1,6 +1,8 @@
 INSTALL:
-  Run 'sudo ./setup install' in the buildnotify directory. This would copy the executables and resources to the appropriate directories.
-  Execute /usr/share/buildnotify/buildnotify.py  to start buildnotify.
-CONFIGURATION:
-  Save buildnotify.example as ~/.buildnotify file. Update as appropriate with your cruisecontrol server urls.
-
+a) Execute buildnotifyapplet.py from the current directory to start buildnotify.
+b) Alternatively you can install using easy_install.
+	b.1) Run easy_install BuildNotify
+	b.2) Run /usr/bin/buildnotifyapplet.py or c:/python2.6/scripts/buildnotifyapplet.py to launch it.
+	
+DEPENDENCIES
+Install pyqt4, pytz and python-dateutil.
