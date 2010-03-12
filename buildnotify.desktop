@@ -1,0 +1,20 @@
+[Desktop Entry]
+Categories=Application;Network;
+Comment[en_US]=System tray cruisecontrol build notification application
+Comment=System tray cruisecontrol build notification application
+Exec=buildnotifyapplet.py
+GenericName[en_US]=BuildNotify
+GenericName=BuildNotiy
+Icon=/usr/share/pixmaps/buildnotify.png
+MimeType=
+Name[en_US]=BuildNotify
+Name=BuildNotify
+Path=
+StartupNotify=false
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=

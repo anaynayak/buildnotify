@@ -1,14 +1,33 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-import sys
+import sys, os
 
-print "Environment details:"
-print sys.version
-print sys.platform
-print sys.path
+packages_path = os.path.abspath(os.path.dirname(__file__))
 
-print "Installing applet:"
+datafiles = []
+icon_files = []
+doc_files = []
+
+prefix = sys.prefix + '/'
+ipath_desktop_file = '%sshare/applications/' % prefix
+ipath_icons = '%sshare/pixmaps/' % prefix
+path_images = packages_path + '/icons/'
+ipath_docs = '%sshare/doc/buildnotify/' % prefix
+
+datafiles.append((ipath_desktop_file,[packages_path + '/buildnotify.desktop']))
+
+docs = ['AUTHORS','INSTALL','LICENSE','README','THANKS']
+for doc in docs:
+	doc_files.append(packages_path + '/' + doc)
+
+icons = ['buildnotify.png']
+for icon in icons:
+	icon_files.append(path_images + icon)
+
+datafiles.append((ipath_icons, icon_files))
+datafiles.append((ipath_docs, doc_files))
+
 setup (name='BuildNotify',
        version='0.2.2',
        description='Cruise Control build monitor for Windows/Linux/Mac',
@@ -22,5 +41,6 @@ setup (name='BuildNotify',
        'It was largely inspired from CCMenu and lets you monitor multiple continuous integration servers with' +
        'customizable build notifications for all projects',
        packages=['buildnotifylib'],
+       data_files = datafiles,
        scripts = ['buildnotifyapplet.py'])
 

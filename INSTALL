@@ -1,0 +1,3 @@
+* LINUX	
+  Requires python-qt4, python-setuptools, pytz, python-dateutil
+  python setup.py install
