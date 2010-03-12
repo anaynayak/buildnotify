@@ -25,9 +25,6 @@
      <height>331</height>
     </rect>
    </property>
-   <property name="currentIndex">
-    <number>1</number>
-   </property>
    <widget class="QWidget" name="serversTab">
     <attribute name="title">
      <string>Servers</string>

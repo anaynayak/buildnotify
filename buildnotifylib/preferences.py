@@ -1,10 +1,11 @@
 from PyQt4 import QtCore
 import pytz
 from PyQt4 import QtGui
-from add_server import AddServerDialog
 from preferences_ui import Ui_Preferences
 
 class PreferencesDialog(QtGui.QDialog):
+    addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
+    
     def __init__(self, conf):
         QtGui.QDialog.__init__(self)
         self.conf = conf
@@ -39,14 +40,12 @@ class PreferencesDialog(QtGui.QDialog):
 
 
     def add_server(self):
-        self.add_server_dialog = AddServerDialog()
-        self.add_server_dialog.show()
-        if self.add_server_dialog.exec_() != QtGui.QDialog.Accepted:
+        text, ok = QtGui.QInputDialog.getText(self, "Add Server",
+                "cctray.xml path" + " " * len(self.addServerTemplateText), QtGui.QLineEdit.Normal, self.addServerTemplateText)
+        if not ok or text == self.addServerTemplateText:
             return
-        str = self.add_server_dialog.get_url()
-        if str == "":
-            return
-        urls = self.ui.cctrayPathList.model().stringList() + [str]
+
+        urls = self.ui.cctrayPathList.model().stringList() + [text]
         self.cctrayUrlsModel = QtGui.QStringListModel(urls)
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 

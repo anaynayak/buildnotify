@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'preferences.ui'
+# Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Fri Mar  5 23:43:21 2010
+# Created: Fri Mar 12 22:22:15 2010
 #      by: PyQt4 UI code generator 4.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -117,7 +117,6 @@ class Ui_Preferences(object):
         self.timezoneLabel.setBuddy(self.timezoneList)
 
         self.retranslateUi(Preferences)
-        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(Preferences)
 
     def retranslateUi(self, Preferences):
