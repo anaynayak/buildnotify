@@ -1,9 +1,11 @@
+from datetime import datetime 
 class ProjectStatusNotification:
     def __init__(self, config, old_integration_status, current_integration_status, notification):
         self.config = config
         self.old_integration_status = old_integration_status
         self.current_integration_status = current_integration_status
         self.notification = notification
+        self.timed_project_filter = TimedProjectFilter()
 
     def show_notifications(self):
         project_status = ProjectStatus(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
@@ -12,14 +14,32 @@ class ProjectStatusNotification:
         self.show_notification_msg(self.config.get_value("brokenBuild"), project_status.failing_builds(), "Broken builds")
         self.show_notification_msg(self.config.get_value("stillFailingBuild"), project_status.still_failing_builds(), "Build is still failing")
         if self.current_integration_status.unavailable_servers() is not []:
-            self.show_notification_msg(self.config.get_value("connectivityIssues"), map(lambda server: server.url, self.current_integration_status.unavailable_servers()), "Connectivity issues")
+            self.show_notification_msg(self.config.get_value("connectivityIssues"),self.timed_project_filter.filter(map(lambda server: server.url, self.current_integration_status.unavailable_servers())), "Connectivity issues")
         self.show_notification_msg(self.config.get_value("successfulBuild"), project_status.still_successful_builds(), "Yet another successful build")
     
     def show_notification_msg(self, show_notification, builds, message):
         if show_notification == False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
-        
+		
+class TimedProjectFilter:
+    map = dict()
+    fact = [1, 2, 3, 5, 8, 13, 21]
+    
+    def filter(self, urls):
+        return filter(lambda url: self.is_new(url), urls)
+    
+    def is_new(self, url):
+        if url not in self.map:
+            self.map[url] = (datetime.now(), 1)
+            return True
+        connection_time, fail_count = self.map[url] 
+        fail_count =  fail_count + 1
+        if self.fact[len(self.fact) - 1] <= fail_count:
+            fail_count = 1
+        self.map[url] = (connection_time, fail_count)
+        return fail_count in self.fact
+    	
 class ProjectStatus:
     def __init__(self, old_projects, current_projects): 
         self.old_projects = old_projects
