@@ -6,8 +6,8 @@ from preferences_ui import Ui_Preferences
 class PreferencesDialog(QtGui.QDialog):
     addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
     
-    def __init__(self, conf):
-        QtGui.QDialog.__init__(self)
+    def __init__(self, conf, parent=None):
+        QtGui.QDialog.__init__(self, parent)
         self.conf = conf
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
@@ -36,7 +36,6 @@ class PreferencesDialog(QtGui.QDialog):
             checkbox.setChecked(self.conf.get_value(str(key)))
 
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone()))
-        self.ui.browserPath.setText(self.conf.get_browser())
 
 
     def add_server(self):
@@ -64,7 +63,6 @@ class PreferencesDialog(QtGui.QDialog):
 
     def save(self):
         self.conf.update_urls(self.get_urls())
-        self.conf.set_browser(self.ui.browserPath.text())
         self.conf.set_timezone(self.ui.timezoneList.currentText())
         for key,value in self.get_selections():
             self.conf.set_value(key, value)

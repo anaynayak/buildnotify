@@ -15,10 +15,9 @@ class Config:
 
     def set_defaults(self):
         self.settings.setValue("misc/settings", "0.1")
-        self.timeout = self.settings.setValue("connection/timeout",10)
-        self.check_interval = self.settings.setValue("connection/interval", 15)
-        self.check_interval = self.settings.setValue("misc/browser", "firefox")
-        self.check_interval = self.settings.setValue("misc/timezone", "US/Central")
+        self.settings.setValue("connection/timeout",10)
+        self.settings.setValue("connection/interval", 30)
+        self.settings.setValue("misc/timezone", "US/Central")
         for key,value in self.default_options.items():
             self.settings.setValue("values/%s" % key, value)
         
@@ -39,9 +38,3 @@ class Config:
 
     def set_timezone(self, timezone):
         self.settings.setValue("misc/timezone",timezone)
-
-    def set_browser(self,browser):
-        self.settings.setValue("misc/browser", browser)
-        
-    def get_browser(self):
-        return str(self.settings.value("misc/browser").toString())

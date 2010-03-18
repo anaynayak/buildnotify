@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'data/preferences.ui'
+# Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Fri Mar 12 22:22:15 2010
+# Created: Thu Mar 18 17:59:25 2010
 #      by: PyQt4 UI code generator 4.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -97,18 +97,6 @@ class Ui_Preferences(object):
         self.timezoneList.setMaximumSize(QtCore.QSize(200, 16777215))
         self.timezoneList.setObjectName("timezoneList")
         self.horizontalLayout.addWidget(self.timezoneList)
-        self.layoutWidget2 = QtGui.QWidget(self.miscTab)
-        self.layoutWidget2.setGeometry(QtCore.QRect(10, 240, 301, 32))
-        self.layoutWidget2.setObjectName("layoutWidget2")
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.layoutWidget2)
-        self.horizontalLayout_2.setSizeConstraint(QtGui.QLayout.SetFixedSize)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.BrowserPathLabel = QtGui.QLabel(self.layoutWidget2)
-        self.BrowserPathLabel.setObjectName("BrowserPathLabel")
-        self.horizontalLayout_2.addWidget(self.BrowserPathLabel)
-        self.browserPath = QtGui.QLineEdit(self.layoutWidget2)
-        self.browserPath.setObjectName("browserPath")
-        self.horizontalLayout_2.addWidget(self.browserPath)
         self.tabWidget.addTab(self.miscTab, "")
         self.buttonBox = QtGui.QDialogButtonBox(Preferences)
         self.buttonBox.setGeometry(QtCore.QRect(40, 350, 421, 32))
@@ -117,6 +105,7 @@ class Ui_Preferences(object):
         self.timezoneLabel.setBuddy(self.timezoneList)
 
         self.retranslateUi(Preferences)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Preferences)
 
     def retranslateUi(self, Preferences):
@@ -135,7 +124,6 @@ class Ui_Preferences(object):
         self.connectivityIssuesCheckbox.setText(QtGui.QApplication.translate("Preferences", "connectivity issues", None, QtGui.QApplication.UnicodeUTF8))
         self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
         self.timezoneLabel.setText(QtGui.QApplication.translate("Preferences", "Server timezone", None, QtGui.QApplication.UnicodeUTF8))
-        self.BrowserPathLabel.setText(QtGui.QApplication.translate("Preferences", "Browser path", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), QtGui.QApplication.translate("Preferences", "Misc", None, QtGui.QApplication.UnicodeUTF8))
 
 import icons_rc

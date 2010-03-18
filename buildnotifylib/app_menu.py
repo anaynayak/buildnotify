@@ -1,9 +1,9 @@
-import os
 import sys
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from distance_of_time import DistanceOfTime
 from preferences import PreferencesDialog
+import webbrowser
 
 class AppMenu:
     def __init__(self, tray, widget, conf, build_icons):
@@ -31,8 +31,7 @@ class AppMenu:
         "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
-        self.preferences_dialog = PreferencesDialog(self.conf)
-        self.preferences_dialog.show()
+        self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
         if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
             self.preferences_dialog.save()
 
@@ -49,4 +48,4 @@ class AppMenu:
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
     def open_url(self, something, url) :
-        os.system(self.conf.get_browser() + " " + url + " &")
+        webbrowser.open(url)
