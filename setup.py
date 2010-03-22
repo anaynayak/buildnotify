@@ -15,7 +15,11 @@ ipath_icons = '%sshare/pixmaps/' % prefix
 path_images = packages_path + '/icons/'
 ipath_docs = '%sshare/doc/buildnotify/' % prefix
 
-datafiles.append((ipath_desktop_file,[packages_path + '/buildnotify.desktop']))
+def append_if_valid(target, tuple):
+    if os.path.exists(tuple[0]):
+        target.append(tuple)
+        
+append_if_valid(datafiles, (ipath_desktop_file,[packages_path + '/buildnotify.desktop']))
 
 docs = ['AUTHORS','INSTALL','LICENSE','README','THANKS']
 for doc in docs:
@@ -23,10 +27,10 @@ for doc in docs:
 
 icons = ['buildnotify.png']
 for icon in icons:
-	icon_files.append(path_images + icon)
+    icon_files.append(path_images + icon)
 
-datafiles.append((ipath_icons, icon_files))
-datafiles.append((ipath_docs, doc_files))
+append_if_valid(datafiles, (ipath_icons, icon_files))
+append_if_valid(datafiles, (ipath_docs, doc_files))
 
 setup (name='BuildNotify',
        version='0.2.3',
