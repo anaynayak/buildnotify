@@ -33,7 +33,7 @@ append_if_valid(datafiles, (ipath_icons, icon_files))
 append_if_valid(datafiles, (ipath_docs, doc_files))
 
 setup (name='BuildNotify',
-       version='0.2.3',
+       version='0.2.4',
        description='Cruise Control build monitor for Windows/Linux/Mac',
        keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
        author='Anay Nayak',
