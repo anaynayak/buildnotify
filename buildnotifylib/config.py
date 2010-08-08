@@ -7,19 +7,14 @@ class Config:
 
     def __init__(self):
         self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
-        if (str(self.settings.value("misc/settings", "notset").toString()) == "notset"):
-            self.set_defaults()
-            
-        self.timeout = self.settings.value("connection/timeout").toDouble()[0]
-        self.interval = self.settings.value("connection/interval_in_minutes").toInt()[0]
+        self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
+        self.interval = self.get_with_default("connection/interval_in_minutes", 2).toInt()[0]
 
-    def set_defaults(self):
-        self.settings.setValue("misc/settings", "0.1")
-        self.settings.setValue("connection/timeout",10)
-        self.settings.setValue("connection/interval_in_minutes", 2)
-        self.settings.setValue("misc/timezone", "US/Central")
-        for key,value in self.default_options.items():
-            self.settings.setValue("values/%s" % key, value)
+    def get_with_default(self, key, default):
+        if (str(self.settings.value(key, "notset").toString()) == "notset"):
+            self.settings.setValue(key, default)
+        return self.settings.value(key)
+
         
     def update_urls(self, urls):
         self.settings.setValue("connection/urls", urls)
@@ -38,13 +33,13 @@ class Config:
         return self.get_interval() * 1000 * 60
         
     def get_value(self, key):
-        return self.settings.value("values/%s" % key).toBool()
+        return self.get_with_default("values/%s" % key , self.default_options[key]).toBool()
 
     def set_value(self, key, value):
         return self.settings.setValue("values/%s" % key, value)
 
     def get_timezone(self):
-        return str(self.settings.value("misc/timezone").toString())
+        return str(self.get_with_default("misc/timezone", "US/Central").toString())
 
     def set_timezone(self, timezone):
         self.settings.setValue("misc/timezone",timezone)
