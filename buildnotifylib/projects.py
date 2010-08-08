@@ -1,7 +1,5 @@
-import socket
-import urllib2
 from xml.dom import minidom
-
+from http_connection import HttpConnection
 from dateutil.parser import parse
 
 class Project:
@@ -76,9 +74,8 @@ class ProjectsPopulator:
             listener.update_projects(integration_status)
 
     def check_nodes(self, conf, url):
-        socket.setdefaulttimeout(conf.timeout)
         try:
-            data = urllib2.urlopen(url)
+            data = HttpConnection().connect(url, conf.timeout)
         except (Exception), e:
             print e
             return ContinuousIntegrationServer(url, None)

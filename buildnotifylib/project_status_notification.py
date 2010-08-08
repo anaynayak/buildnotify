@@ -21,7 +21,7 @@ class ProjectStatusNotification:
         if show_notification == False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
-		
+
 class TimedProjectFilter:
     map = dict()
     fact = [1, 2, 3, 5, 8, 13, 21]

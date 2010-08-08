@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="e1938274-0e2a-4378-948d-b99d31ed7127" kpf_version="4" name="BuildNotify.kpf">
+<preference-set idref="e1938274-0e2a-4378-948d-b99d31ed7127">
+  <boolean id="import_live">1</boolean>
+</preference-set>
+</project>
