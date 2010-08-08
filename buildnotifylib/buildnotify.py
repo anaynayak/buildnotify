@@ -43,7 +43,7 @@ class BuildNotify:
 
     def check_nodes(self):
         self.projects_populator.load_from_server(self.conf)
-        self.timed_event.set_interval(self.conf.check_interval * 1000)
+        self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
 if __name__== '__main__':

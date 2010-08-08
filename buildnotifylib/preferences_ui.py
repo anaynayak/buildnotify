@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Thu Mar 18 17:59:25 2010
-#      by: PyQt4 UI code generator 4.6
+# Created: Sun Aug  8 13:30:16 2010
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -97,12 +97,31 @@ class Ui_Preferences(object):
         self.timezoneList.setMaximumSize(QtCore.QSize(200, 16777215))
         self.timezoneList.setObjectName("timezoneList")
         self.horizontalLayout.addWidget(self.timezoneList)
+        self.horizontalLayoutWidget = QtGui.QWidget(self.miscTab)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 240, 421, 41))
+        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
+        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.pollingIntervalLabel = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.pollingIntervalLabel.setObjectName("pollingIntervalLabel")
+        self.horizontalLayout_2.addWidget(self.pollingIntervalLabel)
+        self.pollingIntervalSpinBox = QtGui.QSpinBox(self.horizontalLayoutWidget)
+        self.pollingIntervalSpinBox.setMinimumSize(QtCore.QSize(130, 0))
+        self.pollingIntervalSpinBox.setMaximumSize(QtCore.QSize(130, 16777215))
+        self.pollingIntervalSpinBox.setInputMethodHints(QtCore.Qt.ImhDigitsOnly)
+        self.pollingIntervalSpinBox.setWrapping(False)
+        self.pollingIntervalSpinBox.setMinimum(1)
+        self.pollingIntervalSpinBox.setMaximum(60)
+        self.pollingIntervalSpinBox.setSingleStep(1)
+        self.pollingIntervalSpinBox.setObjectName("pollingIntervalSpinBox")
+        self.horizontalLayout_2.addWidget(self.pollingIntervalSpinBox)
         self.tabWidget.addTab(self.miscTab, "")
         self.buttonBox = QtGui.QDialogButtonBox(Preferences)
         self.buttonBox.setGeometry(QtCore.QRect(40, 350, 421, 32))
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.timezoneLabel.setBuddy(self.timezoneList)
+        self.pollingIntervalLabel.setBuddy(self.pollingIntervalSpinBox)
 
         self.retranslateUi(Preferences)
         self.tabWidget.setCurrentIndex(0)
@@ -124,6 +143,8 @@ class Ui_Preferences(object):
         self.connectivityIssuesCheckbox.setText(QtGui.QApplication.translate("Preferences", "connectivity issues", None, QtGui.QApplication.UnicodeUTF8))
         self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
         self.timezoneLabel.setText(QtGui.QApplication.translate("Preferences", "Server timezone", None, QtGui.QApplication.UnicodeUTF8))
+        self.pollingIntervalLabel.setText(QtGui.QApplication.translate("Preferences", "Server polling interval", None, QtGui.QApplication.UnicodeUTF8))
+        self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " minutes", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), QtGui.QApplication.translate("Preferences", "Misc", None, QtGui.QApplication.UnicodeUTF8))
 
 import icons_rc

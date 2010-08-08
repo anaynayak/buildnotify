@@ -36,6 +36,7 @@ class PreferencesDialog(QtGui.QDialog):
             checkbox.setChecked(self.conf.get_value(str(key)))
 
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone()))
+        self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval())
 
 
     def add_server(self):
@@ -58,11 +59,15 @@ class PreferencesDialog(QtGui.QDialog):
     def get_urls(self):
         return self.ui.cctrayPathList.model().stringList()
 
+    def get_interval(self):
+        return self.ui.pollingIntervalSpinBox.value()
+        
     def get_selections(self):
         return map(lambda (key,checkbox): (key, checkbox.isChecked()), self.checkboxes.items())
 
     def save(self):
         self.conf.update_urls(self.get_urls())
+        self.conf.set_interval(self.get_interval())
         self.conf.set_timezone(self.ui.timezoneList.currentText())
         for key,value in self.get_selections():
             self.conf.set_value(key, value)
