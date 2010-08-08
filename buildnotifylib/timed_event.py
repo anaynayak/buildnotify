@@ -9,11 +9,9 @@ class TimedEvent:
     def start(self):
         self.timer = QtCore.QTimer()
         self.parent.connect(self.timer, QtCore.SIGNAL('timeout()'), self.event_target)
-        print self.interval
         self.timer.setInterval(self.interval)
         self.timer.setSingleShot(True)
         self.timer.start()
-
     def set_interval(self, interval):
         self.interval = interval
 

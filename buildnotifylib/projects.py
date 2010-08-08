@@ -1,6 +1,8 @@
 from xml.dom import minidom
 from http_connection import HttpConnection
 from dateutil.parser import parse
+from PyQt4.QtCore import QThread
+from PyQt4 import QtCore
 
 class Project:
     def __init__(self, props):
@@ -55,33 +57,36 @@ class OverallIntegrationStatus:
     def unavailable_servers(self):
         return filter(lambda server: server.projects is None, self.servers)
 
-class ProjectsPopulator:    
-    def __init__(self, config):
+class ProjectsPopulator(QThread):    
+    def __init__(self, config, parent = None):
+        QThread.__init__(self, parent)
         self.config = config
         self.listeners = []
 
-    def add_listener(self, listener):
-        self.listeners.append(listener)
-    
-    def load_from_server(self, conf):
+    def load_from_server(self):
+        self.start()
+        
+    def process(self):
         overall_status = [];
         for url in self.config.get_urls():
-            overall_status.append(self.check_nodes(conf, str(url)))
-        self.notify_listeners(OverallIntegrationStatus(overall_status))
+            overall_status.append(self.check_nodes(str(url)))
+        self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
     
-    def notify_listeners(self, integration_status):
-        for listener in self.listeners:
-            listener.update_projects(integration_status)
-
-    def check_nodes(self, conf, url):
+    def run(self):
+        self.process()
+        
+    def check_nodes(self, url):
+        print "checking %s" % url
         try:
-            data = HttpConnection().connect(url, conf.timeout)
+            data = HttpConnection().connect(url, self.config.timeout)
         except (Exception), e:
             print e
             return ContinuousIntegrationServer(url, None)
         dom = minidom.parse(data)
+        print "processed %s" % url
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
                                      'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
         return ContinuousIntegrationServer(url, projects)
+

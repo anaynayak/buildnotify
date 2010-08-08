@@ -11,6 +11,7 @@ class AppMenu:
         tray.setContextMenu(self.menu)
         self.conf = conf
         self.build_icons = build_icons
+        self.create_default_menu_items()
 
     def update(self, projects):
         projects.sort(lambda x, y: (x.lastBuildTime - y.lastBuildTime).days)

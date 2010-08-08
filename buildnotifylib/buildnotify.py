@@ -2,7 +2,7 @@ from app_ui import AppUi
 from app_notification import AppNotification
 from config import Config
 from projects import ProjectsPopulator
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import sys
 import build_icons
 from timed_event import TimedEvent, RepeatTimedEvent
@@ -14,6 +14,7 @@ class BuildNotify:
         self.buildIcons = build_icons.BuildIcons()
         icon = self.buildIcons.for_status("Success.Sleeping")
         self.app.setWindowIcon(icon)
+        self.ready = False
         self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, 5)
         QtGui.QApplication.setQuitOnLastWindowClosed(False)
         self.timed_event.start()
@@ -26,23 +27,28 @@ class BuildNotify:
                     "I couldn't detect any system tray on this system.")
                 sys.exit(1)
             self.timed_event.start()
-            
-        self.run_app()
+        if not self.ready:
+            self.ready = True
+            self.run_app()
 
     def run_app(self):
-        self.projects_populator = ProjectsPopulator(self.conf)
+        self.projects_populator = ProjectsPopulator(self.conf, self.app)
+        self.app.connect(self.projects_populator, QtCore.SIGNAL('updated_projects'), self.update_projects)
         self.app_ui = AppUi(self.conf, self.buildIcons)
         self.app_notification = AppNotification(self.conf, self.app_ui.tray)
-        self.projects_populator.add_listener(self.app_notification)
-        self.projects_populator.add_listener(self.app_ui)
         self.auto_poll()
+        
+    def update_projects(self, integration_status):
+        self.app_notification.update_projects(integration_status)
+        self.app_ui.update_projects(integration_status)
 
     def auto_poll(self):
         self.timed_event = TimedEvent(self.app, self.check_nodes)
-        self.check_nodes();
+        self.timed_event.set_interval(1000)
+        self.timed_event.start()
 
     def check_nodes(self):
-        self.projects_populator.load_from_server(self.conf)
+        self.projects_populator.load_from_server()
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
