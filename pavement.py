@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-
-from setuptools import setup
+from paver.easy import *
+from paver.setuputils import setup
 
 setup (name='BuildNotify',
        version='0.2.6',
@@ -17,3 +16,8 @@ setup (name='BuildNotify',
        packages=['buildnotifylib'],
        scripts = ['buildnotifyapplet.py'])
 
+@task
+def cleanup():
+    for fl in ['BuildNotify.egg-info', 'build', 'dist']:
+        p = path(fl)
+        p.rmtree()
