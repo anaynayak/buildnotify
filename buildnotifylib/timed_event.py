@@ -1,10 +1,10 @@
 from PyQt4 import QtCore
 
 class TimedEvent:
-    def __init__(self,parent, event_target):
+    def __init__(self,parent, event_target, interval = 2000):
         self.event_target = event_target
         self.parent = parent
-        self.interval = 2000
+        self.interval = interval
         
     def start(self):
         self.timer = QtCore.QTimer()

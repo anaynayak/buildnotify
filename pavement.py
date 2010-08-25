@@ -21,3 +21,8 @@ def cleanup():
     for fl in ['BuildNotify.egg-info', 'build', 'dist']:
         p = path(fl)
         p.rmtree()
+        
+@task
+def mk_resources():
+    sh('pyuic4 -o buildnotifylib/preferences_ui.py data/preferences.ui')
+    sh('pyuic4 -o buildnotifylib/project_configuration_ui.py data/project_configuration.ui')

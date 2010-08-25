@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'preferences.ui'
+# Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Sun Aug  8 13:30:16 2010
+# Created: Tue Aug 24 21:40:59 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,6 +41,9 @@ class Ui_Preferences(object):
         sizePolicy.setHeightForWidth(self.removeButton.sizePolicy().hasHeightForWidth())
         self.removeButton.setSizePolicy(sizePolicy)
         self.removeButton.setObjectName("removeButton")
+        self.configureProjectButton = QtGui.QPushButton(self.groupBox_2)
+        self.configureProjectButton.setGeometry(QtCore.QRect(200, 240, 116, 30))
+        self.configureProjectButton.setObjectName("configureProjectButton")
         self.tabWidget.addTab(self.serversTab, "")
         self.miscTab = QtGui.QWidget()
         self.miscTab.setObjectName("miscTab")
@@ -134,6 +137,7 @@ class Ui_Preferences(object):
         self.addButton.setText(QtGui.QApplication.translate("Preferences", "+", None, QtGui.QApplication.UnicodeUTF8))
         self.removeButton.setToolTip(QtGui.QApplication.translate("Preferences", "Remove", None, QtGui.QApplication.UnicodeUTF8))
         self.removeButton.setText(QtGui.QApplication.translate("Preferences", "-", None, QtGui.QApplication.UnicodeUTF8))
+        self.configureProjectButton.setText(QtGui.QApplication.translate("Preferences", "Configure", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.serversTab), QtGui.QApplication.translate("Preferences", "Servers", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Preferences", "Notification settings", None, QtGui.QApplication.UnicodeUTF8))
         self.successfulBuildsCheckbox.setText(QtGui.QApplication.translate("Preferences", "successful builds", None, QtGui.QApplication.UnicodeUTF8))

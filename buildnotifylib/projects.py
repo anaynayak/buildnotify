@@ -16,10 +16,24 @@ class Project:
         return self.status + "." + self.activity
 
 class ContinuousIntegrationServer:
-    def __init__(self, url, projects):
+    def __init__(self, url, projects, unavailable = False):
         self.url = url
         self.projects = projects
+        self.unavailable = unavailable
+    
+    def get_projects(self):
+        return self.projects
 
+class FilteredContinuousIntegrationServer:
+    def __init__(self, server, filter_projects):
+        self.server = server
+        self.filter_projects = filter_projects
+        self.unavailable = server.unavailable
+        self.url = server.url
+    
+    def get_projects(self):
+        return filter(lambda project: project.name not in self.filter_projects, self.server.get_projects())
+    
 class OverallIntegrationStatus:
     def __init__(self, servers):
         self.servers = servers
@@ -50,12 +64,12 @@ class OverallIntegrationStatus:
     def get_projects(self):
         all_projects = []
         for server in self.servers:
-            if server.projects is not None:
-                all_projects.extend(server.projects)
+            if server.get_projects() is not None:
+                all_projects.extend(server.get_projects())
         return all_projects
 
     def unavailable_servers(self):
-        return filter(lambda server: server.projects is None, self.servers)
+        return filter(lambda server: server.unavailable, self.servers)
 
 class ProjectsPopulator(QThread):    
     def __init__(self, config, parent = None):
@@ -76,17 +90,24 @@ class ProjectsPopulator(QThread):
         self.process()
         
     def check_nodes(self, url):
-        print "checking %s" % url
+        return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url));
+
+class ProjectLoader:
+    def __init__(self, url, timeout):
+        self.url = url
+        self.timeout = timeout
+        
+    def get_data(self):
+        print "checking %s" % self.url
         try:
-            data = HttpConnection().connect(url, self.config.timeout)
+            data = HttpConnection().connect(self.url, self.timeout)
         except (Exception), e:
             print e
-            return ContinuousIntegrationServer(url, None)
+            return ContinuousIntegrationServer(self.url, [], True)
         dom = minidom.parse(data)
-        print "processed %s" % url
+        print "processed %s" % self.url
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
                                      'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
-        return ContinuousIntegrationServer(url, projects)
-
+        return ContinuousIntegrationServer(self.url, projects)

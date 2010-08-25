@@ -39,7 +39,7 @@ class TimedProjectFilter:
             fail_count = 1
         self.map[url] = (connection_time, fail_count)
         return fail_count in self.fact
-    	
+
 class ProjectStatus:
     def __init__(self, old_projects, current_projects): 
         self.old_projects = old_projects

@@ -43,3 +43,9 @@ class Config:
 
     def set_timezone(self, timezone):
         self.settings.setValue("misc/timezone",timezone)
+    
+    def set_project_excludes(self, url, excluded_project_names):
+        self.settings.setValue("excludes/%s" % url, excluded_project_names)
+    
+    def get_project_excludes(self, url):
+        return self.settings.value("excludes/%s" % url, QtCore.QStringList()).toStringList()

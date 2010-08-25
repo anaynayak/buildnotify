@@ -98,6 +98,19 @@
        <string>-</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="configureProjectButton">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>240</y>
+        <width>116</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Configure</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="miscTab">

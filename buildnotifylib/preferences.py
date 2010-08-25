@@ -2,7 +2,7 @@ from PyQt4 import QtCore
 import pytz
 from PyQt4 import QtGui
 from preferences_ui import Ui_Preferences
-
+from project_configuration_dialog import ProjectConfigurationDialog
 class PreferencesDialog(QtGui.QDialog):
     addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
     
@@ -24,6 +24,8 @@ class PreferencesDialog(QtGui.QDialog):
                      self.remove_element)
         self.connect(self.ui.buttonBox, QtCore.SIGNAL("accepted()"),
                      QtCore.SLOT("accept()"))
+        self.connect(self.ui.configureProjectButton, QtCore.SIGNAL("clicked()"),
+                     self.configure_projects)
 
     def set_values_from_config(self):
         self.cctrayUrlsModel = QtGui.QStringListModel(self.conf.get_urls())
@@ -56,6 +58,16 @@ class PreferencesDialog(QtGui.QDialog):
         self.cctrayUrlsModel = QtGui.QStringListModel(urls)
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
     
+    def configure_projects(self):
+        url = str(self.ui.cctrayPathList.selectionModel().currentIndex().data().toString())
+        if not url:
+            return;
+        self.project_configuration_dialog = ProjectConfigurationDialog(url, self.conf, self)
+        if self.project_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
+            self.project_configuration_dialog.save()
+
+        
+        
     def get_urls(self):
         return self.ui.cctrayPathList.model().stringList()
 
