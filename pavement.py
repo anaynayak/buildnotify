@@ -25,4 +25,4 @@ def cleanup():
 @task
 def mk_resources():
     sh('pyuic4 -o buildnotifylib/preferences_ui.py data/preferences.ui')
-    sh('pyuic4 -o buildnotifylib/project_configuration_ui.py data/project_configuration.ui')
+    sh('pyuic4 -o buildnotifylib/server_configuration_ui.py data/server_configuration.ui')

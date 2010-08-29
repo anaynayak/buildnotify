@@ -15,6 +15,10 @@ class Config:
             self.settings.setValue(key, default)
         return self.settings.value(key)
 
+    def add_server_url(self, url):
+        urls = self.get_urls()
+        urls.append(url)
+        self.update_urls(urls)
         
     def update_urls(self, urls):
         self.settings.setValue("connection/urls", urls)

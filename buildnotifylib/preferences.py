@@ -2,7 +2,7 @@ from PyQt4 import QtCore
 import pytz
 from PyQt4 import QtGui
 from preferences_ui import Ui_Preferences
-from project_configuration_dialog import ProjectConfigurationDialog
+from server_configuration_dialog import ServerConfigurationDialog
 class PreferencesDialog(QtGui.QDialog):
     addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
     
@@ -42,14 +42,12 @@ class PreferencesDialog(QtGui.QDialog):
 
 
     def add_server(self):
-        text, ok = QtGui.QInputDialog.getText(self, "Add Server",
-                "cctray.xml path" + " " * len(self.addServerTemplateText), QtGui.QLineEdit.Normal, self.addServerTemplateText)
-        if not ok or text == self.addServerTemplateText:
-            return
+        self.server_configuration_dialog = ServerConfigurationDialog(True, self.addServerTemplateText, self.conf, self)
+        if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
+            self.server_configuration_dialog.add_server()
+            self.cctrayUrlsModel = QtGui.QStringListModel(self.conf.get_urls())
+            self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
-        urls = self.ui.cctrayPathList.model().stringList() + [text]
-        self.cctrayUrlsModel = QtGui.QStringListModel(urls)
-        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
@@ -62,9 +60,9 @@ class PreferencesDialog(QtGui.QDialog):
         url = str(self.ui.cctrayPathList.selectionModel().currentIndex().data().toString())
         if not url:
             return;
-        self.project_configuration_dialog = ProjectConfigurationDialog(url, self.conf, self)
-        if self.project_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
-            self.project_configuration_dialog.save()
+        self.server_configuration_dialog = ServerConfigurationDialog(False, url, self.conf, self)
+        if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
+            self.server_configuration_dialog.save()
 
         
         
