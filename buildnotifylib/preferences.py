@@ -30,6 +30,9 @@ class PreferencesDialog(QtGui.QDialog):
     def set_values_from_config(self):
         self.cctrayUrlsModel = QtGui.QStringListModel(self.conf.get_urls())
         self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
+        
+        self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
+        self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
 
         timezones = QtCore.QStringList(pytz.all_timezones)
         self.ui.timezoneList.addItems(timezones)
@@ -39,7 +42,9 @@ class PreferencesDialog(QtGui.QDialog):
 
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone()))
         self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval())
-
+    
+    def item_selection_changed(self, status):
+        self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
         self.server_configuration_dialog = ServerConfigurationDialog(True, self.addServerTemplateText, self.conf, self)

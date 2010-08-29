@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Sun Aug 29 13:54:10 2010
+# Created: Sun Aug 29 17:12:48 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,6 +24,7 @@ class Ui_Preferences(object):
         self.groupBox_2.setObjectName("groupBox_2")
         self.cctrayPathList = QtGui.QListView(self.groupBox_2)
         self.cctrayPathList.setGeometry(QtCore.QRect(0, 21, 419, 211))
+        self.cctrayPathList.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.cctrayPathList.setObjectName("cctrayPathList")
         self.addButton = QtGui.QPushButton(self.groupBox_2)
         self.addButton.setGeometry(QtCore.QRect(380, 240, 41, 31))
@@ -42,6 +43,7 @@ class Ui_Preferences(object):
         self.removeButton.setSizePolicy(sizePolicy)
         self.removeButton.setObjectName("removeButton")
         self.configureProjectButton = QtGui.QPushButton(self.groupBox_2)
+        self.configureProjectButton.setEnabled(False)
         self.configureProjectButton.setGeometry(QtCore.QRect(200, 240, 116, 30))
         self.configureProjectButton.setObjectName("configureProjectButton")
         self.tabWidget.addTab(self.serversTab, "")

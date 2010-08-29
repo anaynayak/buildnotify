@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/server_configuration.ui'
 #
-# Created: Sun Aug 29 13:54:10 2010
+# Created: Sun Aug 29 17:12:48 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
