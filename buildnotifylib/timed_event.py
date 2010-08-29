@@ -1,4 +1,5 @@
 from PyQt4 import QtCore
+from PyQt4.QtCore import QThread
 
 class TimedEvent:
     def __init__(self,parent, event_target, interval = 2000):
@@ -31,3 +32,12 @@ class RepeatTimedEvent:
         self.event_happened_count = self.event_happened_count + 1
         if (self.event_happened_count != self.repeat_count):
             self.start()
+
+class BackgroundEvent(QThread):
+    def __init__(self, task, parent=None):
+        QThread.__init__(self, parent)
+        self.task = task
+    
+    def run(self):
+        data = self.task()
+        self.emit(QtCore.SIGNAL('complete'), data)
