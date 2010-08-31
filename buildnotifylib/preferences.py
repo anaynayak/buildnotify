@@ -49,8 +49,10 @@ class PreferencesDialog(QtGui.QDialog):
     def add_server(self):
         self.server_configuration_dialog = ServerConfigurationDialog(True, self.addServerTemplateText, self.conf, self)
         if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
-            self.server_configuration_dialog.add_server()
-            self.cctrayUrlsModel = QtGui.QStringListModel(self.conf.get_urls())
+            url = self.server_configuration_dialog.save()
+            urls = self.ui.cctrayPathList.model().stringList()
+            urls.append(url)
+            self.cctrayUrlsModel = QtGui.QStringListModel(urls)
             self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
 

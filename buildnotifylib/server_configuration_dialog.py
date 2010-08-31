@@ -58,7 +58,5 @@ class ServerConfigurationDialog(QtGui.QDialog):
             return
         excluded_projects = [str(projectsModel.index(index, 0).data().toString()) for index in range(projectsModel.rowCount()) if projectsModel.index(index, 0).data(Qt.CheckStateRole)==Qt.Unchecked]
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
+        return self.server_url()
     
-    def add_server(self):
-        self.conf.add_server_url(self.server_url())
-        self.save()

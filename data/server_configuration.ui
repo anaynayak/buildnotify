@@ -13,22 +13,6 @@
   <property name="windowTitle">
    <string>Add Server</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>280</y>
-     <width>191</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
   <widget class="QListView" name="projectsList">
    <property name="geometry">
     <rect>
@@ -61,79 +45,73 @@
     <cstring>projectsList</cstring>
    </property>
   </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget">
+  <widget class="QLabel" name="cctrayUrlLabel">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
-     <width>401</width>
+     <y>0</y>
+     <width>161</width>
      <height>41</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QLabel" name="cctrayUrlLabel">
-      <property name="text">
-       <string>cctray.xml</string>
-      </property>
-      <property name="buddy">
-       <cstring>addServerUrl</cstring>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="addServerUrl"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="loadUrlButton">
-      <property name="text">
-       <string>Load</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="text">
+    <string>Path to cctray.xml</string>
+   </property>
+   <property name="buddy">
+    <cstring>addServerUrl</cstring>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="addServerUrl">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>30</y>
+     <width>311</width>
+     <height>30</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="loadUrlButton">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>30</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Load</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="submitButton">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>280</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
  </widget>
  <tabstops>
   <tabstop>addServerUrl</tabstop>
   <tabstop>loadUrlButton</tabstop>
+  <tabstop>submitButton</tabstop>
   <tabstop>projectsList</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>serverConfigurationDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>serverConfigurationDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>addServerUrl</sender>
    <signal>returnPressed()</signal>
@@ -147,6 +125,22 @@
     <hint type="destinationlabel">
      <x>365</x>
      <y>30</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>submitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>serverConfigurationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>293</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>55</x>
+     <y>292</y>
     </hint>
    </hints>
   </connection>
