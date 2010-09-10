@@ -5,6 +5,8 @@ class Config:
         stillFailingBuild = True, connectivityIssues = True,
         lastBuildTimeForProject = True)
 
+    default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
+    
     def __init__(self):
         self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
         self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
@@ -53,3 +55,16 @@ class Config:
     
     def get_project_excludes(self, url):
         return self.settings.value("excludes/%s" % url, QtCore.QStringList()).toStringList()
+    
+    def set_custom_script(self, user_script, status):
+        script = user_script if status else self.default_script
+        self.settings.setValue("notifications/custom_script", script)
+    
+    def set_custom_script_enabled(self, status):
+        self.settings.setValue("notifications/custom_script_enabled", status)
+        
+    def get_custom_script(self):
+        return str(self.settings.value("notifications/custom_script", self.default_script).toString())
+    
+    def get_custom_script_enabled(self):
+        return self.settings.value("notifications/custom_script_enabled", False).toBool()

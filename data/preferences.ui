@@ -119,9 +119,9 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QWidget" name="miscTab">
+   <widget class="QWidget" name="notificationsTab">
     <attribute name="title">
-     <string>Misc</string>
+     <string>Notifications</string>
     </attribute>
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
@@ -141,7 +141,7 @@
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="layoutWidget">
+     <widget class="QWidget" name="layoutWidget_2">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -195,11 +195,77 @@
       </layout>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>401</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Custom notifications</string>
+     </property>
+     <widget class="QCheckBox" name="scriptCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>401</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Execute script for notifications</string>
+      </property>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>391</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="scriptLabel">
+         <property name="text">
+          <string>Script</string>
+         </property>
+         <property name="buddy">
+          <cstring>scriptLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="scriptLineEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>#status# and #projects# would be replaced by the build status and projects respectively</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="miscTab">
+    <attribute name="title">
+     <string>Misc</string>
+    </attribute>
     <widget class="QCheckBox" name="showLastBuildTimeCheckbox">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>200</y>
+       <y>130</y>
        <width>351</width>
        <height>31</height>
       </rect>
@@ -212,7 +278,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>20</y>
        <width>421</width>
        <height>41</height>
       </rect>
@@ -265,7 +331,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>240</y>
+       <y>80</y>
        <width>421</width>
        <height>41</height>
       </rect>
@@ -336,5 +402,22 @@
  <resources>
   <include location="icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>scriptCheckbox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>scriptLineEdit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>147</x>
+     <y>237</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>192</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

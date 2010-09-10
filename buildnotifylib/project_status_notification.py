@@ -1,4 +1,6 @@
-from datetime import datetime 
+from datetime import datetime
+import subprocess
+
 class ProjectStatusNotification:
     def __init__(self, config, old_integration_status, current_integration_status, notification):
         self.config = config
@@ -21,6 +23,11 @@ class ProjectStatusNotification:
         if show_notification == False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
+        print self.config.get_custom_script_enabled()
+        if self.config.get_custom_script_enabled():
+            command = self.config.get_custom_script().replace('#status#', message).replace('#projects#', ",".join(builds))
+            print command
+            subprocess.Popen(command, shell=True)
 
 class TimedProjectFilter:
     map = dict()
