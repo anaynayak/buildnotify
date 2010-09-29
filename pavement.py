@@ -31,4 +31,8 @@ def dist_ppa():
     sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
     changes_file = path('deb_dist').files('*.changes')[0]
     sh('dput ppa:anay/ppa %s' % changes_file)
-    
+
+@task
+@needs('clean')
+def mk_deb():
+    sh('python setup.py --command-packages=stdeb.command bdist_deb')
