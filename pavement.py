@@ -25,7 +25,7 @@ def dist_pypi():
 @task
 @needs('clean')
 def dist_ppa():
-    sh('python setup.py --command-packages=stdeb.command sdist_dsc')
+    sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
     dist_package = path('deb_dist').dirs('buildnotify-*')[0]
     sh('sed -i s/unstable/lucid/ %s/debian/changelog' % dist_package)
     sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
