@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Fri Sep 10 13:18:52 2010
+# Created: Mon Oct  4 17:54:43 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -135,7 +135,6 @@ class Ui_Preferences(object):
         self.pollingIntervalSpinBox = QtGui.QSpinBox(self.horizontalLayoutWidget)
         self.pollingIntervalSpinBox.setMinimumSize(QtCore.QSize(130, 0))
         self.pollingIntervalSpinBox.setMaximumSize(QtCore.QSize(130, 16777215))
-        self.pollingIntervalSpinBox.setInputMethodHints(QtCore.Qt.ImhDigitsOnly)
         self.pollingIntervalSpinBox.setWrapping(False)
         self.pollingIntervalSpinBox.setMinimum(1)
         self.pollingIntervalSpinBox.setMaximum(60)
