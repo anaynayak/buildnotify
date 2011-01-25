@@ -48,8 +48,14 @@ class Config:
         return str(self.get_with_default("misc/timezone", "US/Central").toString())
 
     def set_timezone(self, timezone):
-        self.settings.setValue("misc/timezone",timezone)
+        self.settings.setValue("timezone/%s" % url, timezone)
     
+    def get_project_timezone(self, url):
+        return str(self.get_with_default("timezone/%s" % url, self.get_timezone()).toString())
+
+    def set_project_timezone(self, url, timezone):
+        self.settings.setValue("timezone/%s" % url, timezone)
+
     def set_project_excludes(self, url, excluded_project_names):
         self.settings.setValue("excludes/%s" % url, excluded_project_names)
     

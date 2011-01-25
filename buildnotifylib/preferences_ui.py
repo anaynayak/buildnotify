@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Mon Oct  4 17:54:43 2010
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Sun Jan 16 20:01:28 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -98,34 +98,10 @@ class Ui_Preferences(object):
         self.miscTab = QtGui.QWidget()
         self.miscTab.setObjectName("miscTab")
         self.showLastBuildTimeCheckbox = QtGui.QCheckBox(self.miscTab)
-        self.showLastBuildTimeCheckbox.setGeometry(QtCore.QRect(10, 130, 351, 31))
+        self.showLastBuildTimeCheckbox.setGeometry(QtCore.QRect(10, 60, 351, 31))
         self.showLastBuildTimeCheckbox.setObjectName("showLastBuildTimeCheckbox")
-        self.layoutWidget = QtGui.QWidget(self.miscTab)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 20, 421, 41))
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.horizontalLayout = QtGui.QHBoxLayout(self.layoutWidget)
-        self.horizontalLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.timezoneLabel = QtGui.QLabel(self.layoutWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.timezoneLabel.sizePolicy().hasHeightForWidth())
-        self.timezoneLabel.setSizePolicy(sizePolicy)
-        self.timezoneLabel.setMinimumSize(QtCore.QSize(210, 0))
-        self.timezoneLabel.setObjectName("timezoneLabel")
-        self.horizontalLayout.addWidget(self.timezoneLabel)
-        self.timezoneList = QtGui.QComboBox(self.layoutWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.timezoneList.sizePolicy().hasHeightForWidth())
-        self.timezoneList.setSizePolicy(sizePolicy)
-        self.timezoneList.setMaximumSize(QtCore.QSize(200, 16777215))
-        self.timezoneList.setObjectName("timezoneList")
-        self.horizontalLayout.addWidget(self.timezoneList)
         self.horizontalLayoutWidget = QtGui.QWidget(self.miscTab)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 80, 421, 41))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 421, 41))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -147,7 +123,6 @@ class Ui_Preferences(object):
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.scriptLabel.setBuddy(self.scriptLineEdit)
-        self.timezoneLabel.setBuddy(self.timezoneList)
         self.pollingIntervalLabel.setBuddy(self.pollingIntervalSpinBox)
 
         self.retranslateUi(Preferences)
@@ -176,7 +151,6 @@ class Ui_Preferences(object):
         self.scriptLineEdit.setToolTip(QtGui.QApplication.translate("Preferences", "#status# and #projects# would be replaced by the build status and projects respectively", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), QtGui.QApplication.translate("Preferences", "Notifications", None, QtGui.QApplication.UnicodeUTF8))
         self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
-        self.timezoneLabel.setText(QtGui.QApplication.translate("Preferences", "Server timezone", None, QtGui.QApplication.UnicodeUTF8))
         self.pollingIntervalLabel.setText(QtGui.QApplication.translate("Preferences", "Server polling interval", None, QtGui.QApplication.UnicodeUTF8))
         self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " minutes", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), QtGui.QApplication.translate("Preferences", "Misc", None, QtGui.QApplication.UnicodeUTF8))

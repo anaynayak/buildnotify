@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'data/server_configuration.ui'
 #
-# Created: Tue Aug 31 17:06:09 2010
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Sun Jan 16 20:01:28 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_serverConfigurationDialog(object):
     def setupUi(self, serverConfigurationDialog):
         serverConfigurationDialog.setObjectName("serverConfigurationDialog")
-        serverConfigurationDialog.resize(435, 319)
+        serverConfigurationDialog.resize(440, 381)
         self.projectsList = QtGui.QListView(serverConfigurationDialog)
         self.projectsList.setGeometry(QtCore.QRect(20, 80, 401, 191))
         self.projectsList.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
@@ -32,11 +32,38 @@ class Ui_serverConfigurationDialog(object):
         self.loadUrlButton.setAutoDefault(False)
         self.loadUrlButton.setObjectName("loadUrlButton")
         self.submitButton = QtGui.QPushButton(serverConfigurationDialog)
-        self.submitButton.setGeometry(QtCore.QRect(340, 280, 81, 31))
+        self.submitButton.setGeometry(QtCore.QRect(340, 340, 81, 31))
         self.submitButton.setAutoDefault(False)
         self.submitButton.setObjectName("submitButton")
+        self.layoutWidget = QtGui.QWidget(serverConfigurationDialog)
+        self.layoutWidget.setGeometry(QtCore.QRect(20, 280, 401, 41))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.horizontalLayout = QtGui.QHBoxLayout(self.layoutWidget)
+        self.horizontalLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.timezoneLabel = QtGui.QLabel(self.layoutWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.timezoneLabel.sizePolicy().hasHeightForWidth())
+        self.timezoneLabel.setSizePolicy(sizePolicy)
+        self.timezoneLabel.setMinimumSize(QtCore.QSize(180, 0))
+        self.timezoneLabel.setMaximumSize(QtCore.QSize(180, 16777215))
+        self.timezoneLabel.setObjectName("timezoneLabel")
+        self.horizontalLayout.addWidget(self.timezoneLabel)
+        self.timezoneList = QtGui.QComboBox(self.layoutWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.timezoneList.sizePolicy().hasHeightForWidth())
+        self.timezoneList.setSizePolicy(sizePolicy)
+        self.timezoneList.setMinimumSize(QtCore.QSize(210, 0))
+        self.timezoneList.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.timezoneList.setObjectName("timezoneList")
+        self.horizontalLayout.addWidget(self.timezoneList)
         self.label.setBuddy(self.projectsList)
         self.cctrayUrlLabel.setBuddy(self.addServerUrl)
+        self.timezoneLabel.setBuddy(self.timezoneList)
 
         self.retranslateUi(serverConfigurationDialog)
         QtCore.QObject.connect(self.addServerUrl, QtCore.SIGNAL("returnPressed()"), self.loadUrlButton.click)
@@ -52,4 +79,5 @@ class Ui_serverConfigurationDialog(object):
         self.cctrayUrlLabel.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Path to cctray.xml", None, QtGui.QApplication.UnicodeUTF8))
         self.loadUrlButton.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Load", None, QtGui.QApplication.UnicodeUTF8))
         self.submitButton.setText(QtGui.QApplication.translate("serverConfigurationDialog", "OK", None, QtGui.QApplication.UnicodeUTF8))
+        self.timezoneLabel.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Server timezone", None, QtGui.QApplication.UnicodeUTF8))
 

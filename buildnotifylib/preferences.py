@@ -34,13 +34,9 @@ class PreferencesDialog(QtGui.QDialog):
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
         self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
 
-        timezones = QtCore.QStringList(pytz.all_timezones)
-        self.ui.timezoneList.addItems(timezones)
-
         for key, checkbox in self.checkboxes.iteritems():
             checkbox.setChecked(self.conf.get_value(str(key)))
 
-        self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone()))
         self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval())
         self.ui.scriptCheckbox.setChecked(self.conf.get_custom_script_enabled())
         self.ui.scriptLineEdit.setText(self.conf.get_custom_script())
@@ -87,7 +83,6 @@ class PreferencesDialog(QtGui.QDialog):
     def save(self):
         self.conf.update_urls(self.get_urls())
         self.conf.set_interval(self.get_interval())
-        self.conf.set_timezone(self.ui.timezoneList.currentText())
         self.conf.set_custom_script(self.ui.scriptLineEdit.text(), self.ui.scriptCheckbox.isChecked())
         self.conf.set_custom_script_enabled(self.ui.scriptCheckbox.isChecked())
         for key,value in self.get_selections():
