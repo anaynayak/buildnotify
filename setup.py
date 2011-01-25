@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-
+from buildnotifylib.config import VERSION
 setup (name='BuildNotify',
-       version='0.2.9',
+       version=VERSION,
        description='Cruise Control build monitor for Windows/Linux/Mac',
        keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
        author='Anay Nayak',

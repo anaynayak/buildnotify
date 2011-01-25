@@ -4,6 +4,7 @@ from PyQt4 import QtCore
 from distance_of_time import DistanceOfTime
 from preferences import PreferencesDialog
 import webbrowser
+from config import VERSION
 
 class AppMenu:
     def __init__(self, tray, widget, conf, build_icons):
@@ -27,8 +28,8 @@ class AppMenu:
         self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
         
     def about_clicked(self,widget):
-        QtGui.QMessageBox.about(self.menu, "About BuildNotify",
-        "<b>BuildNotify</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," +
+        QtGui.QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
+        "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION   +
         "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
