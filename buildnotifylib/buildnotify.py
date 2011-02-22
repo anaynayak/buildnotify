@@ -34,9 +34,13 @@ class BuildNotify:
     def run_app(self):
         self.projects_populator = ProjectsPopulator(self.conf, self.app)
         self.app.connect(self.projects_populator, QtCore.SIGNAL('updated_projects'), self.update_projects)
-        self.app_ui = AppUi(self.conf, self.buildIcons)
+        self.app.connect(self.app, QtCore.SIGNAL('reload_project_data'), self.reload_project_data)
+        self.app_ui = AppUi(self.app, self.conf, self.buildIcons)
         self.app_notification = AppNotification(self.conf, self.app_ui.tray)
         self.auto_poll()
+        
+    def reload_project_data(self) :
+        self.projects_populator.reload()
         
     def update_projects(self, integration_status):
         self.app_notification.update_projects(integration_status)

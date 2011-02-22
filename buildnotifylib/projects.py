@@ -3,6 +3,7 @@ from http_connection import HttpConnection
 from dateutil.parser import parse
 from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
+from timed_event import BackgroundEvent
 
 class Project:
     def __init__(self, props):
@@ -79,6 +80,9 @@ class ProjectsPopulator(QThread):
 
     def load_from_server(self):
         self.start()
+    
+    def reload(self):
+        BackgroundEvent(self.process, self).run()
         
     def process(self):
         overall_status = [];

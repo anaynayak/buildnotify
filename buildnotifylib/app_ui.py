@@ -3,12 +3,13 @@ from time import strftime
 from app_menu import AppMenu
 
 class AppUi:
-    def __init__(self, conf, build_icons):
+    def __init__(self, app, conf, build_icons):
         self.widget = QtGui.QWidget()
+        self.app = app
         self.build_icons = build_icons
         self.tray = QtGui.QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
         self.tray.show()
-        self.app_menu = AppMenu(self.tray, self.widget, conf, self.build_icons);
+        self.app_menu = AppMenu(self.app, self.tray, self.widget, conf, self.build_icons);
 
     def update_projects(self,integration_status):
         count = str(len(integration_status.get_failing_builds()))

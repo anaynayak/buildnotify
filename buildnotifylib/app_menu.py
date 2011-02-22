@@ -7,10 +7,11 @@ import webbrowser
 from config import VERSION
 
 class AppMenu:
-    def __init__(self, tray, widget, conf, build_icons):
+    def __init__(self, app, tray, widget, conf, build_icons):
         self.menu = QtGui.QMenu(widget)
         tray.setContextMenu(self.menu)
         self.conf = conf
+        self.app = app
         self.build_icons = build_icons
         self.create_default_menu_items()
 
@@ -36,11 +37,13 @@ class AppMenu:
         self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
         if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
             self.preferences_dialog.save()
-
+            self.app.emit(QtCore.SIGNAL('reload_project_data'))
+        
     def exit(self,widget):
         sys.exit()
 
     def create_menu_item(self, label, icon, url, lastBuildTime):
+        
         menu_item_label = label
         if self.conf.get_value("lastBuildTimeForProject") == True:
             menu_item_label = label + ", " + DistanceOfTime(lastBuildTime, self.conf.get_timezone()).age() + " ago"

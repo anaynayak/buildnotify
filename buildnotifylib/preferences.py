@@ -68,7 +68,6 @@ class PreferencesDialog(QtGui.QDialog):
         self.server_configuration_dialog = ServerConfigurationDialog(False, url, self.conf, self)
         if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
             self.server_configuration_dialog.save()
-
         
         
     def get_urls(self):
