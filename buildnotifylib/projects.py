@@ -57,9 +57,13 @@ class OverallIntegrationStatus:
     def to_map(self):
         status = dict([('Success.Sleeping', []), ('Success.Building', []),
         ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []),
-        ('Failure.Sleeping', []), ('Failure.Building', []),('Unknown.Building', []), ('Unknown.CheckingModifications', []), ('Unknown.Sleeping',[])])
+        ('Failure.Sleeping', []), ('Failure.Building', []),('Unknown.Building', []), 
+        ('Unknown.CheckingModifications', []), ('Unknown.Sleeping',[]), ('Unknown.Unknown',[])])
         for project in self.get_projects():
-            status[project.get_build_status()].append(project)
+            if (status.has_key(project.get_build_status())):
+                status[project.get_build_status()].append(project)
+            else:
+                status['Unknown.Unknown'].append(project)
         return status
 
     def get_projects(self):

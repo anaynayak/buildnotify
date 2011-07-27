@@ -10,7 +10,7 @@ class Notification:
         self.notification = None
         try:
             if pynotify.init(" buildnotify "):
-                self.notification = pynotify.Notification("buildnotify", "buildnotify", None, None)
+                self.notification = pynotify.Notification("buildnotify", "buildnotify", None)
         except NameError:
             pass
 
