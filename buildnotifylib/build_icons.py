@@ -2,11 +2,11 @@ from PyQt4 import QtGui, QtCore
 import icons_rc
 
 class BuildIcons:
-    success_sleeping = '/icon-success.png'
-    success_building = '/icon-success-building.png'
-    failure_sleeping = '/icon-failure.png'
-    failure_building = '/icon-failure-building.png'
-    unavailable = '/icon-inactive.png'
+    success_sleeping = 'icon-success.svg'
+    success_building = 'icon-success-building.svg'
+    failure_sleeping = 'icon-failure.svg'
+    failure_building = 'icon-failure-building.svg'
+    unavailable = 'icon-inactive.svg'
     resource_path = ":/status/icons/%s"
     
     def __init__(self):
@@ -24,11 +24,10 @@ class BuildIcons:
     def for_aggregate_status(self, status, count):
         if count is "0":
             return self.for_status(status)
-        self.textFont = QtGui.QFont()
-        self.textFont.setPixelSize(12)
-        pixmap = QtGui.QPixmap(self.get_path(status))
+        icon = self.for_status(status)
+        pixmap = icon.pixmap(22,22)
         painter = QtGui.QPainter(pixmap)
-        painter.setFont(self.textFont)
+        painter.setOpacity(1)
         painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
         painter.end()
         return QtGui.QIcon(pixmap)
@@ -37,11 +36,3 @@ class BuildIcons:
         if self.all_status.has_key(status):
             return self.resource_path % self.all_status[status]
         return self.resource_path % self.all_status['unavailable']
-
-    def for_count(self, count):
-        pixmap = QtGui.QPixmap(24, 24)
-        pixmap.fill(QtCore.Qt.transparent)
-        painter = QtGui.QPainter(pixmap)
-        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
-        painter.end()
-        return QtGui.QIcon(pixmap)
