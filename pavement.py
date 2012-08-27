@@ -28,7 +28,7 @@ def dist_pypi():
 def dist_ppa():
     sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
     dist_package = path('deb_dist').dirs('buildnotify-*')[0]
-    sh('sed -i s/unstable/lucid/ %s/debian/changelog' % dist_package)
+    sh('sed -i s/unstable/precise/ %s/debian/changelog' % dist_package)
     sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
     changes_file = path('deb_dist').files('*.changes')[0]
     sh('dput ppa:anay/ppa %s' % changes_file)

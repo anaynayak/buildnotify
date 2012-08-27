@@ -1,7 +1,5 @@
 from PyQt4 import QtCore
 
-VERSION = "0.3.0"
-
 class Config:
     default_options = dict(successfulBuild = False,
         brokenBuild = True, fixedBuild = True,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from buildnotifylib.config import VERSION
+from buildnotifylib.version import VERSION
 setup (name='BuildNotify',
        version=VERSION,
        description='Cruise Control build monitor for Windows/Linux/Mac',

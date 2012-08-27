@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from distance_of_time import DistanceOfTime
 from preferences import PreferencesDialog
 import webbrowser
-from config import VERSION
+from version import VERSION
 
 class AppMenu:
     def __init__(self, app, tray, widget, conf, build_icons):
