@@ -18,7 +18,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         timezones = QtCore.QStringList(pytz.all_timezones)
         self.ui.timezoneList.addItems(timezones)
 
-        self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_project_timezone(self.server_url())))
+        self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone(self.server_url())))
 
         if not editable:
             self.auto_load()
@@ -29,7 +29,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.ui.addServerUrl.setReadOnly(True)
         self.ui.loadUrlButton.setEnabled(False)
         self.fetch_data()
-    
+
     def fetch_data(self):
         self.ui.loadUrlButton.setEnabled(False)
         self.event = BackgroundEvent(self.load_projects, self)
@@ -53,10 +53,10 @@ class ServerConfigurationDialog(QtGui.QDialog):
             item.setCheckState(check)
             projectsModel.appendRow(item)
         self.ui.projectsList.setModel(projectsModel)
-    
+
     def server_url(self):
         return str(self.ui.addServerUrl.text())
-    
+
     def save(self):
         projectsModel = self.ui.projectsList.model()
         if projectsModel is None:
@@ -65,4 +65,4 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
         self.conf.set_project_timezone(self.server_url(), self.ui.timezoneList.currentText())
         return self.server_url()
-    
+

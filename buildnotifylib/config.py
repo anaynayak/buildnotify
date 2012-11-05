@@ -7,7 +7,7 @@ class Config:
         lastBuildTimeForProject = True)
 
     default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
-    
+
     def __init__(self):
         self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
         self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
@@ -22,7 +22,7 @@ class Config:
         urls = self.get_urls()
         urls.append(url)
         self.update_urls(urls)
-        
+
     def update_urls(self, urls):
         self.settings.setValue("connection/urls", urls)
 
@@ -32,46 +32,50 @@ class Config:
     def set_interval(self, interval):
         self.interval = interval
         self.settings.setValue("connection/interval", interval)
-    
+
     def get_interval(self):
         return self.interval
-    
+
     def get_interval_in_millis(self):
         return self.get_interval() * 1000 * 60
-        
+
     def get_value(self, key):
-        return self.get_with_default("values/%s" % key , self.default_options[key]).toBool()
+        return self.get_with_default("values/%s" % key, self.default_options[key]).toBool()
 
     def set_value(self, key, value):
         return self.settings.setValue("values/%s" % key, value)
 
-    def get_timezone(self):
-        return str(self.get_with_default("misc/timezone", "US/Central").toString())
+    def get_timezone(self, url):
+        print("get time zone: %s" % url)
+        return str(self.get_with_default("timezone/%s" % url, "US/Central").toString())
 
-    def set_timezone(self, timezone):
-        self.settings.setValue("timezone/%s" % url, timezone)
-    
-    def get_project_timezone(self, url):
-        return str(self.get_with_default("timezone/%s" % url, self.get_timezone()).toString())
+#    def set_timezone(self, timezone, url):
+#        self.settings.setValue("timezone/%s" % url, timezone)
+
+    def get_project_timezone(self, url, server_url):
+        # project level time zones can not be edited, so ditch the value
+        # and just return the server's time zone
+        return self.get_timezone(server_url)
 
     def set_project_timezone(self, url, timezone):
         self.settings.setValue("timezone/%s" % url, timezone)
+        print("setting: timezone/%s" % url, timezone)
 
     def set_project_excludes(self, url, excluded_project_names):
         self.settings.setValue("excludes/%s" % url, excluded_project_names)
-    
+
     def get_project_excludes(self, url):
         return self.settings.value("excludes/%s" % url, QtCore.QStringList()).toStringList()
-    
+
     def set_custom_script(self, user_script, status):
         script = user_script if status else self.default_script
         self.settings.setValue("notifications/custom_script", script)
-    
+
     def set_custom_script_enabled(self, status):
         self.settings.setValue("notifications/custom_script_enabled", status)
-        
+
     def get_custom_script(self):
         return str(self.settings.value("notifications/custom_script", self.default_script).toString())
-    
+
     def get_custom_script_enabled(self):
         return self.settings.value("notifications/custom_script_enabled", False).toBool()

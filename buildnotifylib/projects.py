@@ -12,6 +12,7 @@ class Project:
         self.activity = props['activity']
         self.lastBuildTime = parse(props['lastBuildTime']).replace(tzinfo=None)
         self.url = props['url']
+        self.server_url = props['server_url']
 
     def get_build_status(self):
         return self.status + "." + self.activity
@@ -21,7 +22,7 @@ class ContinuousIntegrationServer:
         self.url = url
         self.projects = projects
         self.unavailable = unavailable
-    
+
     def get_projects(self):
         return self.projects
 
@@ -31,14 +32,14 @@ class FilteredContinuousIntegrationServer:
         self.filter_projects = filter_projects
         self.unavailable = server.unavailable
         self.url = server.url
-    
+
     def get_projects(self):
         return filter(lambda project: project.name not in self.filter_projects, self.server.get_projects())
-    
+
 class OverallIntegrationStatus:
     def __init__(self, servers):
         self.servers = servers
-        
+
     def get_build_status(self):
         map = self.to_map()
         seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping', 'Failure.CheckingModifications', 'Success.CheckingModifications']
@@ -46,18 +47,18 @@ class OverallIntegrationStatus:
             if len(map[status]) > 0:
                 return status
         return None
-           
+
     def get_failing_builds(self):
         failing_builds = []
         for project in self.get_projects():
             if project.status == 'Failure':
                 failing_builds.append(project)
         return failing_builds
-    
+
     def to_map(self):
         status = dict([('Success.Sleeping', []), ('Success.Building', []),
         ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []),
-        ('Failure.Sleeping', []), ('Failure.Building', []),('Unknown.Building', []), 
+        ('Failure.Sleeping', []), ('Failure.Building', []),('Unknown.Building', []),
         ('Unknown.CheckingModifications', []), ('Unknown.Sleeping',[]), ('Unknown.Unknown',[])])
         for project in self.get_projects():
             if (status.has_key(project.get_build_status())):
@@ -76,7 +77,7 @@ class OverallIntegrationStatus:
     def unavailable_servers(self):
         return filter(lambda server: server.unavailable, self.servers)
 
-class ProjectsPopulator(QThread):    
+class ProjectsPopulator(QThread):
     def __init__(self, config, parent = None):
         QThread.__init__(self, parent)
         self.config = config
@@ -84,19 +85,19 @@ class ProjectsPopulator(QThread):
 
     def load_from_server(self):
         self.start()
-    
+
     def reload(self):
         BackgroundEvent(self.process, self).run()
-        
+
     def process(self):
         overall_status = [];
         for url in self.config.get_urls():
             overall_status.append(self.check_nodes(str(url)))
         self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
-    
+
     def run(self):
         self.process()
-        
+
     def check_nodes(self, url):
         return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url));
 
@@ -104,7 +105,7 @@ class ProjectLoader:
     def __init__(self, url, timeout):
         self.url = url
         self.timeout = timeout
-        
+
     def get_data(self):
         print "checking %s" % self.url
         try:
@@ -117,5 +118,6 @@ class ProjectLoader:
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
-                                     'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')}))
+                                     'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
+                                     'server_url': self.url}))  # WRONG
         return ContinuousIntegrationServer(self.url, projects)
