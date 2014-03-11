@@ -1,7 +1,6 @@
 from PyQt4 import QtCore
-import pytz
 from PyQt4 import QtGui
-from preferences_ui import Ui_Preferences
+from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from server_configuration_dialog import ServerConfigurationDialog
 class PreferencesDialog(QtGui.QDialog):
     addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"

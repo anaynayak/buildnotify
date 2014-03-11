@@ -3,6 +3,7 @@ import urllib2
 import urlparse
 import base64
 import platform
+
 class HttpConnection:
     def __init__(self):
         self.user_agent = "%s-%s" % ("BuildNotify", platform.platform())

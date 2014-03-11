@@ -8,9 +8,9 @@ def clean():
         
 @task
 def mk_resources():
-    sh('pyuic4 -o buildnotifylib/preferences_ui.py data/preferences.ui')
-    sh('pyuic4 -o buildnotifylib/server_configuration_ui.py data/server_configuration.ui')
-    sh('pyrcc4 data/icons.qrc -o buildnotifylib/icons_rc.py')
+    sh('pyuic4 -o buildnotifylib/generated/preferences_ui.py data/preferences.ui')
+    sh('pyuic4 -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui')
+    sh('pyrcc4 data/icons.qrc -o buildnotifylib/generated/icons_rc.py')
 
 @task
 @needs('dist_pypi', 'dist_ppa')

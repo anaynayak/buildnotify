@@ -1,11 +1,17 @@
-from app_ui import AppUi
-from app_notification import AppNotification
-from config import Config
-from projects import ProjectsPopulator
-from PyQt4 import QtGui, QtCore
 import sys
+
+from app_ui import AppUi
+
+from app_notification import AppNotification
+
+from config import Config
+
+from buildnotifylib.core.projects import ProjectsPopulator
+
+from PyQt4 import QtGui, QtCore
 import build_icons
 from timed_event import TimedEvent, RepeatTimedEvent
+
 
 class BuildNotify:
     def __init__(self):

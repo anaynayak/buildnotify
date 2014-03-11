@@ -1,10 +1,11 @@
-from PyQt4 import QtCore
 import pytz
+
+from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
-from server_configuration_ui import Ui_serverConfigurationDialog
+from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from timed_event import BackgroundEvent
-from projects import ProjectLoader
+from buildnotifylib.core.projects import ProjectLoader
 
 class ServerConfigurationDialog(QtGui.QDialog):
 

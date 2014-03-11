@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, QtCore
-import icons_rc
+
 
 class BuildIcons:
     success_sleeping = 'icon-success.svg'

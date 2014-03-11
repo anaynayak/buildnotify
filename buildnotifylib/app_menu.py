@@ -1,10 +1,12 @@
 import sys
+import webbrowser
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-from distance_of_time import DistanceOfTime
+from buildnotifylib.core.distance_of_time import DistanceOfTime
 from preferences import PreferencesDialog
-import webbrowser
 from version import VERSION
+
 
 class AppMenu:
     def __init__(self, app, tray, widget, conf, build_icons):
