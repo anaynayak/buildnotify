@@ -31,9 +31,9 @@ class RepeatTimedEvent:
         self.timed_event.start()
 
     def on_event(self):
-        self.event_target(self.event_happened_count);
-        self.event_happened_count = self.event_happened_count + 1
-        if (self.event_happened_count != self.repeat_count):
+        self.event_target(self.event_happened_count)
+        self.event_happened_count += 1
+        if self.event_happened_count != self.repeat_count:
             self.start()
 
 

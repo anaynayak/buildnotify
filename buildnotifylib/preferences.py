@@ -23,8 +23,8 @@ class PreferencesDialog(QtGui.QDialog):
         self.connect(self.ui.configureProjectButton, QtCore.SIGNAL("clicked()"), self.configure_projects)
 
     def set_values_from_config(self):
-        self.cctrayUrlsModel = QtGui.QStringListModel(self.conf.get_urls())
-        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
+        self.cctray_urls_model = QtGui.QStringListModel(self.conf.get_urls())
+        self.ui.cctrayPathList.setModel(self.cctray_urls_model)
 
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
         self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
@@ -45,16 +45,16 @@ class PreferencesDialog(QtGui.QDialog):
             url = server_configuration_dialog.save()
             urls = self.ui.cctrayPathList.model().stringList()
             urls.append(url)
-            self.cctrayUrlsModel = QtGui.QStringListModel(urls)
-            self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
+            self.cctray_urls_model = QtGui.QStringListModel(urls)
+            self.ui.cctrayPathList.setModel(self.cctray_urls_model)
 
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
         urls = self.ui.cctrayPathList.model().stringList()
         urls.removeAt(index.row())
-        self.cctrayUrlsModel = QtGui.QStringListModel(urls)
-        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
+        self.cctray_urls_model = QtGui.QStringListModel(urls)
+        self.ui.cctrayPathList.setModel(self.cctray_urls_model)
 
     def configure_projects(self):
         url = str(self.ui.cctrayPathList.selectionModel().currentIndex().data().toString())

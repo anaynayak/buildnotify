@@ -42,26 +42,25 @@ class ServerConfigurationDialog(QtGui.QDialog):
 
     def load_data(self, server):
         self.ui.loadUrlButton.setEnabled(self.editable)
-        projects = [project.name for project in server.projects]
         excluded_projects = self.conf.get_project_excludes(self.server_url())
 
-        projectsModel = QtGui.QStandardItemModel()
+        projects_model = QtGui.QStandardItemModel()
         for project in server.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
             check = Qt.Unchecked if project.name in excluded_projects else Qt.Checked
             item.setCheckState(check)
-            projectsModel.appendRow(item)
-        self.ui.projectsList.setModel(projectsModel)
+            projects_model.appendRow(item)
+        self.ui.projectsList.setModel(projects_model)
 
     def server_url(self):
         return str(self.ui.addServerUrl.text())
 
     def save(self):
-        projectsModel = self.ui.projectsList.model()
-        if projectsModel is None:
+        projects_model = self.ui.projectsList.model()
+        if projects_model is None:
             return self.server_url()
-        excluded_projects = [str(projectsModel.index(index, 0).data().toString()) for index in range(projectsModel.rowCount()) if projectsModel.index(index, 0).data(Qt.CheckStateRole) == Qt.Unchecked]
+        excluded_projects = [str(projects_model.index(index, 0).data().toString()) for index in range(projects_model.rowCount()) if projects_model.index(index, 0).data(Qt.CheckStateRole) == Qt.Unchecked]
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
         self.conf.set_project_timezone(self.server_url(), self.ui.timezoneList.currentText())
         return self.server_url()

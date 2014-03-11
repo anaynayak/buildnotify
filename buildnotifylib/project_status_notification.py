@@ -22,7 +22,7 @@ class ProjectStatusNotification:
         self.show_notification_msg(self.config.get_value("successfulBuild"), project_status.still_successful_builds(), "Yet another successful build")
 
     def show_notification_msg(self, show_notification, builds, message):
-        if show_notification == False or builds == []:
+        if show_notification is False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
         if self.config.get_custom_script_enabled():
@@ -34,6 +34,9 @@ class TimedProjectFilter:
     map = dict()
     fact = [1, 2, 3, 5, 8, 13, 21]
 
+    def __init__(self):
+        pass
+
     def filter(self, urls):
         return filter(lambda url: self.is_new(url), urls)
 
@@ -42,7 +45,7 @@ class TimedProjectFilter:
             self.map[url] = (datetime.now(), 1)
             return True
         connection_time, fail_count = self.map[url]
-        fail_count = fail_count + 1
+        fail_count += 1
         if self.fact[len(self.fact) - 1] <= fail_count:
             fail_count = 1
         self.map[url] = (connection_time, fail_count)
@@ -96,8 +99,8 @@ class ProjectTuple:
         return self.status('Failure', 'Failure') and self.different_builds()
 
     def status(self, new_status, old_status):
-        return self.current_project.status == new_status and self.old_project != None and self.old_project.status == old_status
+        return self.current_project.status == new_status and self.old_project is not None and self.old_project.status == old_status
 
     def different_builds(self):
-        return self.current_project.lastBuildTime != self.old_project.lastBuildTime    
+        return self.current_project.last_build_time != self.old_project.last_build_time
 

@@ -11,7 +11,7 @@ class Project:
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
-        self.lastBuildTime = parse(props['lastBuildTime']).replace(tzinfo=None)
+        self.last_build_time = parse(props['lastBuildTime']).replace(tzinfo=None)
         self.url = props['url']
         self.server_url = props['server_url']
 
@@ -45,26 +45,22 @@ class OverallIntegrationStatus:
         self.servers = servers
 
     def get_build_status(self):
-        map = self.to_map()
+        build_status_mapping = self.to_map()
         seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping', 'Failure.CheckingModifications', 'Success.CheckingModifications']
         for status in seq:
-            if len(map[status]) > 0:
+            if len(build_status_mapping[status]) > 0:
                 return status
         return None
 
     def get_failing_builds(self):
-        failing_builds = []
-        for project in self.get_projects():
-            if project.status == 'Failure':
-                failing_builds.append(project)
-        return failing_builds
+        return filter(lambda p: p.status == 'Failure', self.get_projects())
 
     def to_map(self):
         status = dict(
             [('Success.Sleeping', []), ('Success.Building', []), ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []), ('Failure.Sleeping', []), ('Failure.Building', []),
              ('Unknown.Building', []), ('Unknown.CheckingModifications', []), ('Unknown.Sleeping', []), ('Unknown.Unknown', [])])
         for project in self.get_projects():
-            if (status.has_key(project.get_build_status())):
+            if project.get_build_status() in status:
                 status[project.get_build_status()].append(project)
             else:
                 status['Unknown.Unknown'].append(project)
@@ -94,7 +90,7 @@ class ProjectsPopulator(QThread):
         BackgroundEvent(self.process, self).run()
 
     def process(self):
-        overall_status = [];
+        overall_status = []
         for url in self.config.get_urls():
             overall_status.append(self.check_nodes(str(url)))
         self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
@@ -103,7 +99,7 @@ class ProjectsPopulator(QThread):
         self.process()
 
     def check_nodes(self, url):
-        return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url));
+        return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url))
 
 
 class ProjectLoader:
@@ -115,7 +111,7 @@ class ProjectLoader:
         print "checking %s" % self.url
         try:
             data = HttpConnection().connect(self.url, self.timeout)
-        except (Exception), e:
+        except Exception, e:
             print e
             return ContinuousIntegrationServer(self.url, [], True)
         dom = minidom.parse(data)

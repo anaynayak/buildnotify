@@ -29,6 +29,6 @@ class BuildIcons:
         return QtGui.QIcon(pixmap)
 
     def get_path(self, status):
-        if self.all_status.has_key(status):
+        if status in self.all_status:
             return self.resource_path % self.all_status[status]
         return self.resource_path % self.all_status['unavailable']

@@ -18,10 +18,10 @@ class AppMenu:
         self.create_default_menu_items()
 
     def update(self, projects):
-        projects.sort(lambda x, y: (x.lastBuildTime - y.lastBuildTime).days)
+        projects.sort(lambda x, y: (x.last_build_time - y.last_build_time).days)
         self.menu.clear()
         for project in projects:
-            self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.lastBuildTime, project.server_url)
+            self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.last_build_time, project.server_url)
         self.create_default_menu_items()
 
     def create_default_menu_items(self):
@@ -32,7 +32,8 @@ class AppMenu:
 
     def about_clicked(self, widget):
         QtGui.QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
-                                "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION + "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
+                                "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
+                                "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
@@ -43,13 +44,14 @@ class AppMenu:
     def exit(self, widget):
         sys.exit()
 
-    def create_menu_item(self, label, icon, url, lastBuildTime, server_url):
+    def create_menu_item(self, label, icon, url, last_build_time, server_url):
 
         menu_item_label = label
-        if self.conf.get_value("lastBuildTimeForProject") == True:
-            menu_item_label = label + ", " + DistanceOfTime(lastBuildTime, self.conf.get_project_timezone(url, server_url)).age() + " ago"
+        if self.conf.get_value("lastBuildTimeForProject"):
+            menu_item_label = label + ", " + DistanceOfTime(last_build_time, self.conf.get_project_timezone(url, server_url)).age() + " ago"
 
         action = self.menu.addAction(icon, menu_item_label)
+        action.setIconVisibleInMenu(True)
         receiver = lambda url=url: self.open_url(self, url)
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
