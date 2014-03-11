@@ -7,8 +7,8 @@ from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurat
 from timed_event import BackgroundEvent
 from buildnotifylib.core.projects import ProjectLoader
 
-class ServerConfigurationDialog(QtGui.QDialog):
 
+class ServerConfigurationDialog(QtGui.QDialog):
     def __init__(self, editable, url, conf, parent=None):
         QtGui.QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
@@ -23,8 +23,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
 
         if not editable:
             self.auto_load()
-        self.connect(self.ui.loadUrlButton, QtCore.SIGNAL("clicked()"),
-                     self.fetch_data)
+        self.connect(self.ui.loadUrlButton, QtCore.SIGNAL("clicked()"), self.fetch_data)
 
     def auto_load(self):
         self.ui.addServerUrl.setReadOnly(True)
@@ -62,7 +61,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         projectsModel = self.ui.projectsList.model()
         if projectsModel is None:
             return self.server_url()
-        excluded_projects = [str(projectsModel.index(index, 0).data().toString()) for index in range(projectsModel.rowCount()) if projectsModel.index(index, 0).data(Qt.CheckStateRole)==Qt.Unchecked]
+        excluded_projects = [str(projectsModel.index(index, 0).data().toString()) for index in range(projectsModel.rowCount()) if projectsModel.index(index, 0).data(Qt.CheckStateRole) == Qt.Unchecked]
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
         self.conf.set_project_timezone(self.server_url(), self.ui.timezoneList.currentText())
         return self.server_url()

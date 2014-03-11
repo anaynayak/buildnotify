@@ -8,16 +8,12 @@ class BuildIcons:
     failure_building = 'icon-failure-building.svg'
     unavailable = 'icon-inactive.svg'
     resource_path = ":/status/icons/%s"
-    
+
     def __init__(self):
-        self.all_status = {'Success.Sleeping':self.success_sleeping,
-         'Success.CheckingModifications': self.success_sleeping,
-         'Success.Building':self.success_building, 
-         'Failure.Sleeping':self.failure_sleeping, 
-         'Failure.CheckingModifications': self.failure_sleeping,
-         'Failure.Building': self.failure_building, 
-         'unavailable':self.unavailable }
- 
+        self.all_status = {'Success.Sleeping': self.success_sleeping, 'Success.CheckingModifications': self.success_sleeping, 'Success.Building': self.success_building,
+                           'Failure.Sleeping': self.failure_sleeping, 'Failure.CheckingModifications': self.failure_sleeping, 'Failure.Building': self.failure_building,
+                           'unavailable': self.unavailable}
+
     def for_status(self, status):
         return QtGui.QIcon(self.get_path(status))
 
@@ -25,7 +21,7 @@ class BuildIcons:
         if count is "0":
             return self.for_status(status)
         icon = self.for_status(status)
-        pixmap = icon.pixmap(22,22)
+        pixmap = icon.pixmap(22, 22)
         painter = QtGui.QPainter(pixmap)
         painter.setOpacity(1)
         painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)

@@ -30,10 +30,9 @@ class AppMenu:
         self.menu.addAction(QtGui.QAction("Preferences", self.menu, triggered=self.preferences_clicked))
         self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
 
-    def about_clicked(self,widget):
+    def about_clicked(self, widget):
         QtGui.QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
-        "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION   +
-        "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
+                                "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION + "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
@@ -41,7 +40,7 @@ class AppMenu:
             self.preferences_dialog.save()
             self.app.emit(QtCore.SIGNAL('reload_project_data'))
 
-    def exit(self,widget):
+    def exit(self, widget):
         sys.exit()
 
     def create_menu_item(self, label, icon, url, lastBuildTime, server_url):
@@ -54,5 +53,5 @@ class AppMenu:
         receiver = lambda url=url: self.open_url(self, url)
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
-    def open_url(self, something, url) :
+    def open_url(self, something, url):
         webbrowser.open(url)

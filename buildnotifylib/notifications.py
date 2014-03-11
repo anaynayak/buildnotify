@@ -4,6 +4,7 @@ except ImportError:
     pass
 from PyQt4 import QtGui
 
+
 class Notification:
     def __init__(self, widget):
         self.widget = widget
@@ -17,7 +18,7 @@ class Notification:
     def show_message(self, title, text):
         if self.notification:
             self.notification.update(title, text, None)
-        if self.notification == None or not self.notification.show():
+        if self.notification is None or not self.notification.show():
             self.widget.showMessage(title, text, QtGui.QSystemTrayIcon.Information, 3000)
 
 

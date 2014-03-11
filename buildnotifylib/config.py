@@ -1,10 +1,8 @@
 from PyQt4 import QtCore
 
+
 class Config:
-    default_options = dict(successfulBuild = False,
-        brokenBuild = True, fixedBuild = True,
-        stillFailingBuild = True, connectivityIssues = True,
-        lastBuildTimeForProject = True)
+    default_options = dict(successfulBuild=False, brokenBuild=True, fixedBuild=True, stillFailingBuild=True, connectivityIssues=True, lastBuildTimeForProject=True)
 
     default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
 
@@ -14,7 +12,7 @@ class Config:
         self.interval = self.get_with_default("connection/interval_in_minutes", 2).toInt()[0]
 
     def get_with_default(self, key, default):
-        if (str(self.settings.value(key, "notset").toString()) == "notset"):
+        if str(self.settings.value(key, "notset").toString()) == "notset":
             self.settings.setValue(key, default)
         return self.settings.value(key)
 
@@ -48,9 +46,6 @@ class Config:
     def get_timezone(self, url):
         print("get time zone: %s" % url)
         return str(self.get_with_default("timezone/%s" % url, "US/Central").toString())
-
-#    def set_timezone(self, timezone, url):
-#        self.settings.setValue("timezone/%s" % url, timezone)
 
     def get_project_timezone(self, url, server_url):
         # project level time zones can not be edited, so ditch the value

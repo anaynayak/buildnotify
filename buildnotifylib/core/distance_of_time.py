@@ -1,18 +1,18 @@
-
 from datetime import datetime
 import pytz
+
 
 class DistanceOfTime:
     def __init__(self, from_date, timezone):
         self.from_date = from_date
         self.timezone = timezone
-        
+
     def age(self):
         since_date = datetime.now(tz=pytz.timezone(self.timezone)).replace(tzinfo=None)
 
         distance_in_time = since_date - self.from_date
         distance_in_seconds = int(round(abs(distance_in_time.days * 86400 + distance_in_time.seconds)))
-        distance_in_minutes = int(round(distance_in_seconds/60))
+        distance_in_minutes = int(round(distance_in_seconds / 60))
 
         if distance_in_minutes <= 1:
             return "1 minute"

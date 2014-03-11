@@ -5,6 +5,7 @@ from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
 from timed_event import BackgroundEvent
 
+
 class Project:
     def __init__(self, props):
         self.name = props['name']
@@ -17,14 +18,16 @@ class Project:
     def get_build_status(self):
         return self.status + "." + self.activity
 
+
 class ContinuousIntegrationServer:
-    def __init__(self, url, projects, unavailable = False):
+    def __init__(self, url, projects, unavailable=False):
         self.url = url
         self.projects = projects
         self.unavailable = unavailable
 
     def get_projects(self):
         return self.projects
+
 
 class FilteredContinuousIntegrationServer:
     def __init__(self, server, filter_projects):
@@ -35,6 +38,7 @@ class FilteredContinuousIntegrationServer:
 
     def get_projects(self):
         return filter(lambda project: project.name not in self.filter_projects, self.server.get_projects())
+
 
 class OverallIntegrationStatus:
     def __init__(self, servers):
@@ -56,10 +60,9 @@ class OverallIntegrationStatus:
         return failing_builds
 
     def to_map(self):
-        status = dict([('Success.Sleeping', []), ('Success.Building', []),
-        ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []),
-        ('Failure.Sleeping', []), ('Failure.Building', []),('Unknown.Building', []),
-        ('Unknown.CheckingModifications', []), ('Unknown.Sleeping',[]), ('Unknown.Unknown',[])])
+        status = dict(
+            [('Success.Sleeping', []), ('Success.Building', []), ('Failure.CheckingModifications', []), ('Success.CheckingModifications', []), ('Failure.Sleeping', []), ('Failure.Building', []),
+             ('Unknown.Building', []), ('Unknown.CheckingModifications', []), ('Unknown.Sleeping', []), ('Unknown.Unknown', [])])
         for project in self.get_projects():
             if (status.has_key(project.get_build_status())):
                 status[project.get_build_status()].append(project)
@@ -77,8 +80,9 @@ class OverallIntegrationStatus:
     def unavailable_servers(self):
         return filter(lambda server: server.unavailable, self.servers)
 
+
 class ProjectsPopulator(QThread):
-    def __init__(self, config, parent = None):
+    def __init__(self, config, parent=None):
         QThread.__init__(self, parent)
         self.config = config
         self.listeners = []
@@ -101,6 +105,7 @@ class ProjectsPopulator(QThread):
     def check_nodes(self, url):
         return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url));
 
+
 class ProjectLoader:
     def __init__(self, url, timeout):
         self.url = url
@@ -117,7 +122,7 @@ class ProjectLoader:
         print "processed %s" % self.url
         projects = []
         for node in dom.getElementsByTagName('Project'):
-            projects.append(Project({'name': node.getAttribute('name'), 'lastBuildStatus':node.getAttribute('lastBuildStatus'),
-                                     'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
-                                     'server_url': self.url}))  # WRONG
+            projects.append(Project(
+                {'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'), 'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'),
+                 'lastBuildTime': node.getAttribute('lastBuildTime'), 'server_url': self.url}))  # WRONG
         return ContinuousIntegrationServer(self.url, projects)

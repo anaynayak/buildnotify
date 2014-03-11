@@ -28,9 +28,8 @@ class BuildNotify:
 
     def delayed_start(self, event_count):
         if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
-            if (event_count == 5) :
-                QtGui.QMessageBox.critical(None, "BuildNotify",
-                    "I couldn't detect any system tray on this system.")
+            if (event_count == 5):
+                QtGui.QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
                 sys.exit(1)
             self.timed_event.start()
         if not self.ready:
@@ -44,10 +43,10 @@ class BuildNotify:
         self.app_ui = AppUi(self.app, self.conf, self.buildIcons)
         self.app_notification = AppNotification(self.conf, self.app_ui.tray)
         self.auto_poll()
-        
-    def reload_project_data(self) :
+
+    def reload_project_data(self):
         self.projects_populator.reload()
-        
+
     def update_projects(self, integration_status):
         self.app_notification.update_projects(integration_status)
         self.app_ui.update_projects(integration_status)
@@ -62,5 +61,6 @@ class BuildNotify:
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
-if __name__== '__main__':
+
+if __name__ == '__main__':
     BuildNotify()
