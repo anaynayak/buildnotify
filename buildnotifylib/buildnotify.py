@@ -10,7 +10,7 @@ from buildnotifylib.core.projects import ProjectsPopulator
 
 from PyQt4 import QtGui, QtCore
 from build_icons import BuildIcons
-from timed_event import TimedEvent, RepeatTimedEvent
+from buildnotifylib.core.timed_event import TimedEvent, RepeatTimedEvent
 
 
 class BuildNotify:

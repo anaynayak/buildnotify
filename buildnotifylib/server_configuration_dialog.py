@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
-from timed_event import BackgroundEvent
+from buildnotifylib.core.timed_event import BackgroundEvent
 from buildnotifylib.core.projects import ProjectLoader
 
 
