@@ -2,12 +2,13 @@ from PyQt4 import QtGui, QtCore
 
 
 class BuildIcons:
-    success_sleeping = 'icon-success.svg'
-    success_building = 'icon-success-building.svg'
-    failure_sleeping = 'icon-failure.svg'
-    failure_building = 'icon-failure-building.svg'
-    unavailable = 'icon-inactive.svg'
-    resource_path = ":/status/icons/%s"
+    success_sleeping = 'icon-success'
+    success_building = 'icon-success-building'
+    failure_sleeping = 'icon-failure'
+    failure_building = 'icon-failure-building'
+    unavailable = 'icon-inactive'
+    resource_path = ":/status/icons/%s.svg"
+    theme_resource_path = "%s"
 
     def __init__(self):
         self.all_status = {'Success.Sleeping': self.success_sleeping, 'Success.CheckingModifications': self.success_sleeping, 'Success.Building': self.success_building,
@@ -15,7 +16,7 @@ class BuildIcons:
                            'unavailable': self.unavailable}
 
     def for_status(self, status):
-        return QtGui.QIcon(self.get_path(status))
+        return QtGui.QIcon.fromTheme(self.get_path(self.theme_resource_path, status), QtGui.QIcon(self.get_path(self.resource_path, status)))
 
     def for_aggregate_status(self, status, count):
         if count is "0":
@@ -28,7 +29,7 @@ class BuildIcons:
         painter.end()
         return QtGui.QIcon(pixmap)
 
-    def get_path(self, status):
+    def get_path(self, resource_path, status):
         if status in self.all_status:
-            return self.resource_path % self.all_status[status]
-        return self.resource_path % self.all_status['unavailable']
+            return resource_path % self.all_status[status]
+        return resource_path % self.all_status['unavailable']
