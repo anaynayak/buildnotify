@@ -2,7 +2,7 @@
 
 from setuptools import setup
 setup (name='BuildNotify',
-       version="0.3.2",
+       version="0.3.3",
        description='Cruise Control build monitor for Windows/Linux/Mac',
        keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
        author='Anay Nayak',
