@@ -13,6 +13,6 @@ setup (name='BuildNotify',
        long_description = 'BuildNotify is a cruise control system tray monitor which works on Windows/Linux/Mac.' +
        'It was largely inspired from CCMenu and lets you monitor multiple continuous integration servers with' +
        'customizable build notifications for all projects',
-       packages=['buildnotifylib'],
+       packages=['buildnotifylib', 'buildnotifylib.core'],
        scripts = ['buildnotifyapplet.py'])
 

@@ -2,11 +2,11 @@ from PyQt4 import QtGui, QtCore
 
 
 class BuildIcons:
-    success_sleeping = 'icon-success'
-    success_building = 'icon-success-building'
-    failure_sleeping = 'icon-failure'
-    failure_building = 'icon-failure-building'
-    unavailable = 'icon-inactive'
+    success_sleeping = 'buildnotify-success'
+    success_building = 'buildnotify-success-building'
+    failure_sleeping = 'buildnotify-failure'
+    failure_building = 'buildnotify-failure-building'
+    unavailable = 'buildnotify-inactive'
     resource_path = ":/status/icons/%s.svg"
     theme_resource_path = "%s"
 

@@ -1,9 +1,9 @@
 <RCC>
   <qresource prefix="status" >
-    <file>../icons/icon-success.svg</file>
-    <file>../icons/icon-failure-building.svg</file>
-    <file>../icons/icon-inactive.svg</file>
-    <file>../icons/icon-success-building.svg</file>
-    <file>../icons/icon-failure.svg</file>
+    <file>../icons/buildnotify-success.svg</file>
+    <file>../icons/buildnotify-failure-building.svg</file>
+    <file>../icons/buildnotify-inactive.svg</file>
+    <file>../icons/buildnotify-success-building.svg</file>
+    <file>../icons/buildnotify-failure.svg</file>
   </qresource>
 </RCC>
