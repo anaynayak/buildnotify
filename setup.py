@@ -2,7 +2,7 @@
 
 from setuptools import setup
 setup (name='BuildNotify',
-       version="0.3.4",
+       version="0.3.5",
        description='Cruise Control build monitor for Windows/Linux/Mac',
        keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
        author='Anay Nayak',
@@ -13,6 +13,6 @@ setup (name='BuildNotify',
        long_description = 'BuildNotify is a cruise control system tray monitor which works on Windows/Linux/Mac.' +
        'It was largely inspired from CCMenu and lets you monitor multiple continuous integration servers with' +
        'customizable build notifications for all projects',
-       packages=['buildnotifylib', 'buildnotifylib.core'],
+       packages=['buildnotifylib', 'buildnotifylib.core', 'buildnotifylib.generated'],
        scripts = ['buildnotifyapplet.py'])
 

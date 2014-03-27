@@ -25,11 +25,14 @@ def dist_pypi():
     """Upload package to https://pypi.python.org/pypi/BuildNotify/"""
     sh('python setup.py sdist upload')
 
-    
 @task
 @needs('clean', 'mk_deb')
 def dist_ppa():
     """Upload package to https://launchpad.net/~anay/+archive/ppa"""
+    sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
+    dist_package = path('deb_dist').dirs('buildnotify-*')[0]
+    sh('sed -i s/unstable/precise/ %s/debian/changelog' % dist_package)
+    sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
     changes_file = path('deb_dist').files('*.changes')[0]
     sh('dput ppa:anay/ppa %s' % changes_file)
 
@@ -37,10 +40,7 @@ def dist_ppa():
 @needs('clean')
 def mk_deb():
     """Build deb package"""
-    sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
-    dist_package = path('deb_dist').dirs('buildnotify-*')[0]
-    sh('sed -i s/unstable/precise/ %s/debian/changelog' % dist_package)
-    sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
+    sh('python setup.py --command-packages=stdeb.command bdist_deb')
 
 @task
 @needs('clean')
