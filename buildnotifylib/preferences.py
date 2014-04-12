@@ -35,6 +35,8 @@ class PreferencesDialog(QtGui.QDialog):
         self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval())
         self.ui.scriptCheckbox.setChecked(self.conf.get_custom_script_enabled())
         self.ui.scriptLineEdit.setText(self.conf.get_custom_script())
+        self.ui.sortBuildByLastBuildTime.setChecked(self.conf.get_sort_by_last_build_time())
+        self.ui.sortBuildByName.setChecked(self.conf.get_sort_by_name())
 
     def item_selection_changed(self, status):
         self.ui.configureProjectButton.setEnabled(status)
@@ -79,5 +81,9 @@ class PreferencesDialog(QtGui.QDialog):
         self.conf.set_interval(self.get_interval())
         self.conf.set_custom_script(self.ui.scriptLineEdit.text(), self.ui.scriptCheckbox.isChecked())
         self.conf.set_custom_script_enabled(self.ui.scriptCheckbox.isChecked())
+        if self.ui.sortBuildByLastBuildTime.isChecked():
+            self.conf.set_sort_by_last_build_time()
+        if self.ui.sortBuildByName.isChecked():
+            self.conf.set_sort_by_name()
         for key, value in self.get_selections():
             self.conf.set_value(key, value)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Tue Mar 18 20:49:08 2014
+# Created: Sat Apr 12 18:07:24 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -125,6 +125,16 @@ class Ui_Preferences(object):
         self.pollingIntervalSpinBox.setSingleStep(1)
         self.pollingIntervalSpinBox.setObjectName(_fromUtf8("pollingIntervalSpinBox"))
         self.horizontalLayout_2.addWidget(self.pollingIntervalSpinBox)
+        self.groupBox_4 = QtGui.QGroupBox(self.miscTab)
+        self.groupBox_4.setGeometry(QtCore.QRect(10, 109, 401, 131))
+        self.groupBox_4.setObjectName(_fromUtf8("groupBox_4"))
+        self.sortBuildByName = QtGui.QRadioButton(self.groupBox_4)
+        self.sortBuildByName.setGeometry(QtCore.QRect(0, 20, 191, 21))
+        self.sortBuildByName.setObjectName(_fromUtf8("sortBuildByName"))
+        self.sortBuildByLastBuildTime = QtGui.QRadioButton(self.groupBox_4)
+        self.sortBuildByLastBuildTime.setGeometry(QtCore.QRect(0, 40, 221, 21))
+        self.sortBuildByLastBuildTime.setChecked(True)
+        self.sortBuildByLastBuildTime.setObjectName(_fromUtf8("sortBuildByLastBuildTime"))
         self.tabWidget.addTab(self.miscTab, _fromUtf8(""))
         self.buttonBox = QtGui.QDialogButtonBox(Preferences)
         self.buttonBox.setGeometry(QtCore.QRect(40, 350, 421, 32))
@@ -161,6 +171,9 @@ class Ui_Preferences(object):
         self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
         self.pollingIntervalLabel.setText(QtGui.QApplication.translate("Preferences", "Server polling interval", None, QtGui.QApplication.UnicodeUTF8))
         self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " minutes", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_4.setTitle(QtGui.QApplication.translate("Preferences", "Build Sort order", None, QtGui.QApplication.UnicodeUTF8))
+        self.sortBuildByName.setText(QtGui.QApplication.translate("Preferences", "Sort builds by name", None, QtGui.QApplication.UnicodeUTF8))
+        self.sortBuildByLastBuildTime.setText(QtGui.QApplication.translate("Preferences", "Sort builds by last build time", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), QtGui.QApplication.translate("Preferences", "Misc", None, QtGui.QApplication.UnicodeUTF8))
 
 import icons_rc

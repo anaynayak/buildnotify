@@ -327,6 +327,48 @@
       </item>
      </layout>
     </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>109</y>
+       <width>401</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Build Sort order</string>
+     </property>
+     <widget class="QRadioButton" name="sortBuildByName">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>191</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sort builds by name</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="sortBuildByLastBuildTime">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>40</y>
+        <width>221</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sort builds by last build time</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QDialogButtonBox" name="buttonBox">

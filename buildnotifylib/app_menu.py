@@ -18,11 +18,16 @@ class AppMenu:
         self.create_default_menu_items()
 
     def update(self, projects):
-        projects.sort(lambda x, y: (x.last_build_time - y.last_build_time).days)
+        projects.sort(key=self.sort_key)
         self.menu.clear()
         for project in projects:
             self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.last_build_time, project.server_url)
         self.create_default_menu_items()
+
+    def sort_key(self, p):
+        if self.conf.get_sort_by_name():
+            return p.name
+        return p.last_build_time
 
     def create_default_menu_items(self):
         self.menu.addSeparator()

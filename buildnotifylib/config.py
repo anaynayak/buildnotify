@@ -7,11 +7,15 @@ class Config:
     default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
     CUSTOM_SCRIPT = "notifications/custom_script"
     SCRIPT_ENABLED = "notifications/custom_script_enabled"
+    SORT_KEY = "sort_key"
     INTERVAL_IN_MINUTES = "connection/interval_in_minutes"
     CONNECTION_URLS = "connection/urls"
     EXCLUDES = "excludes/%s"
     TIMEZONE = "timezone/%s"
     VALUES = "values/%s"
+
+    SORT_BY_LAST_BUILD_TIME = "sort_build_time"
+    SORT_BY_NAME = "sort_name"
 
     def __init__(self):
         self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
@@ -78,3 +82,16 @@ class Config:
 
     def get_custom_script_enabled(self):
         return self.settings.value(self.SCRIPT_ENABLED, False).toBool()
+
+    def get_sort_by_last_build_time(self):
+        return str(self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME).toString()) == self.SORT_BY_LAST_BUILD_TIME
+
+    def get_sort_by_name(self):
+        return str(self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME).toString()) == self.SORT_BY_NAME
+
+    def set_sort_by_last_build_time(self):
+        self.settings.setValue(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME)
+
+    def set_sort_by_name(self):
+        self.settings.setValue(self.SORT_KEY, self.SORT_BY_NAME)
+
