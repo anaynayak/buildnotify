@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/server_configuration.ui'
 #
-# Created: Tue Mar 18 20:49:08 2014
+# Created: Sat May  3 22:03:30 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,15 +17,12 @@ except AttributeError:
 class Ui_serverConfigurationDialog(object):
     def setupUi(self, serverConfigurationDialog):
         serverConfigurationDialog.setObjectName(_fromUtf8("serverConfigurationDialog"))
-        serverConfigurationDialog.resize(440, 381)
-        self.projectsList = QtGui.QListView(serverConfigurationDialog)
-        self.projectsList.setGeometry(QtCore.QRect(20, 80, 401, 191))
+        serverConfigurationDialog.resize(440, 350)
+        self.projectsList = QtGui.QTreeView(serverConfigurationDialog)
+        self.projectsList.setGeometry(QtCore.QRect(20, 70, 401, 191))
         self.projectsList.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.projectsList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.projectsList.setObjectName(_fromUtf8("projectsList"))
-        self.label = QtGui.QLabel(serverConfigurationDialog)
-        self.label.setGeometry(QtCore.QRect(20, 60, 391, 20))
-        self.label.setObjectName(_fromUtf8("label"))
         self.cctrayUrlLabel = QtGui.QLabel(serverConfigurationDialog)
         self.cctrayUrlLabel.setGeometry(QtCore.QRect(20, 0, 161, 41))
         self.cctrayUrlLabel.setObjectName(_fromUtf8("cctrayUrlLabel"))
@@ -37,11 +34,11 @@ class Ui_serverConfigurationDialog(object):
         self.loadUrlButton.setAutoDefault(False)
         self.loadUrlButton.setObjectName(_fromUtf8("loadUrlButton"))
         self.submitButton = QtGui.QPushButton(serverConfigurationDialog)
-        self.submitButton.setGeometry(QtCore.QRect(340, 340, 81, 31))
+        self.submitButton.setGeometry(QtCore.QRect(340, 310, 81, 31))
         self.submitButton.setAutoDefault(False)
         self.submitButton.setObjectName(_fromUtf8("submitButton"))
         self.layoutWidget = QtGui.QWidget(serverConfigurationDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(20, 280, 401, 41))
+        self.layoutWidget.setGeometry(QtCore.QRect(20, 270, 401, 41))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.layoutWidget)
         self.horizontalLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
@@ -67,7 +64,6 @@ class Ui_serverConfigurationDialog(object):
         self.timezoneList.setMaximumSize(QtCore.QSize(200, 16777215))
         self.timezoneList.setObjectName(_fromUtf8("timezoneList"))
         self.horizontalLayout.addWidget(self.timezoneList)
-        self.label.setBuddy(self.projectsList)
         self.cctrayUrlLabel.setBuddy(self.addServerUrl)
         self.timezoneLabel.setBuddy(self.timezoneList)
 
@@ -81,7 +77,6 @@ class Ui_serverConfigurationDialog(object):
 
     def retranslateUi(self, serverConfigurationDialog):
         serverConfigurationDialog.setWindowTitle(QtGui.QApplication.translate("serverConfigurationDialog", "Add Server", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Select projects", None, QtGui.QApplication.UnicodeUTF8))
         self.cctrayUrlLabel.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Path to cctray.xml", None, QtGui.QApplication.UnicodeUTF8))
         self.loadUrlButton.setText(QtGui.QApplication.translate("serverConfigurationDialog", "Load", None, QtGui.QApplication.UnicodeUTF8))
         self.submitButton.setText(QtGui.QApplication.translate("serverConfigurationDialog", "OK", None, QtGui.QApplication.UnicodeUTF8))

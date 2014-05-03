@@ -16,6 +16,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.editable = editable
         self.ui.addServerUrl.setText(url)
         self.conf = conf
+        self.parent = QtGui.QStandardItem("All")
         timezones = QtCore.QStringList(pytz.all_timezones)
         self.ui.timezoneList.addItems(timezones)
 
@@ -45,13 +46,24 @@ class ServerConfigurationDialog(QtGui.QDialog):
         excluded_projects = self.conf.get_project_excludes(self.server_url())
 
         projects_model = QtGui.QStandardItemModel()
+        self.parent.setCheckable(True)
+        projects_model.itemChanged.connect(self.project_checked)
+        projects_model.setHorizontalHeaderLabels(['Select Projects'])
         for project in server.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
             check = Qt.Unchecked if project.name in excluded_projects else Qt.Checked
             item.setCheckState(check)
-            projects_model.appendRow(item)
+            self.parent.appendRow(item)
+        projects_model.appendRow(self.parent)
         self.ui.projectsList.setModel(projects_model)
+        self.ui.projectsList.expandToDepth(1)
+        self.ui.projectsList.setItemsExpandable(False)
+        self.ui.projectsList.setRootIsDecorated(False)
+
+    def project_checked(self, item):
+        if item == self.parent:
+            [self.parent.child(index, 0).setCheckState(self.parent.checkState()) for index in range(self.parent.rowCount())]
 
     def server_url(self):
         return str(self.ui.addServerUrl.text())
@@ -60,7 +72,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         projects_model = self.ui.projectsList.model()
         if projects_model is None:
             return self.server_url()
-        excluded_projects = [str(projects_model.index(index, 0).data().toString()) for index in range(projects_model.rowCount()) if projects_model.index(index, 0).data(Qt.CheckStateRole) == Qt.Unchecked]
+        excluded_projects = [str(projects_model.index(index, 0, self.parent.index()).data().toString()) for index in range(self.parent.rowCount()) if projects_model.index(index, 0, self.parent.index()).data(Qt.CheckStateRole) == Qt.Unchecked]
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
         self.conf.set_project_timezone(self.server_url(), self.ui.timezoneList.currentText())
         return self.server_url()

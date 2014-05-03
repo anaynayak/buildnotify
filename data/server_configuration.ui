@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>381</height>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Add Server</string>
   </property>
-  <widget class="QListView" name="projectsList">
+  <widget class="QTreeView" name="projectsList">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>80</y>
+     <y>70</y>
      <width>401</width>
      <height>191</height>
     </rect>
@@ -27,22 +27,6 @@
    </property>
    <property name="selectionMode">
     <enum>QAbstractItemView::NoSelection</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>391</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Select projects</string>
-   </property>
-   <property name="buddy">
-    <cstring>projectsList</cstring>
    </property>
   </widget>
   <widget class="QLabel" name="cctrayUrlLabel">
@@ -91,7 +75,7 @@
    <property name="geometry">
     <rect>
      <x>340</x>
-     <y>340</y>
+     <y>310</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -107,7 +91,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>280</y>
+     <y>270</y>
      <width>401</width>
      <height>41</height>
     </rect>
