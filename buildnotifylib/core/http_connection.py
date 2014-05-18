@@ -18,6 +18,8 @@ class HttpConnection:
         url_without_auth = urlparse.urlunparse((urlparts.scheme, host, urlparts.path, urlparts.params, urlparts.query, urlparts.fragment))
         headers = {'User-Agent': self.user_agent}
         if username is not None:
-            encodedstring = base64.encodestring("%s:%s" % (username, password))[:-1]
+            unquoted_username = urllib2.unquote(username)
+            unquoted_password = urllib2.unquote(password)
+            encodedstring = base64.encodestring("%s:%s" % (unquoted_username, unquoted_password))[:-1]
             headers["Authorization"] = "Basic %s" % encodedstring
         return urllib2.urlopen(urllib2.Request(url_without_auth, None, headers))
