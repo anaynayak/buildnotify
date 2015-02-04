@@ -8,7 +8,7 @@ class Config:
     CUSTOM_SCRIPT = "notifications/custom_script"
     SCRIPT_ENABLED = "notifications/custom_script_enabled"
     SORT_KEY = "sort_key"
-    INTERVAL_IN_MINUTES = "connection/interval_in_minutes"
+    INTERVAL_IN_SECONDS = "connection/interval_in_seconds"
     CONNECTION_URLS = "connection/urls"
     EXCLUDES = "excludes/%s"
     TIMEZONE = "timezone/%s"
@@ -20,7 +20,7 @@ class Config:
     def __init__(self):
         self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
         self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
-        self.interval = self.get_with_default(self.INTERVAL_IN_MINUTES, 2).toInt()[0]
+        self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
 
     def get_with_default(self, key, default):
         if str(self.settings.value(key, "notset").toString()) == "notset":
@@ -38,14 +38,14 @@ class Config:
     def get_urls(self):
         return self.settings.value(self.CONNECTION_URLS, QtCore.QStringList()).toStringList()
 
-    def set_interval(self, interval):
-        self.settings.setValue(self.INTERVAL_IN_MINUTES, interval)
+    def set_interval_in_seconds(self, interval):
+        self.settings.setValue(self.INTERVAL_IN_SECONDS, interval)
 
-    def get_interval(self):
-        return self.get_with_default(self.INTERVAL_IN_MINUTES, 2).toInt()[0]
+    def get_interval_in_seconds(self):
+        return self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
 
     def get_interval_in_millis(self):
-        return self.get_interval() * 1000 * 60
+        return self.get_interval_in_seconds() * 1000
 
     def get_value(self, key):
         return self.get_with_default(self.VALUES % key, self.default_options[key]).toBool()

@@ -312,7 +312,7 @@
          <bool>false</bool>
         </property>
         <property name="suffix">
-         <string> minutes</string>
+         <string> seconds</string>
         </property>
         <property name="minimum">
          <number>1</number>

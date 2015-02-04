@@ -32,7 +32,7 @@ class PreferencesDialog(QtGui.QDialog):
         for key, checkbox in self.checkboxes.iteritems():
             checkbox.setChecked(self.conf.get_value(str(key)))
 
-        self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval())
+        self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval_in_seconds())
         self.ui.scriptCheckbox.setChecked(self.conf.get_custom_script_enabled())
         self.ui.scriptLineEdit.setText(self.conf.get_custom_script())
         self.ui.sortBuildByLastBuildTime.setChecked(self.conf.get_sort_by_last_build_time())
@@ -70,7 +70,7 @@ class PreferencesDialog(QtGui.QDialog):
     def get_urls(self):
         return self.ui.cctrayPathList.model().stringList()
 
-    def get_interval(self):
+    def get_interval_in_seconds(self):
         return self.ui.pollingIntervalSpinBox.value()
 
     def get_selections(self):
@@ -78,7 +78,7 @@ class PreferencesDialog(QtGui.QDialog):
 
     def save(self):
         self.conf.update_urls(self.get_urls())
-        self.conf.set_interval(self.get_interval())
+        self.conf.set_interval_in_seconds(self.get_interval_in_seconds())
         self.conf.set_custom_script(self.ui.scriptLineEdit.text(), self.ui.scriptCheckbox.isChecked())
         self.conf.set_custom_script_enabled(self.ui.scriptCheckbox.isChecked())
         if self.ui.sortBuildByLastBuildTime.isChecked():

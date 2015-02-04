@@ -170,7 +170,7 @@ class Ui_Preferences(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), QtGui.QApplication.translate("Preferences", "Notifications", None, QtGui.QApplication.UnicodeUTF8))
         self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
         self.pollingIntervalLabel.setText(QtGui.QApplication.translate("Preferences", "Server polling interval", None, QtGui.QApplication.UnicodeUTF8))
-        self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " minutes", None, QtGui.QApplication.UnicodeUTF8))
+        self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " seconds", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_4.setTitle(QtGui.QApplication.translate("Preferences", "Build Sort order", None, QtGui.QApplication.UnicodeUTF8))
         self.sortBuildByName.setText(QtGui.QApplication.translate("Preferences", "Sort builds by name", None, QtGui.QApplication.UnicodeUTF8))
         self.sortBuildByLastBuildTime.setText(QtGui.QApplication.translate("Preferences", "Sort builds by last build time", None, QtGui.QApplication.UnicodeUTF8))
