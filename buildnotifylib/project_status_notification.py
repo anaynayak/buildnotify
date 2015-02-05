@@ -76,7 +76,7 @@ class ProjectStatus:
 
     def tuple_for(self, new_project):
         for project in self.old_projects:
-            if project.name == new_project.name:
+            if new_project.name == project.name and new_project.server_url == project.server_url:
                 return ProjectTuple(new_project, project)
         return ProjectTuple(new_project, None)
 
