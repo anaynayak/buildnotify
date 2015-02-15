@@ -11,12 +11,19 @@ class Project:
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
-        self.last_build_time = parse(props['lastBuildTime']).replace(tzinfo=None)
         self.url = props['url']
         self.server_url = props['server_url']
+        self.last_build_time = props['lastBuildTime']
+
 
     def get_build_status(self):
         return self.status + "." + self.activity
+
+    def different_builds(self, project):
+        return self.last_build_time != project.last_build_time
+
+    def get_last_build_time(self):
+        return parse(self.last_build_time).replace(tzinfo=None)
 
 
 class ContinuousIntegrationServer:
