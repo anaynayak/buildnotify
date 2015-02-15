@@ -14,13 +14,14 @@ class Project:
         self.url = props['url']
         self.server_url = props['server_url']
         self.last_build_time = props['lastBuildTime']
+        self.last_build_label = props.get('lastBuildLabel', None)
 
 
     def get_build_status(self):
         return self.status + "." + self.activity
 
     def different_builds(self, project):
-        return self.last_build_time != project.last_build_time
+        return self.last_build_label != project.last_build_label
 
     def get_last_build_time(self):
         return parse(self.last_build_time).replace(tzinfo=None)
@@ -126,6 +127,10 @@ class ProjectLoader:
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(
-                {'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'), 'activity': node.getAttribute('activity'), 'url': node.getAttribute('webUrl'),
-                 'lastBuildTime': node.getAttribute('lastBuildTime'), 'server_url': self.url}))  # WRONG
+                {
+                    'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'),
+                    'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),
+                    'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
+                    'server_url': self.url
+                }))  # WRONG
         return ContinuousIntegrationServer(self.url, projects)

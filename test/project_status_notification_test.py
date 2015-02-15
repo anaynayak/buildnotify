@@ -28,19 +28,19 @@ class ProjectStatusNotificationTest(unittest.TestCase):
         self.assertEquals("proj1", successful_builds[0])
 
     def test_should_identify_still_failing_builds(self):
-        old_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}),
-                        Project({'server_url': 'url', 'name': 'stillfailingbuild', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
-        new_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}),
-                        Project({'server_url': 'url', 'name': 'stillfailingbuild', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:47'})]
+        old_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '1', 'lastBuildTime': '2009-05-29T13:54:07'}),
+                        Project({'server_url': 'url', 'name': 'stillfailingbuild', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '10', 'lastBuildTime': '2009-05-29T13:54:37'})]
+        new_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '1', 'lastBuildTime': '2009-05-29T13:54:07'}),
+                        Project({'server_url': 'url', 'name': 'stillfailingbuild', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '11', 'lastBuildTime': '2009-05-29T13:54:47'})]
         still_failing_builds = self.build(old_projects, new_projects).still_failing_builds()
         self.assertEquals(1, len(still_failing_builds))
         self.assertEquals("stillfailingbuild", still_failing_builds[0])
 
     def test_should_identify_still_successful_builds(self):
-        old_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}),
-                        Project({'server_url': 'url', 'name': 'Successbuild', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:37'})]
-        new_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:07'}),
-                        Project({'server_url': 'url', 'name': 'Successbuild', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildTime': '2009-05-29T13:54:47'})]
+        old_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '1', 'lastBuildTime': '2009-05-29T13:54:07'}),
+                        Project({'server_url': 'url', 'name': 'Successbuild', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '10', 'lastBuildTime': '2009-05-29T13:54:37'})]
+        new_projects = [Project({'server_url': 'url', 'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '1', 'lastBuildTime': '2009-05-29T13:54:07'}),
+                        Project({'server_url': 'url', 'name': 'Successbuild', 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl', 'lastBuildLabel': '11', 'lastBuildTime': '2009-05-29T13:54:47'})]
         still_successful_builds = self.build(old_projects, new_projects).still_successful_builds()
         self.assertEquals(1, len(still_successful_builds))
         self.assertEquals("Successbuild", still_successful_builds[0])

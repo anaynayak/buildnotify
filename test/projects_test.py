@@ -27,6 +27,7 @@ class ProjectTest(unittest.TestCase):
             'lastBuildStatus': 'Success',
             'activity': 'Sleeping',
             'url': 'someurl',
+            'lastBuildLabel': '120',
             'lastBuildTime': '2009-05-29T13:54:07'
         })
 
@@ -36,6 +37,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEquals('someurl', project.url)
         self.assertEquals('Sleeping', project.activity)
         self.assertEquals('2009-05-29T13:54:07', project.last_build_time)
+        self.assertEquals('120', project.last_build_label)
         self.assertEquals(datetime.datetime(2009, 5, 29, 13, 54, 7), project.get_last_build_time())
 
 
