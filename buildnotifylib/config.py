@@ -12,6 +12,7 @@ class Config:
     CONNECTION_URLS = "connection/urls"
     EXCLUDES = "excludes/%s"
     TIMEZONE = "timezone/%s"
+    DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
 
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
@@ -63,6 +64,12 @@ class Config:
 
     def set_project_timezone(self, url, timezone):
         self.settings.setValue(self.TIMEZONE % url, timezone)
+
+    def set_display_prefix(self, url, prefix):
+        self.settings.setValue(self.DISPLAY_PREFIX % url, prefix)
+
+    def get_display_prefix(self, url):
+        return str(self.settings.value(self.DISPLAY_PREFIX % url).toString())
 
     def set_project_excludes(self, url, excluded_project_names):
         self.settings.setValue(self.EXCLUDES % url, excluded_project_names)

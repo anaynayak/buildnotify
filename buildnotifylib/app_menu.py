@@ -50,10 +50,11 @@ class AppMenu:
         sys.exit()
 
     def create_menu_item(self, label, icon, url, last_build_time, server_url):
-
         menu_item_label = label
+        if self.conf.get_display_prefix(server_url):
+            menu_item_label = "[" + self.conf.get_display_prefix(server_url) + "] " + menu_item_label
         if self.conf.get_value("lastBuildTimeForProject"):
-            menu_item_label = label + ", " + DistanceOfTime(last_build_time, self.conf.get_project_timezone(url, server_url)).age() + " ago"
+            menu_item_label = menu_item_label + ", " + DistanceOfTime(last_build_time, self.conf.get_project_timezone(url, server_url)).age() + " ago"
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)

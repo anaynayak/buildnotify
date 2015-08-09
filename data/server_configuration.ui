@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>350</height>
+    <width>439</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,7 +75,7 @@
    <property name="geometry">
     <rect>
      <x>340</x>
-     <y>310</y>
+     <y>350</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -147,6 +147,62 @@
         <width>200</width>
         <height>16777215</height>
        </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>310</y>
+     <width>401</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetFixedSize</enum>
+    </property>
+    <item>
+     <widget class="QLabel" name="displayPrefixLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>180</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>180</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Display prefix</string>
+      </property>
+      <property name="buddy">
+       <cstring>timezoneList</cstring>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="displayPrefix">
+      <property name="minimumSize">
+       <size>
+        <width>210</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="placeholderText">
+       <string>e.g. branch/release</string>
       </property>
      </widget>
     </item>

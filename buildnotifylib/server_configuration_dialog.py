@@ -21,7 +21,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.ui.timezoneList.addItems(timezones)
 
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.conf.get_timezone(self.server_url())))
-
+        self.ui.displayPrefix.setText(self.conf.get_display_prefix(self.server_url()))
         if not editable:
             self.auto_load()
         self.connect(self.ui.loadUrlButton, QtCore.SIGNAL("clicked()"), self.fetch_data)
@@ -75,5 +75,6 @@ class ServerConfigurationDialog(QtGui.QDialog):
         excluded_projects = [str(projects_model.index(index, 0, self.parent.index()).data().toString()) for index in range(self.parent.rowCount()) if projects_model.index(index, 0, self.parent.index()).data(Qt.CheckStateRole) == Qt.Unchecked]
         self.conf.set_project_excludes(self.server_url(), excluded_projects)
         self.conf.set_project_timezone(self.server_url(), self.ui.timezoneList.currentText())
+        self.conf.set_display_prefix(self.server_url(), self.ui.displayPrefix.text())
         return self.server_url()
 
