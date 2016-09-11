@@ -1,52 +1,11 @@
-from xml.dom import minidom
-from http_connection import HttpConnection
-from dateutil.parser import parse
-from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
+from PyQt4.QtCore import QThread
+from xml.dom import minidom
+
+from buildnotifylib.core.server import ContinuousIntegrationServer, FilteredContinuousIntegrationServer
+from buildnotifylib.core.project import Project
+from http_connection import HttpConnection
 from timed_event import BackgroundEvent
-
-
-class Project:
-    def __init__(self, props):
-        self.name = props['name']
-        self.status = props['lastBuildStatus']
-        self.activity = props['activity']
-        self.url = props['url']
-        self.server_url = props['server_url']
-        self.last_build_time = props['lastBuildTime']
-        self.last_build_label = props.get('lastBuildLabel', None)
-
-
-    def get_build_status(self):
-        return self.status + "." + self.activity
-
-    def different_builds(self, project):
-        return self.last_build_label != project.last_build_label
-
-    def get_last_build_time(self):
-        return parse(self.last_build_time).replace(tzinfo=None)
-
-
-class ContinuousIntegrationServer:
-    def __init__(self, url, projects, unavailable=False):
-        self.url = url
-        self.projects = projects
-        self.unavailable = unavailable
-
-    def get_projects(self):
-        return self.projects
-
-
-class FilteredContinuousIntegrationServer:
-    def __init__(self, server, filter_projects):
-        self.server = server
-        self.filter_projects = filter_projects
-        self.unavailable = server.unavailable
-        self.url = server.url
-
-    def get_projects(self):
-        return filter(lambda project: project.name not in self.filter_projects, self.server.get_projects())
-
 
 class OverallIntegrationStatus:
     def __init__(self, servers):
@@ -111,14 +70,15 @@ class ProjectsPopulator(QThread):
 
 
 class ProjectLoader:
-    def __init__(self, url, timeout):
+    def __init__(self, url, timeout, connection=HttpConnection()):
         self.url = url
         self.timeout = timeout
+        self.connection = connection
 
     def get_data(self):
         print "checking %s" % self.url
         try:
-            data = HttpConnection().connect(self.url, self.timeout)
+            data = self.connection.connect(self.url, self.timeout)
         except Exception, e:
             print e
             return ContinuousIntegrationServer(self.url, [], True)
