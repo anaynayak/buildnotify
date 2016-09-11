@@ -1,5 +1,5 @@
 from PyQt4 import QtCore
-
+from serverconfig import ServerConfig
 
 class Config:
     default_options = dict(successfulBuild=False, brokenBuild=True, fixedBuild=True, stillFailingBuild=True, connectivityIssues=True, lastBuildTimeForProject=True)
@@ -12,14 +12,16 @@ class Config:
     CONNECTION_URLS = "connection/urls"
     EXCLUDES = "excludes/%s"
     TIMEZONE = "timezone/%s"
+    USERNAME = "username/%s"
+    PASSWORD = "password/%s"
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
 
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
 
-    def __init__(self):
-        self.settings = QtCore.QSettings("BuildNotify", "BuildNotify")
+    def __init__(self, settings = QtCore.QSettings("BuildNotify", "BuildNotify")):
+        self.settings = settings
         self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
         self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
 
@@ -30,6 +32,8 @@ class Config:
 
     def add_server_url(self, url):
         urls = self.get_urls()
+        if url in urls:
+            return
         urls.append(url)
         self.update_urls(urls)
 
@@ -37,7 +41,7 @@ class Config:
         self.settings.setValue(self.CONNECTION_URLS, urls)
 
     def get_urls(self):
-        return self.settings.value(self.CONNECTION_URLS, QtCore.QStringList()).toStringList()
+        return [str(url) for url in self.settings.value(self.CONNECTION_URLS, QtCore.QStringList()).toStringList()]
 
     def set_interval_in_seconds(self, interval):
         self.settings.setValue(self.INTERVAL_IN_SECONDS, interval)
@@ -57,7 +61,7 @@ class Config:
     def get_timezone(self, url):
         return str(self.get_with_default(self.TIMEZONE % url, "US/Central").toString())
 
-    def get_project_timezone(self, url, server_url):
+    def get_project_timezone(self, url, server_url): #TODO: server_url and url ??
         # project level time zones can not be edited, so ditch the value
         # and just return the server's time zone
         return self.get_timezone(server_url)
@@ -102,3 +106,29 @@ class Config:
     def set_sort_by_name(self):
         self.settings.setValue(self.SORT_KEY, self.SORT_BY_NAME)
 
+    def set_username(self, url, username):
+        self.settings.setValue(self.USERNAME % url, username)
+
+    def get_username(self, url):
+        return str(self.settings.value(self.USERNAME % url).toString())
+
+    def set_password(self, url, password):
+        self.settings.setValue(self.PASSWORD % url, password)
+
+    def get_password(self, url):
+        return str(self.settings.value(self.PASSWORD % url).toString())
+
+    def save_server(self, server):
+        self.add_server_url(server.url)
+        self.set_project_excludes(server.url, server.excluded_projects)
+        self.set_project_timezone(server.url, server.timezone)
+        self.set_display_prefix(server.url, server.prefix)
+        self.set_username(server.url, server.username)
+        self.set_password(server.url, server.password)
+
+    def get_server(self, url):
+        return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url),
+                            self.get_display_prefix(url), self.get_username(url), self.get_password(url))
+
+    def get_servers(self):
+        return [self.get_server(url) for url in self.get_urls()]

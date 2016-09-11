@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created: Sat Apr 12 18:07:24 2014
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Sun Sep 11 11:36:31 2016
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_Preferences(object):
     def setupUi(self, Preferences):
@@ -120,9 +129,9 @@ class Ui_Preferences(object):
         self.pollingIntervalSpinBox.setMinimumSize(QtCore.QSize(130, 0))
         self.pollingIntervalSpinBox.setMaximumSize(QtCore.QSize(130, 16777215))
         self.pollingIntervalSpinBox.setWrapping(False)
-        self.pollingIntervalSpinBox.setMinimum(5)
-        self.pollingIntervalSpinBox.setMaximum(3600)
-        self.pollingIntervalSpinBox.setSingleStep(5)
+        self.pollingIntervalSpinBox.setMinimum(1)
+        self.pollingIntervalSpinBox.setMaximum(60)
+        self.pollingIntervalSpinBox.setSingleStep(1)
         self.pollingIntervalSpinBox.setObjectName(_fromUtf8("pollingIntervalSpinBox"))
         self.horizontalLayout_2.addWidget(self.pollingIntervalSpinBox)
         self.groupBox_4 = QtGui.QGroupBox(self.miscTab)
@@ -149,31 +158,31 @@ class Ui_Preferences(object):
         QtCore.QMetaObject.connectSlotsByName(Preferences)
 
     def retranslateUi(self, Preferences):
-        Preferences.setWindowTitle(QtGui.QApplication.translate("Preferences", "Preferences", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_2.setTitle(QtGui.QApplication.translate("Preferences", "Monitored servers", None, QtGui.QApplication.UnicodeUTF8))
-        self.addButton.setToolTip(QtGui.QApplication.translate("Preferences", "Add", None, QtGui.QApplication.UnicodeUTF8))
-        self.addButton.setText(QtGui.QApplication.translate("Preferences", "+", None, QtGui.QApplication.UnicodeUTF8))
-        self.removeButton.setToolTip(QtGui.QApplication.translate("Preferences", "Remove", None, QtGui.QApplication.UnicodeUTF8))
-        self.removeButton.setText(QtGui.QApplication.translate("Preferences", "-", None, QtGui.QApplication.UnicodeUTF8))
-        self.configureProjectButton.setText(QtGui.QApplication.translate("Preferences", "Configure", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.serversTab), QtGui.QApplication.translate("Preferences", "Servers", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox.setTitle(QtGui.QApplication.translate("Preferences", "Notification settings", None, QtGui.QApplication.UnicodeUTF8))
-        self.successfulBuildsCheckbox.setText(QtGui.QApplication.translate("Preferences", "successful builds", None, QtGui.QApplication.UnicodeUTF8))
-        self.brokenBuildsCheckbox.setText(QtGui.QApplication.translate("Preferences", "broken builds", None, QtGui.QApplication.UnicodeUTF8))
-        self.fixedBuildsCheckbox.setText(QtGui.QApplication.translate("Preferences", "fixed builds", None, QtGui.QApplication.UnicodeUTF8))
-        self.stillFailingBuildsCheckbox.setText(QtGui.QApplication.translate("Preferences", "still failing builds", None, QtGui.QApplication.UnicodeUTF8))
-        self.connectivityIssuesCheckbox.setText(QtGui.QApplication.translate("Preferences", "connectivity issues", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_3.setTitle(QtGui.QApplication.translate("Preferences", "Custom notifications", None, QtGui.QApplication.UnicodeUTF8))
-        self.scriptCheckbox.setText(QtGui.QApplication.translate("Preferences", "Execute script for notifications", None, QtGui.QApplication.UnicodeUTF8))
-        self.scriptLabel.setText(QtGui.QApplication.translate("Preferences", "Script", None, QtGui.QApplication.UnicodeUTF8))
-        self.scriptLineEdit.setToolTip(QtGui.QApplication.translate("Preferences", "#status# and #projects# would be replaced by the build status and projects respectively", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), QtGui.QApplication.translate("Preferences", "Notifications", None, QtGui.QApplication.UnicodeUTF8))
-        self.showLastBuildTimeCheckbox.setText(QtGui.QApplication.translate("Preferences", "show last build time for each project", None, QtGui.QApplication.UnicodeUTF8))
-        self.pollingIntervalLabel.setText(QtGui.QApplication.translate("Preferences", "Server polling interval", None, QtGui.QApplication.UnicodeUTF8))
-        self.pollingIntervalSpinBox.setSuffix(QtGui.QApplication.translate("Preferences", " seconds", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_4.setTitle(QtGui.QApplication.translate("Preferences", "Build Sort order", None, QtGui.QApplication.UnicodeUTF8))
-        self.sortBuildByName.setText(QtGui.QApplication.translate("Preferences", "Sort builds by name", None, QtGui.QApplication.UnicodeUTF8))
-        self.sortBuildByLastBuildTime.setText(QtGui.QApplication.translate("Preferences", "Sort builds by last build time", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), QtGui.QApplication.translate("Preferences", "Misc", None, QtGui.QApplication.UnicodeUTF8))
+        Preferences.setWindowTitle(_translate("Preferences", "Preferences", None))
+        self.groupBox_2.setTitle(_translate("Preferences", "Monitored servers", None))
+        self.addButton.setToolTip(_translate("Preferences", "Add", None))
+        self.addButton.setText(_translate("Preferences", "+", None))
+        self.removeButton.setToolTip(_translate("Preferences", "Remove", None))
+        self.removeButton.setText(_translate("Preferences", "-", None))
+        self.configureProjectButton.setText(_translate("Preferences", "Configure", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.serversTab), _translate("Preferences", "Servers", None))
+        self.groupBox.setTitle(_translate("Preferences", "Notification settings", None))
+        self.successfulBuildsCheckbox.setText(_translate("Preferences", "successful builds", None))
+        self.brokenBuildsCheckbox.setText(_translate("Preferences", "broken builds", None))
+        self.fixedBuildsCheckbox.setText(_translate("Preferences", "fixed builds", None))
+        self.stillFailingBuildsCheckbox.setText(_translate("Preferences", "still failing builds", None))
+        self.connectivityIssuesCheckbox.setText(_translate("Preferences", "connectivity issues", None))
+        self.groupBox_3.setTitle(_translate("Preferences", "Custom notifications", None))
+        self.scriptCheckbox.setText(_translate("Preferences", "Execute script for notifications", None))
+        self.scriptLabel.setText(_translate("Preferences", "Script", None))
+        self.scriptLineEdit.setToolTip(_translate("Preferences", "#status# and #projects# would be replaced by the build status and projects respectively", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), _translate("Preferences", "Notifications", None))
+        self.showLastBuildTimeCheckbox.setText(_translate("Preferences", "show last build time for each project", None))
+        self.pollingIntervalLabel.setText(_translate("Preferences", "Server polling interval", None))
+        self.pollingIntervalSpinBox.setSuffix(_translate("Preferences", " seconds", None))
+        self.groupBox_4.setTitle(_translate("Preferences", "Build Sort order", None))
+        self.sortBuildByName.setText(_translate("Preferences", "Sort builds by name", None))
+        self.sortBuildByLastBuildTime.setText(_translate("Preferences", "Sort builds by last build time", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), _translate("Preferences", "Misc", None))
 
 import icons_rc

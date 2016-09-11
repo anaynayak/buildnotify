@@ -58,32 +58,32 @@ class ProjectsPopulator(QThread):
 
     def process(self):
         overall_status = []
-        for url in self.config.get_urls():
-            overall_status.append(self.check_nodes(str(url)))
+        for server in self.config.get_servers():
+            overall_status.append(self.check_nodes(server))
         self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
 
     def run(self):
         self.process()
 
-    def check_nodes(self, url):
-        return FilteredContinuousIntegrationServer(ProjectLoader(url, self.config.timeout).get_data(), self.config.get_project_excludes(url))
+    def check_nodes(self, server):
+        return FilteredContinuousIntegrationServer(ProjectLoader(server, self.config.timeout).get_data(), server.excluded_projects)
 
 
 class ProjectLoader:
-    def __init__(self, url, timeout, connection=HttpConnection()):
-        self.url = url
+    def __init__(self, server, timeout, connection=HttpConnection()):
+        self.server = server
         self.timeout = timeout
         self.connection = connection
 
     def get_data(self):
-        print "checking %s" % self.url
+        print "checking %s" % self.server.url
         try:
-            data = self.connection.connect(self.url, self.timeout)
+            data = self.connection.connect(self.server, self.timeout)
         except Exception, e:
             print e
-            return ContinuousIntegrationServer(self.url, [], True)
+            return ContinuousIntegrationServer(self.server.url, [], True)
         dom = minidom.parse(data)
-        print "processed %s" % self.url
+        print "processed %s" % self.server.url
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(
@@ -91,6 +91,6 @@ class ProjectLoader:
                     'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'),
                     'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),
                     'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
-                    'server_url': self.url
+                    'server_url': self.server.url
                 }))  # WRONG
-        return ContinuousIntegrationServer(self.url, projects)
+        return ContinuousIntegrationServer(self.server.url, projects)

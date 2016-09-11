@@ -42,7 +42,7 @@ class PreferencesDialog(QtGui.QDialog):
         self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
-        server_configuration_dialog = ServerConfigurationDialog(True, self.addServerTemplateText, self.conf, self)
+        server_configuration_dialog = ServerConfigurationDialog(self.addServerTemplateText, self.conf, self)
         if server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
             url = server_configuration_dialog.save()
             urls = self.ui.cctrayPathList.model().stringList()
@@ -62,7 +62,7 @@ class PreferencesDialog(QtGui.QDialog):
         url = str(self.ui.cctrayPathList.selectionModel().currentIndex().data().toString())
         if not url:
             return
-        server_configuration_dialog = ServerConfigurationDialog(False, url, self.conf, self)
+        server_configuration_dialog = ServerConfigurationDialog(url, self.conf, self)
         if server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
             server_configuration_dialog.save()
 

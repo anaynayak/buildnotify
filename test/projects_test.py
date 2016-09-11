@@ -2,6 +2,7 @@ import unittest
 
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.core.server import ContinuousIntegrationServer
+from buildnotifylib.serverconfig import ServerConfig
 from project_builder import ProjectBuilder
 from cStringIO import StringIO
 
@@ -39,13 +40,13 @@ class ProjectLoaderTest(unittest.TestCase):
         class MockConnection:
             def __init__(self):
                 pass
-            def connect(self, url, timeout):
+            def connect(self, server, timeout):
                 return StringIO("""<?xml version="1.0" encoding="UTF-8"?>
                                         <Projects>
                                             <Project name="project" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/>
                                         </Projects>
 """)
-        server = ProjectLoader("url", 10, MockConnection()).get_data()
+        server = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
         projects = server.get_projects()
         self.assertEquals(1, len(projects))
         self.assertEquals("project", projects[0].name)
