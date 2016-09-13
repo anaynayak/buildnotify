@@ -46,13 +46,13 @@ class ProjectLoaderTest(unittest.TestCase):
                                             <Project name="project" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/>
                                         </Projects>
 """)
-        server = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
-        projects = server.get_projects()
+        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
+        projects = response.server.get_projects()
         self.assertEquals(1, len(projects))
         self.assertEquals("project", projects[0].name)
         self.assertEquals("Sleeping", projects[0].activity)
         self.assertEquals("Success", projects[0].status)
-        self.assertEquals(False, server.unavailable)
+        self.assertEquals(False, response.server.unavailable)
 
 if __name__ == '__main__':
     unittest.main()
