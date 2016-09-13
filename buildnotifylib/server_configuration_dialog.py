@@ -19,7 +19,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.parent = QtGui.QStandardItem("All")
         timezones = QtCore.QStringList(pytz.all_timezones)
         self.ui.timezoneList.addItems(timezones)
-        self.server = conf.get_server(url)
+        self.server = conf.get_server_config(url)
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.server.timezone))
         self.ui.displayPrefix.setText(self.server.prefix)
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
@@ -37,15 +37,19 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.project_loader = ProjectLoader(self.get_server_config(), self.conf.timeout)
         return self.project_loader.get_data()
 
-    def load_data(self, server):
+    def load_data(self, response):
         self.ui.loadUrlButton.setEnabled(True)
+        if response.failed():
+            QtGui.QMessageBox.critical(self, "Failed to fetch projects", "<b>Fetch failed with error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
+            return
+
         self.ui.stackedWidget.setCurrentIndex(1)
         projects_model = QtGui.QStandardItemModel()
         projects_model.itemChanged.connect(self.project_checked)
         projects_model.setHorizontalHeaderLabels(['Select Projects'])
         self.parent = QtGui.QStandardItem("All")
         self.parent.setCheckable(True)
-        for project in server.projects:
+        for project in response.server.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
             check = Qt.Unchecked if project.name in self.server.excluded_projects else Qt.Checked
@@ -70,5 +74,5 @@ class ServerConfigurationDialog(QtGui.QDialog):
         return ServerConfig(self.server_url(), excluded_projects, self.ui.timezoneList.currentText(), self.ui.displayPrefix.text(), self.ui.username.text(), self.ui.password.text())
 
     def save(self):
-        self.conf.save_server(self.get_server_config())
+        self.conf.save_server_config(self.get_server_config())
         return self.server_url()

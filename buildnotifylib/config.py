@@ -118,7 +118,7 @@ class Config:
     def get_password(self, url):
         return str(self.settings.value(self.PASSWORD % url).toString())
 
-    def save_server(self, server):
+    def save_server_config(self, server):
         self.add_server_url(server.url)
         self.set_project_excludes(server.url, server.excluded_projects)
         self.set_project_timezone(server.url, server.timezone)
@@ -126,9 +126,9 @@ class Config:
         self.set_username(server.url, server.username)
         self.set_password(server.url, server.password)
 
-    def get_server(self, url):
+    def get_server_config(self, url):
         return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url),
                             self.get_display_prefix(url), self.get_username(url), self.get_password(url))
 
-    def get_servers(self):
-        return [self.get_server(url) for url in self.get_urls()]
+    def get_server_configs(self):
+        return [self.get_server_config(url) for url in self.get_urls()]

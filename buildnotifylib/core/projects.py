@@ -6,6 +6,7 @@ from buildnotifylib.core.server import ContinuousIntegrationServer, FilteredCont
 from buildnotifylib.core.project import Project
 from http_connection import HttpConnection
 from timed_event import BackgroundEvent
+from response import Response
 
 class OverallIntegrationStatus:
     def __init__(self, servers):
@@ -58,15 +59,16 @@ class ProjectsPopulator(QThread):
 
     def process(self):
         overall_status = []
-        for server in self.config.get_servers():
-            overall_status.append(self.check_nodes(server))
+        for server_config in self.config.get_server_configs():
+            overall_status.append(self.check_nodes(server_config))
         self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
 
     def run(self):
         self.process()
 
-    def check_nodes(self, server):
-        return FilteredContinuousIntegrationServer(ProjectLoader(server, self.config.timeout).get_data(), server.excluded_projects)
+    def check_nodes(self, server_config):
+        response = ProjectLoader(server_config, self.config.timeout).get_data()
+        return FilteredContinuousIntegrationServer(response.server, server_config.excluded_projects)
 
 
 class ProjectLoader:
@@ -81,7 +83,7 @@ class ProjectLoader:
             data = self.connection.connect(self.server, self.timeout)
         except Exception, e:
             print e
-            return ContinuousIntegrationServer(self.server.url, [], True)
+            return Response(ContinuousIntegrationServer(self.server.url, [], True), e)
         dom = minidom.parse(data)
         print "processed %s" % self.server.url
         projects = []
@@ -93,4 +95,4 @@ class ProjectLoader:
                     'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
                     'server_url': self.server.url
                 }))  # WRONG
-        return ContinuousIntegrationServer(self.server.url, projects)
+        return Response(ContinuousIntegrationServer(self.server.url, projects))

@@ -21,8 +21,8 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals([], self.config.get_project_excludes('http://bitbucket.org/Anay/buildnotify/buildnotify.xml'))
 
     def test_should_store_server_preferences(self):
-        self.config.save_server(ServerConfig('http://bitbucket.org/Anay/buildnotify/cctray.xml', ['excludedproject'], 'EDT', 'prefix', 'user', 'pass'))
-        server = self.config.get_server("http://bitbucket.org/Anay/buildnotify/cctray.xml")
+        self.config.save_server_config(ServerConfig('http://bitbucket.org/Anay/buildnotify/cctray.xml', ['excludedproject'], 'EDT', 'prefix', 'user', 'pass'))
+        server = self.config.get_server_config("http://bitbucket.org/Anay/buildnotify/cctray.xml")
         self.assertEquals('user', server.username)
         self.assertEquals('pass', server.password)
         self.assertEquals("http://bitbucket.org/Anay/buildnotify/cctray.xml", server.url)
@@ -32,13 +32,13 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals(["http://bitbucket.org/Anay/buildnotify/cctray.xml"], self.config.get_urls())
 
     def test_should_get_empty_if_missing(self):
-        server = self.config.get_server('someurl')
+        server = self.config.get_server_config('someurl')
         self.assertEquals('', server.username)
 
     def test_should_return_all_servers(self):
-        self.config.save_server(ServerConfig('url1', [], 'EDT', 'prefix', 'user', 'pass'))
-        self.config.save_server(ServerConfig('url2', [], 'EDT', 'prefix', 'user', 'pass'))
-        servers = self.config.get_servers()
+        self.config.save_server_config(ServerConfig('url1', [], 'EDT', 'prefix', 'user', 'pass'))
+        self.config.save_server_config(ServerConfig('url2', [], 'EDT', 'prefix', 'user', 'pass'))
+        servers = self.config.get_server_configs()
         self.assertEquals(2, len(servers))
         self.assertEquals('url1', servers[0].url)
         self.assertEquals('url2', servers[1].url)
