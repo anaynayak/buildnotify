@@ -71,7 +71,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
     def get_server_config(self):
         projects_model = self.ui.projectsList.model()
         excluded_projects = [str(projects_model.index(index, 0, self.parent.index()).data().toString()) for index in range(self.parent.rowCount()) if projects_model.index(index, 0, self.parent.index()).data(Qt.CheckStateRole) == Qt.Unchecked]
-        return ServerConfig(self.server_url(), excluded_projects, self.ui.timezoneList.currentText(), self.ui.displayPrefix.text(), self.ui.username.text(), self.ui.password.text())
+        return ServerConfig(self.server_url(), excluded_projects, str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()), str(self.ui.username.text()), str(self.ui.password.text()))
 
     def save(self):
         self.conf.save_server_config(self.get_server_config())

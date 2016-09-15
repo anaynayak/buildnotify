@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y ubuntu-desktop xinit unity
-     sudo apt-get install -y python-qt4 qt4-dev-tools python-tz python-dateutil pyqt4-dev-tools python-support python-pip
+     sudo apt-get install -y python-qt4 qt4-dev-tools python-tz python-dateutil pyqt4-dev-tools python-support python-pip python-keyring
      sudo pip install paver
      sudo apt-get install python-nose
   SHELL

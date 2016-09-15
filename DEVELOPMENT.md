@@ -1,4 +1,3 @@
-
 Local setup:
 
 Virtualbox + Ubuntu Precise
@@ -7,7 +6,7 @@ Dependencies for running application and build script:
 
 ```
 sudo apt-get update
-sudo apt-get install python-qt4 qt4-dev-tools python-tz python-dateutil pyqt4-dev-tools python-support
+sudo apt-get install python-qt4 qt4-dev-tools python-tz python-dateutil pyqt4-dev-tools python-support python-keyring
 sudo pip install paver
 ```
 

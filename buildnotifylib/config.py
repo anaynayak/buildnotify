@@ -1,5 +1,6 @@
 from PyQt4 import QtCore
 from serverconfig import ServerConfig
+from core.keystore import Keystore
 
 class Config:
     default_options = dict(successfulBuild=False, brokenBuild=True, fixedBuild=True, stillFailingBuild=True, connectivityIssues=True, lastBuildTimeForProject=True)
@@ -22,6 +23,7 @@ class Config:
 
     def __init__(self, settings = QtCore.QSettings("BuildNotify", "BuildNotify")):
         self.settings = settings
+        self.keystore = Keystore()
         self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
         self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
 
@@ -112,11 +114,11 @@ class Config:
     def get_username(self, url):
         return str(self.settings.value(self.USERNAME % url).toString())
 
-    def set_password(self, url, password):
-        self.settings.setValue(self.PASSWORD % url, password)
+    def set_password(self, url, username, password):
+        self.keystore.save(url, username, password)
 
-    def get_password(self, url):
-        return str(self.settings.value(self.PASSWORD % url).toString())
+    def get_password(self, url, username):
+        return self.keystore.load(url, username) or ''
 
     def save_server_config(self, server):
         self.add_server_url(server.url)
@@ -124,11 +126,12 @@ class Config:
         self.set_project_timezone(server.url, server.timezone)
         self.set_display_prefix(server.url, server.prefix)
         self.set_username(server.url, server.username)
-        self.set_password(server.url, server.password)
+        self.set_password(server.url, server.username, server.password)
 
     def get_server_config(self, url):
+        username = self.get_username(url)
         return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url),
-                            self.get_display_prefix(url), self.get_username(url), self.get_password(url))
+                            self.get_display_prefix(url), username, self.get_password(url, username))
 
     def get_server_configs(self):
         return [self.get_server_config(url) for url in self.get_urls()]
