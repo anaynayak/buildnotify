@@ -8,26 +8,28 @@ from preferences import PreferencesDialog
 from version import VERSION
 
 
-class AppMenu:
-    def __init__(self, app, tray, widget, conf, build_icons):
+class AppMenu(QtCore.QObject):
+    reload_data = QtCore.pyqtSignal()
+
+    def __init__(self, widget, conf, build_icons):
+        super(AppMenu, self).__init__(widget)
         self.menu = QtGui.QMenu(widget)
-        tray.setContextMenu(self.menu)
         self.conf = conf
-        self.app = app
         self.build_icons = build_icons
         self.create_default_menu_items()
 
     def update(self, projects):
-        projects.sort(key=self.sort_key)
         self.menu.clear()
-        for project in projects:
-            self.create_menu_item(project.name, self.build_icons.for_status(project.get_build_status()), project.url, project.get_last_build_time(), project.server_url)
+        for project in self.sorted_projects(projects):
+            icon = self.build_icons.for_status(project.get_build_status())
+            self.create_menu_item(project.name, icon, project.url, project.get_last_build_time(),
+                                  project.server_url)
         self.create_default_menu_items()
 
-    def sort_key(self, p):
+    def sorted_projects(self, projects):
         if self.conf.get_sort_by_name():
-            return p.name
-        return p.get_last_build_time()
+            return sorted(projects, key=lambda p: p.name)
+        return sorted(projects, key=lambda p: p.get_last_build_time(), reverse=True)
 
     def create_default_menu_items(self):
         self.menu.addSeparator()
@@ -44,7 +46,7 @@ class AppMenu:
         self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
         if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
             self.preferences_dialog.save()
-            self.app.emit(QtCore.SIGNAL('reload_project_data'))
+            self.reload_data.emit()
 
     def exit(self, widget):
         sys.exit()

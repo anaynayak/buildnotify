@@ -1,4 +1,4 @@
 #!/usr/bin/env python
 import buildnotifylib
 
-buildnotifylib.BuildNotify()
+buildnotifylib.BuildNotify.start()

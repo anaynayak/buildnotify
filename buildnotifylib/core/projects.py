@@ -46,6 +46,8 @@ class OverallIntegrationStatus:
 
 
 class ProjectsPopulator(QThread):
+    updated_projects = QtCore.pyqtSignal(object)
+
     def __init__(self, config, parent=None):
         QThread.__init__(self, parent)
         self.config = config
@@ -61,7 +63,7 @@ class ProjectsPopulator(QThread):
         overall_status = []
         for server_config in self.config.get_server_configs():
             overall_status.append(self.check_nodes(server_config))
-        self.emit(QtCore.SIGNAL('updated_projects'), OverallIntegrationStatus(overall_status))
+        self.updated_projects.emit(OverallIntegrationStatus(overall_status))
 
     def run(self):
         self.process()

@@ -1,16 +1,21 @@
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 from time import strftime
 from app_menu import AppMenu
 
 
-class AppUi:
-    def __init__(self, app, conf, build_icons):
+class AppUi(QtCore.QObject):
+    reload_data = QtCore.pyqtSignal()
+
+    def __init__(self, parent, conf, build_icons):
+        super(AppUi, self).__init__(parent)
         self.widget = QtGui.QWidget()
-        self.app = app
         self.build_icons = build_icons
         self.tray = QtGui.QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
         self.tray.show()
-        self.app_menu = AppMenu(self.app, self.tray, self.widget, conf, self.build_icons);
+        self.app_menu = AppMenu(self.widget, conf, self.build_icons)
+        self.app_menu.reload_data.connect(self.reload_data)
+        self.tray.setContextMenu(self.app_menu.menu)
 
     def update_projects(self, integration_status):
         count = str(len(integration_status.get_failing_builds()))

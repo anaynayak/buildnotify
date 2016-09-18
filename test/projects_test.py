@@ -54,5 +54,16 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEquals("Success", projects[0].status)
         self.assertEquals(False, response.server.unavailable)
 
+    def test_should_respond_even_if_things_fail(self):
+        class MockConnection:
+            def __init__(self):
+                pass
+            def connect(self, server, timeout):
+                raise Exception("something went wrong")
+        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
+        projects = response.server.get_projects()
+        self.assertEquals(0, len(projects))
+        self.assertEquals(True, response.server.unavailable)
+
 if __name__ == '__main__':
     unittest.main()

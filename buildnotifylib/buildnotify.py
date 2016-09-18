@@ -1,29 +1,24 @@
 import sys
 
-from app_ui import AppUi
+from PyQt4 import QtGui
 
 from app_notification import AppNotification
-
-from config import Config
-
-from buildnotifylib.core.projects import ProjectsPopulator
-
-from PyQt4 import QtGui, QtCore
+from app_ui import AppUi
 from build_icons import BuildIcons
+from buildnotifylib.core.projects import ProjectsPopulator
 from buildnotifylib.core.timed_event import TimedEvent, RepeatTimedEvent
+from config import Config
 
 
 class BuildNotify:
-    def __init__(self):
-        self.conf = Config()
-        self.app = QtGui.QApplication(sys.argv)
+    def __init__(self, app, conf=Config(), interval=2000):
+        self.conf = conf
         self.build_icons = BuildIcons()
+        self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
-        self.app.setQuitOnLastWindowClosed(False)
         self.ready = False
-        self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, 5)
+        self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, 5, interval)
         self.timed_event.start()
-        sys.exit(self.app.exec_())
 
     def delayed_start(self, event_count):
         if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
@@ -37,9 +32,9 @@ class BuildNotify:
 
     def run_app(self):
         self.projects_populator = ProjectsPopulator(self.conf, self.app)
-        self.app.connect(self.projects_populator, QtCore.SIGNAL('updated_projects'), self.update_projects)
-        self.app.connect(self.app, QtCore.SIGNAL('reload_project_data'), self.reload_project_data)
+        self.projects_populator.updated_projects.connect(self.update_projects)
         self.app_ui = AppUi(self.app, self.conf, self.build_icons)
+        self.app_ui.reload_data.connect(self.reload_project_data)
         self.app_notification = AppNotification(self.conf, self.app_ui.tray)
         self.auto_poll()
 
@@ -60,6 +55,13 @@ class BuildNotify:
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
+    @classmethod
+    def start(cls):
+        app = QtGui.QApplication(sys.argv)
+        app.setQuitOnLastWindowClosed(False)
+        b = BuildNotify(app)
+        sys.exit(b.app.exec_())
+
 
 if __name__ == '__main__':
-    BuildNotify()
+    BuildNotify.start()

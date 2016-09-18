@@ -1,5 +1,5 @@
 from dateutil.parser import parse
-
+from datetime import datetime
 
 class Project:
     def __init__(self, props):
@@ -18,4 +18,6 @@ class Project:
         return self.last_build_label != project.last_build_label
 
     def get_last_build_time(self):
+        if len(self.last_build_time)==0:
+            return datetime.now()
         return parse(self.last_build_time).replace(tzinfo=None)
