@@ -15,6 +15,7 @@ class Config:
     TIMEZONE = "timezone/%s"
     USERNAME = "username/%s"
     PASSWORD = "password/%s"
+    SKIP_SSL_VERIFICATION = "skip_ssl_verification/%s"
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
 
@@ -120,6 +121,12 @@ class Config:
     def get_password(self, url, username):
         return self.keystore.load(url, username) or ''
 
+    def set_skip_ssl_verification(self, url, skip_ssl_verification):
+        self.settings.setValue(self.SKIP_SSL_VERIFICATION % url, skip_ssl_verification)
+
+    def get_skip_ssl_verification(self, url):
+        return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False).toBool()
+
     def save_server_config(self, server):
         self.add_server_url(server.url)
         self.set_project_excludes(server.url, server.excluded_projects)
@@ -127,11 +134,13 @@ class Config:
         self.set_display_prefix(server.url, server.prefix)
         self.set_username(server.url, server.username)
         self.set_password(server.url, server.username, server.password)
+        self.set_skip_ssl_verification(server.url, server.skip_ssl_verification)
 
     def get_server_config(self, url):
         username = self.get_username(url)
         return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url),
-                            self.get_display_prefix(url), username, self.get_password(url, username))
+                            self.get_display_prefix(url), username, self.get_password(url, username),
+                            self.get_skip_ssl_verification(url))
 
     def get_server_configs(self):
         return [self.get_server_config(url) for url in self.get_urls()]

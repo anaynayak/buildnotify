@@ -26,6 +26,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.ui.username.setText(self.server.username)
         self.ui.password.setText(self.server.password)
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.skip_ssl_verification = False
 
     def fetch_data(self):
         self.ui.loadUrlButton.setEnabled(False)
@@ -40,7 +41,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
     def load_data(self, response):
         self.ui.loadUrlButton.setEnabled(True)
         if response.failed():
-            QtGui.QMessageBox.critical(self, "Failed to fetch projects", "<b>Fetch failed with error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
+            self.handle_errors(response)
             return
 
         self.ui.stackedWidget.setCurrentIndex(1)
@@ -61,6 +62,21 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.ui.projectsList.setItemsExpandable(False)
         self.ui.projectsList.setRootIsDecorated(False)
 
+    def handle_errors(self, response):
+        if response.ssl_error():
+            reply = QtGui.QMessageBox.question(self, "Failed to fetch projects",
+                                               "<b>SSL error, retry without verification?:</b> %s" % Qt.convertFromPlainText(str(response.error)),
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.Yes:
+                self.skip_ssl_verification = True
+                self.fetch_data()
+            return
+
+        if response.failed():
+            QtGui.QMessageBox.critical(self, "Failed to fetch projects",
+                                       "<b>Error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
+            return
+
     def project_checked(self, item):
         if item.hasChildren():
             [item.child(index, 0).setCheckState(item.checkState()) for index in range(item.rowCount())]
@@ -70,8 +86,15 @@ class ServerConfigurationDialog(QtGui.QDialog):
 
     def get_server_config(self):
         projects_model = self.ui.projectsList.model()
-        excluded_projects = [str(projects_model.index(index, 0, self.parent.index()).data().toString()) for index in range(self.parent.rowCount()) if projects_model.index(index, 0, self.parent.index()).data(Qt.CheckStateRole) == Qt.Unchecked]
-        return ServerConfig(self.server_url(), excluded_projects, str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()), str(self.ui.username.text()), str(self.ui.password.text()))
+
+        def project(i, model):
+            return model.index(i, 0, self.parent.index())
+
+        excluded_projects = [str(project(i, projects_model).data().toString()) for i in range(self.parent.rowCount()) if
+                             project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked]
+        return ServerConfig(self.server_url(), excluded_projects,
+                            str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()),
+                            str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification)
 
     def save(self):
         self.conf.save_server_config(self.get_server_config())
