@@ -5,9 +5,8 @@ from buildnotifylib.core.project import Project
 
 class ProjectTest(unittest.TestCase):
     def test_should_ignore_empty_last_build_time(self):
-        project = Project({
+        project = Project('i', None, {
             'lastBuildTime': '',
-            'server_url': 'i',
             'name': 'g',
             'lastBuildStatus': 'n',
             'activity': 'o',
@@ -16,8 +15,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEquals(datetime.datetime.now().date(), project.get_last_build_time().date())
 
     def test_should_correctly_parse_project(self):
-        project = Project({
-            'server_url': 'url',
+        project = Project('url', None, {
             'name': 'proj1',
             'lastBuildStatus': 'Success',
             'activity': 'Sleeping',

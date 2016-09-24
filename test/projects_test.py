@@ -65,5 +65,21 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEquals(0, len(projects))
         self.assertEquals(True, response.server.unavailable)
 
+    def test_should_set_display_prefix(self):
+        class MockConnection:
+            def __init__(self):
+                pass
+            def connect(self, server, timeout):
+                return StringIO("""<?xml version="1.0" encoding="UTF-8"?>
+                                        <Projects>
+                                            <Project name="project" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/>
+                                        </Projects>
+""")
+        response = ProjectLoader(ServerConfig('url', [], '', 'RELEASE', '', ''), 10, MockConnection()).get_data()
+        projects = response.server.get_projects()
+        self.assertEquals(1, len(projects))
+        self.assertEquals("[RELEASE] project", projects[0].label())
+
+
 if __name__ == '__main__':
     unittest.main()

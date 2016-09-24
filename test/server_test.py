@@ -1,7 +1,7 @@
 import unittest
 
-from buildnotifylib.core.project import Project
 from buildnotifylib.core.server import ContinuousIntegrationServer, FilteredContinuousIntegrationServer
+from test.project_builder import ProjectBuilder
 
 
 class FilteredContinuousIntegrationServerTest(unittest.TestCase):
@@ -10,8 +10,8 @@ class FilteredContinuousIntegrationServerTest(unittest.TestCase):
             def __missing__(self, key):
                 return key
 
-        project1 = Project(Attrs({'name': 'a'}))
-        project2 = Project(Attrs({'name': 'b'}))
+        project1 = ProjectBuilder(Attrs({'name': 'a'})).build()
+        project2 = ProjectBuilder(Attrs({'name': 'b'})).build()
         server = FilteredContinuousIntegrationServer(ContinuousIntegrationServer("someurl", [project1, project2]), ['a'])
         self.assertEquals([project2], server.get_projects())
 

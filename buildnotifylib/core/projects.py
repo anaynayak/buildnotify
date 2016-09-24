@@ -74,27 +74,28 @@ class ProjectsPopulator(QThread):
 
 
 class ProjectLoader:
-    def __init__(self, server, timeout, connection=HttpConnection()):
-        self.server = server
+    def __init__(self, server_config, timeout, connection=HttpConnection()):
+        self.server_config = server_config
         self.timeout = timeout
         self.connection = connection
 
     def get_data(self):
-        print "checking %s" % self.server.url
+        print "checking %s" % self.server_config.url
         try:
-            data = self.connection.connect(self.server, self.timeout)
+            data = self.connection.connect(self.server_config, self.timeout)
         except Exception, e:
             print e
-            return Response(ContinuousIntegrationServer(self.server.url, [], True), e)
+            return Response(ContinuousIntegrationServer(self.server_config.url, [], True), e)
         dom = minidom.parse(data)
-        print "processed %s" % self.server.url
+        print "processed %s" % self.server_config.url
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(
+                self.server_config.url,
+                self.server_config.prefix,
                 {
                     'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'),
                     'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),
-                    'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime'),
-                    'server_url': self.server.url
-                }))  # WRONG
-        return Response(ContinuousIntegrationServer(self.server.url, projects))
+                    'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')
+                }))
+        return Response(ContinuousIntegrationServer(self.server_config.url, projects))

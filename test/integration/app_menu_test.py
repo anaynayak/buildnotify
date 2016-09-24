@@ -20,9 +20,8 @@ def test_should_set_menu_items_for_projects(qtbot):
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': '2016-09-17 11:31:12',
-        'server_url': 'someurl'
-    }).build()
+        'lastBuildTime': '2016-09-17 11:31:12'
+    }).server('someurl').build()
     app_menu.update([project1])
     app_menu.menu.show()
 
@@ -105,18 +104,16 @@ def test_should_add_display_prefix(qtbot):
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': time,
-        'server_url': 'Server2'
-    }).build()
+        'lastBuildTime': time
+    }).server('Server2').build()
 
     project2 = ProjectBuilder({
         'name': 'AProject',
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': time,
-        'server_url': 'Server1'
-    }).build()
+        'lastBuildTime': time
+    }).server('Server1').build()
 
     app_menu.update([project1, project2])
     app_menu.menu.show()
