@@ -1,0 +1,13 @@
+image: ubuntu:16.04
+
+pipelines:
+  default:
+    - step:
+        script:
+          - apt-get update
+          - apt-get install -y python-qt4 python-keyring xvfb curl mercurial
+          - curl https://bootstrap.pypa.io/get-pip.py | python
+          - pip install -r test-requirements.txt
+          - pip install python-coveralls
+          - xvfb-run pytest -l --full-trace --cov-report= --cov=buildnotifylib
+          - coveralls
