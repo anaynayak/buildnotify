@@ -22,13 +22,13 @@ class AppMenu(QtCore.QObject):
         self.menu.clear()
         for project in self.sorted_projects(projects):
             icon = self.build_icons.for_status(project.get_build_status())
-            self.create_menu_item(project.name, icon, project.url, project.get_last_build_time(),
+            self.create_menu_item(project.label(), icon, project.url, project.get_last_build_time(),
                                   project.server_url)
         self.create_default_menu_items()
 
     def sorted_projects(self, projects):
         if self.conf.get_sort_by_name():
-            return sorted(projects, key=lambda p: p.name)
+            return sorted(projects, key=lambda p: p.label())
         return sorted(projects, key=lambda p: p.get_last_build_time(), reverse=True)
 
     def create_default_menu_items(self):
@@ -53,8 +53,6 @@ class AppMenu(QtCore.QObject):
 
     def create_menu_item(self, label, icon, url, last_build_time, server_url):
         menu_item_label = label
-        if self.conf.get_display_prefix(server_url):
-            menu_item_label = "[" + self.conf.get_display_prefix(server_url) + "] " + menu_item_label
         if self.conf.get_value("lastBuildTimeForProject"):
             menu_item_label = menu_item_label + ", " + DistanceOfTime(last_build_time, self.conf.get_project_timezone(url, server_url)).age() + " ago"
 

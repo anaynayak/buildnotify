@@ -93,8 +93,8 @@ def test_should_sort_by_name(qtbot):
 
 @pytest.mark.functional
 def test_should_add_display_prefix(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server("Server2", {
-        'display_prefix/Server2': 'R1'}).build()
+    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
+        "Server2").build()
     parent = QtGui.QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
@@ -105,7 +105,7 @@ def test_should_add_display_prefix(qtbot):
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
         'lastBuildTime': time
-    }).server('Server2').build()
+    }).server('Server2').prefix('R1').build()
 
     project2 = ProjectBuilder({
         'name': 'AProject',
@@ -118,8 +118,44 @@ def test_should_add_display_prefix(qtbot):
     app_menu.update([project1, project2])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['AProject', # Sort order doesnt consider prefix.
+    assert [str(a.text()) for a in app_menu.menu.actions()] == ['AProject',
                                                                 '[R1] BProject',
+                                                                "",
+                                                                "About",
+                                                                "Preferences",
+                                                                "Exit"]
+
+
+@pytest.mark.functional
+def test_should_consider_prefix_for_sorting(qtbot):
+    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
+        "Server2", {
+            'display_prefix/Server2': 'R1'}).build()
+    parent = QtGui.QWidget()
+    app_menu = AppMenu(parent, conf, BuildIcons())
+    qtbot.addWidget(parent)
+    time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
+    project1 = ProjectBuilder({
+        'name': 'BProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
+        'activity': 'Sleeping', 'lastBuildTime': time
+    }).server('Server2').prefix('R1').build()
+
+    project2 = ProjectBuilder({
+        'name': 'AProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
+        'activity': 'Sleeping', 'lastBuildTime': time
+    }).server('Server1').prefix('R2').build()
+
+    project3 = ProjectBuilder({
+        'name': 'CProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
+        'activity': 'Sleeping', 'lastBuildTime': time
+    }).server('Server1').prefix('R2').build()
+
+    app_menu.update([project1, project2, project3])
+    app_menu.menu.show()
+
+    assert [str(a.text()) for a in app_menu.menu.actions()] == ['[R1] BProject',
+                                                                '[R2] AProject',
+                                                                '[R2] CProject',
                                                                 "",
                                                                 "About",
                                                                 "Preferences",

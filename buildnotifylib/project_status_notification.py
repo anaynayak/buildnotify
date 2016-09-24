@@ -72,11 +72,11 @@ class ProjectStatus:
     def filter_all(self, filter_fn):
         project_tuples = map(lambda current_project: self.tuple_for(current_project), self.current_projects)
         project_tuples = filter(filter_fn, project_tuples)
-        return map(lambda project_tuple: project_tuple.current_project.name, project_tuples)
+        return map(lambda project_tuple: project_tuple.current_project.label(), project_tuples)
 
     def tuple_for(self, new_project):
         for project in self.old_projects:
-            if new_project.name == project.name and new_project.server_url == project.server_url:
+            if new_project.matches(project):
                 return ProjectTuple(new_project, project)
         return ProjectTuple(new_project, None)
 

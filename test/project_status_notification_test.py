@@ -119,6 +119,25 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertEquals(1, len(still_successful_builds))
         self.assertEquals("Successbuild", still_successful_builds[0])
 
+    def test_should_include_prefix_in_notification(self):
+        old_projects = [
+            ProjectBuilder(
+                {'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping',
+                 'url': 'someurl',
+                 'lastBuildTime': '2009-05-29T13:54:07'}).prefix('R1').build()]
+        new_projects = [
+            ProjectBuilder(
+                {'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping',
+                 'url': 'someurl',
+                 'lastBuildTime': '2009-05-29T13:54:07'}).prefix('R1').build(),
+            ProjectBuilder(
+                {'name': 'Successbuild', 'lastBuildStatus': 'Success',
+                 'activity': 'Sleeping', 'url': 'someurl',
+                 'lastBuildTime': '2009-05-29T13:54:47'}).prefix('R1').build()]
+        still_successful_builds = self.build(old_projects, new_projects).still_successful_builds()
+        self.assertEquals(1, len(still_successful_builds))
+        self.assertEquals("[R1] Successbuild", still_successful_builds[0])
+
     def build(self, old_projects, new_projects):
         return ProjectStatus(old_projects, new_projects)
 

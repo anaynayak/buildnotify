@@ -24,6 +24,9 @@ class Project:
     def different_builds(self, project):
         return self.last_build_label != project.last_build_label
 
+    def matches(self, other):
+        return other.name == self.name and other.server_url == self.server_url
+
     def get_last_build_time(self):
         if len(self.last_build_time) == 0:
             return datetime.now()
