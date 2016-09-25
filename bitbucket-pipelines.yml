@@ -9,5 +9,5 @@ pipelines:
           - curl https://bootstrap.pypa.io/get-pip.py | python
           - pip install -r test-requirements.txt
           - pip install python-coveralls
-          - xvfb-run pytest -l --full-trace --cov-report= --cov=buildnotifylib
+          - xvfb-run pytest -v -l --full-trace --cov-report= --cov=buildnotifylib
           - coveralls
