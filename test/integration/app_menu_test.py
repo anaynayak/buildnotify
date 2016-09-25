@@ -45,7 +45,7 @@ def test_should_suffix_build_time(qtbot):
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
         'lastBuildTime': oneYearAgo
-    }).build()
+    }).timezone('US/Central').build()
 
     app_menu.update([project1])
     app_menu.menu.show()

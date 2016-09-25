@@ -26,6 +26,9 @@ def test_should_show_configured_urls(qtbot):
     assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Checked
     assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
 
+    assert dialog.ui.timezoneList.currentText() == 'None'
+
+
 @pytest.mark.functional
 def test_should_exclude_projects(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
@@ -46,12 +49,15 @@ def test_should_exclude_projects(qtbot):
     assert [str(s) for s in config.excluded_projects] == ['cleanup-artifacts-B']
 
 
-
 @pytest.mark.functional
 def test_should_preload_info(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     url = "file://" + file
-    conf = ConfigBuilder().server(url, {"excludes/%s" % url: ['cleanup-artifacts-B']}).build()
+    conf = ConfigBuilder().server(url, {
+        "excludes/%s" % url: ['cleanup-artifacts-B'],
+        "timezone/%s" % url: 'US/Eastern',
+    }).build()
+
     dialog = ServerConfigurationDialog(url, conf)
     dialog.show()
     qtbot.addWidget(dialog)
@@ -64,6 +70,10 @@ def test_should_preload_info(qtbot):
     assert model.item(0, 0).child(0, 0).isCheckable() == True
     assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
     assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Unchecked
+    def timezone():
+        assert dialog.ui.timezoneList.count() > 100
+        assert dialog.ui.timezoneList.currentText() == 'US/Eastern'
+    qtbot.waitUntil(timezone)
 
 
 @pytest.mark.functional

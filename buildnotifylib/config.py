@@ -18,6 +18,7 @@ class Config:
     SKIP_SSL_VERIFICATION = "skip_ssl_verification/%s"
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
+    NONE_TIMEZONE = "None"
 
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
@@ -62,14 +63,10 @@ class Config:
         return self.settings.setValue(self.VALUES % key, value)
 
     def get_timezone(self, url):
-        return str(self.get_with_default(self.TIMEZONE % url, "US/Central").toString())
+        default = self.get_with_default(self.TIMEZONE % url, "None")
+        return str(default.toString())
 
-    def get_project_timezone(self, url, server_url): #TODO: server_url and url ??
-        # project level time zones can not be edited, so ditch the value
-        # and just return the server's time zone
-        return self.get_timezone(server_url)
-
-    def set_project_timezone(self, url, timezone):
+    def set_timezone(self, url, timezone):
         self.settings.setValue(self.TIMEZONE % url, timezone)
 
     def set_display_prefix(self, url, prefix):
@@ -127,14 +124,14 @@ class Config:
     def get_skip_ssl_verification(self, url):
         return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False).toBool()
 
-    def save_server_config(self, server):
-        self.add_server_url(server.url)
-        self.set_project_excludes(server.url, server.excluded_projects)
-        self.set_project_timezone(server.url, server.timezone)
-        self.set_display_prefix(server.url, server.prefix)
-        self.set_username(server.url, server.username)
-        self.set_password(server.url, server.username, server.password)
-        self.set_skip_ssl_verification(server.url, server.skip_ssl_verification)
+    def save_server_config(self, server_config):
+        self.add_server_url(server_config.url)
+        self.set_project_excludes(server_config.url, server_config.excluded_projects)
+        self.set_timezone(server_config.url, server_config.timezone)
+        self.set_display_prefix(server_config.url, server_config.prefix)
+        self.set_username(server_config.url, server_config.username)
+        self.set_password(server_config.url, server_config.username, server_config.password)
+        self.set_skip_ssl_verification(server_config.url, server_config.skip_ssl_verification)
 
     def get_server_config(self, url):
         username = self.get_username(url)

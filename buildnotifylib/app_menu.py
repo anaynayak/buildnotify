@@ -22,8 +22,7 @@ class AppMenu(QtCore.QObject):
         self.menu.clear()
         for project in self.sorted_projects(projects):
             icon = self.build_icons.for_status(project.get_build_status())
-            self.create_menu_item(project.label(), icon, project.url, project.get_last_build_time(),
-                                  project.server_url)
+            self.create_menu_item(project, icon)
         self.create_default_menu_items()
 
     def sorted_projects(self, projects):
@@ -51,14 +50,14 @@ class AppMenu(QtCore.QObject):
     def exit(self, widget):
         sys.exit()
 
-    def create_menu_item(self, label, icon, url, last_build_time, server_url):
-        menu_item_label = label
+    def create_menu_item(self, project, icon):
+        menu_item_label = project.label()
         if self.conf.get_value("lastBuildTimeForProject"):
-            menu_item_label = menu_item_label + ", " + DistanceOfTime(last_build_time, self.conf.get_project_timezone(url, server_url)).age() + " ago"
+            menu_item_label = menu_item_label + ", " + DistanceOfTime(project.get_last_build_time()).age() + " ago"
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)
-        receiver = lambda url=url: self.open_url(self, url)
+        receiver = lambda url=project.url: self.open_url(self, url)
         QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
 
     def open_url(self, something, url):

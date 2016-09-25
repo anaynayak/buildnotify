@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from buildnotifylib.core.timed_event import BackgroundEvent
 from buildnotifylib.core.projects import ProjectLoader
+from buildnotifylib.config import Config
 from serverconfig import ServerConfig
 
 
@@ -17,7 +18,9 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.ui.addServerUrl.setText(url)
         self.conf = conf
         self.parent = QtGui.QStandardItem("All")
-        timezones = QtCore.QStringList(pytz.all_timezones)
+        all_timezones = [Config.NONE_TIMEZONE]
+        all_timezones.extend(pytz.all_timezones)
+        timezones = QtCore.QStringList(all_timezones)
         self.ui.timezoneList.addItems(timezones)
         self.server = conf.get_server_config(url)
         self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.server.timezone))

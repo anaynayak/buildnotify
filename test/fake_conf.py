@@ -25,7 +25,7 @@ class ConfigBuilder:
         urls = self.conf.get('connection/urls', [])
         urls.append(url)
         self._merge({'connection/urls': urls})
-        self._merge({'display_prefix/%s' % url: "", 'timezone/%s' % url: "US/Central"})
+        self._merge({'display_prefix/%s' % url: ""})
         self._merge(overrides)
         return self
 

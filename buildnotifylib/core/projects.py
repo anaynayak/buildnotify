@@ -93,6 +93,7 @@ class ProjectLoader:
             projects.append(Project(
                 self.server_config.url,
                 self.server_config.prefix,
+                self.server_config.timezone,
                 {
                     'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'),
                     'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),

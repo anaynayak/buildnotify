@@ -1,11 +1,14 @@
-from dateutil.parser import parse
+import pytz
 from datetime import datetime
-
+from dateutil.parser import parse
+from buildnotifylib.config import Config
+from dateutil.tz import tzlocal
 
 class Project:
-    def __init__(self, server_url, prefix, props):
+    def __init__(self, server_url, prefix, timezone, props):
         self.server_url = server_url
         self.prefix = prefix
+        self.timezone = timezone
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
@@ -29,5 +32,11 @@ class Project:
 
     def get_last_build_time(self):
         if len(self.last_build_time) == 0:
-            return datetime.now()
-        return parse(self.last_build_time).replace(tzinfo=None)
+            return datetime.now(tzlocal())
+        if self.timezone == Config.NONE_TIMEZONE:
+            dt = parse(self.last_build_time)
+            if dt.tzinfo is None:
+                return dt.replace(tzinfo=tzlocal())
+            else:
+                return dt
+        return parse(self.last_build_time).replace(tzinfo=pytz.timezone(self.timezone))

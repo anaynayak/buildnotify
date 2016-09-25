@@ -1,4 +1,5 @@
 from buildnotifylib.core.project import Project
+from buildnotifylib.config import Config
 
 
 class ProjectBuilder:
@@ -6,6 +7,7 @@ class ProjectBuilder:
         self.attrs = attrs
         self.url = url
         self._prefix = prefix
+        self._timezone = Config.NONE_TIMEZONE
 
     def server(self, url):
         self.url = url
@@ -15,8 +17,12 @@ class ProjectBuilder:
         self._prefix = prefix
         return self
 
+    def timezone(self, timezone):
+        self._timezone = timezone
+        return self
+
     def build(self):
-        return Project(self.url, self._prefix, Attrs(self.attrs))
+        return Project(self.url, self._prefix, self._timezone, Attrs(self.attrs))
 
 
 class Attrs(dict):
