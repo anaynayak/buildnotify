@@ -1,5 +1,5 @@
-from PyQt4 import QtCore
-from PyQt4.QtCore import QThread
+from PyQt5 import QtCore
+from PyQt5.QtCore import QThread
 from xml.dom import minidom
 
 from buildnotifylib.core.server import ContinuousIntegrationServer, FilteredContinuousIntegrationServer

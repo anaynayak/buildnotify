@@ -1,4 +1,4 @@
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from serverconfig import ServerConfig
 from core.keystore import Keystore
 
@@ -26,13 +26,13 @@ class Config:
     def __init__(self, settings = QtCore.QSettings("BuildNotify", "BuildNotify")):
         self.settings = settings
         self.keystore = Keystore()
-        self.timeout = self.get_with_default("connection/timeout", 10).toDouble()[0]
-        self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
+        self.timeout = self.get_with_default("connection/timeout", 10, int)
+        self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60, int)
 
-    def get_with_default(self, key, default):
-        if str(self.settings.value(key, "notset").toString()) == "notset":
+    def get_with_default(self, key, default, usertype):
+        if self.settings.value(key, "notset") == "notset":
             self.settings.setValue(key, default)
-        return self.settings.value(key)
+        return self.settings.value(key, type=usertype)
 
     def add_server_url(self, url):
         urls = self.get_urls()
@@ -42,29 +42,30 @@ class Config:
         self.update_urls(urls)
 
     def update_urls(self, urls):
-        self.settings.setValue(self.CONNECTION_URLS, urls)
+        if urls:
+            self.settings.setValue(self.CONNECTION_URLS, urls)
 
     def get_urls(self):
-        return [str(url) for url in self.settings.value(self.CONNECTION_URLS, QtCore.QStringList()).toStringList()]
+        return [str(url) for url in self.settings.value(self.CONNECTION_URLS, [])]
 
     def set_interval_in_seconds(self, interval):
         self.settings.setValue(self.INTERVAL_IN_SECONDS, interval)
 
     def get_interval_in_seconds(self):
-        return self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60).toInt()[0]
+        default = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60, int)
+        return default
 
     def get_interval_in_millis(self):
         return self.get_interval_in_seconds() * 1000
 
     def get_value(self, key):
-        return self.get_with_default(self.VALUES % key, self.default_options[key]).toBool()
+        return self.get_with_default(self.VALUES % key, self.default_options[key], bool)
 
     def set_value(self, key, value):
         return self.settings.setValue(self.VALUES % key, value)
 
     def get_timezone(self, url):
-        default = self.get_with_default(self.TIMEZONE % url, "None")
-        return str(default.toString())
+        return self.get_with_default(self.TIMEZONE % url, "None", str)
 
     def set_timezone(self, url, timezone):
         self.settings.setValue(self.TIMEZONE % url, timezone)
@@ -73,13 +74,13 @@ class Config:
         self.settings.setValue(self.DISPLAY_PREFIX % url, prefix)
 
     def get_display_prefix(self, url):
-        return str(self.settings.value(self.DISPLAY_PREFIX % url).toString())
+        return self.settings.value(self.DISPLAY_PREFIX % url)
 
     def set_project_excludes(self, url, excluded_project_names):
         self.settings.setValue(self.EXCLUDES % url, excluded_project_names)
 
     def get_project_excludes(self, url):
-        return self.settings.value(self.EXCLUDES % url, QtCore.QStringList()).toStringList()
+        return self.settings.value(self.EXCLUDES % url, [])
 
     def set_custom_script(self, user_script, status):
         script = user_script if status else self.default_script
@@ -89,16 +90,16 @@ class Config:
         self.settings.setValue(self.SCRIPT_ENABLED, status)
 
     def get_custom_script(self):
-        return str(self.settings.value(self.CUSTOM_SCRIPT, self.default_script).toString())
+        return self.settings.value(self.CUSTOM_SCRIPT, self.default_script)
 
     def get_custom_script_enabled(self):
-        return self.settings.value(self.SCRIPT_ENABLED, False).toBool()
+        return self.settings.value(self.SCRIPT_ENABLED, False, bool)
 
     def get_sort_by_last_build_time(self):
-        return str(self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME).toString()) == self.SORT_BY_LAST_BUILD_TIME
+        return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME) == self.SORT_BY_LAST_BUILD_TIME
 
     def get_sort_by_name(self):
-        return str(self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME).toString()) == self.SORT_BY_NAME
+        return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME) == self.SORT_BY_NAME
 
     def set_sort_by_last_build_time(self):
         self.settings.setValue(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME)
@@ -110,7 +111,7 @@ class Config:
         self.settings.setValue(self.USERNAME % url, username)
 
     def get_username(self, url):
-        return str(self.settings.value(self.USERNAME % url).toString())
+        return self.settings.value(self.USERNAME % url, '')
 
     def set_password(self, url, username, password):
         self.keystore.save(url, username, password)
@@ -122,7 +123,7 @@ class Config:
         self.settings.setValue(self.SKIP_SSL_VERIFICATION % url, skip_ssl_verification)
 
     def get_skip_ssl_verification(self, url):
-        return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False).toBool()
+        return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False, bool)
 
     def save_server_config(self, server_config):
         self.add_server_url(server_config.url)

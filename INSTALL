@@ -1,3 +1,2 @@
 * LINUX	
-  Requires python-qt4, python-setuptools, pytz, python-dateutil, python-keyring
-  python setup.py install
+  Use setup.sh to install the required dependencies

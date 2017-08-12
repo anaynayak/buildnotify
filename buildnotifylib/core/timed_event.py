@@ -1,6 +1,5 @@
-from PyQt4 import QtCore
-from PyQt4.QtCore import QThread
-
+from PyQt5 import QtCore
+from PyQt5.QtCore import QThread, pyqtSignal
 
 class TimedEvent:
     def __init__(self, parent, event_target, interval=2000):
@@ -10,7 +9,7 @@ class TimedEvent:
 
     def start(self):
         self.timer = QtCore.QTimer()
-        self.parent.connect(self.timer, QtCore.SIGNAL('timeout()'), self.event_target)
+        self.timer.timeout.connect(self.event_target)
         self.timer.setInterval(self.interval)
         self.timer.setSingleShot(True)
         self.timer.start()
@@ -39,10 +38,12 @@ class RepeatTimedEvent:
 
 
 class BackgroundEvent(QThread):
+    completed = pyqtSignal('PyQt_PyObject')
+
     def __init__(self, task, parent=None):
         QThread.__init__(self, parent)
         self.task = task
 
     def run(self):
         data = self.task()
-        self.emit(QtCore.SIGNAL('complete'), data)
+        self.completed.emit(data)

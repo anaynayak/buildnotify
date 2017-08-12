@@ -1,4 +1,4 @@
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from buildnotifylib.config import Config
 
 
@@ -9,8 +9,8 @@ class FakeSettings:
     def setValue(self, key, val):
         self.hash[key] = val
 
-    def value(self, key, fallback=None):
-        return QtCore.QVariant(self.hash.get(key, fallback))
+    def value(self, key, fallback=None, type=None):
+        return self.hash.get(key, fallback)
 
 
 class ConfigBuilder:

@@ -1,8 +1,8 @@
 import pytz
 
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt
-from PyQt4 import QtGui
+from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QDialog, QMessageBox
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from buildnotifylib.core.timed_event import BackgroundEvent
 from buildnotifylib.core.projects import ProjectLoader
@@ -10,9 +10,9 @@ from buildnotifylib.config import Config
 from serverconfig import ServerConfig
 
 
-class ServerConfigurationDialog(QtGui.QDialog):
+class ServerConfigurationDialog(QDialog):
     def __init__(self, url, conf, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
         self.ui.addServerUrl.setText(url)
@@ -20,10 +20,9 @@ class ServerConfigurationDialog(QtGui.QDialog):
         self.parent = QtGui.QStandardItem("All")
         all_timezones = [Config.NONE_TIMEZONE]
         all_timezones.extend(pytz.all_timezones)
-        timezones = QtCore.QStringList(all_timezones)
-        self.ui.timezoneList.addItems(timezones)
+        self.ui.timezoneList.addItems(all_timezones)
         self.server = conf.get_server_config(url)
-        self.ui.timezoneList.setCurrentIndex(timezones.indexOf(self.server.timezone))
+        self.ui.timezoneList.setCurrentIndex(all_timezones.index(self.server.timezone))
         self.ui.displayPrefix.setText(self.server.prefix)
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
         self.ui.username.setText(self.server.username)
@@ -34,7 +33,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
     def fetch_data(self):
         self.ui.loadUrlButton.setEnabled(False)
         self.event = BackgroundEvent(self.load_projects, self)
-        self.connect(self.event, QtCore.SIGNAL('complete'), lambda data: self.load_data(data))
+        self.event.completed.connect(lambda data: self.load_data(data))
         self.event.start()
 
     def load_projects(self):
@@ -67,16 +66,16 @@ class ServerConfigurationDialog(QtGui.QDialog):
 
     def handle_errors(self, response):
         if response.ssl_error():
-            reply = QtGui.QMessageBox.question(self, "Failed to fetch projects",
+            reply = QMessageBox.question(self, "Failed to fetch projects",
                                                "<b>SSL error, retry without verification?:</b> %s" % Qt.convertFromPlainText(str(response.error)),
-                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-            if reply == QtGui.QMessageBox.Yes:
+                                               QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.Yes:
                 self.skip_ssl_verification = True
                 self.fetch_data()
             return
 
         if response.failed():
-            QtGui.QMessageBox.critical(self, "Failed to fetch projects",
+            QMessageBox.critical(self, "Failed to fetch projects",
                                        "<b>Error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
             return
 
@@ -93,7 +92,7 @@ class ServerConfigurationDialog(QtGui.QDialog):
         def project(i, model):
             return model.index(i, 0, self.parent.index())
 
-        excluded_projects = [str(project(i, projects_model).data().toString()) for i in range(self.parent.rowCount()) if
+        excluded_projects = [project(i, projects_model).data() for i in range(self.parent.rowCount()) if
                              project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked]
         return ServerConfig(self.server_url(), excluded_projects,
                             str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()),

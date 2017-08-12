@@ -1,14 +1,14 @@
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5.QtCore import QStringListModel
+from PyQt5.QtWidgets import QDialog
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from server_configuration_dialog import ServerConfigurationDialog
 
 
-class PreferencesDialog(QtGui.QDialog):
+class PreferencesDialog(QDialog):
     addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
 
     def __init__(self, conf, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QDialog.__init__(self, parent)
         self.conf = conf
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
@@ -17,13 +17,13 @@ class PreferencesDialog(QtGui.QDialog):
         self.set_values_from_config()
 
         # Connect up the buttons.
-        self.connect(self.ui.addButton, QtCore.SIGNAL("clicked()"), self.add_server)
-        self.connect(self.ui.removeButton, QtCore.SIGNAL("clicked()"), self.remove_element)
-        self.connect(self.ui.buttonBox, QtCore.SIGNAL("accepted()"), QtCore.SLOT("accept()"))
-        self.connect(self.ui.configureProjectButton, QtCore.SIGNAL("clicked()"), self.configure_projects)
+        self.ui.addButton.clicked.connect(self.add_server)
+        self.ui.removeButton.clicked.connect(self.remove_element)
+        self.ui.buttonBox.accepted.connect(self.accept)
+        self.ui.configureProjectButton.clicked.connect(self.configure_projects)
 
     def set_values_from_config(self):
-        self.cctray_urls_model = QtGui.QStringListModel(self.conf.get_urls())
+        self.cctray_urls_model = QStringListModel(self.conf.get_urls())
         self.ui.cctrayPathList.setModel(self.cctray_urls_model)
 
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
@@ -43,27 +43,27 @@ class PreferencesDialog(QtGui.QDialog):
 
     def add_server(self):
         self.server_configuration_dialog = ServerConfigurationDialog(self.addServerTemplateText, self.conf, self)
-        if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
+        if self.server_configuration_dialog.exec_() == QDialog.Accepted:
             url = self.server_configuration_dialog.save()
             urls = self.ui.cctrayPathList.model().stringList()
             urls.append(url)
-            self.cctray_urls_model = QtGui.QStringListModel(urls)
-            self.ui.cctrayPathList.setModel(self.cctray_urls_model)
+            self.cctrayUrlsModel = QStringListModel(urls)
+            self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
         urls = self.ui.cctrayPathList.model().stringList()
-        urls.removeAt(index.row())
-        self.cctray_urls_model = QtGui.QStringListModel(urls)
-        self.ui.cctrayPathList.setModel(self.cctray_urls_model)
+        urls.pop(index.row())
+        self.cctrayUrlsModel = QStringListModel(urls)
+        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
 
     def configure_projects(self):
-        url = str(self.ui.cctrayPathList.selectionModel().currentIndex().data().toString())
+        url = self.ui.cctrayPathList.selectionModel().currentIndex().data()
         if not url:
             return
         self.server_configuration_dialog = ServerConfigurationDialog(url, self.conf, self)
-        if self.server_configuration_dialog.exec_() == QtGui.QDialog.Accepted:
+        if self.server_configuration_dialog.exec_() == QDialog.Accepted:
             self.server_configuration_dialog.save()
 
 

@@ -2,7 +2,7 @@ try:
     import pynotify
 except ImportError:
     pass
-from PyQt4 import QtGui
+from PyQt5 import QtGui
 
 
 class Notification:

@@ -1,7 +1,8 @@
 import os
 
 import pytest
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QItemSelectionModel, Qt
 
 from buildnotifylib.preferences import PreferencesDialog
 from test.fake_conf import ConfigBuilder
@@ -31,7 +32,7 @@ def test_should_show_configure_notifications(qtbot):
     assert dialog.ui.scriptCheckbox.isChecked() == False
     assert dialog.ui.scriptLineEdit.text() == 'echo #status# #projects# >> /tmp/buildnotify.log'
 
-    qtbot.mouseClick(dialog.ui.successfulBuildsCheckbox, QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.successfulBuildsCheckbox, Qt.LeftButton)
     dialog.save()
 
     qtbot.waitUntil(lambda: conf.get_value("successfulBuild"))
@@ -46,7 +47,7 @@ def test_should_prefill_server_config(qtbot):
     dialog.show()
 
     index = dialog.ui.cctrayPathList.model().index(0, 0)
-    dialog.ui.cctrayPathList.selectionModel().select(index, QtGui.QItemSelectionModel.Select)
+    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
     dialog.item_selection_changed(True)
 
@@ -55,7 +56,7 @@ def test_should_prefill_server_config(qtbot):
 
     QtCore.QTimer.singleShot(500, close_dialog)
 
-    qtbot.mouseClick(dialog.ui.configureProjectButton, QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.configureProjectButton, Qt.LeftButton)
 
     assert dialog.server_configuration_dialog.ui.addServerUrl.text() == "file://" + file
 
@@ -69,11 +70,11 @@ def test_should_remove_configured_servers(qtbot):
     dialog.show()
 
     index = dialog.ui.cctrayPathList.model().index(0, 0)
-    dialog.ui.cctrayPathList.selectionModel().select(index, QtGui.QItemSelectionModel.Select)
+    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
     dialog.item_selection_changed(True)
 
-    qtbot.mouseClick(dialog.ui.removeButton, QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.removeButton, Qt.LeftButton)
 
     assert [str(s) for s in dialog.ui.cctrayPathList.model().stringList()] == []
 

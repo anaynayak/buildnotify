@@ -1,5 +1,6 @@
 import pytest
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QDialogButtonBox, QWidget
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -12,7 +13,7 @@ from test.project_builder import ProjectBuilder
 @pytest.mark.functional
 def test_should_set_menu_items_for_projects(qtbot):
     conf = ConfigBuilder().server('someurl').build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     project1 = ProjectBuilder({
@@ -35,10 +36,10 @@ def test_should_set_menu_items_for_projects(qtbot):
 @pytest.mark.functional
 def test_should_suffix_build_time(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': True}).build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    oneYearAgo = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
+    oneYearAgo = (datetime.now() - relativedelta(years=1, days=1)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'Project 1',
         'url': 'dummyurl',
@@ -60,7 +61,7 @@ def test_should_suffix_build_time(qtbot):
 @pytest.mark.functional
 def test_should_sort_by_name(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -95,7 +96,7 @@ def test_should_sort_by_name(qtbot):
 def test_should_add_display_prefix(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
         "Server2").build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -131,7 +132,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
         "Server2", {
             'display_prefix/Server2': 'R1'}).build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -165,7 +166,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
 @pytest.mark.functional
 def test_should_show_recent_build_first(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_build_time'}).build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     project1 = ProjectBuilder({
@@ -198,12 +199,12 @@ def test_should_show_recent_build_first(qtbot):
 @pytest.mark.functional
 def test_should_show_preferences(qtbot):
     conf = ConfigBuilder().build()
-    parent = QtGui.QWidget()
+    parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
 
     def close_dialog():
-        button = app_menu.preferences_dialog.ui.buttonBox.button(QtGui.QDialogButtonBox.Ok)
+        button = app_menu.preferences_dialog.ui.buttonBox.button(QDialogButtonBox.Ok)
         qtbot.mouseClick(button, QtCore.Qt.LeftButton)
 
     QtCore.QTimer.singleShot(500, close_dialog)

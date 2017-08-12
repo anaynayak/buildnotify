@@ -1,8 +1,8 @@
 import sys
 import webbrowser
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog, QMessageBox, QAction, QMenu
 from buildnotifylib.core.distance_of_time import DistanceOfTime
 from preferences import PreferencesDialog
 from version import VERSION
@@ -13,7 +13,7 @@ class AppMenu(QtCore.QObject):
 
     def __init__(self, widget, conf, build_icons):
         super(AppMenu, self).__init__(widget)
-        self.menu = QtGui.QMenu(widget)
+        self.menu = QMenu(widget)
         self.conf = conf
         self.build_icons = build_icons
         self.create_default_menu_items()
@@ -32,18 +32,18 @@ class AppMenu(QtCore.QObject):
 
     def create_default_menu_items(self):
         self.menu.addSeparator()
-        self.menu.addAction(QtGui.QAction("About", self.menu, triggered=self.about_clicked))
-        self.menu.addAction(QtGui.QAction("Preferences", self.menu, triggered=self.preferences_clicked))
-        self.menu.addAction(QtGui.QAction("Exit", self.menu, triggered=self.exit))
+        self.menu.addAction(QAction("About", self.menu, triggered=self.about_clicked))
+        self.menu.addAction(QAction("Preferences", self.menu, triggered=self.preferences_clicked))
+        self.menu.addAction(QAction("Exit", self.menu, triggered=self.exit))
 
     def about_clicked(self, widget):
-        QtGui.QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
-                                "<b>BuildNotify %s</b> has been developed using PyQt4 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
+        QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
+                                "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
                                 "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
         self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
-        if self.preferences_dialog.exec_() == QtGui.QDialog.Accepted:
+        if self.preferences_dialog.exec_() == QDialog.Accepted:
             self.preferences_dialog.save()
             self.reload_data.emit()
 
@@ -57,8 +57,7 @@ class AppMenu(QtCore.QObject):
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)
-        receiver = lambda url=project.url: self.open_url(self, url)
-        QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+        action.triggered.connect(self.open_url(project.url))
 
-    def open_url(self, something, url):
-        webbrowser.open(url)
+    def open_url(self, url):
+        return lambda: webbrowser.open(url)

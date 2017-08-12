@@ -1,7 +1,7 @@
 import unittest
 from buildnotifylib.config import Config
 from buildnotifylib.serverconfig import ServerConfig
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 class ConfigTest(unittest.TestCase):
     def setUp(self):
@@ -42,7 +42,6 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals(2, len(servers))
         self.assertEquals('url1', servers[0].url)
         self.assertEquals('url2', servers[1].url)
-
 
 if __name__ == '__main__':
     unittest.main()

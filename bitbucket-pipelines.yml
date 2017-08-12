@@ -3,9 +3,11 @@ image: ubuntu:16.04
 pipelines:
   default:
     - step:
+        caches:
+          - pip
         script:
           - apt-get update
-          - apt-get install -y python-qt4 python-keyring xvfb curl mercurial
+          - apt-get install -y python-pyqt5 python-keyring xvfb curl mercurial
           - curl https://bootstrap.pypa.io/get-pip.py | python
           - pip install -r test-requirements.txt
           - pip install python-coveralls

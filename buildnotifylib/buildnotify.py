@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
 
 from app_notification import AppNotification
 from app_ui import AppUi
@@ -21,9 +21,9 @@ class BuildNotify:
         self.timed_event.start()
 
     def delayed_start(self, event_count):
-        if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
+        if not QSystemTrayIcon.isSystemTrayAvailable():
             if event_count == 5:
-                QtGui.QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
+                QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
                 sys.exit(1)
             self.timed_event.start()
         if not self.ready:
@@ -57,7 +57,7 @@ class BuildNotify:
 
     @classmethod
     def start(cls):
-        app = QtGui.QApplication(sys.argv)
+        app = QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
         b = BuildNotify(app)
         sys.exit(b.app.exec_())

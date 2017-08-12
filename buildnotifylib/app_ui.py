@@ -1,5 +1,6 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QWidget, QSystemTrayIcon
+
 from time import strftime
 from app_menu import AppMenu
 
@@ -9,9 +10,9 @@ class AppUi(QtCore.QObject):
 
     def __init__(self, parent, conf, build_icons):
         super(AppUi, self).__init__(parent)
-        self.widget = QtGui.QWidget()
+        self.widget = QWidget()
         self.build_icons = build_icons
-        self.tray = QtGui.QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
+        self.tray = QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
         self.tray.show()
         self.app_menu = AppMenu(self.widget, conf, self.build_icons)
         self.app_menu.reload_data.connect(self.reload_data)

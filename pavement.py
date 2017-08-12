@@ -9,9 +9,9 @@ def clean():
 @task
 def mk_resources():
     """Regenerate source corresponding to icons/Qt designer files"""
-    sh('pyuic4 -o buildnotifylib/generated/preferences_ui.py data/preferences.ui')
-    sh('pyuic4 -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui')
-    sh('pyrcc4 data/icons.qrc -o buildnotifylib/generated/icons_rc.py')
+    sh('pyuic5 -o buildnotifylib/generated/preferences_ui.py data/preferences.ui')
+    sh('pyuic5 -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui')
+    sh('pyrcc5 data/icons.qrc -o buildnotifylib/generated/icons_rc.py')
 
 @task
 @needs('dist_pypi', 'dist_ppa')

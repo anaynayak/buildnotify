@@ -1,8 +1,9 @@
 import os
 
 import pytest
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import Qt
 from mock import ANY
 
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
@@ -83,8 +84,8 @@ def test_should_fail_for_bad_url(qtbot, mocker):
     dialog = ServerConfigurationDialog(url, conf)
     dialog.show()
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QtGui.QMessageBox, 'critical',
-                            return_value=QtGui.QMessageBox.No)
+    m = mocker.patch.object(QMessageBox, 'critical',
+                            return_value=QMessageBox.No)
 
     qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
 

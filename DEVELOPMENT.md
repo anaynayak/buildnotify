@@ -1,14 +1,7 @@
 Local setup:
 
-Virtualbox + Ubuntu Precise
-
-Dependencies for running application and build script:
-
-```
-sudo apt-get update
-sudo apt-get install python-qt4 qt4-dev-tools python-tz python-dateutil pyqt4-dev-tools python-support python-keyring
-sudo pip install paver
-```
+* Use Vagrantfile to launch a local VM
+* Alternatively, use dependencies specified in setup.sh to setup a local machine
 
 Complete list of available paver commands can be viewed by running @paver 
 
@@ -22,11 +15,3 @@ sudo pip install stdeb
 sudo apt-get install debhelper dput
 
 ```
-
-
-
-```
-cp NEW_ICON /usr/share/icons/hicolor/icon-success.svg
-sudo gtk-update-icon-cache /usr/share/icons/hicolor
-```
-

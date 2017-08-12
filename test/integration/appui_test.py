@@ -1,6 +1,6 @@
 import pytest
 import re
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
@@ -13,7 +13,7 @@ from test.project_builder import ProjectBuilder
 @pytest.mark.functional
 def test_should_update_tooltip_on_poll(qtbot):
     conf = ConfigBuilder().build()
-    widget = AppUi(QtGui.QWidget(), conf, BuildIcons())
+    widget = AppUi(QtWidgets.QWidget(), conf, BuildIcons())
     qtbot.addWidget(widget)
     project1 = ProjectBuilder({
         'name': 'a',
