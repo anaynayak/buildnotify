@@ -24,5 +24,5 @@ def test_should_consolidate_build_status(qtbot):
     def projects_loaded():
         assert len([str(a.text()) for a in b.app_ui.app_menu.menu.actions()]) == 11
     if QSystemTrayIcon.isSystemTrayAvailable():
-      qtbot.waitUntil(lambda: re.compile("Last checked.*").match(b.app_ui.tray.toolTip()) is not None)
+      qtbot.waitUntil(lambda: re.compile("Last checked.*").match(b.app_ui.tray.toolTip()) is not None, timeout=5000)
       qtbot.waitUntil(projects_loaded)
