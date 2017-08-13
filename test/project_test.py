@@ -31,12 +31,23 @@ class ProjectTest(unittest.TestCase):
         self.assertEquals('url', project.server_url)
         self.assertEquals('proj1', project.name)
         self.assertEquals('Success', project.status)
-        self.assertEquals('someurl', project.url)
+        self.assertEquals('http://someurl', project.url)
         self.assertEquals('Sleeping', project.activity)
         self.assertEquals('2009-05-29T13:54:07', project.last_build_time)
         self.assertEquals('120', project.last_build_label)
         self.assertEquals(datetime.datetime(2009, 5, 29, 13, 54, 7, 0, tzlocal()), project.get_last_build_time())
         self.assertEquals("Success.Sleeping", project.get_build_status())
+
+    def test_should_not_override_existing_url_scheme(self):
+        project = Project('url', '', 'tz', {
+            'name': 'proj1',
+            'lastBuildStatus': 'Success',
+            'activity': 'Sleeping',
+            'url': 'https://10.0.0.1/project1',
+            'lastBuildLabel': '120',
+            'lastBuildTime': '2009-05-29T13:54:07'
+        })
+        self.assertEquals('https://10.0.0.1/project1', project.url)
 
 class ProjectTimezoneTest(unittest.TestCase):
     def tzproj(self, time, timezone='None'):
