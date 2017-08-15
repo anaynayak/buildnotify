@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog
+
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from server_configuration_dialog import ServerConfigurationDialog
 
@@ -12,8 +13,11 @@ class PreferencesDialog(QDialog):
         self.conf = conf
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
-        self.checkboxes = dict(successfulBuild=self.ui.successfulBuildsCheckbox, brokenBuild=self.ui.brokenBuildsCheckbox, fixedBuild=self.ui.fixedBuildsCheckbox,
-                               stillFailingBuild=self.ui.stillFailingBuildsCheckbox, connectivityIssues=self.ui.connectivityIssuesCheckbox, lastBuildTimeForProject=self.ui.showLastBuildTimeCheckbox)
+        self.checkboxes = dict(successfulBuild=self.ui.successfulBuildsCheckbox,
+                               brokenBuild=self.ui.brokenBuildsCheckbox, fixedBuild=self.ui.fixedBuildsCheckbox,
+                               stillFailingBuild=self.ui.stillFailingBuildsCheckbox,
+                               connectivityIssues=self.ui.connectivityIssuesCheckbox,
+                               lastBuildTimeForProject=self.ui.showLastBuildTimeCheckbox)
         self.set_values_from_config()
 
         # Connect up the buttons.
@@ -23,8 +27,7 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.clicked.connect(self.configure_projects)
 
     def set_values_from_config(self):
-        self.cctray_urls_model = QStringListModel(self.conf.get_urls())
-        self.ui.cctrayPathList.setModel(self.cctray_urls_model)
+        self.ui.cctrayPathList.setModel(QStringListModel(self.conf.get_urls()))
 
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
         self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
@@ -42,29 +45,26 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
-        self.server_configuration_dialog = ServerConfigurationDialog(self.addServerTemplateText, self.conf, self)
-        if self.server_configuration_dialog.exec_() == QDialog.Accepted:
-            url = self.server_configuration_dialog.save()
+        server_config = ServerConfigurationDialog(self.addServerTemplateText, self.conf, self).open()
+        if server_config is not None:
+            self.conf.save_server_config(server_config)
             urls = self.ui.cctrayPathList.model().stringList()
-            urls.append(url)
-            self.cctrayUrlsModel = QStringListModel(urls)
-            self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
-
+            urls.append(server_config.url)
+            self.ui.cctrayPathList.setModel(QStringListModel(urls))
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
         urls = self.ui.cctrayPathList.model().stringList()
         urls.pop(index.row())
-        self.cctrayUrlsModel = QStringListModel(urls)
-        self.ui.cctrayPathList.setModel(self.cctrayUrlsModel)
+        self.ui.cctrayPathList.setModel(QStringListModel(urls))
 
     def configure_projects(self):
         url = self.ui.cctrayPathList.selectionModel().currentIndex().data()
         if not url:
             return
-        self.server_configuration_dialog = ServerConfigurationDialog(url, self.conf, self)
-        if self.server_configuration_dialog.exec_() == QDialog.Accepted:
-            self.server_configuration_dialog.save()
+        server_config = ServerConfigurationDialog(url, self.conf, self).open()
+        if server_config is not None:
+            self.conf.save_server_config(server_config)
 
     def get_urls(self):
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
@@ -75,14 +75,26 @@ class PreferencesDialog(QDialog):
     def get_selections(self):
         return map(lambda (key, checkbox): (key, checkbox.isChecked()), self.checkboxes.items())
 
-    def save(self):
-        self.conf.update_urls(self.get_urls())
-        self.conf.set_interval_in_seconds(self.get_interval_in_seconds())
-        self.conf.set_custom_script(self.ui.scriptLineEdit.text(), self.ui.scriptCheckbox.isChecked())
-        self.conf.set_custom_script_enabled(self.ui.scriptCheckbox.isChecked())
-        if self.ui.sortBuildByLastBuildTime.isChecked():
-            self.conf.set_sort_by_last_build_time()
-        if self.ui.sortBuildByName.isChecked():
-            self.conf.set_sort_by_name()
-        for key, value in self.get_selections():
-            self.conf.set_value(key, value)
+    def open(self):
+        if self.exec_() == QDialog.Accepted:
+            return Preferences(
+                urls=self.get_urls(),
+                interval=self.get_interval_in_seconds(),
+                custom_script_text=self.ui.scriptLineEdit.text(),
+                custom_script_checked=self.ui.scriptCheckbox.isChecked(),
+                sort_by_build_time=self.ui.sortBuildByLastBuildTime.isChecked(),
+                sort_by_name=self.ui.sortBuildByName.isChecked(),
+                selections=self.get_selections()
+            )
+
+
+class Preferences:
+    def __init__(self, urls, interval, custom_script_text, custom_script_checked,
+                 sort_by_build_time, sort_by_name, selections):
+        self.urls = urls
+        self.interval = interval
+        self.custom_script_text = custom_script_text
+        self.trigger_custom_script = custom_script_checked
+        self.sort_by_build_time = sort_by_build_time
+        self.sort_by_name = sort_by_name
+        self.selections = selections

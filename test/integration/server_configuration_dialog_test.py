@@ -47,9 +47,8 @@ def test_should_exclude_projects(qtbot):
 
     model.item(0, 0).child(0, 0).setCheckState(QtCore.Qt.Unchecked)
 
-    dialog.save()
-    config = conf.get_server_config(url)
-    assert [str(s) for s in config.excluded_projects] == ['cleanup-artifacts-B']
+    server_config = dialog.get_server_config()
+    assert [str(s) for s in server_config.excluded_projects] == ['cleanup-artifacts-B']
 
 
 @pytest.mark.functional

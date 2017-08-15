@@ -142,3 +142,15 @@ class Config:
 
     def get_server_configs(self):
         return [self.get_server_config(url) for url in self.get_urls()]
+
+    def update_preferences(self, preferences):
+        self.update_urls(preferences.urls)
+        self.set_interval_in_seconds(preferences.interval)
+        self.set_custom_script(preferences.custom_script_text, preferences.trigger_custom_script)
+        self.set_custom_script_enabled(preferences.trigger_custom_script)
+        if preferences.sort_by_build_time:
+            self.set_sort_by_last_build_time()
+        if preferences.sort_by_name:
+            self.set_sort_by_name()
+        for key, value in preferences.selections:
+            self.set_value(key, value)

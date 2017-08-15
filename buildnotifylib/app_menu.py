@@ -42,9 +42,9 @@ class AppMenu(QtCore.QObject):
                                 "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
-        self.preferences_dialog = PreferencesDialog(self.conf, self.menu)
-        if self.preferences_dialog.exec_() == QDialog.Accepted:
-            self.preferences_dialog.save()
+        preferences = PreferencesDialog(self.conf, self.menu).open()
+        if preferences is not None:
+            self.conf.update_preferences(preferences)
             self.reload_data.emit()
 
     def exit(self, widget):

@@ -1,6 +1,5 @@
 import datetime
 import unittest
-import pytz
 from datetime import timedelta
 from dateutil.tz import tzlocal
 from buildnotifylib.core.project import Project

@@ -1,10 +1,10 @@
 import pytest
-from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QDialogButtonBox, QWidget
+from PyQt5.QtWidgets import QWidget
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from buildnotifylib.app_menu import AppMenu
+from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.build_icons import BuildIcons
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
@@ -197,18 +197,13 @@ def test_should_show_recent_build_first(qtbot):
 
 
 @pytest.mark.functional
-@pytest.mark.requireshead
-def test_should_show_preferences(qtbot):
+def test_should_show_preferences(qtbot, mocker):
     conf = ConfigBuilder().build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
 
-    def close_dialog():
-        button = app_menu.preferences_dialog.ui.buttonBox.button(QDialogButtonBox.Ok)
-        qtbot.mouseClick(button, QtCore.Qt.LeftButton)
-
-    QtCore.QTimer.singleShot(500, close_dialog)
-
-    with qtbot.waitSignal(app_menu.reload_data, timeout=10000) as blocker:
+    mocker.patch.object(PreferencesDialog, 'open', return_value="some preferences")
+    mocker.patch.object(conf, 'update_preferences')
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000) as blocker:
         app_menu.preferences_clicked(None)

@@ -1,6 +1,8 @@
 import unittest
 from buildnotifylib.config import Config
 from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.preferences import Preferences
+
 from PyQt5 import QtCore
 
 class ConfigTest(unittest.TestCase):
@@ -42,6 +44,16 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals(2, len(servers))
         self.assertEquals('url1', servers[0].url)
         self.assertEquals('url2', servers[1].url)
+
+    def test_should_update_preferences(self):
+        self.config.update_preferences(Preferences(['url1'], 300, '/bin/sh', True, False, True, []))
+
+        self.assertEquals(self.config.get_urls(), ['url1'])
+        self.assertEquals(self.config.get_interval_in_seconds(), 300)
+        self.assertEquals(self.config.get_custom_script(), '/bin/sh')
+        self.assertEquals(self.config.get_custom_script_enabled(), True)
+        self.assertEquals(self.config.get_sort_by_last_build_time(), False)
+        self.assertEquals(self.config.get_sort_by_name(), True)
 
 if __name__ == '__main__':
     unittest.main()

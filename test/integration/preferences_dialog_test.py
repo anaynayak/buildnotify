@@ -2,9 +2,11 @@ import os
 
 import pytest
 from PyQt5 import QtCore, QtGui
+from PyQt5.QtWidgets import QDialogButtonBox
 from PyQt5.QtCore import QItemSelectionModel, Qt
 
 from buildnotifylib.preferences import PreferencesDialog
+from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 from test.fake_conf import ConfigBuilder
 
 
@@ -34,15 +36,26 @@ def test_should_show_configure_notifications(qtbot):
     assert dialog.ui.scriptCheckbox.isChecked() == False
     assert dialog.ui.scriptLineEdit.text() == 'echo #status# #projects# >> /tmp/buildnotify.log'
 
-    qtbot.mouseClick(dialog.ui.successfulBuildsCheckbox, Qt.LeftButton)
-    dialog.save()
-
-    qtbot.waitUntil(lambda: conf.get_value("successfulBuild"))
-
 
 @pytest.mark.functional
 @pytest.mark.requireshead
-def test_should_prefill_server_config(qtbot):
+def test_should_return_preferences_on_accept(qtbot):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+
+    def close_dialog():
+        button = dialog.ui.buttonBox.button(QDialogButtonBox.Ok)
+        qtbot.mouseClick(button, QtCore.Qt.LeftButton)
+
+    QtCore.QTimer.singleShot(100, close_dialog)
+    preferences = dialog.open()
+
+    qtbot.waitUntil(lambda: preferences is not None)
+
+
+@pytest.mark.functional
+def test_should_prefill_server_config(qtbot, mocker):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     conf = ConfigBuilder().server("file://" + file).build()
     dialog = PreferencesDialog(conf)
@@ -54,14 +67,11 @@ def test_should_prefill_server_config(qtbot):
     dialog.ui.cctrayPathList.setCurrentIndex(index)
     dialog.item_selection_changed(True)
 
-    def close_dialog():
-        dialog.server_configuration_dialog.close()
-
-    QtCore.QTimer.singleShot(500, close_dialog)
+    m = mocker.patch.object(ServerConfigurationDialog, 'open')
 
     qtbot.mouseClick(dialog.ui.configureProjectButton, Qt.LeftButton)
 
-    assert dialog.server_configuration_dialog.ui.addServerUrl.text() == "file://" + file
+    qtbot.waitUntil(lambda: m.assert_any_call())
 
 
 @pytest.mark.functional
@@ -81,5 +91,3 @@ def test_should_remove_configured_servers(qtbot):
     qtbot.mouseClick(dialog.ui.removeButton, Qt.LeftButton)
 
     assert [str(s) for s in dialog.ui.cctrayPathList.model().stringList()] == []
-
-

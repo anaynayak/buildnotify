@@ -98,6 +98,6 @@ class ServerConfigurationDialog(QDialog):
                             str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()),
                             str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification)
 
-    def save(self):
-        self.conf.save_server_config(self.get_server_config())
-        return self.server_url()
+    def open(self):
+        if self.exec_() == QDialog.Accepted:
+            return self.get_server_config()
