@@ -9,6 +9,7 @@ from test.fake_conf import ConfigBuilder
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_show_configured_urls(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     conf = ConfigBuilder().server("file://" + file).build()
@@ -18,6 +19,7 @@ def test_should_show_configured_urls(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_show_configure_notifications(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     conf = ConfigBuilder().server("file://" + file).build()
@@ -39,6 +41,7 @@ def test_should_show_configure_notifications(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_prefill_server_config(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     conf = ConfigBuilder().server("file://" + file).build()
@@ -62,6 +65,7 @@ def test_should_prefill_server_config(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_remove_configured_servers(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     conf = ConfigBuilder().server("file://" + file).build()

@@ -11,6 +11,7 @@ from test.fake_conf import ConfigBuilder
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_show_configured_urls(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     url = "file://" + file
@@ -31,6 +32,7 @@ def test_should_show_configured_urls(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_exclude_projects(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     url = "file://" + file
@@ -51,6 +53,7 @@ def test_should_exclude_projects(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_preload_info(qtbot):
     file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
     url = "file://" + file
@@ -78,6 +81,7 @@ def test_should_preload_info(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_fail_for_bad_url(qtbot, mocker):
     url = "file:///badpath"
     conf = ConfigBuilder().server(url).build()

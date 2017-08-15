@@ -66,9 +66,8 @@ class PreferencesDialog(QDialog):
         if self.server_configuration_dialog.exec_() == QDialog.Accepted:
             self.server_configuration_dialog.save()
 
-
     def get_urls(self):
-        return self.ui.cctrayPathList.model().stringList()
+        return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
 
     def get_interval_in_seconds(self):
         return self.ui.pollingIntervalSpinBox.value()

@@ -197,6 +197,7 @@ def test_should_show_recent_build_first(qtbot):
 
 
 @pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_show_preferences(qtbot):
     conf = ConfigBuilder().build()
     parent = QWidget()
