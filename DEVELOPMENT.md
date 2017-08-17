@@ -18,10 +18,11 @@ Complete list of available paver commands can be viewed by running @paver
 ### Packaging
 
 
-Dependencies for creating a deb package
+Dependencies for creating a pip/deb package
 
 ```
 sudo pip install stdeb
+sudo apt-get install twine
 sudo apt-get install debhelper dput
 
 ```

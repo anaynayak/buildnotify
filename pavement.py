@@ -23,7 +23,13 @@ def dist():
 @needs('clean')
 def dist_pypi():
     """Upload package to https://pypi.python.org/pypi/BuildNotify/"""
-    sh('python setup.py sdist upload')
+    # Set TWINE_USERNAME, TWINE_PASSWORD
+    sh('python setup.py sdist')
+    pkg = path('dist').files('*.tar.gz')[0].name
+    # sh('gpg --detach-sign -a dist/' + pkg)
+    # sig = path('dist').files('*.asc')[0].name
+    # sh('twine upload dist/' + pkg + ' dist/' + sig)
+    sh('twine upload dist/' + pkg)
 
 @task
 @needs('clean', 'mk_deb')

@@ -29,7 +29,7 @@ setup(name='BuildNotify',
           'Intended Audience :: Developers',
           'Intended Audience :: End Users/Desktop',
           'Environment :: X11 Applications :: Qt',
-          'Topic :: Software Development :: Build Tools'
+          'Topic :: Software Development :: Build Tools',
           'Topic :: Software Development :: User Interfaces',
           'Topic :: Software Development :: Widget Sets'
       ],
