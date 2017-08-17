@@ -7,9 +7,9 @@ pipelines:
           - pip
         script:
           - apt-get update
-          - apt-get install -y python-pyqt5 python-keyring xvfb curl mercurial
+          - apt-get install -y python-pyqt5-dbg python-keyring xvfb curl mercurial
           - curl https://bootstrap.pypa.io/get-pip.py | python
           - pip install -r test-requirements.txt
           - pip install python-coveralls
-          - xvfb-run pytest -v -l -m "not requireshead" --full-trace --cov-report= --cov=buildnotifylib
+          - xvfb-run --server-args="-screen 0 1024x768x24" pytest -v -l --full-trace --cov-report= --cov=buildnotifylib
           - coveralls
