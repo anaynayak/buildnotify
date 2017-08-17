@@ -5,3 +5,6 @@ syntax: glob
 *~
 .idea
 .vagrant
+*.egg-info
+.cache
+*.diff

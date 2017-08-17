@@ -1,0 +1,16 @@
+## [1.0.0] - 2017-08-17
+
+### Added
+- Sort projects by last build time or name
+- Allow selection/deselection of all projects in configuration screen
+- Using keychain to manage passwords
+- Support for self-signed certificates
+- Per CI server build label prefix
+- Support for projects without URL scheme specified in the cctray.xml feed
+- Upgrade to PyQt5
+### Changed
+- Allow polling unit to seconds from minutes.
+- List of projects can now be dragged to extend the visible list
+### Fixed
+- Encoding of username/password for basic authentication
+- Projects with same name across CI servers are handled correctly
