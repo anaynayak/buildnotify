@@ -1,7 +1,9 @@
 import datetime
 import unittest
 from datetime import timedelta
+
 from dateutil.tz import tzlocal
+
 from buildnotifylib.core.project import Project
 
 
@@ -12,8 +14,7 @@ class ProjectTest(unittest.TestCase):
             'name': 'g',
             'lastBuildStatus': 'n',
             'activity': 'o',
-            'url': 'r'}
-                          )
+            'url': 'r'})
         self.assertEquals(datetime.datetime.now().date(), project.get_last_build_time().date())
         self.assertEquals(tzlocal(), project.get_last_build_time().tzinfo)
 

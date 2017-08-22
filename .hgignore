@@ -10,3 +10,5 @@ syntax: glob
 *.diff
 dist
 report.txt
+.tox
+.coverage

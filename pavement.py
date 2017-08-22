@@ -1,4 +1,4 @@
-from paver.easy import *
+from paver.easy import task, needs, path, sh
 
 
 @task

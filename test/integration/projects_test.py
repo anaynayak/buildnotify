@@ -7,5 +7,5 @@ import pytest
 def test_should_fetch_projects(qtbot):
     conf = ConfigBuilder().build()
     populator = ProjectsPopulator(conf)
-    with qtbot.waitSignal(populator.updated_projects, timeout=1000) as blocker:
+    with qtbot.waitSignal(populator.updated_projects, timeout=1000):
         populator.process()

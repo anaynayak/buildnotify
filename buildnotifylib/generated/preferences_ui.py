@@ -173,5 +173,3 @@ class Ui_Preferences(object):
         self.sortBuildByName.setText(_translate("Preferences", "Sort builds by name"))
         self.sortBuildByLastBuildTime.setText(_translate("Preferences", "Sort builds by last build time"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), _translate("Preferences", "Misc"))
-
-
