@@ -10,4 +10,4 @@ pipelines:
           - apt-get install -y python-pyqt5-dbg python-keyring xvfb curl mercurial
           - curl https://bootstrap.pypa.io/get-pip.py | python
           - pip install tox
-          - xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoverage
+          - xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
