@@ -1,8 +1,9 @@
+from time import strftime
+
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget, QSystemTrayIcon
 
-from time import strftime
-from app_menu import AppMenu
+from buildnotifylib.app_menu import AppMenu
 
 
 class AppUi(QtCore.QObject):
@@ -19,7 +20,7 @@ class AppUi(QtCore.QObject):
         self.tray.setContextMenu(self.app_menu.menu)
 
     def update_projects(self, integration_status):
-        count = str(len(integration_status.get_failing_builds()))
+        count = len(integration_status.get_failing_builds())
         self.tray.setIcon(self.build_icons.for_aggregate_status(integration_status.get_build_status(), count))
         self.app_menu.update(integration_status.get_projects())
         self.tray.setToolTip("Last checked: " + strftime("%Y-%m-%d %H:%M:%S"))

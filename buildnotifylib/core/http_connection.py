@@ -1,10 +1,11 @@
 import base64
 import platform
 import socket
-import urllib2
 import ssl
+import urllib2
 
-class HttpConnection:
+
+class HttpConnection(object):
     def __init__(self):
         self.user_agent = "%s-%s" % ("BuildNotify", platform.platform())
 
@@ -17,5 +18,5 @@ class HttpConnection:
             encodedstring = base64.encodestring("%s:%s" % (unquoted_username, unquoted_password))[:-1]
             headers["Authorization"] = "Basic %s" % encodedstring
         if server.skip_ssl_verification:
-            return urllib2.urlopen(urllib2.Request(server.url, None, headers), context = ssl._create_unverified_context())
+            return urllib2.urlopen(urllib2.Request(server.url, None, headers), context=ssl._create_unverified_context())
         return urllib2.urlopen(urllib2.Request(server.url, None, headers))

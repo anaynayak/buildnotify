@@ -1,12 +1,17 @@
-from PyQt5.QtWidgets import QWidget
 import pytest
+from PyQt5.QtWidgets import QWidget
 
-from  buildnotifylib.core.timed_event import TimedEvent, RepeatTimedEvent
+from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
+from buildnotifylib.core.timed_event import TimedEvent
 
 
-class TargetTimedEvent:
+class TargetTimedEvent(object):
+    def __init__(self):
+        pass
+
     def method(self, **kwargs):
         pass
+
 
 @pytest.mark.functional
 def test_should_trigger_event_on_timeout(qtbot, mocker):
@@ -17,6 +22,7 @@ def test_should_trigger_event_on_timeout(qtbot, mocker):
     event.start()
 
     qtbot.waitUntil(lambda: m.assert_any_call())
+
 
 @pytest.mark.functional
 def test_should_repeat_trigger_event(qtbot, mocker):

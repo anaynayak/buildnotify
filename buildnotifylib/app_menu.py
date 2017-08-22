@@ -2,10 +2,11 @@ import sys
 import webbrowser
 
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QMessageBox, QAction, QMenu
+from PyQt5.QtWidgets import QMessageBox, QAction, QMenu
+
 from buildnotifylib.core.distance_of_time import DistanceOfTime
-from preferences import PreferencesDialog
-from version import VERSION
+from buildnotifylib.preferences import PreferencesDialog
+from buildnotifylib.version import VERSION
 
 
 class AppMenu(QtCore.QObject):
@@ -38,8 +39,8 @@ class AppMenu(QtCore.QObject):
 
     def about_clicked(self, widget):
         QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
-                                "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
-                                "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
+                          "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
+                          "please visit <a href=\"http://bitbucket.org/Anay/buildnotify\">http://bitbucket.org/Anay/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget):
         preferences = PreferencesDialog(self.conf, self.menu).open()

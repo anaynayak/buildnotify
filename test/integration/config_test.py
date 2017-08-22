@@ -1,9 +1,11 @@
 import unittest
-from buildnotifylib.config import Config
-from buildnotifylib.serverconfig import ServerConfig
-from buildnotifylib.preferences import Preferences
 
 from PyQt5 import QtCore
+
+from buildnotifylib.config import Config
+from buildnotifylib.preferences import Preferences
+from buildnotifylib.serverconfig import ServerConfig
+
 
 class ConfigTest(unittest.TestCase):
     def setUp(self):
@@ -12,8 +14,10 @@ class ConfigTest(unittest.TestCase):
         self.config = Config(q_settings)
 
     def test_should_persist_user_project_excludes(self):
-        self.config.set_project_excludes('http://bitbucket.org/Anay/buildnotify/cctray.xml', ['buildnotify::test-server'])
-        self.assertEquals(['buildnotify::test-server'], self.config.get_project_excludes('http://bitbucket.org/Anay/buildnotify/cctray.xml'))
+        self.config.set_project_excludes('http://bitbucket.org/Anay/buildnotify/cctray.xml',
+                                         ['buildnotify::test-server'])
+        self.assertEquals(['buildnotify::test-server'],
+                          self.config.get_project_excludes('http://bitbucket.org/Anay/buildnotify/cctray.xml'))
 
     def test_should_persist_empty_user_project_excludes(self):
         self.config.set_project_excludes('http://bitbucket.org/Anay/buildnotify/cctray.xml', [])
@@ -23,7 +27,9 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals([], self.config.get_project_excludes('http://bitbucket.org/Anay/buildnotify/buildnotify.xml'))
 
     def test_should_store_server_preferences(self):
-        self.config.save_server_config(ServerConfig('http://bitbucket.org/Anay/buildnotify/cctray.xml', ['excludedproject'], 'EDT', 'prefix', 'user', 'pass'))
+        self.config.save_server_config(
+            ServerConfig('http://bitbucket.org/Anay/buildnotify/cctray.xml', ['excludedproject'], 'EDT', 'prefix',
+                         'user', 'pass'))
         server = self.config.get_server_config("http://bitbucket.org/Anay/buildnotify/cctray.xml")
         self.assertEquals('user', server.username)
         self.assertEquals('pass', server.password)
@@ -54,6 +60,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEquals(self.config.get_custom_script_enabled(), True)
         self.assertEquals(self.config.get_sort_by_last_build_time(), False)
         self.assertEquals(self.config.get_sort_by_name(), True)
+
 
 if __name__ == '__main__':
     unittest.main()

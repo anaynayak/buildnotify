@@ -1,13 +1,13 @@
 import pytz
-
-from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
-from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
-from buildnotifylib.core.timed_event import BackgroundEvent
-from buildnotifylib.core.projects import ProjectLoader
+
 from buildnotifylib.config import Config
-from serverconfig import ServerConfig
+from buildnotifylib.core.background_event import BackgroundEvent
+from buildnotifylib.core.projects import ProjectLoader
+from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
+from buildnotifylib.serverconfig import ServerConfig
 
 
 class ServerConfigurationDialog(QDialog):
@@ -33,7 +33,7 @@ class ServerConfigurationDialog(QDialog):
     def fetch_data(self):
         self.ui.loadUrlButton.setEnabled(False)
         self.event = BackgroundEvent(self.load_projects, self)
-        self.event.completed.connect(lambda data: self.load_data(data))
+        self.event.completed.connect(self.load_data)
         self.event.start()
 
     def load_projects(self):
@@ -67,8 +67,9 @@ class ServerConfigurationDialog(QDialog):
     def handle_errors(self, response):
         if response.ssl_error():
             reply = QMessageBox.question(self, "Failed to fetch projects",
-                                               "<b>SSL error, retry without verification?:</b> %s" % Qt.convertFromPlainText(str(response.error)),
-                                               QMessageBox.Yes, QMessageBox.No)
+                                         "<b>SSL error, retry without verification?:</b> %s" % Qt.convertFromPlainText(
+                                             str(response.error)),
+                                         QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.skip_ssl_verification = True
                 self.fetch_data()
@@ -76,12 +77,12 @@ class ServerConfigurationDialog(QDialog):
 
         if response.failed():
             QMessageBox.critical(self, "Failed to fetch projects",
-                                       "<b>Error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
-            return
+                                 "<b>Error:</b> %s" % Qt.convertFromPlainText(str(response.error)))
 
     def project_checked(self, item):
         if item.hasChildren():
-            [item.child(index, 0).setCheckState(item.checkState()) for index in range(item.rowCount())]
+            for index in range(item.rowCount()):
+                item.child(index, 0).setCheckState(item.checkState())
 
     def server_url(self):
         return str(self.ui.addServerUrl.text())

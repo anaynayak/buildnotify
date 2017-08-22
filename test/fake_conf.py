@@ -1,26 +1,32 @@
 from buildnotifylib.config import Config
 
 
-class FakeSettings:
-    def __init__(self, hash={}):
-        self.hash = hash
+class FakeSettings(object):
+    def __init__(self, settings=None):
+        if settings is None:
+            settings = {}
+        self.settings = settings
 
     def setValue(self, key, val):
-        self.hash[key] = val
+        self.settings[key] = val
 
     def value(self, key, fallback=None, type=None):
-        return self.hash.get(key, fallback)
+        return self.settings.get(key, fallback)
 
 
-class ConfigBuilder:
-    def __init__(self, overrides={}):
+class ConfigBuilder(object):
+    def __init__(self, overrides=None):
+        if overrides is None:
+            overrides = {}
         self.conf = {
             'sort_by_name': True,
             'values/lastBuildTimeForProject': False
         }
         self._merge(overrides)
 
-    def server(self, url, overrides={}):
+    def server(self, url, overrides=None):
+        if overrides is None:
+            overrides = {}
         urls = self.conf.get('connection/urls', [])
         urls.append(url)
         self._merge({'connection/urls': urls})
@@ -32,4 +38,4 @@ class ConfigBuilder:
         return Config(FakeSettings(self.conf))
 
     def _merge(self, overrides):
-        self.conf = dict(self.conf.items() + overrides.items())
+        self.conf = dict(self.conf, **overrides)

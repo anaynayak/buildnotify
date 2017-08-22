@@ -12,6 +12,9 @@ docker run -it --volume=/Users/Anay/Project/buildnotify:/buildnotify --workdir="
 
 Run steps from bitbucket-pipelines.yml
 ```
+apt-get install python-dev build-essential libffi-dev libssl-dev
+pylint -f parseable buildnotifylib/ --disable=missing-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-public-methods >report.txt
+```
 
 Complete list of available paver commands can be viewed by running @paver 
 

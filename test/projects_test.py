@@ -1,10 +1,11 @@
 import unittest
 
+from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
-from buildnotifylib.core.server import ContinuousIntegrationServer
 from buildnotifylib.serverconfig import ServerConfig
 from project_builder import ProjectBuilder
 from cStringIO import StringIO
+
 
 class OverallIntegrationStatusTest(unittest.TestCase):
     def test_should_consolidate_build_status(self):
@@ -35,18 +36,25 @@ class OverallIntegrationStatusTest(unittest.TestCase):
         self.assertEquals([project2], status.get_failing_builds())
 
 
+class MockConnection(object):
+    def __init__(self, response_fn):
+        self.response_fn = response_fn
+
+    def connect(self, server, timeout):
+        return self.response_fn()
+
+
 class ProjectLoaderTest(unittest.TestCase):
     def test_should_load_feed(self):
-        class MockConnection:
-            def __init__(self):
-                pass
-            def connect(self, server, timeout):
-                return StringIO("""<?xml version="1.0" encoding="UTF-8"?>
-                                        <Projects>
-                                            <Project name="project" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/>
-                                        </Projects>
-""")
-        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
+        connection = MockConnection(lambda: StringIO("""<?xml version="1.0" encoding="UTF-8"?>
+                                <Projects>
+                                    <Project name="project" 
+                                        activity="Sleeping" 
+                                        lastBuildStatus="Success" 
+                                        lastBuildTime="2009-06-12T06:54:35" 
+                                        webUrl="http://local/url"/>
+                                </Projects>"""))
+        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, connection).get_data()
         projects = response.server.get_projects()
         self.assertEquals(1, len(projects))
         self.assertEquals("project", projects[0].name)
@@ -55,27 +63,28 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEquals(False, response.server.unavailable)
 
     def test_should_respond_even_if_things_fail(self):
-        class MockConnection:
+        class MockConnection(object):
             def __init__(self):
                 pass
+
             def connect(self, server, timeout):
                 raise Exception("something went wrong")
+
         response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
         projects = response.server.get_projects()
         self.assertEquals(0, len(projects))
         self.assertEquals(True, response.server.unavailable)
 
     def test_should_set_display_prefix(self):
-        class MockConnection:
-            def __init__(self):
-                pass
-            def connect(self, server, timeout):
-                return StringIO("""<?xml version="1.0" encoding="UTF-8"?>
+        connection = MockConnection(lambda: StringIO("""<?xml version="1.0" encoding="UTF-8"?>
                                         <Projects>
-                                            <Project name="project" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/>
-                                        </Projects>
-""")
-        response = ProjectLoader(ServerConfig('url', [], '', 'RELEASE', '', ''), 10, MockConnection()).get_data()
+                                            <Project name="project" 
+                                                activity="Sleeping" 
+                                                lastBuildStatus="Success" 
+                                                lastBuildTime="2009-06-12T06:54:35" 
+                                                webUrl="http://local/url"/>
+                                        </Projects>"""))
+        response = ProjectLoader(ServerConfig('url', [], '', 'RELEASE', '', ''), 10, connection).get_data()
         projects = response.server.get_projects()
         self.assertEquals(1, len(projects))
         self.assertEquals("[RELEASE] project", projects[0].label())

@@ -8,3 +8,5 @@ syntax: glob
 *.egg-info
 .cache
 *.diff
+dist
+report.txt

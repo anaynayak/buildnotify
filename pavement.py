@@ -1,11 +1,13 @@
 from paver.easy import *
 
+
 @task
 def clean():
     for fl in ['BuildNotify.egg-info', 'build', 'dist', 'deb_dist']:
         p = path(fl)
         p.rmtree()
-        
+
+
 @task
 def mk_resources():
     """Regenerate source corresponding to icons/Qt designer files"""
@@ -13,11 +15,13 @@ def mk_resources():
     sh('pyuic5 -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui')
     sh('pyrcc5 data/icons.qrc -o buildnotifylib/generated/icons_rc.py')
 
+
 @task
 @needs('dist_pypi', 'dist_ppa')
 def dist():
     """Triggers dist_pypi and dist_ppa"""
     pass
+
 
 @task
 @needs('clean')
@@ -31,6 +35,7 @@ def dist_pypi():
     # sh('twine upload dist/' + pkg + ' dist/' + sig)
     sh('twine upload dist/' + pkg)
 
+
 @task
 @needs('clean', 'mk_deb')
 def dist_ppa():
@@ -42,11 +47,13 @@ def dist_ppa():
     changes_file = path('deb_dist').files('*.changes')[0]
     sh('dput ppa:anay/ppa %s' % changes_file)
 
+
 @task
 @needs('clean')
 def mk_deb():
     """Build deb package"""
     sh('python setup.py --command-packages=stdeb.command bdist_deb')
+
 
 @task
 @needs('clean')

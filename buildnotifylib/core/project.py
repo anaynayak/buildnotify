@@ -1,11 +1,14 @@
-import pytz
 from datetime import datetime
-from dateutil.parser import parse
-from buildnotifylib.config import Config
-from dateutil.tz import tzlocal
 from urlparse import urlparse
 
-class Project:
+import pytz
+from dateutil.parser import parse
+from dateutil.tz import tzlocal
+
+from buildnotifylib.config import Config
+
+
+class Project(object):
     def __init__(self, server_url, prefix, timezone, props):
         self.server_url = server_url
         self.prefix = prefix
@@ -32,12 +35,11 @@ class Project:
         return other.name == self.name and other.server_url == self.server_url
 
     def get_last_build_time(self):
-        if len(self.last_build_time) == 0:
+        if not self.last_build_time:
             return datetime.now(tzlocal())
         if self.timezone == Config.NONE_TIMEZONE:
-            dt = parse(self.last_build_time)
-            if dt.tzinfo is None:
-                return dt.replace(tzinfo=tzlocal())
-            else:
-                return dt
+            date = parse(self.last_build_time)
+            if date.tzinfo is None:
+                return date.replace(tzinfo=tzlocal())
+            return date
         return parse(self.last_build_time).replace(tzinfo=pytz.timezone(self.timezone))

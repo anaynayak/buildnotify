@@ -2,7 +2,7 @@ from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog
 
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
-from server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):
@@ -73,7 +73,7 @@ class PreferencesDialog(QDialog):
         return self.ui.pollingIntervalSpinBox.value()
 
     def get_selections(self):
-        return map(lambda (key, checkbox): (key, checkbox.isChecked()), self.checkboxes.items())
+        return [(key, checkbox.isChecked()) for (key, checkbox) in self.checkboxes.items()]
 
     def open(self):
         if self.exec_() == QDialog.Accepted:
@@ -88,7 +88,7 @@ class PreferencesDialog(QDialog):
             )
 
 
-class Preferences:
+class Preferences(object):
     def __init__(self, urls, interval, custom_script_text, custom_script_checked,
                  sort_by_build_time, sort_by_name, selections):
         self.urls = urls

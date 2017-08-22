@@ -1,6 +1,7 @@
 import unittest
 
-from buildnotifylib.core.server import ContinuousIntegrationServer, FilteredContinuousIntegrationServer
+from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
+from buildnotifylib.core.filtered_continuous_integration_server import FilteredContinuousIntegrationServer
 from test.project_builder import ProjectBuilder
 
 

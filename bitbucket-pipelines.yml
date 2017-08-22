@@ -12,4 +12,5 @@ pipelines:
           - pip install -r test-requirements.txt
           - pip install python-coveralls
           - xvfb-run --server-args="-screen 0 1024x768x24" pytest -v -l --full-trace --cov-report= --cov=buildnotifylib
+          - pylint -f parseable buildnotifylib/ --disable=missing-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-public-methods
           - coveralls

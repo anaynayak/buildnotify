@@ -2,7 +2,7 @@ from buildnotifylib.core.project import Project
 from buildnotifylib.config import Config
 
 
-class ProjectBuilder:
+class ProjectBuilder(object):
     def __init__(self, attrs, url='someurl', prefix=None):
         self.attrs = attrs
         self.url = url

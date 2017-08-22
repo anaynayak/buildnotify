@@ -1,8 +1,8 @@
-from datetime import datetime
 import subprocess
+from datetime import datetime
 
 
-class ProjectStatusNotification:
+class ProjectStatusNotification(object):
     def __init__(self, config, old_integration_status, current_integration_status, notification):
         self.config = config
         self.old_integration_status = old_integration_status
@@ -11,26 +11,35 @@ class ProjectStatusNotification:
         self.timed_project_filter = TimedProjectFilter()
 
     def show_notifications(self):
-        project_status = ProjectStatus(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
+        project_status = ProjectStatus(self.old_integration_status.get_projects(),
+                                       self.current_integration_status.get_projects())
 
-        self.show_notification_msg(self.config.get_value("fixedBuild"), project_status.successful_builds(), "Fixed builds")
-        self.show_notification_msg(self.config.get_value("brokenBuild"), project_status.failing_builds(), "Broken builds")
-        self.show_notification_msg(self.config.get_value("stillFailingBuild"), project_status.still_failing_builds(), "Build is still failing")
-        if self.current_integration_status.unavailable_servers() is not []:
-            self.show_notification_msg(self.config.get_value("connectivityIssues"),
-                                       self.timed_project_filter.filter(map(lambda server: server.url, self.current_integration_status.unavailable_servers())), "Connectivity issues")
-        self.show_notification_msg(self.config.get_value("successfulBuild"), project_status.still_successful_builds(), "Yet another successful build")
+        self.show_notification_msg(self.config.get_value("fixedBuild"),
+                                   project_status.successful_builds(), "Fixed builds")
+        self.show_notification_msg(self.config.get_value("brokenBuild"),
+                                   project_status.failing_builds(), "Broken builds")
+        self.show_notification_msg(self.config.get_value("stillFailingBuild"),
+                                   project_status.still_failing_builds(), "Build is still failing")
+        self.show_notification_msg(self.config.get_value("connectivityIssues"),
+                                   self.unavailable_server_urls(), "Connectivity issues")
+        self.show_notification_msg(self.config.get_value("successfulBuild"),
+                                   project_status.still_successful_builds(), "Yet another successful build")
+
+    def unavailable_server_urls(self):
+        urls = [server.url for server in self.current_integration_status.unavailable_servers()]
+        return self.timed_project_filter.filter(urls)
 
     def show_notification_msg(self, show_notification, builds, message):
         if show_notification is False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
         if self.config.get_custom_script_enabled():
-            command = self.config.get_custom_script().replace('#status#', message).replace('#projects#', ",".join(builds))
+            command = self.config.get_custom_script().replace('#status#', message).replace('#projects#',
+                                                                                           ",".join(builds))
             subprocess.Popen(command, shell=True)
 
 
-class TimedProjectFilter:
+class TimedProjectFilter(object):
     map = dict()
     fact = [1, 2, 3, 5, 8, 13, 21]
 
@@ -38,7 +47,7 @@ class TimedProjectFilter:
         pass
 
     def filter(self, urls):
-        return filter(lambda url: self.is_new(url), urls)
+        return [url for url in urls if self.is_new(url)]
 
     def is_new(self, url):
         if url not in self.map:
@@ -52,7 +61,7 @@ class TimedProjectFilter:
         return fail_count in self.fact
 
 
-class ProjectStatus:
+class ProjectStatus(object):
     def __init__(self, old_projects, current_projects):
         self.old_projects = old_projects
         self.current_projects = current_projects
@@ -70,9 +79,9 @@ class ProjectStatus:
         return self.filter_all(lambda project_tuple: project_tuple.has_been_successful())
 
     def filter_all(self, filter_fn):
-        project_tuples = map(lambda current_project: self.tuple_for(current_project), self.current_projects)
-        project_tuples = filter(filter_fn, project_tuples)
-        return map(lambda project_tuple: project_tuple.current_project.label(), project_tuples)
+        project_tuples = [self.tuple_for(project) for project in self.current_projects]
+        return [project_tuple.current_project.label()
+                for project_tuple in project_tuples if filter_fn(project_tuple)]
 
     def tuple_for(self, new_project):
         for project in self.old_projects:
@@ -81,7 +90,7 @@ class ProjectStatus:
         return ProjectTuple(new_project, None)
 
 
-class ProjectTuple:
+class ProjectTuple(object):
     def __init__(self, current_project, old_project):
         self.current_project = current_project
         self.old_project = old_project
@@ -93,11 +102,11 @@ class ProjectTuple:
         return self.status('Success', 'Failure')
 
     def has_been_successful(self):
-        return (self.old_project is None) or (self.status('Success', 'Success') and self.current_project.different_builds(self.old_project))
+        return (self.old_project is None) or (
+            self.status('Success', 'Success') and self.current_project.different_builds(self.old_project))
 
     def has_been_failing(self):
         return self.status('Failure', 'Failure') and self.current_project.different_builds(self.old_project)
 
     def status(self, new_status, old_status):
         return self.current_project.status == new_status and self.old_project is not None and self.old_project.status == old_status
-

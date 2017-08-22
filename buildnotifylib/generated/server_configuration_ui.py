@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_serverConfigurationDialog(object):
     def setupUi(self, serverConfigurationDialog):
         serverConfigurationDialog.setObjectName("serverConfigurationDialog")
@@ -147,4 +148,3 @@ class Ui_serverConfigurationDialog(object):
         self.chooseProjectsLabel.setText(_translate("serverConfigurationDialog", "Choose projects"))
         self.backButton.setText(_translate("serverConfigurationDialog", "Back"))
         self.submitButton.setText(_translate("serverConfigurationDialog", "OK"))
-

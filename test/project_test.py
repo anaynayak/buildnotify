@@ -48,8 +48,10 @@ class ProjectTest(unittest.TestCase):
         })
         self.assertEquals('https://10.0.0.1/project1', project.url)
 
+
 class ProjectTimezoneTest(unittest.TestCase):
-    def tzproj(self, time, timezone='None'):
+    @classmethod
+    def tzproj(cls, time, timezone='None'):
         return Project('url', None, timezone, {
             'name': 'proj1',
             'lastBuildStatus': 'Success',
@@ -60,42 +62,42 @@ class ProjectTimezoneTest(unittest.TestCase):
         })
 
     def test_should_retain_original_tz_offset(self):
-        project = self.tzproj('2015-02-14T13:23:20+05:30')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20+05:30')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))
         self.assertEquals(build_time.utcoffset(), timedelta(hours=5, minutes=30))
 
     def test_should_consider_other_variants1(self):
-        project = self.tzproj('2015-02-14T13:25:53Z')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:25:53Z')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 25, 53, 0, None),
                           build_time.replace(tzinfo=None))
         self.assertEquals(build_time.utcoffset(), timedelta(hours=0, minutes=0))
 
     def test_should_consider_other_variants2(self):
-        project = self.tzproj('2015-02-14T13:27:20.000+0000')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:27:20.000+0000')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 27, 20, 0, None),
                           build_time.replace(tzinfo=None))
         self.assertEquals(build_time.utcoffset(), timedelta(hours=0, minutes=0))
 
     def test_should_consider_other_variants3(self):
-        project = self.tzproj('2015-02-14T13:23:20+00:00', 'None')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20+00:00', 'None')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))
         self.assertEquals(build_time.utcoffset(), timedelta(hours=0, minutes=0))
 
     def test_should_take_local_timezone_if_unspecified(self):
-        project = self.tzproj('2015-02-14T13:23:20', 'None')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20', 'None')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))
         self.assertEquals(build_time.tzinfo, tzlocal())
 
     def test_should_override_timezone(self):
-        project = self.tzproj('2015-02-14T13:23:20+05:30', 'Etc/GMT-5')
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20+05:30', 'Etc/GMT-5')
         build_time = project.get_last_build_time()
         self.assertEquals(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))

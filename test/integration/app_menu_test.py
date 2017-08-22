@@ -39,13 +39,13 @@ def test_should_suffix_build_time(qtbot):
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    oneYearAgo = (datetime.now() - relativedelta(years=1, days=1)).strftime("%Y-%m-%d %H:%M:%S")
+    one_year_ago = (datetime.now() - relativedelta(years=1, days=1)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'Project 1',
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': oneYearAgo
+        'lastBuildTime': one_year_ago
     }).timezone('US/Central').build()
 
     app_menu.update([project1])
@@ -205,5 +205,5 @@ def test_should_show_preferences(qtbot, mocker):
 
     mocker.patch.object(PreferencesDialog, 'open', return_value="some preferences")
     mocker.patch.object(conf, 'update_preferences')
-    with qtbot.waitSignal(app_menu.reload_data, timeout=1000) as blocker:
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
         app_menu.preferences_clicked(None)

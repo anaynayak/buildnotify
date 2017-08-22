@@ -1,9 +1,12 @@
 from PyQt5 import QtCore
-from serverconfig import ServerConfig
-from core.keystore import Keystore
 
-class Config:
-    default_options = dict(successfulBuild=False, brokenBuild=True, fixedBuild=True, stillFailingBuild=True, connectivityIssues=True, lastBuildTimeForProject=True)
+from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.serverconfig import ServerConfig
+
+
+class Config(object):
+    default_options = dict(successfulBuild=False, brokenBuild=True, fixedBuild=True, stillFailingBuild=True,
+                           connectivityIssues=True, lastBuildTimeForProject=True)
 
     default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
     CUSTOM_SCRIPT = "notifications/custom_script"
@@ -23,7 +26,7 @@ class Config:
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
 
-    def __init__(self, settings = QtCore.QSettings("BuildNotify", "BuildNotify")):
+    def __init__(self, settings=QtCore.QSettings("BuildNotify", "BuildNotify")):
         self.settings = settings
         self.keystore = Keystore()
         self.timeout = self.get_with_default("connection/timeout", 10, int)

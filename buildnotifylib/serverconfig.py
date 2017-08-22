@@ -1,4 +1,4 @@
-class ServerConfig:
+class ServerConfig(object):
     def __init__(self, url, excluded_projects, timezone, prefix, username, password, skip_ssl_verification=False):
         self.url = url
         self.excluded_projects = excluded_projects

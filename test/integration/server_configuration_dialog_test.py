@@ -1,9 +1,9 @@
 import os
 
 import pytest
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
 from mock import ANY
 
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
@@ -13,8 +13,8 @@ from test.fake_conf import ConfigBuilder
 @pytest.mark.functional
 @pytest.mark.requireshead
 def test_should_show_configured_urls(qtbot):
-    file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
-    url = "file://" + file
+    file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
+    url = "file://" + file_path
     conf = ConfigBuilder().server(url).build()
     dialog = ServerConfigurationDialog(url, conf)
     dialog.show()
@@ -23,8 +23,8 @@ def test_should_show_configured_urls(qtbot):
 
     qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
     model = dialog.ui.projectsList.model()
-    assert model.item(0, 0).hasChildren() == True
-    assert model.item(0, 0).child(0, 0).isCheckable() == True
+    assert model.item(0, 0).hasChildren()
+    assert model.item(0, 0).child(0, 0).isCheckable()
     assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Checked
     assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
 
@@ -34,8 +34,8 @@ def test_should_show_configured_urls(qtbot):
 @pytest.mark.functional
 @pytest.mark.requireshead
 def test_should_exclude_projects(qtbot):
-    file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
-    url = "file://" + file
+    file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
+    url = "file://" + file_path
     conf = ConfigBuilder().server(url).build()
     dialog = ServerConfigurationDialog(url, conf)
     dialog.show()
@@ -54,8 +54,8 @@ def test_should_exclude_projects(qtbot):
 @pytest.mark.functional
 @pytest.mark.requireshead
 def test_should_preload_info(qtbot):
-    file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
-    url = "file://" + file
+    file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
+    url = "file://" + file_path
     conf = ConfigBuilder().server(url, {
         "excludes/%s" % url: ['cleanup-artifacts-B'],
         "timezone/%s" % url: 'US/Eastern',
@@ -69,13 +69,15 @@ def test_should_preload_info(qtbot):
     qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
     model = dialog.ui.projectsList.model()
 
-    assert model.item(0, 0).hasChildren() == True
-    assert model.item(0, 0).child(0, 0).isCheckable() == True
+    assert model.item(0, 0).hasChildren()
+    assert model.item(0, 0).child(0, 0).isCheckable()
     assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
     assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Unchecked
+
     def timezone():
         assert dialog.ui.timezoneList.count() > 100
         assert dialog.ui.timezoneList.currentText() == 'US/Eastern'
+
     qtbot.waitUntil(timezone)
 
 

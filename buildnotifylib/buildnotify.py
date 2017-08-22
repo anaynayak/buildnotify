@@ -2,15 +2,16 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
 
-from app_notification import AppNotification
-from app_ui import AppUi
-from build_icons import BuildIcons
+from buildnotifylib.app_notification import AppNotification
+from buildnotifylib.app_ui import AppUi
+from buildnotifylib.build_icons import BuildIcons
+from buildnotifylib.config import Config
 from buildnotifylib.core.projects import ProjectsPopulator
-from buildnotifylib.core.timed_event import TimedEvent, RepeatTimedEvent
-from config import Config
+from buildnotifylib.core.timed_event import TimedEvent
+from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 
 
-class BuildNotify:
+class BuildNotify(object):
     def __init__(self, app, conf=Config(), interval=2000):
         self.conf = conf
         self.build_icons = BuildIcons()
@@ -59,8 +60,8 @@ class BuildNotify:
     def start(cls):
         app = QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
-        b = BuildNotify(app)
-        sys.exit(b.app.exec_())
+        buildnotify = BuildNotify(app)
+        sys.exit(buildnotify.app.exec_())
 
 
 if __name__ == '__main__':

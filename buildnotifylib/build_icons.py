@@ -1,7 +1,7 @@
 from PyQt5 import QtGui, QtCore
 
 
-class BuildIcons:
+class BuildIcons(object):
     success_sleeping = 'buildnotify-success'
     success_building = 'buildnotify-success-building'
     failure_sleeping = 'buildnotify-failure'
@@ -11,15 +11,20 @@ class BuildIcons:
     theme_resource_path = "%s"
 
     def __init__(self):
-        self.all_status = {'Success.Sleeping': self.success_sleeping, 'Success.CheckingModifications': self.success_sleeping, 'Success.Building': self.success_building,
-                           'Failure.Sleeping': self.failure_sleeping, 'Failure.CheckingModifications': self.failure_sleeping, 'Failure.Building': self.failure_building,
+        self.all_status = {'Success.Sleeping': self.success_sleeping,
+                           'Success.CheckingModifications': self.success_sleeping,
+                           'Success.Building': self.success_building,
+                           'Failure.Sleeping': self.failure_sleeping,
+                           'Failure.CheckingModifications': self.failure_sleeping,
+                           'Failure.Building': self.failure_building,
                            'unavailable': self.unavailable}
 
     def for_status(self, status):
-        return QtGui.QIcon.fromTheme(self.get_path(self.theme_resource_path, status), QtGui.QIcon(self.get_path(self.resource_path, status)))
+        return QtGui.QIcon.fromTheme(self.get_path(self.theme_resource_path, status),
+                                     QtGui.QIcon(self.get_path(self.resource_path, status)))
 
     def for_aggregate_status(self, status, count):
-        if count is "0":
+        if count == 0:
             return self.for_status(status)
         icon = self.for_status(status)
         pixmap = icon.pixmap(22, 22)

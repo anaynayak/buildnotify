@@ -6,9 +6,9 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 def test_should_fetch_data():
-    file = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../data/cctray.xml")
-    response = HttpConnection().connect(ServerConfig('file://' + file, [], '', '', None, None), 10)
-    assert str(response.read()) == open(file, 'r').read()
+    file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../data/cctray.xml")
+    response = HttpConnection().connect(ServerConfig('file://' + file_path, [], '', '', None, None), 10)
+    assert str(response.read()) == open(file_path, 'r').read()
 
 
 def test_should_pass_auth_if_provided(mocker):

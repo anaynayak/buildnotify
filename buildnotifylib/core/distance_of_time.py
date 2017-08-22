@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class DistanceOfTime:
+class DistanceOfTime(object):
     def __init__(self, from_date):
         self.from_date = from_date
 
@@ -12,23 +12,14 @@ class DistanceOfTime:
         distance_in_seconds = int(round(abs(distance_in_time.days * 86400 + distance_in_time.seconds)))
         distance_in_minutes = int(round(distance_in_seconds / 60))
 
-        if distance_in_minutes <= 1:
-            return "1 minute"
-        elif distance_in_minutes < 45:
-            return "%s minutes" % distance_in_minutes
-        elif distance_in_minutes < 90:
-            return "1 hour"
-        elif distance_in_minutes < 1440:
-            return "%d hours" % (round(distance_in_minutes / 60.0))
-        elif distance_in_minutes < 2880:
-            return "1 day"
-        elif distance_in_minutes < 43220:
-            return "%d days" % (round(distance_in_minutes / 1440))
-        elif distance_in_minutes < 86400:
-            return "1 month"
-        elif distance_in_minutes < 525600:
-            return "%d months" % (round(distance_in_minutes / 43200))
-        elif distance_in_minutes < 1051200:
-            return "1 year"
-        else:
-            return "over %d years" % (round(distance_in_minutes / 525600))
+        buckets = [(1, "1 minute"),
+                   (45, "%s minutes" % distance_in_minutes),
+                   (90, "1 hour"),
+                   (1440, "%d hours" % (round(distance_in_minutes / 60.0))),
+                   (2880, "1 day"),
+                   (43220, "%d days" % (round(distance_in_minutes / 1440))),
+                   (86400, "1 month"),
+                   (525600, "%d months" % (round(distance_in_minutes / 43200))),
+                   (1051200, "1 year")]
+        default_bucket = "over %d years" % (round(distance_in_minutes / 525600))
+        return next((desc for (time, desc) in buckets if distance_in_minutes <= time), default_bucket)

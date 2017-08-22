@@ -6,7 +6,8 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
+
 
 class Ui_Preferences(object):
     def setupUi(self, Preferences):
@@ -161,8 +162,10 @@ class Ui_Preferences(object):
         self.groupBox_3.setTitle(_translate("Preferences", "Custom notifications"))
         self.scriptCheckbox.setText(_translate("Preferences", "Execute script for notifications"))
         self.scriptLabel.setText(_translate("Preferences", "Script"))
-        self.scriptLineEdit.setToolTip(_translate("Preferences", "#status# and #projects# would be replaced by the build status and projects respectively"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), _translate("Preferences", "Notifications"))
+        self.scriptLineEdit.setToolTip(_translate("Preferences",
+                                                  "#status# and #projects# would be replaced by the build status and projects respectively"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab),
+                                  _translate("Preferences", "Notifications"))
         self.showLastBuildTimeCheckbox.setText(_translate("Preferences", "show last build time for each project"))
         self.pollingIntervalLabel.setText(_translate("Preferences", "Server polling interval"))
         self.pollingIntervalSpinBox.setSuffix(_translate("Preferences", " seconds"))
@@ -171,4 +174,4 @@ class Ui_Preferences(object):
         self.sortBuildByLastBuildTime.setText(_translate("Preferences", "Sort builds by last build time"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), _translate("Preferences", "Misc"))
 
-import icons_rc
+
