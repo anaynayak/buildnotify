@@ -21,7 +21,7 @@ class BuildIcons(object):
 
     def for_status(self, status):
         return QtGui.QIcon.fromTheme(self.get_path(self.theme_resource_path, status),
-                                     QtGui.QIcon(self.get_path(self.resource_path, status)))
+                                     QtGui.QIcon(QtGui.QPixmap(self.get_path(self.resource_path, status))))
 
     def for_aggregate_status(self, status, count):
         if count == 0:
@@ -30,7 +30,7 @@ class BuildIcons(object):
         pixmap = icon.pixmap(22, 22)
         painter = QtGui.QPainter(pixmap)
         painter.setOpacity(1)
-        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, count)
+        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str(count))
         painter.end()
         return QtGui.QIcon(pixmap)
 
