@@ -21,7 +21,6 @@ BuildNotify is a CCMenu/CCTray equivalent for Ubuntu. It resides in your system 
 * Access individual project pages through the tray menu.
 * Receive notifications for fixed/broken/still failing builds.
 * Easy access to the last build time for each project
-
 * Customize build notifications.
 
 [![Project List](images/projectlist.png)]()
