@@ -10,7 +10,7 @@ Local setup:
 docker run -it --volume=/Absolute/Path/To/buildnotify:/buildnotify --workdir="/buildnotify" --memory=4g --memory-swap=4g --entrypoint=/bin/bash ubuntu:16.04
 docker run -it --volume=/Users/Anay/Project/buildnotify:/buildnotify --workdir="/buildnotify" --memory=4g --memory-swap=4g --entrypoint=/bin/bash ubuntu:16.04
 
-Run steps from bitbucket-pipelines.yml
+Run steps from .circleci/config.yml
 ```
 apt-get install python-dev build-essential libffi-dev libssl-dev
 pylint -f parseable buildnotifylib/ --disable=missing-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-public-methods >report.txt

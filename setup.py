@@ -9,7 +9,7 @@ setup(name='BuildNotify',
       author='Anay Nayak',
       requires=['pytz'],
       author_email='anayak007@gmail.com',
-      url="http://bitbucket.org/Anay/buildnotify/",
+      url="https://anaynayak.github.io/buildnotify/",
       license='GPL v3',
       long_description='BuildNotify is a cruise control system tray monitor which works on Windows/Linux/Mac.' +
                        'It was largely inspired from CCMenu and lets you monitor multiple continuous integration '
