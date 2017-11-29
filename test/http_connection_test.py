@@ -7,17 +7,17 @@ from buildnotifylib.serverconfig import ServerConfig
 
 def test_should_fetch_data():
     file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../data/cctray.xml")
-    response = HttpConnection().connect(ServerConfig('file://' + file_path, [], '', '', None, None), 10)
+    response = HttpConnection().connect(ServerConfig('file://' + file_path, [], '', '', None, None), 3)
     assert str(response.read()) == open(file_path, 'r').read()
 
 
 def test_should_pass_auth_if_provided(mocker):
     m = mocker.patch.object(urllib2, 'urlopen', return_value='content')
-    response = HttpConnection().connect(ServerConfig('url', [], '', '', "user", "pass"), 10)
+    response = HttpConnection().connect(ServerConfig('url.com/cc.xml', [], '', '', "user", "pass"), 3)
     assert str(response) == 'content'
 
     def url_with_auth(a):
-        return a.get_full_url() == 'url' and a.get_header('Authorization') is not None
+        return a.get_full_url() == 'http://url.com/cc.xml' and a.get_header('Authorization') is not None
 
     m.assert_called_once_with(Matcher(url_with_auth))
 
