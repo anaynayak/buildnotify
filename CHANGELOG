@@ -1,3 +1,10 @@
+## [1.0.1] - 2017-12-09
+
+### Fixed
+- Fixed bug with missing icon
+- App crash on network connectivity issue
+
+
 ## [1.0.0] - 2017-08-17
 
 ### Added
