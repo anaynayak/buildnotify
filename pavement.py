@@ -30,9 +30,7 @@ def dist_pypi():
     # Set TWINE_USERNAME, TWINE_PASSWORD
     sh('python setup.py sdist')
     pkg = path('dist').files('*.tar.gz')[0].name
-    # sh('gpg --detach-sign -a dist/' + pkg)
-    # sig = path('dist').files('*.asc')[0].name
-    # sh('twine upload dist/' + pkg + ' dist/' + sig)
+    # sh('twine upload --sign dist/' + pkg)
     sh('twine upload dist/' + pkg)
 
 

@@ -24,8 +24,10 @@ Complete list of available paver commands can be viewed by running @paver
 Dependencies for creating a pip/deb package
 
 ```
+sudo pip install paver
 sudo pip install stdeb
-sudo apt-get install twine
+sudo pip install twine
+sudo pip install keyrings.alt
 sudo apt-get install debhelper dput
 
 ```
