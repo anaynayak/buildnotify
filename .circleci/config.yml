@@ -13,3 +13,6 @@ jobs:
             curl -s https://bootstrap.pypa.io/get-pip.py | python
             pip install tox
             xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
+            pip install paver
+            paver dist_pypi
+            pip install dist/*.tar.gz
