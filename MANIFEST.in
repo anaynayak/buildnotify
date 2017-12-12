@@ -1,0 +1,3 @@
+recursive-include buildnotifylib *.py
+include *.desktop
+include *.svg
