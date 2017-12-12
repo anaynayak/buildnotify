@@ -26,9 +26,14 @@ def dist():
 @task
 @needs('clean')
 def dist_pypi():
+    sh('python setup.py sdist')
+
+
+@task
+@needs('dist_pypi')
+def release_pypi():
     """Upload package to https://pypi.python.org/pypi/BuildNotify/"""
     # Set TWINE_USERNAME, TWINE_PASSWORD
-    sh('python setup.py sdist')
     pkg = path('dist').files('*.tar.gz')[0].name
     # sh('twine upload --sign dist/' + pkg)
     sh('twine upload dist/' + pkg)
