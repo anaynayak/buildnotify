@@ -18,7 +18,7 @@ setup(name='BuildNotify',
       package_dir={'buildnotifylib': 'buildnotifylib'},
       data_files=[
           ('share/applications', ['buildnotify.desktop']),
-          ('share/pixmaps', ['icons/buildnotify.svg']),
+          ('share/pixmaps', ['buildnotify.svg']),
       ],
       classifiers=[
           'Intended Audience :: Developers',
