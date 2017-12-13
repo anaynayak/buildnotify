@@ -1,6 +1,12 @@
 ## [1.0.1] - 2017-12-09
 
 ### Fixed
+- Fixed blocker bug with .desktop file leading to installation failure
+
+
+## [1.0.1] - 2017-12-09
+
+### Fixed
 - Fixed bug with missing icon
 - App crash on network connectivity issue
 

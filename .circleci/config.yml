@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           command: |
-            apt-get update
+            apt-get -qq update
             apt-get install -y -qq python-pyqt5 python-keyring xvfb curl git
             curl -s https://bootstrap.pypa.io/get-pip.py | python
             pip install tox
