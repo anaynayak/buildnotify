@@ -1,4 +1,9 @@
-## [1.0.1] - 2017-12-09
+## [1.0.3] - 2017-12-14
+
+### Fixed
+- Fixed bug with url scheme detection.
+
+## [1.0.2] - 2017-12-13
 
 ### Fixed
 - Fixed blocker bug with .desktop file leading to installation failure

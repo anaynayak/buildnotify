@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='BuildNotify',
-      version="1.0.2",
+      version="1.0.3",
       description='Cruise Control build monitor for Windows/Linux/Mac',
       keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
       author='Anay Nayak',
