@@ -19,7 +19,7 @@ class HttpConnection(object):
             encodedstring = base64.encodestring("%s:%s" % (unquoted_username, unquoted_password))[:-1]
             headers["Authorization"] = "Basic %s" % encodedstring
         parsed = urlparse(server.url)
-        url = parsed.geturl() if parsed.scheme else 'http://' + server.url
+        url = parsed.geturl() if parsed.scheme in ('http', 'https', 'file') else 'http://' + server.url
         if server.skip_ssl_verification:
             return urllib2.urlopen(urllib2.Request(url, None, headers), context=ssl._create_unverified_context())
         return urllib2.urlopen(urllib2.Request(url, None, headers))
