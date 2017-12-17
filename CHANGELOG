@@ -2,7 +2,7 @@
 
 ### Fixed
 - Add http scheme in cctray.xml feed if missing
-
+- Preferences dialog uses available space on resize
 
 ## [1.0.3] - 2017-12-14
 
