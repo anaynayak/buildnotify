@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+- Add http scheme in cctray.xml feed if missing
+
+
 ## [1.0.3] - 2017-12-14
 
 ### Fixed

@@ -23,7 +23,7 @@ class ProjectTest(unittest.TestCase):
             'name': 'proj1',
             'lastBuildStatus': 'Success',
             'activity': 'Sleeping',
-            'url': 'someurl',
+            'url': '1.2.3.4:8080/cc.xml',
             'lastBuildLabel': '120',
             'lastBuildTime': '2009-05-29T13:54:07'
         })
@@ -31,7 +31,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEquals('url', project.server_url)
         self.assertEquals('proj1', project.name)
         self.assertEquals('Success', project.status)
-        self.assertEquals('http://someurl', project.url)
+        self.assertEquals('http://1.2.3.4:8080/cc.xml', project.url)
         self.assertEquals('Sleeping', project.activity)
         self.assertEquals('2009-05-29T13:54:07', project.last_build_time)
         self.assertEquals('120', project.last_build_label)

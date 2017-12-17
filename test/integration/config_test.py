@@ -48,8 +48,8 @@ class ConfigTest(unittest.TestCase):
         self.config.save_server_config(ServerConfig('url2', [], 'EDT', 'prefix', 'user', 'pass'))
         servers = self.config.get_server_configs()
         self.assertEquals(2, len(servers))
-        self.assertEquals('url1', servers[0].url)
-        self.assertEquals('url2', servers[1].url)
+        self.assertEquals('http://url1', servers[0].url)
+        self.assertEquals('http://url2', servers[1].url)
 
     def test_should_update_preferences(self):
         self.config.update_preferences(Preferences(['url1'], 300, '/bin/sh', True, False, True, []))
