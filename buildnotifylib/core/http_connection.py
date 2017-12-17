@@ -3,7 +3,6 @@ import platform
 import socket
 import ssl
 import urllib2
-from urlparse import urlparse
 
 
 class HttpConnection(object):
@@ -18,8 +17,8 @@ class HttpConnection(object):
             unquoted_password = urllib2.unquote(server.password)
             encodedstring = base64.encodestring("%s:%s" % (unquoted_username, unquoted_password))[:-1]
             headers["Authorization"] = "Basic %s" % encodedstring
-        parsed = urlparse(server.url)
-        url = parsed.geturl() if parsed.scheme in ('http', 'https', 'file') else 'http://' + server.url
+        request = urllib2.Request(server.url, None, headers)
         if server.skip_ssl_verification:
-            return urllib2.urlopen(urllib2.Request(url, None, headers), context=ssl._create_unverified_context())
-        return urllib2.urlopen(urllib2.Request(url, None, headers))
+            context = ssl._create_unverified_context()
+            return urllib2.urlopen(request, context=context)
+        return urllib2.urlopen(request)

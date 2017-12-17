@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from dateutil.tz import tzlocal
 
 from buildnotifylib.config import Config
+from buildnotifylib.serverconfig import ServerConfig
 
 
 class Project(object):
@@ -16,7 +17,7 @@ class Project(object):
         self.name = props['name']
         self.status = props['lastBuildStatus']
         self.activity = props['activity']
-        self.url = urlparse(props['url'], 'http').geturl().replace('///', '//')
+        self.url = ServerConfig.cleanup(props['url'])
         self.last_build_time = props['lastBuildTime']
         self.last_build_label = props.get('lastBuildLabel', None)
 
