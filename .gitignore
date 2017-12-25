@@ -10,3 +10,5 @@ dist
 report.txt
 .tox
 .coverage
+coverage.xml
+parts
