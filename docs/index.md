@@ -7,7 +7,8 @@
 [![GitHub issues](https://img.shields.io/github/issues/anaynayak/buildnotify.svg)]()
 [![Requirements Status](https://requires.io/github/anaynayak/buildnotify/requirements.svg?branch=master)]()
 [![CircleCI](https://img.shields.io/circleci/project/github/anaynayak/buildnotify.svg)]()
-[![Coverage Status](https://coveralls.io/repos/bitbucket/Anay/buildnotify/badge.svg?branch=default)]() 
+[![Coverage Status](https://img.shields.io/codeclimate/c/anaynayak/buildnotify.svg?maxAge=3600)]()
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/anaynayak/buildnotify.svg?maxAge=3600)]()
 
 BuildNotify is a CCMenu/CCTray equivalent for Ubuntu. It resides in your system tray and notifies you of the build status for different projects on your continuous integration servers. BuildNotify is largely inspired from the awesome CCMenu available for Mac.
 
