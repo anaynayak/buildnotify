@@ -23,7 +23,7 @@ jobs:
           name: run tests
           command: |
             ~/cc-test-reporter before-build
-            xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
+            xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoverage
             ~/cc-test-reporter after-build --exit-code $?
             paver dist_pypi
             pip install dist/*.tar.gz
