@@ -2,6 +2,12 @@
 
 from setuptools import setup
 
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
+
 setup(name='BuildNotify',
       version="1.0.3",
       description='Cruise Control build monitor for Windows/Linux/Mac',
@@ -11,10 +17,9 @@ setup(name='BuildNotify',
       author_email='anayak007@gmail.com',
       url="https://anaynayak.github.io/buildnotify/",
       license='GPL v3',
-      long_description='BuildNotify is a cruise control system tray monitor which works on Windows/Linux/Mac.' +
-                       'It was largely inspired from CCMenu and lets you monitor multiple continuous integration '
-                       'servers with customizable build notifications for all projects',
-      packages=['buildnotifylib', 'buildnotifylib.core', 'buildnotifylib.generated'],
+      long_description=readme(),
+      packages=['buildnotifylib', 'buildnotifylib.core',
+                'buildnotifylib.generated'],
       package_dir={'buildnotifylib': 'buildnotifylib'},
       data_files=[
           ('share/applications', ['buildnotify.desktop']),
