@@ -7,12 +7,46 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install dependencies
           command: |
             apt-get -qq update
             apt-get install -y -qq python-pyqt5 python-keyring xvfb curl git
             curl -s https://bootstrap.pypa.io/get-pip.py | python
             pip install tox
-            xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
             pip install paver
+      - run:
+          name: run tests
+          command: |
+            xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
             paver dist_pypi
             pip install dist/*.tar.gz
+  deploy:
+    docker:
+      - image: ubuntu:16.04
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            curl -s https://bootstrap.pypa.io/get-pip.py | python
+            pip install paver twine
+      - run:
+          name: upload to pypi
+          command: |
+            paver release_pypi
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
