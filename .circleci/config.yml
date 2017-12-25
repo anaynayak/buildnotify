@@ -35,6 +35,8 @@ jobs:
       - run:
           name: install dependencies
           command: |
+            apt-get -qq update
+            apt-get install -y -qq python curl
             curl -s https://bootstrap.pypa.io/get-pip.py | python
             pip install paver twine
       - run:
@@ -52,8 +54,8 @@ workflows:
       - deploy:
           requires:
             - build
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
+#          filters:
+#            tags:
+#              only: /[0-9]+(\.[0-9]+)*/
+#            branches:
+#              ignore: /.*/
