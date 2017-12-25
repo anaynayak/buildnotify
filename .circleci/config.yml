@@ -15,9 +15,16 @@ jobs:
             pip install tox
             pip install paver
       - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ~/cc-test-reporter
+            chmod +x ~/cc-test-reporter
+      - run:
           name: run tests
           command: |
+            ~/cc-test-reporter before-build
             xvfb-run --server-args="-screen 0 1024x768x24" tox -ecoveralls
+            ~/cc-test-reporter after-build --exit-code $?
             paver dist_pypi
             pip install dist/*.tar.gz
   deploy:
