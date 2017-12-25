@@ -1,4 +1,8 @@
-## Unreleased
+## [1.0.4] - 2017-12-14
+
+### Added
+- Codeclimate for test coverage
+- Deployment to testpypi
 
 ### Fixed
 - Add http scheme in cctray.xml feed if missing
