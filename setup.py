@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from os import getenv
+
 from setuptools import setup
 
 
@@ -8,8 +10,12 @@ def readme():
         return f.read()
 
 
+def version():
+    return getenv('BUILD_VERSION', "1.0.4")
+
+
 setup(name='BuildNotify',
-      version="1.0.4",
+      version=version(),
       description='Cruise Control build monitor for Windows/Linux/Mac',
       keywords='cctray ccmenu buildnotify ubuntu linux cruisecontrol continuous integration ci',
       author='Anay Nayak',

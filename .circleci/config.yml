@@ -39,6 +39,7 @@ jobs:
             apt-get install -y -qq python curl
             curl -s https://bootstrap.pypa.io/get-pip.py | python
             pip install paver twine
+      - run: echo "export BUILD_VERSION=`python buildnotifylib/version.py`" >> $BASH_ENV
       - run:
           name: upload to pypi
           command: |
@@ -56,6 +57,4 @@ workflows:
             - build
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
+              only: /.*/
