@@ -2,12 +2,11 @@
 
 # Form implementation generated from reading ui file 'data/server_configuration.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtWidgets
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_serverConfigurationDialog(object):
     def setupUi(self, serverConfigurationDialog):
@@ -29,10 +28,10 @@ class Ui_serverConfigurationDialog(object):
         self.addServerUrl = QtWidgets.QLineEdit(self.page)
         self.addServerUrl.setGeometry(QtCore.QRect(10, 20, 411, 31))
         self.addServerUrl.setObjectName("addServerUrl")
-        self.groupBox = QtWidgets.QGroupBox(self.page)
-        self.groupBox.setGeometry(QtCore.QRect(10, 60, 411, 91))
-        self.groupBox.setObjectName("groupBox")
-        self.formLayoutWidget_2 = QtWidgets.QWidget(self.groupBox)
+        self.authenticationSettings = QtWidgets.QGroupBox(self.page)
+        self.authenticationSettings.setGeometry(QtCore.QRect(10, 60, 411, 91))
+        self.authenticationSettings.setObjectName("authenticationSettings")
+        self.formLayoutWidget_2 = QtWidgets.QWidget(self.authenticationSettings)
         self.formLayoutWidget_2.setGeometry(QtCore.QRect(0, 19, 411, 71))
         self.formLayoutWidget_2.setObjectName("formLayoutWidget_2")
         self.formLayout_2 = QtWidgets.QFormLayout(self.formLayoutWidget_2)
@@ -99,7 +98,6 @@ class Ui_serverConfigurationDialog(object):
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setObjectName("page_2")
         self.gridLayout = QtWidgets.QGridLayout(self.page_2)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
         self.chooseProjectsLabel = QtWidgets.QLabel(self.page_2)
         self.chooseProjectsLabel.setObjectName("chooseProjectsLabel")
@@ -138,7 +136,7 @@ class Ui_serverConfigurationDialog(object):
         serverConfigurationDialog.setWindowTitle(_translate("serverConfigurationDialog", "Add Server"))
         self.cctrayUrlLabel.setText(_translate("serverConfigurationDialog", "Path to cctray.xml"))
         self.loadUrlButton.setText(_translate("serverConfigurationDialog", "Load"))
-        self.groupBox.setTitle(_translate("serverConfigurationDialog", "Authentication"))
+        self.authenticationSettings.setTitle(_translate("serverConfigurationDialog", "Authentication"))
         self.usernameLabel.setText(_translate("serverConfigurationDialog", "Username"))
         self.passwordLabel.setText(_translate("serverConfigurationDialog", "Password"))
         self.groupBox_2.setTitle(_translate("serverConfigurationDialog", "Misc"))
@@ -148,3 +146,4 @@ class Ui_serverConfigurationDialog(object):
         self.chooseProjectsLabel.setText(_translate("serverConfigurationDialog", "Choose projects"))
         self.backButton.setText(_translate("serverConfigurationDialog", "Back"))
         self.submitButton.setText(_translate("serverConfigurationDialog", "OK"))
+

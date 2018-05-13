@@ -1,9 +1,20 @@
-import keyring
+class FakeKeyring:
+    def set_password(self, url, username, password):
+        pass
+
+    def get_password(self, url, username):
+        pass
+
+try:
+    import keyring
+except ImportError:
+    keyring = FakeKeyring()
 
 
 class Keystore(object):
-    def __init__(self):
-        pass
+    @staticmethod
+    def isAvailable():
+        return not isinstance(keyring, FakeKeyring)
 
     @staticmethod
     def save(url, username, password):

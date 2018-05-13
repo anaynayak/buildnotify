@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QDialog, QMessageBox
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.background_event import BackgroundEvent
+from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from buildnotifylib.serverconfig import ServerConfig
@@ -27,6 +28,11 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
         self.ui.username.setText(self.server.username)
         self.ui.password.setText(self.server.password)
+        if not Keystore.isAvailable():
+            self.ui.authenticationSettings.setTitle('Authentication (keyring dependency missing)')
+            self.ui.username.setEnabled(False)
+            self.ui.password.setEnabled(False)
+
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.skip_ssl_verification = False
 

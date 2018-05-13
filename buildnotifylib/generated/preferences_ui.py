@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/preferences.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,7 +25,6 @@ class Ui_Preferences(object):
         self.serversTab.setSizePolicy(sizePolicy)
         self.serversTab.setObjectName("serversTab")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.serversTab)
-        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.groupBox_2 = QtWidgets.QGroupBox(self.serversTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)

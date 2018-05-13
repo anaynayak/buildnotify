@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 from mock import ANY
 
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.core.keystore import Keystore
 from test.fake_conf import ConfigBuilder
 
 
@@ -96,5 +97,25 @@ def test_should_fail_for_bad_url(qtbot, mocker):
 
     def alert_shown():
         m.assert_called_once_with(dialog, ANY, ANY)
+
+    qtbot.wait_until(alert_shown)
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_should_disable_authentication_if_keystore_is_unavailable(qtbot, mocker):
+    file_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)) + "../../../data/cctray.xml")
+    m = mocker.patch.object(Keystore, 'isAvailable',
+                            return_value=False)
+
+    url = "file://" + file_path
+    conf = ConfigBuilder().server(url).build()
+    dialog = ServerConfigurationDialog(url, conf)
+    dialog.show()
+    qtbot.addWidget(dialog)
+
+    def alert_shown():
+        assert not dialog.ui.username.isEnabled()
+        assert not dialog.ui.password.isEnabled()
+        assert dialog.ui.authenticationSettings.title() == 'Authentication (keyring dependency missing)'
 
     qtbot.wait_until(alert_shown)
