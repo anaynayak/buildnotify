@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+"pyqt5" = "*"
 
 [dev-packages]
 pytest = "==3.2.1"
@@ -16,6 +17,5 @@ pytz = "==2017.2"
 keyring = "==10.4.0"
 mock = "==2.0.0"
 "flake8" = "==3.4.1"
-
-[requires]
-python_version = "2.7"
+paver = "*"
+twine = "*"
