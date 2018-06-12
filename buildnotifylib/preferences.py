@@ -32,7 +32,7 @@ class PreferencesDialog(QDialog):
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
         self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
 
-        for key, checkbox in self.checkboxes.iteritems():
+        for key, checkbox in self.checkboxes.items():
             checkbox.setChecked(self.conf.get_value(str(key)))
 
         self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval_in_seconds())

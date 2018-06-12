@@ -1,11 +1,13 @@
 import unittest
+import six
 
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
-from project_builder import ProjectBuilder
-from cStringIO import StringIO
+from .project_builder import ProjectBuilder
 
+
+StringIO = six.StringIO
 
 class OverallIntegrationStatusTest(unittest.TestCase):
     def test_should_consolidate_build_status(self):

@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 "pyqt5" = "*"
+pytz = "*"
+keyring = "*"
+"keyrings.alt" = "*"
+defusedxml = "*"
 
 [dev-packages]
 pytest = "==3.2.1"
@@ -13,8 +17,6 @@ pytest-cov = "==2.5.1"
 pytest-mock = "==1.6.2"
 pytest-pylint = "==0.7.1"
 python-dateutil = "==2.6.1"
-pytz = "==2017.2"
-keyring = "==10.4.0"
 mock = "==2.0.0"
 "flake8" = "==3.4.1"
 paver = "*"

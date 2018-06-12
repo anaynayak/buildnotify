@@ -1,5 +1,5 @@
 import os
-import urllib2
+import urllib.request
 
 from buildnotifylib.core.http_connection import HttpConnection
 from buildnotifylib.serverconfig import ServerConfig
@@ -12,7 +12,7 @@ def test_should_fetch_data():
 
 
 def test_should_pass_auth_if_provided(mocker):
-    m = mocker.patch.object(urllib2, 'urlopen', return_value='content')
+    m = mocker.patch.object(urllib.request, 'urlopen', return_value='content')
     response = HttpConnection().connect(ServerConfig('http://localhost:8080/cc.xml', [], '', '', 'user', 'pass'), 3)
     assert str(response) == 'content'
 
@@ -24,7 +24,7 @@ def test_should_pass_auth_if_provided(mocker):
 
 
 def test_should_fetch_data_without_auth(mocker):
-    m = mocker.patch.object(urllib2, 'urlopen', return_value='content')
+    m = mocker.patch.object(urllib.request, 'urlopen', return_value='content')
     response = HttpConnection().connect(ServerConfig('localhost:8080/cc.xml', [], '', '', None, None), 3)
     assert str(response) == 'content'
 

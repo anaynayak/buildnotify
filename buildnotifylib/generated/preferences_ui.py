@@ -189,4 +189,4 @@ class Ui_Preferences(object):
         self.sortBuildByLastBuildTime.setText(_translate("Preferences", "Sort builds by last build time"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.miscTab), _translate("Preferences", "Misc"))
 
-import icons_rc
+from . import icons_rc

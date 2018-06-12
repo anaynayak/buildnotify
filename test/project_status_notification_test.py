@@ -171,7 +171,7 @@ def test_should_return_notifications(mocker):
             pass
 
         def show_message(self, **kwargs):
-            print kwargs
+            print(kwargs)
 
     m = mocker.patch.object(NotificationFake, 'show_message')
 
