@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5 import QtCore
 
 from buildnotifylib.core.keystore import Keystore
@@ -128,7 +130,13 @@ class Config(object):
         self.keystore.save(url, username, password)
 
     def get_password(self, url, username):
-        return self.keystore.load(url, username) or ''
+        try:
+            pw = self.keystore.load(url, username)
+        except Exception as e:
+            # Log the exception.
+            logging.exception("keyring access resulted in an error")
+            pw = ''
+        return pw
 
     def set_skip_ssl_verification(self, url, skip_ssl_verification):
         self.settings.setValue(self.SKIP_SSL_VERIFICATION % url,
