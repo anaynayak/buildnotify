@@ -9,6 +9,8 @@ pytz = "*"
 keyring = "*"
 "keyrings.alt" = "*"
 defusedxml = "*"
+"notify2" = "*"
+dbus-python = "*"
 
 [dev-packages]
 pytest = "==3.2.1"
@@ -21,3 +23,4 @@ mock = "==2.0.0"
 "flake8" = "==3.4.1"
 paver = "*"
 twine = "*"
+stdeb = "*"

@@ -1,7 +1,5 @@
-try:
-    import pynotify
-except ImportError:
-    pass
+import notify2
+
 from PyQt5.QtWidgets import QSystemTrayIcon
 
 
@@ -9,11 +7,9 @@ class Notification(object):
     def __init__(self, widget):
         self.widget = widget
         self.notification = None
-        try:
-            if pynotify.init(" buildnotify "):
-                self.notification = pynotify.Notification("buildnotify", "buildnotify", None)
-        except NameError:
-            pass
+
+        if notify2.init(" buildnotify "):
+            self.notification = notify2.Notification("buildnotify", "buildnotify", None)
 
     def show_message(self, title, text):
         if self.notification:
