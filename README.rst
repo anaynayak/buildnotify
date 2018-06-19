@@ -20,14 +20,13 @@ Building from source
 
 The ubuntu package is pretty old!  This might mean you need to build from source.
 
-To do so do the following:
+To do so do the following::
 
-::
-  git clone https://github.com/anaynayak/buildnotify
-  cd buildnotify
-  chmod u+x setup.py
-  sh setup.sh
-  sudo setup.py install
+    git clone https://github.com/anaynayak/buildnotify
+    cd buildnotify
+    chmod u+x setup.py
+    sh setup.sh
+    sudo setup.py install
 
 
 this will put buildnotifyapplet.py on your path in ``/usr/local/bin``
