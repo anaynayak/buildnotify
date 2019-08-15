@@ -10,4 +10,4 @@ def version(key='CIRCLE_BUILD_NUM'):
 
 
 if __name__ == '__main__':
-    print(version())
+    print((version()))

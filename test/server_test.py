@@ -12,7 +12,7 @@ class FilteredContinuousIntegrationServerTest(unittest.TestCase):
 
         server = FilteredContinuousIntegrationServer(ContinuousIntegrationServer("someurl", [project1, project2]), ['a'])
 
-        self.assertEquals([project2], server.get_projects())
+        self.assertEqual([project2], server.get_projects())
 
     def test_prefix_shouldnt_affect_exclusion(self):
         project1 = ProjectBuilder({'name': 'a'}).prefix('s1').build()
@@ -20,7 +20,7 @@ class FilteredContinuousIntegrationServerTest(unittest.TestCase):
 
         server = FilteredContinuousIntegrationServer(ContinuousIntegrationServer("someurl", [project1, project2]), ['a'])
 
-        self.assertEquals([project2], server.get_projects())
+        self.assertEqual([project2], server.get_projects())
 
 
 if __name__ == '__main__':

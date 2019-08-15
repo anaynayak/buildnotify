@@ -1,8 +1,6 @@
-import base64
 import platform
-import socket
-import ssl
-import urllib2
+
+import requests
 
 
 class HttpConnection(object):
@@ -10,15 +8,9 @@ class HttpConnection(object):
         self.user_agent = "%s-%s" % ("BuildNotify", platform.platform())
 
     def connect(self, server, timeout):
-        socket.setdefaulttimeout(timeout)
-        headers = {'User-Agent': self.user_agent}
-        if server.has_creds():
-            unquoted_username = urllib2.unquote(server.username)
-            unquoted_password = urllib2.unquote(server.password)
-            encodedstring = base64.encodestring("%s:%s" % (unquoted_username, unquoted_password))[:-1]
-            headers["Authorization"] = "Basic %s" % encodedstring
-        request = urllib2.Request(server.url, None, headers)
-        if server.skip_ssl_verification:
-            context = ssl._create_unverified_context()
-            return urllib2.urlopen(request, context=context)
-        return urllib2.urlopen(request)
+        headers = {'user-agent': self.user_agent}
+        auth = (server.username, server.password) if server.has_creds() else None
+        response = requests.get(server.url, verify=not server.skip_ssl_verification, headers=headers, auth=auth,
+                                timeout=timeout)
+        response.raise_for_status()
+        return response.text

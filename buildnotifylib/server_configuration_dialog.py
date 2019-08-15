@@ -99,7 +99,7 @@ class ServerConfigurationDialog(QDialog):
         def project(i, model):
             return model.index(i, 0, self.parent.index())
 
-        excluded_projects = [project(i, projects_model).data().encode('utf-8') for i in range(self.parent.rowCount()) if
+        excluded_projects = [project(i, projects_model).data() for i in range(self.parent.rowCount()) if
                              project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked]
         return ServerConfig(self.server_url(), excluded_projects,
                             str(self.ui.timezoneList.currentText()), self.ui.displayPrefix.text().encode('utf-8'),
