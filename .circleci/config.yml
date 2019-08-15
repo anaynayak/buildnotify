@@ -3,17 +3,16 @@ jobs:
   build:
     working_directory: ~/buildnotify
     docker:
-      - image: ubuntu:16.04
+      - image: ubuntu:19.04
     steps:
       - checkout
       - run:
           name: install dependencies
           command: |
             apt-get -qq update
-            apt-get install -y -qq python-pyqt5 python-keyring xvfb curl git
-            curl -s https://bootstrap.pypa.io/get-pip.py | python
-            pip install tox
-            pip install paver
+            apt-get install -y -qq python3-pip xvfb curl git
+            pip3 install tox
+            pip3 install paver
       - run:
           name: Setup Code Climate test-reporter
           command: |
@@ -29,17 +28,16 @@ jobs:
             pip install dist/*.tar.gz
   deploy:
     docker:
-      - image: ubuntu:16.04
+      - image: ubuntu:19.04
     steps:
       - checkout
       - run:
           name: install dependencies
           command: |
             apt-get -qq update
-            apt-get install -y -qq python curl
-            curl -s https://bootstrap.pypa.io/get-pip.py | python
-            pip install paver twine
-      - run: echo "export BUILD_VERSION=`python buildnotifylib/version.py`" >> $BASH_ENV
+            apt-get install -y -qq python3-pip curl
+            pip3 install paver twine
+      - run: echo "export BUILD_VERSION=`python3 buildnotifylib/version.py`" >> $BASH_ENV
       - run:
           name: upload to pypi
           command: |
