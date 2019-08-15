@@ -86,14 +86,14 @@ class ProjectLoader(object):
         self.connection = connection
 
     def get_data(self):
-        print "checking %s" % self.server_config.url
+        print("checking %s" % self.server_config.url)
         try:
             data = self.connection.connect(self.server_config, self.timeout)
-        except Exception, ex:
-            print ex
+        except Exception as ex:
+            print(ex)
             return Response(ContinuousIntegrationServer(self.server_config.url, [], True), ex)
-        dom = minidom.parse(data)
-        print "processed %s" % self.server_config.url
+        dom = minidom.parseString(data)
+        print("processed %s" % self.server_config.url)
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(
