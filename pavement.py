@@ -26,7 +26,7 @@ def dist():
 @task
 @needs('clean')
 def dist_pypi():
-    sh('python setup.py sdist')
+    sh('python3 setup.py sdist')
 
 
 @task
@@ -43,7 +43,7 @@ def release_pypi():
 @needs('clean', 'mk_deb')
 def dist_ppa():
     """Upload package to https://launchpad.net/~anay/+archive/ppa"""
-    sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
+    sh('python3 setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
     dist_package = path('deb_dist').dirs('buildnotify-*')[0]
     sh('sed -i s/unstable/precise/ %s/debian/changelog' % dist_package)
     sh('cd %s;dpkg-buildpackage -i -S -I -rfakeroot' % dist_package)
@@ -55,15 +55,15 @@ def dist_ppa():
 @needs('clean')
 def mk_deb():
     """Build deb package"""
-    sh('python setup.py --command-packages=stdeb.command bdist_deb')
+    sh('python3 setup.py --command-packages=stdeb.command bdist_deb')
 
 
 @task
 @needs('clean')
 def mk_osc():
     """Upload package to https://build.opensuse.org/package/repositories/home:Anay/BuildNotifyTest"""
-    sh('python setup.py sdist')
-    sh('python setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
+    sh('python3 setup.py sdist')
+    sh('python3 setup.py --command-packages=stdeb.command sdist_dsc --force-buildsystem=False')
     dist_package = path('deb_dist').dirs('buildnotify-*')[0]
     sh('rm %s' % path('../BuildNotifyTest').files('*.tar.gz')[0])
     sh('rm %s' % path('../BuildNotifyTest').files('*.dsc')[0])
