@@ -35,6 +35,27 @@ def test_should_show_configured_urls(qtbot):
 
 @pytest.mark.functional
 @pytest.mark.requireshead
+def test_should_save_restore_config(qtbot):
+    with requests_mock.Mocker() as m:
+        url = 'http://localhost:8080/cc.xml'
+        m.get(url, text=fake_content())
+        conf = ConfigBuilder().server(url).build()
+        dialog = ServerConfigurationDialog(url, conf)
+        dialog.show()
+        qtbot.addWidget(dialog)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+
+        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+        server_config = dialog.get_server_config()
+
+        conf.save_server_config(server_config)
+        dialog = ServerConfigurationDialog(url, conf)
+        dialog.show()
+        qtbot.addWidget(dialog)
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
 def test_should_exclude_projects(qtbot):
     with requests_mock.Mocker() as m:
         url = 'http://localhost:8080/cc.xml'
