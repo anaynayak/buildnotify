@@ -10,7 +10,7 @@ jobs:
           name: install dependencies
           command: |
             apt-get -qq update
-            apt-get install -y -qq python3-pip xvfb curl git
+            apt-get install -y -qq python3-pip xvfb curl git libxkbcommon-x11-0 herbstluftwm
             pip3 install tox
             pip3 install paver
       - run:
@@ -25,7 +25,7 @@ jobs:
             tox -ecoverage
             ~/cc-test-reporter after-build --exit-code $?
             paver dist_pypi
-            pip install dist/*.tar.gz
+            pip3 install dist/*.tar.gz
   deploy:
     docker:
       - image: ubuntu:19.04
@@ -56,6 +56,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: /.*/
   nightly:
     triggers:
       - schedule:
