@@ -1,0 +1,53 @@
+name: buildnotify
+title: BuildNotify
+version: '1.0+git'
+summary: A system tray based build status notification app for cctray.xml feed.
+description: |
+  BuildNotify is a system tray notification app for continuous integration build status changes.
+grade: devel
+confinement: devmode
+base: core18
+icon: icons/buildnotify.svg
+license: GPL-3.0
+
+apps:
+  buildnotify:
+    command: desktop-launch $SNAP/buildnotifyapplet.py
+    plugs: [home, desktop, network, x11]
+    desktop: share/applications/buildnotify.desktop
+
+parts:
+  desktop-qt5:
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    make-parameters:
+      - FLAVOR=qt5
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    stage-packages:
+      - libxkbcommon0
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5
+      - try:
+          - appmenu-qt5
+      - locales-all
+      - xdg-user-dirs
+  buildnotify:
+    plugin: python
+    python-version: python3
+    source: .
+#    source-type: git
+    build-packages:
+      - python3-pyqt5
+      - python-keyring
+    stage-packages:
+      - python3-pyqt5
+      - python-keyring
+      - libc-bin
+      - locales
+    after: [desktop-qt5]
