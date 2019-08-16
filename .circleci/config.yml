@@ -1,5 +1,18 @@
 version: 2
 jobs:
+  image:
+    working_directory: ~/buildnotify
+    machine: true
+    steps:
+      - checkout
+      - run:
+          command: |
+            sudo apt update && sudo apt install -y snapd
+            docker run -v $(pwd):$(pwd) -t ubuntu:disco sh -c "apt update -qq && apt install snapcraft -y && cd $(pwd) && snapcraft"
+            mkdir -p artifacts
+            mv *.snap artifacts
+      - store_artifacts:
+          path: artifacts
   build:
     working_directory: ~/buildnotify
     docker:
@@ -46,6 +59,7 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
+      - image
       - build:
           filters:
             tags:
