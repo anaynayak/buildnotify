@@ -12,5 +12,6 @@ class HttpConnection(object):
         auth = (server.username, server.password) if server.has_creds() else None
         response = requests.get(server.url, verify=not server.skip_ssl_verification, headers=headers, auth=auth,
                                 timeout=timeout)
+        response.encoding = 'utf-8'
         response.raise_for_status()
         return response.text

@@ -1,6 +1,6 @@
 from os import getenv
 
-VERSION = "1.0.4"
+VERSION = "2.0.0"
 
 
 def version(key='CIRCLE_BUILD_NUM'):
