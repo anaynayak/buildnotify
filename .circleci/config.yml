@@ -2,13 +2,15 @@ version: 2
 jobs:
   image:
     working_directory: ~/buildnotify
-    machine: true
+    docker:
+      - image: ubuntu:19.04
     steps:
       - checkout
       - run:
           command: |
-            sudo apt -qq update && sudo apt install -y snapd
-            docker run -v $(pwd):$(pwd) -t ubuntu:disco sh -c "apt update -qq && apt install snapcraft -y && cd $(pwd) && snapcraft"
+            apt-get -qq update
+            apt install -y -qq snapcraft
+            TERM=dumb snapcraft
             mkdir -p artifacts
             mv *.snap artifacts
       - store_artifacts:
@@ -60,18 +62,6 @@ workflows:
   build_and_deploy:
     jobs:
       - image
-      - build:
-          filters:
-            tags:
-              only: /.*/
-      - deploy:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
   nightly:
     triggers:
       - schedule:
