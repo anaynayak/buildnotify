@@ -1,4 +1,5 @@
 from PyQt5 import QtCore
+from PyQt5.QtCore import QSettings
 
 from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.serverconfig import ServerConfig
@@ -28,7 +29,7 @@ class Config(object):
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
 
-    def __init__(self, settings=QtCore.QSettings("BuildNotify", "BuildNotify")):
+    def __init__(self, settings=QtCore.QSettings('settings.ini', QSettings.IniFormat)):
         self.settings = settings
         self.keystore = Keystore()
         self.timeout = self.get_with_default("connection/timeout", 10, int)

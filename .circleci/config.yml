@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           command: |
-            sudo apt update && sudo apt install -y snapd
+            sudo apt -qq update && sudo apt install -y snapd
             docker run -v $(pwd):$(pwd) -t ubuntu:disco sh -c "apt update -qq && apt install snapcraft -y && cd $(pwd) && snapcraft"
             mkdir -p artifacts
             mv *.snap artifacts

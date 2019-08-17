@@ -1,5 +1,4 @@
 name: buildnotify
-title: BuildNotify
 version: '1.0+git'
 summary: A system tray based build status notification app for cctray.xml feed.
 description: |
@@ -8,7 +7,6 @@ grade: devel
 confinement: devmode
 base: core18
 icon: icons/buildnotify.svg
-license: GPL-3.0
 
 apps:
   buildnotify:
