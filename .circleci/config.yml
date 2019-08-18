@@ -2,13 +2,17 @@ version: 2
 jobs:
   image:
     working_directory: ~/buildnotify
-    machine: true
+    docker:
+      - image: ubuntu:18.04
     steps:
       - checkout
       - run:
           command: |
-            sudo apt update && sudo apt install -y snapd
-            docker run -v $(pwd):$(pwd) -t ubuntu:19.04 sh -c "apt update -qq && apt -qq -y install snapcraft && cd $(pwd) && TERM=dumb snapcraft"
+            apt-get -qq update
+            apt install -y -qq snapcraft
+      - run:
+          command: |
+            TERM=dumb snapcraft
             mkdir -p artifacts
             mv *.snap artifacts
       - store_artifacts:
