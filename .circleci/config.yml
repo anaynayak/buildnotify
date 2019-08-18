@@ -12,6 +12,7 @@ jobs:
             apt install -y -qq snapcraft
       - run:
           command: |
+            snapcraft update
             TERM=dumb snapcraft
             mkdir -p artifacts
             mv *.snap artifacts
