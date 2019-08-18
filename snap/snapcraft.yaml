@@ -31,7 +31,6 @@ parts:
     source: .
     build-packages:
       - python-pyqt5
-      - python3-distutils
       - python-keyring
     #    source-type: git
     stage-packages:
