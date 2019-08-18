@@ -10,7 +10,9 @@ jobs:
           command: |
             apt-get -qq update
             apt install -y -qq snapcraft
-            TERM=dumb snapcraft
+      - run:
+          command: |
+            snapcraft
             mkdir -p artifacts
             mv *.snap artifacts
       - store_artifacts:
