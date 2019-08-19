@@ -5,40 +5,47 @@ description: |
   BuildNotify is a system tray notification app for continuous integration build status changes.
 grade: devel
 confinement: devmode
+base: core18
 icon: icons/buildnotify.svg
 
 apps:
   buildnotify:
-    command: desktop-launch buildnotifyapplet.py
-    plugs: [home, network, x11, unity7]
+    command: desktop-launch $SNAP/buildnotifyapplet.py
+    plugs: [home,desktop, network, x11, unity7]
     desktop: share/applications/buildnotify.desktop
 
 parts:
   desktop-qt5:
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    make-parameters:
+      - FLAVOR=qt5
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
     stage-packages:
       - libxkbcommon0
-      - ttf-ubuntu-font-family
-      - dmz-cursor-theme
-      - light-themes
       - shared-mime-info
       - libqt5gui5
       - libgdk-pixbuf2.0-0
-      - libqt5svg5 # for loading icon themes which are svg
+      - libqt5svg5
+      - try:
+          - appmenu-qt5
       - locales-all
+      - xdg-user-dirs
   buildnotify:
     plugin: python
     python-version: python3
     source: .
+#    source-type: git
     build-packages:
-      - python-pyqt5
+      - python3-pyqt5
       - python-keyring
-    #    source-type: git
     stage-packages:
-      - python-pyqt5
+      - python3-pyqt5
       - python-keyring
-    python-packages:
-      - python-dateutil==2.6.1
-      - pytz==2017.2
-      - keyring==10.4.0
+      - libc-bin
+      - locales
     after: [desktop-qt5]
-
