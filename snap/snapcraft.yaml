@@ -10,7 +10,7 @@ icon: icons/buildnotify.svg
 
 apps:
   buildnotify:
-    command: desktop-launch $SNAP/buildnotifyapplet.py
+    command: desktop-launch $SNAP/bin/buildnotifyapplet.py
     plugs: [home,desktop, network, x11, unity7]
     desktop: share/applications/buildnotify.desktop
 
