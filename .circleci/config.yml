@@ -1,5 +1,28 @@
 version: 2
 jobs:
+  image:
+    working_directory: ~/buildnotify
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - checkout
+      - run:
+          command: |
+            apt-get -qq update
+            apt install -y -qq snapcraft
+      - run:
+          command: |
+            snapcraft update
+            TERM=dumb snapcraft
+            mkdir -p artifacts
+            mv *.snap artifacts
+      - store_artifacts:
+          path: artifacts
+      - run:
+          command: |
+            mkdir .snapcraft
+            echo $SNAPCRAFT_LOGIN_FILE | base64 --decode --ignore-garbage > .snapcraft/snapcraft.cfg
+            snapcraft push artifacts/*.snap --release edge
   build:
     working_directory: ~/buildnotify
     docker:
