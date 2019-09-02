@@ -3,7 +3,7 @@ pytest-qt==3.2.2
 pytest-cov==2.7.1
 pytest-mock==1.10.4
 pytest-pylint==0.14.1
-requests_mock==1.6.0
+requests_mock==1.7.0
 pytest-xvfb==1.2.0
 keyring==10.4.0
 mock==3.0.5
