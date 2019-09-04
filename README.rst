@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fanaynayak%2Fbuildnotify.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fanaynayak%2Fbuildnotify?ref=badge_shield)
+
 BuildNotify
 ===========
 
@@ -29,3 +31,7 @@ To do so do the following::
     pip install -e setup.py
 
 this will put buildnotifyapplet.py at ``./venv/bin/buildnotifyapplet.py``
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fanaynayak%2Fbuildnotify.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fanaynayak%2Fbuildnotify?ref=badge_large)
