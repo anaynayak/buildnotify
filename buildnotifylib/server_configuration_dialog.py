@@ -16,18 +16,25 @@ class ServerConfigurationDialog(QDialog):
         QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
-        self.ui.addServerUrl.setText(url)
+
+        if url is not None:
+            self.ui.addServerUrl.setText(url)
+
         self.conf = conf
         self.parent = QtGui.QStandardItem("All")
         all_timezones = [Config.NONE_TIMEZONE]
         all_timezones.extend(pytz.all_timezones)
         self.ui.timezoneList.addItems(all_timezones)
-        self.server = conf.get_server_config(url)
-        self.ui.timezoneList.setCurrentIndex(all_timezones.index(self.server.timezone))
-        self.ui.displayPrefix.setText(self.server.prefix)
+
+        if url is not None:
+            self.server = conf.get_server_config(url)
+            self.ui.timezoneList.setCurrentIndex(all_timezones.index(self.server.timezone))
+            self.ui.displayPrefix.setText(self.server.prefix)
+            self.ui.username.setText(self.server.username)
+            self.ui.password.setText(self.server.password)
+
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
-        self.ui.username.setText(self.server.username)
-        self.ui.password.setText(self.server.password)
+
         if not Keystore.isAvailable():
             self.ui.authenticationSettings.setTitle('Authentication (keyring dependency missing)')
             self.ui.username.setEnabled(False)
@@ -37,17 +44,23 @@ class ServerConfigurationDialog(QDialog):
         self.skip_ssl_verification = False
 
     def fetch_data(self):
+        if '' == self.ui.addServerUrl.text():
+            QMessageBox.critical(self, "Invalid input", "Path field cannot be empty.")
+            return
+
         self.ui.loadUrlButton.setEnabled(False)
         self.event = BackgroundEvent(self.load_projects, self)
         self.event.completed.connect(self.load_data)
         self.event.start()
 
     def load_projects(self):
-        self.project_loader = ProjectLoader(self.get_server_config(), self.conf.timeout)
+        config = self.get_server_config()
+        self.project_loader = ProjectLoader(config, self.conf.timeout)
         return self.project_loader.get_data()
 
     def load_data(self, response):
         self.ui.loadUrlButton.setEnabled(True)
+
         if response.failed():
             self.handle_errors(response)
             return
