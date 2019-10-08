@@ -17,9 +17,6 @@ class ServerConfigurationDialog(QDialog):
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
 
-        if url is not None:
-            self.ui.addServerUrl.setText(url)
-
         self.conf = conf
         self.parent = QtGui.QStandardItem("All")
         all_timezones = [Config.NONE_TIMEZONE]
@@ -27,6 +24,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.timezoneList.addItems(all_timezones)
 
         if url is not None:
+            self.ui.addServerUrl.setText(url)
             self.server = conf.get_server_config(url)
             self.ui.timezoneList.setCurrentIndex(all_timezones.index(self.server.timezone))
             self.ui.displayPrefix.setText(self.server.prefix)
