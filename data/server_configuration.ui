@@ -6,234 +6,226 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>295</height>
+    <width>458</width>
+    <height>351</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>458</width>
+    <height>351</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Add Server</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
       <number>0</number>
      </property>
      <widget class="QWidget" name="page">
-      <widget class="QLabel" name="cctrayUrlLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>-10</y>
-         <width>161</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Path to cctray.xml</string>
-       </property>
-       <property name="buddy">
-        <cstring>addServerUrl</cstring>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="loadUrlButton">
-       <property name="geometry">
-        <rect>
-         <x>340</x>
-         <y>240</y>
-         <width>81</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Load</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="addServerUrl">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>411</width>
-         <height>31</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QGroupBox" name="authenticationSettings">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>411</width>
-         <height>91</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Authentication</string>
-       </property>
-       <widget class="QWidget" name="formLayoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>19</y>
-          <width>411</width>
-          <height>71</height>
-         </rect>
-        </property>
-        <layout class="QFormLayout" name="formLayout_2">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="cctrayUrlLabel">
+         <property name="text">
+          <string>Path to cctray.xml</string>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="usernameLabel">
-           <property name="text">
-            <string>Username</string>
+         <property name="buddy">
+          <cstring>addServerUrl</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="addServerUrl">
+         <property name="placeholderText">
+          <string notr="true">http://[host]:[port]/dashboard/cctray.xml</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="authenticationSettings">
+         <property name="title">
+          <string>Authentication</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QFormLayout" name="formLayout_2">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="usernameLabel">
+              <property name="text">
+               <string>Username</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="username"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="passwordLabel">
+              <property name="text">
+               <string>Password</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="password">
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Misc</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QFormLayout" name="formLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="timezoneLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>180</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>180</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Server timezone</string>
+              </property>
+              <property name="buddy">
+               <cstring>timezoneList</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="timezoneList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>210</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="displayPrefixLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>180</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>180</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Display prefix</string>
+              </property>
+              <property name="buddy">
+               <cstring>timezoneList</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="displayPrefix">
+              <property name="minimumSize">
+               <size>
+                <width>210</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="placeholderText">
+               <string>e.g. branch/release</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="username"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="passwordLabel">
-           <property name="text">
-            <string>Password</string>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
            </property>
-          </widget>
+          </spacer>
          </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="password">
-           <property name="echoMode">
-            <enum>QLineEdit::Password</enum>
+         <item>
+          <widget class="QPushButton" name="loadUrlButton">
+           <property name="text">
+            <string>Load</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>150</y>
-         <width>411</width>
-         <height>81</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Misc</string>
-       </property>
-       <widget class="QWidget" name="formLayoutWidget_3">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>19</y>
-          <width>411</width>
-          <height>62</height>
-         </rect>
-        </property>
-        <layout class="QFormLayout" name="formLayout_3">
-         <item row="0" column="0">
-          <widget class="QLabel" name="timezoneLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>180</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Server timezone</string>
-           </property>
-           <property name="buddy">
-            <cstring>timezoneList</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="displayPrefixLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>180</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Display prefix</string>
-           </property>
-           <property name="buddy">
-            <cstring>timezoneList</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="timezoneList">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>210</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>16777215</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="displayPrefix">
-           <property name="minimumSize">
-            <size>
-             <width>210</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="placeholderText">
-            <string>e.g. branch/release</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="page_2">
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
         <widget class="QLabel" name="chooseProjectsLabel">
          <property name="text">
           <string>Choose projects</string>
@@ -243,7 +235,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="3">
+       <item>
         <widget class="QTreeView" name="projectsList">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
@@ -253,25 +245,42 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="backButton">
-         <property name="text">
-          <string>Back</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="submitButton">
-         <property name="text">
-          <string>OK</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="backButton">
+           <property name="text">
+            <string>Back</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="submitButton">
+           <property name="text">
+            <string>OK</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -281,8 +290,6 @@
  </widget>
  <tabstops>
   <tabstop>addServerUrl</tabstop>
-  <tabstop>loadUrlButton</tabstop>
-  <tabstop>submitButton</tabstop>
   <tabstop>projectsList</tabstop>
  </tabstops>
  <resources/>

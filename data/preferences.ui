@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>394</height>
+    <width>462</width>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,14 @@
    <bool>false</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -116,260 +123,223 @@
       <attribute name="title">
        <string>Notifications</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>421</width>
-         <height>131</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Notification settings</string>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <widget class="QWidget" name="layoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>30</y>
-          <width>401</width>
-          <height>101</height>
-         </rect>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="successfulBuildsCheckbox">
-           <property name="text">
-            <string>successful builds</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="brokenBuildsCheckbox">
-           <property name="text">
-            <string>broken builds</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="fixedBuildsCheckbox">
-           <property name="text">
-            <string>fixed builds</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QCheckBox" name="stillFailingBuildsCheckbox">
-           <property name="text">
-            <string>still failing builds</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="connectivityIssuesCheckbox">
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>connectivity issues</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>160</y>
-         <width>401</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Custom notifications</string>
-       </property>
-       <widget class="QCheckBox" name="scriptCheckbox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>20</y>
-          <width>401</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Execute script for notifications</string>
-        </property>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>50</y>
-          <width>391</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="scriptLabel">
-           <property name="text">
-            <string>Script</string>
-           </property>
-           <property name="buddy">
-            <cstring>scriptLineEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="scriptLineEdit">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>#status# and #projects# would be replaced by the build status and projects respectively</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Notification settings</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="successfulBuildsCheckbox">
+              <property name="text">
+               <string>successful builds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="brokenBuildsCheckbox">
+              <property name="text">
+               <string>broken builds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="fixedBuildsCheckbox">
+              <property name="text">
+               <string>fixed builds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="stillFailingBuildsCheckbox">
+              <property name="text">
+               <string>still failing builds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="connectivityIssuesCheckbox">
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>connectivity issues</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Custom notifications</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="scriptCheckbox">
+            <property name="text">
+             <string>Execute script for notifications</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="scriptLabel">
+              <property name="text">
+               <string>Script</string>
+              </property>
+              <property name="buddy">
+               <cstring>scriptLineEdit</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="scriptLineEdit">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>#status# and #projects# would be replaced by the build status and projects respectively</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="miscTab">
       <attribute name="title">
        <string>Misc</string>
       </attribute>
-      <widget class="QCheckBox" name="showLastBuildTimeCheckbox">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>351</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>show last build time for each project</string>
-       </property>
-      </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>421</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="pollingIntervalLabel">
-          <property name="text">
-           <string>Server polling interval</string>
-          </property>
-          <property name="buddy">
-           <cstring>pollingIntervalSpinBox</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="pollingIntervalSpinBox">
-          <property name="minimumSize">
-           <size>
-            <width>130</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>130</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="wrapping">
-           <bool>false</bool>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>60</number>
-          </property>
-          <property name="singleStep">
-           <number>1</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>109</y>
-         <width>401</width>
-         <height>131</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Build Sort order</string>
-       </property>
-       <widget class="QRadioButton" name="sortBuildByName">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>20</y>
-          <width>191</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Sort builds by name</string>
-        </property>
-       </widget>
-       <widget class="QRadioButton" name="sortBuildByLastBuildTime">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>40</y>
-          <width>221</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Sort builds by last build time</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="pollingIntervalSpinBox">
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>130</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="wrapping">
+            <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> seconds</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>60</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="pollingIntervalLabel">
+           <property name="text">
+            <string>Server polling interval</string>
+           </property>
+           <property name="buddy">
+            <cstring>pollingIntervalSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QCheckBox" name="showLastBuildTimeCheckbox">
+           <property name="text">
+            <string>show last build time for each project</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Build Sort order</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QRadioButton" name="sortBuildByName">
+            <property name="text">
+             <string>Sort builds by name</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="sortBuildByLastBuildTime">
+            <property name="text">
+             <string>Sort builds by last build time</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>

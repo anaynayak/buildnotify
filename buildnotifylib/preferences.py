@@ -6,8 +6,6 @@ from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):
-    addServerTemplateText = "http://[host]:[port]/dashboard/cctray.xml"
-
     def __init__(self, conf, parent=None):
         QDialog.__init__(self, parent)
         self.conf = conf
@@ -30,6 +28,7 @@ class PreferencesDialog(QDialog):
         self.ui.cctrayPathList.setModel(QStringListModel(self.conf.get_urls()))
 
         self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
+        self.ui.cctrayPathList.doubleClicked.connect(self.configure_projects)
         self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
 
         for key, checkbox in self.checkboxes.items():
@@ -45,7 +44,7 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
-        server_config = ServerConfigurationDialog(self.addServerTemplateText, self.conf, self).open()
+        server_config = ServerConfigurationDialog(None, self.conf, self).open()
         if server_config is not None:
             self.conf.save_server_config(server_config)
             urls = self.ui.cctrayPathList.model().stringList()
