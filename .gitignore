@@ -14,3 +14,4 @@ report.txt
 .coverage
 coverage.xml
 parts
+.vscode
