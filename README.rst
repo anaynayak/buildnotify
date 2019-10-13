@@ -29,3 +29,11 @@ To do so do the following::
     pip install -e setup.py
 
 this will put buildnotifyapplet.py at ``./venv/bin/buildnotifyapplet.py``
+
+
+Installing from PyPI
+====================
+
+``pip install buildnotify --pre``
+
+Launch using ``./venv/bin/buildnotifyapplet.py``
