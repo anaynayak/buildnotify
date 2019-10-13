@@ -1,33 +1,21 @@
 Local setup:
 
-* Use Vagrantfile to launch a local VM
-* Alternatively, use dependencies specified in setup.sh to setup a local machine
+* virtualenv -p python3 venv
+* source venv/bin/activate.fish
+* `tox` for running tests 
+* `pip install -e .` for installing locally. Use `python buildnotifyapplet.py` to launch
+* `paver mk_resources` is used to regenerate source files corresponding to icons/dialogs.
 
-
-### Running tests
-
-```
-docker run -it --volume=/Absolute/Path/To/buildnotify:/buildnotify --workdir="/buildnotify" --memory=4g --memory-swap=4g --entrypoint=/bin/bash ubuntu:16.04
-docker run -it --volume=/Users/Anay/Project/buildnotify:/buildnotify --workdir="/buildnotify" --memory=4g --memory-swap=4g --entrypoint=/bin/bash ubuntu:16.04
-
-Run steps from .circleci/config.yml
-```
-apt-get install python-dev build-essential libffi-dev libssl-dev
-pylint -f parseable buildnotifylib/ --disable=missing-docstring,too-many-instance-attributes,too-few-public-methods,too-many-arguments,too-many-public-methods >report.txt
-```
-
-Complete list of available paver commands can be viewed by running @paver 
+Paver commands can be viewed by running `paver -h`. Run `pip install paver` if not installed.
 
 ### Packaging
 
-
-Dependencies for creating a pip/deb package
+Dependencies for creating a pip/deb package (use virtualenv)
 
 ```
-sudo pip install paver
-sudo pip install stdeb
-sudo pip install twine
-sudo pip install keyrings.alt
-sudo apt-get install debhelper dput
-
+pip install paver
+pip install stdeb
+pip install twine
+pip install keyrings.alt
+apt-get install debhelper dput
 ```
