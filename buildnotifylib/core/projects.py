@@ -9,6 +9,7 @@ from buildnotifylib.core.filtered_continuous_integration_server import FilteredC
 from buildnotifylib.core.http_connection import HttpConnection
 from buildnotifylib.core.project import Project
 from buildnotifylib.core.response import Response
+from buildnotifylib.serverconfig import ServerConfig
 
 
 class OverallIntegrationStatus(object):
@@ -88,7 +89,11 @@ class ProjectLoader(object):
     def get_data(self):
         print("checking %s" % self.server_config.url)
         try:
-            data = self.connection.connect(self.server_config, self.timeout)
+            headers = {}
+            if self.server_config.authentication_type == ServerConfig.AUTH_BEARER_TOKEN:
+                headers['Authorization'] = 'Bearer %s' % self.server_config.password
+
+            data = self.connection.connect(self.server_config, self.timeout, headers)
         except Exception as ex:
             print(ex)
             return Response(ContinuousIntegrationServer(self.server_config.url, [], True), ex)
