@@ -40,7 +40,7 @@ class MockConnection(object):
     def __init__(self, data):
         self.data = data
 
-    def connect(self, server, timeout):
+    def connect(self, server, timeout, additional_headers=None):
         return self.data
 
 
