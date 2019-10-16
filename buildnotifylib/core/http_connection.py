@@ -9,9 +9,7 @@ class HttpConnection(object):
 
     def connect(self, server, timeout, additional_headers=None):
         headers = {'user-agent': self.user_agent}
-        if type(additional_headers) is dict:
-            for header in additional_headers:
-                headers[header] = additional_headers[header]
+        headers.update(additional_headers or {})
 
         auth = (server.username, server.password) if server.has_creds() else None
         response = requests.get(server.url, verify=not server.skip_ssl_verification, headers=headers, auth=auth,
