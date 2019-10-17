@@ -21,6 +21,7 @@ class Config(object):
     USERNAME = "username/%s"
     PASSWORD = "password/%s"
     SKIP_SSL_VERIFICATION = "skip_ssl_verification/%s"
+    AUTHORIZATION_TYPE = "authorization_type/%s"
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
     NONE_TIMEZONE = "None"
@@ -138,6 +139,15 @@ class Config(object):
         return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False,
                                    bool)
 
+    def set_authorization_type(self, url, authorization_type):
+        self.settings.setValue(self.AUTHORIZATION_TYPE % url,
+                               authorization_type)
+
+    def get_authorization_type(self, url):
+        return self.settings.value(self.AUTHORIZATION_TYPE % url,
+                                   ServerConfig.AUTH_USERNAME_PASSWORD,
+                                   int)
+
     def save_server_config(self, server_config):
         self.add_server_url(server_config.url)
         self.set_project_excludes(server_config.url,
@@ -149,14 +159,13 @@ class Config(object):
                           server_config.password)
         self.set_skip_ssl_verification(server_config.url,
                                        server_config.skip_ssl_verification)
+        self.set_authorization_type(server_config.url, server_config.authentication_type)
 
     def get_server_config(self, url):
         username = self.get_username(url)
-        return ServerConfig(url, self.get_project_excludes(url),
-                            self.get_timezone(url),
-                            self.get_display_prefix(url), username,
-                            self.get_password(url, username),
-                            self.get_skip_ssl_verification(url))
+        return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url), self.get_display_prefix(url),
+                            username, self.get_password(url, username), self.get_skip_ssl_verification(url),
+                            self.get_authorization_type(url))
 
     def get_server_configs(self):
         return [self.get_server_config(url) for url in self.get_urls()]

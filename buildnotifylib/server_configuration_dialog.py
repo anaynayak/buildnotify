@@ -30,16 +30,42 @@ class ServerConfigurationDialog(QDialog):
             self.ui.displayPrefix.setText(self.server.prefix)
             self.ui.username.setText(self.server.username)
             self.ui.password.setText(self.server.password)
+            self.ui.authentication_type.setCurrentIndex(self.server.authentication_type)
+            self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
+            self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
+        else:
+            self.server = ServerConfig('', '', '', '', '', '')
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
 
         if not Keystore.isAvailable():
             self.ui.authenticationSettings.setTitle('Authentication (keyring dependency missing)')
+            self.ui.authentication_type.setEnabled(False)
             self.ui.username.setEnabled(False)
             self.ui.password.setEnabled(False)
 
+        self.ui.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.skip_ssl_verification = False
+
+    def set_authentication_type(self, index):
+        self.ui.username.setText('')
+        self.ui.password.setText('')
+        if ServerConfig.AUTH_USERNAME_PASSWORD == index:
+            # Username/password selected
+            self.ui.username.setVisible(True)
+            self.ui.usernameLabel.setVisible(True)
+            self.ui.passwordLabel.setText('Password')
+            self.ui.password.setPlaceholderText(None)
+        elif ServerConfig.AUTH_BEARER_TOKEN == index:
+            # Bearer token selected
+            self.ui.username.setVisible(False)
+            self.ui.usernameLabel.setVisible(False)
+            self.ui.passwordLabel.setText('Bearer token')
+            self.ui.password.setPlaceholderText("Do not include the 'Bearer' keyword")
+        else:
+            raise NotImplemented('Unsupported value: "%s". An implementation is missing.'
+                                 % self.ui.authentication_type.currentText())
 
     def fetch_data(self):
         if '' == self.ui.addServerUrl.text():
@@ -114,7 +140,8 @@ class ServerConfigurationDialog(QDialog):
                              project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked]
         return ServerConfig(self.server_url(), excluded_projects,
                             str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()),
-                            str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification)
+                            str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification,
+                            int(self.ui.authentication_type.currentIndex()))
 
     def open(self):
         if self.exec_() == QDialog.Accepted:
