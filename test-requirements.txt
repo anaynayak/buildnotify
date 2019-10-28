@@ -1,7 +1,7 @@
 pytest==5.2.1
 pytest-qt==3.2.2
 pytest-cov==2.8.1
-pytest-mock==1.11.1
+pytest-mock==1.11.2
 pytest-pylint==0.14.1
 requests_mock==1.7.0
 pytest-xvfb==1.2.0
