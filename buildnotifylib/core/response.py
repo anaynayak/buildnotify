@@ -1,4 +1,4 @@
-from ssl import SSLError
+from requests.exceptions import SSLError
 
 
 class Response(object):
@@ -11,6 +11,6 @@ class Response(object):
 
     def ssl_error(self):
         try:
-            return self.failed() and type(self.error.reason) is SSLError
+            return self.failed() and type(self.error) is SSLError
         except AttributeError:
             return False
