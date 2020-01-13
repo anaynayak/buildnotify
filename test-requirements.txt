@@ -5,6 +5,6 @@ pytest-mock==1.11.1
 pytest-pylint==0.14.1
 requests_mock==1.7.0
 pytest-xvfb==1.2.0
-keyring==10.4.0
+keyring==21.1.0
 mock==3.0.5
 flake8==3.7.8
