@@ -4,7 +4,7 @@ pytest-cov==2.8.1
 pytest-mock==3.0.0
 pytest-pylint==0.15.1
 requests_mock==1.7.0
-pytest-xvfb==1.2.0
+pytest-xvfb==2.0.0
 keyring==10.4.0
 mock==4.0.2
 flake8==3.7.9

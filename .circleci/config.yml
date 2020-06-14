@@ -26,7 +26,7 @@ jobs:
   build:
     working_directory: ~/buildnotify
     docker:
-      - image: ubuntu:19.04
+      - image: ubuntu:18.04
     steps:
       - checkout
       - run:
@@ -49,9 +49,11 @@ jobs:
             ~/cc-test-reporter after-build --exit-code $?
             paver dist_pypi
             pip3 install dist/*.tar.gz
+      - store_test_results:
+          path: reports
   deploy:
     docker:
-      - image: ubuntu:19.04
+      - image: ubuntu:18.04
     steps:
       - checkout
       - run:
