@@ -19,7 +19,6 @@ class Config(object):
     EXCLUDES = "excludes/%s"
     TIMEZONE = "timezone/%s"
     USERNAME = "username/%s"
-    PASSWORD = "password/%s"
     SKIP_SSL_VERIFICATION = "skip_ssl_verification/%s"
     AUTHORIZATION_TYPE = "authorization_type/%s"
     DISPLAY_PREFIX = "display_prefix/%s"

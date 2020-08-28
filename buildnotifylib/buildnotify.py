@@ -56,8 +56,8 @@ class BuildNotify(object):
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
-    @classmethod
-    def start(cls):
+    @staticmethod
+    def start():
         app = QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
         buildnotify = BuildNotify(app)

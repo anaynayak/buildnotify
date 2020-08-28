@@ -13,3 +13,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Python Vulture Action
         uses: anaynayak/python-vulture-action@v1.0
+        with:
+          vulture-args: buildnotifylib/ test/whitelist.py --exclude generated
