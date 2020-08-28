@@ -58,7 +58,6 @@ class ProjectsPopulator(QThread):
     def __init__(self, config, parent=None):
         QThread.__init__(self, parent)
         self.config = config
-        self.listeners = []
 
     def load_from_server(self):
         self.start()

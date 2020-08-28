@@ -27,9 +27,9 @@ class PreferencesDialog(QDialog):
     def set_values_from_config(self):
         self.ui.cctrayPathList.setModel(QStringListModel(self.conf.get_urls()))
 
-        self.ui.cctrayPathList.clicked.connect(lambda x: self.item_selection_changed(True))
+        self.ui.cctrayPathList.clicked.connect(lambda _: self.item_selection_changed(True))
         self.ui.cctrayPathList.doubleClicked.connect(self.configure_projects)
-        self.ui.removeButton.clicked.connect(lambda x: self.item_selection_changed(False))
+        self.ui.removeButton.clicked.connect(lambda _: self.item_selection_changed(False))
 
         for key, checkbox in self.checkboxes.items():
             checkbox.setChecked(self.conf.get_value(str(key)))
