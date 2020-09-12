@@ -2,16 +2,27 @@ name: Vulture
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          pip3 install tox
+          pip3 install paver
       - name: Python Vulture Action
         uses: anaynayak/python-vulture-action@v1.0
         with:
           vulture-args: buildnotifylib/ test/whitelist.py --exclude generated
+      - name: Test install
+        run: |
+          paver dist_pypi
+          pip3 install dist/*.tar.gz
