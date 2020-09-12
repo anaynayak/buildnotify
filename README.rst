@@ -36,4 +36,4 @@ Installing from PyPI
 
 ``pip install buildnotify --pre``
 
-Launch using ``./venv/bin/buildnotifyapplet.py``
+Launch using ``.local/bin/buildnotifyapplet.py``
