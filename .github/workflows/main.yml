@@ -1,17 +1,36 @@
-name: Vulture
+name: ci
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
-
+    branches: [master]
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
       - name: Python Vulture Action
         uses: anaynayak/python-vulture-action@v1.0
         with:
           vulture-args: buildnotifylib/ test/whitelist.py --exclude generated
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y -qq xvfb curl git libxkbcommon-x11-0 herbstluftwm
+          pip3 install tox
+          pip3 install paver
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v2.6.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        with:
+          coverageCommand: tox -e coverage
+      - name: Test install
+        run: |
+          paver dist_pypi
+          pip3 install dist/*.tar.gz

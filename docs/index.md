@@ -5,8 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/l/Buildnotify.svg)]() 
 [![PyPI status](https://img.shields.io/pypi/status/buildnotify.svg)]() 
 [![GitHub issues](https://img.shields.io/github/issues/anaynayak/buildnotify.svg)]()
-[![Requirements Status](https://requires.io/github/anaynayak/buildnotify/requirements.svg?branch=master)]()
-[![CircleCI](https://img.shields.io/circleci/project/github/anaynayak/buildnotify.svg)]()
+[![CI](https://github.com/anaynayak/buildnotify/workflows/ci/badge.svg)]()
 [![Coverage Status](https://img.shields.io/codeclimate/c/anaynayak/buildnotify.svg?maxAge=3600)]()
 [![Maintainability](https://img.shields.io/codeclimate/maintainability/anaynayak/buildnotify.svg?maxAge=3600)]()
 

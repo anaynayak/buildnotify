@@ -3,7 +3,7 @@ from os import getenv
 VERSION = "2.0.0"
 
 
-def version(key='CIRCLE_BUILD_NUM'):
+def version(key='BUILD_LABEL'):
     build = getenv(key)
     label = '' if build is None else '.dev' + build
     return VERSION + label
