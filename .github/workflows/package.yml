@@ -5,6 +5,8 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  BUILD_LABEL: ${{ github.run_id }}
 jobs:
   pypi:
     runs-on: ubuntu-latest
@@ -16,6 +18,7 @@ jobs:
       - name: Build dist
         run: |
           pip3 install paver
+          export BUILD_VERSION=`python3 buildnotifylib/version.py`
           paver dist_pypi
       - name: Publish to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
