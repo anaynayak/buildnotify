@@ -2,8 +2,6 @@ name: package
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
 
 env:
   BUILD_LABEL: ${{ github.run_id }}
