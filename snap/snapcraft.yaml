@@ -1,5 +1,5 @@
 name: buildnotify-test
-version: '1.0+git'
+version: "1.0+git"
 summary: A system tray based build status notification app for cctray.xml feed.
 description: |
   BuildNotify is a system tray notification app for continuous integration build status changes.
@@ -11,41 +11,44 @@ icon: icons/buildnotify.svg
 apps:
   buildnotify:
     command: desktop-launch $SNAP/bin/buildnotifyapplet.py
-    plugs: [home,desktop, network, x11, unity7]
+    extensions:
+      - kde-neon
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - unity7
+      - network
+      - home
+      - opengl
     desktop: share/applications/buildnotify.desktop
 
+environment:
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+
 parts:
-  desktop-qt5:
-    build-packages:
-      - build-essential
-      - qtbase5-dev
-      - dpkg-dev
-    make-parameters:
-      - FLAVOR=qt5
-    plugin: make
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: qt
-    stage-packages:
-      - libxkbcommon0
-      - shared-mime-info
-      - libqt5gui5
-      - libgdk-pixbuf2.0-0
-      - libqt5svg5
-      - try:
-          - appmenu-qt5
-      - locales-all
-      - xdg-user-dirs
   buildnotify:
     plugin: python
     python-version: python3
     source: .
-#    source-type: git
     build-packages:
+      - python3
       - python3-pyqt5
       - python-keyring
+      - execstack
     stage-packages:
-      - python3-pyqt5
-      - python-keyring
-      - libc-bin
-      - locales
-    after: [desktop-qt5]
+      - libqt53dextras5
+      - libqt53dquick5
+      - libqt53danimation5
+      - libqt53dquickscene2d5
+      - libqt5webview5
+      - libatk1.0-0
+      - libgtk-3-0
+      - libspeechd2
+      - qtwebengine5-dev
+      - libqt5gamepad5
+    override-prime: |
+      snapcraftctl prime
+      sed -i 's|Icon=/usr/share/pixmaps/buildnotify.svg|Icon=${SNAP}/share/pixmaps/buildnotify.svg|g' share/applications/buildnotify.desktop
