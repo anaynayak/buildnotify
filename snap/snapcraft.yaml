@@ -48,7 +48,6 @@ parts:
       - libgtk-3-0
       - libspeechd2
       - qtwebengine5-dev
-      - libqt5gamepad5
     override-prime: |
       snapcraftctl prime
       sed -i 's|Icon=/usr/share/pixmaps/buildnotify.svg|Icon=${SNAP}/share/pixmaps/buildnotify.svg|g' share/applications/buildnotify.desktop
