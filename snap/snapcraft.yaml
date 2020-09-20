@@ -7,7 +7,7 @@ grade: devel
 confinement: devmode
 base: core18
 icon: icons/buildnotify.svg
-
+architectures: [amd64]
 apps:
   buildnotify:
     command: desktop-launch $SNAP/bin/buildnotifyapplet.py
