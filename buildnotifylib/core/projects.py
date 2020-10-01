@@ -1,7 +1,8 @@
+from typing import Optional, List, Dict
 from xml.dom import minidom
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, QObject
 
 from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
@@ -13,10 +14,10 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class OverallIntegrationStatus(object):
-    def __init__(self, servers):
+    def __init__(self, servers: List[FilteredContinuousIntegrationServer]):
         self.servers = servers
 
-    def get_build_status(self):
+    def get_build_status(self) -> Optional[str]:
         build_status_mapping = self.to_map()
         seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping',
                'Failure.CheckingModifications', 'Success.CheckingModifications']
@@ -25,10 +26,10 @@ class OverallIntegrationStatus(object):
                 return status
         return None
 
-    def get_failing_builds(self):
+    def get_failing_builds(self) -> List[Project]:
         return [p for p in self.get_projects() if p.status == 'Failure']
 
-    def to_map(self):
+    def to_map(self) -> Dict[str, List[Project]]:
         status = dict(
             [('Success.Sleeping', []), ('Success.Building', []), ('Failure.CheckingModifications', []),
              ('Success.CheckingModifications', []), ('Failure.Sleeping', []), ('Failure.Building', []),
@@ -41,21 +42,21 @@ class OverallIntegrationStatus(object):
                 status['Unknown.Unknown'].append(project)
         return status
 
-    def get_projects(self):
+    def get_projects(self) -> List[Project]:
         all_projects = []
         for server in self.servers:
             if server.get_projects() is not None:
                 all_projects.extend(server.get_projects())
         return all_projects
 
-    def unavailable_servers(self):
+    def unavailable_servers(self) -> List[FilteredContinuousIntegrationServer]:
         return [server for server in self.servers if server.unavailable]
 
 
 class ProjectsPopulator(QThread):
     updated_projects = QtCore.pyqtSignal(object)
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, parent: QObject = None):
         QThread.__init__(self, parent)
         self.config = config
 
@@ -74,18 +75,18 @@ class ProjectsPopulator(QThread):
     def run(self):
         self.process()
 
-    def check_nodes(self, server_config):
+    def check_nodes(self, server_config: ServerConfig) -> FilteredContinuousIntegrationServer:
         response = ProjectLoader(server_config, self.config.timeout).get_data()
         return FilteredContinuousIntegrationServer(response.server, server_config.excluded_projects)
 
 
 class ProjectLoader(object):
-    def __init__(self, server_config, timeout, connection=HttpConnection()):
+    def __init__(self, server_config: ServerConfig, timeout: Optional[float], connection=HttpConnection()):
         self.server_config = server_config
         self.timeout = timeout
         self.connection = connection
 
-    def get_data(self):
+    def get_data(self) -> Response:
         print("checking %s" % self.server_config.url)
         try:
             headers = {}

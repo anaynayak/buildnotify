@@ -2,10 +2,10 @@ from datetime import datetime
 
 
 class DistanceOfTime(object):
-    def __init__(self, from_date):
+    def __init__(self, from_date: datetime):
         self.from_date = from_date
 
-    def age(self):
+    def age(self) -> str:
         since_date = datetime.now(tz=self.from_date.tzinfo)
 
         distance_in_time = since_date - self.from_date

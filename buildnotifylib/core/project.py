@@ -1,5 +1,5 @@
 from datetime import datetime
-from urllib.parse import urlparse
+from typing import Dict
 
 import pytz
 from dateutil.parser import parse
@@ -10,7 +10,7 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class Project(object):
-    def __init__(self, server_url, prefix, timezone, props):
+    def __init__(self, server_url: str, prefix: str, timezone: str, props: Dict[str, str]):
         self.server_url = server_url
         self.prefix = prefix
         self.timezone = timezone
@@ -21,21 +21,21 @@ class Project(object):
         self.last_build_time = props['lastBuildTime']
         self.last_build_label = props.get('lastBuildLabel', None)
 
-    def get_build_status(self):
+    def get_build_status(self) -> str:
         return self.status + "." + self.activity
 
-    def label(self):
+    def label(self) -> str:
         if self.prefix:
             return "[" + self.prefix + "] " + self.name
         return self.name
 
-    def different_builds(self, project):
+    def different_builds(self, project: 'Project') -> bool:
         return self.last_build_label != project.last_build_label
 
-    def matches(self, other):
+    def matches(self, other: 'Project') -> bool:
         return other.name == self.name and other.server_url == self.server_url
 
-    def get_last_build_time(self):
+    def get_last_build_time(self) -> datetime:
         if not self.last_build_time:
             return datetime.now(tzlocal())
         if self.timezone == Config.NONE_TIMEZONE:

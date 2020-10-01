@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pytz
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
@@ -34,11 +36,11 @@ class ServerConfigurationDialog(QDialog):
             self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
             self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
         else:
-            self.server = ServerConfig('', '', '', '', '', '')
+            self.server = ServerConfig('', [], '', '', '', '')
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
 
-        if not Keystore.isAvailable():
+        if not Keystore.is_available():
             self.ui.authenticationSettings.setTitle('Authentication (keyring dependency missing)')
             self.ui.authentication_type.setEnabled(False)
             self.ui.username.setEnabled(False)
@@ -130,7 +132,7 @@ class ServerConfigurationDialog(QDialog):
     def server_url(self):
         return str(self.ui.addServerUrl.text())
 
-    def get_server_config(self):
+    def get_server_config(self) -> ServerConfig:
         projects_model = self.ui.projectsList.model()
 
         def project(i, model):
@@ -143,6 +145,6 @@ class ServerConfigurationDialog(QDialog):
                             str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification,
                             int(self.ui.authentication_type.currentIndex()))
 
-    def open(self):
+    def open(self) -> Optional[ServerConfig]:
         if self.exec_() == QDialog.Accepted:
             return self.get_server_config()

@@ -1,8 +1,12 @@
+from typing import Callable
+
+from PyQt5.QtCore import QObject
+
 from buildnotifylib.core.timed_event import TimedEvent
 
 
 class RepeatTimedEvent(object):
-    def __init__(self, parent, event_target, repeat_count, interval=2000):
+    def __init__(self, parent: QObject, event_target: Callable[[int], None], repeat_count: int, interval=2000):
         self.parent = parent
         self.repeat_count = repeat_count
         self.event_target = event_target
