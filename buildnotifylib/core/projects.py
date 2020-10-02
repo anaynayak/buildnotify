@@ -3,6 +3,7 @@ from xml.dom import minidom
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, QObject
+from buildnotifylib.config import Config
 
 from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
@@ -30,7 +31,7 @@ class OverallIntegrationStatus(object):
         return [p for p in self.get_projects() if p.status == 'Failure']
 
     def to_map(self) -> Dict[str, List[Project]]:
-        status = dict(
+        status: Dict[str, List[Project]] = dict(
             [('Success.Sleeping', []), ('Success.Building', []), ('Failure.CheckingModifications', []),
              ('Success.CheckingModifications', []), ('Failure.Sleeping', []), ('Failure.Building', []),
              ('Unknown.Building', []), ('Unknown.CheckingModifications', []), ('Unknown.Sleeping', []),
@@ -56,7 +57,7 @@ class OverallIntegrationStatus(object):
 class ProjectsPopulator(QThread):
     updated_projects = QtCore.pyqtSignal(object)
 
-    def __init__(self, config, parent: QObject = None):
+    def __init__(self, config: Config, parent: QObject = None):
         QThread.__init__(self, parent)
         self.config = config
 

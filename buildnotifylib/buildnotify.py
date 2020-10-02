@@ -6,13 +6,13 @@ from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.config import Config
-from buildnotifylib.core.projects import ProjectsPopulator
+from buildnotifylib.core.projects import ProjectsPopulator, OverallIntegrationStatus
 from buildnotifylib.core.timed_event import TimedEvent
 from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 
 
 class BuildNotify(object):
-    def __init__(self, app, conf=Config(), interval=2000):
+    def __init__(self, app: QApplication, conf=Config(), interval=2000):
         self.conf = conf
         self.build_icons = BuildIcons()
         self.app = app
@@ -21,7 +21,7 @@ class BuildNotify(object):
         self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, 5, interval)
         self.timed_event.start()
 
-    def delayed_start(self, event_count):
+    def delayed_start(self, event_count: int):
         if not QSystemTrayIcon.isSystemTrayAvailable():
             if event_count == 5:
                 QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
@@ -42,7 +42,7 @@ class BuildNotify(object):
     def reload_project_data(self):
         self.projects_populator.reload()
 
-    def update_projects(self, integration_status):
+    def update_projects(self, integration_status: OverallIntegrationStatus):
         self.app_notification.update_projects(integration_status)
         self.app_ui.update_projects(integration_status)
 

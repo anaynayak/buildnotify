@@ -1,12 +1,15 @@
-from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QDialog
+from typing import Optional, List, Tuple
 
+from PyQt5.QtCore import QStringListModel
+from PyQt5.QtWidgets import QDialog, QWidget
+
+from buildnotifylib.config import Config, Preferences
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, conf, parent=None):
+    def __init__(self, conf: Config, parent: QWidget = None):
         QDialog.__init__(self, parent)
         self.conf = conf
         self.ui = Ui_Preferences()
@@ -65,16 +68,16 @@ class PreferencesDialog(QDialog):
         if server_config is not None:
             self.conf.save_server_config(server_config)
 
-    def get_urls(self):
+    def get_urls(self) -> List[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
 
-    def get_interval_in_seconds(self):
+    def get_interval_in_seconds(self) -> int:
         return self.ui.pollingIntervalSpinBox.value()
 
-    def get_selections(self):
+    def get_selections(self) -> List[Tuple[str, bool]]:
         return [(key, checkbox.isChecked()) for (key, checkbox) in list(self.checkboxes.items())]
 
-    def open(self):
+    def open(self) -> Optional[Preferences]:  # type: ignore
         if self.exec_() == QDialog.Accepted:
             return Preferences(
                 urls=self.get_urls(),
@@ -85,15 +88,4 @@ class PreferencesDialog(QDialog):
                 sort_by_name=self.ui.sortBuildByName.isChecked(),
                 selections=self.get_selections()
             )
-
-
-class Preferences(object):
-    def __init__(self, urls, interval, custom_script_text, custom_script_checked,
-                 sort_by_build_time, sort_by_name, selections):
-        self.urls = urls
-        self.interval = interval
-        self.custom_script_text = custom_script_text
-        self.trigger_custom_script = custom_script_checked
-        self.sort_by_build_time = sort_by_build_time
-        self.sort_by_name = sort_by_name
-        self.selections = selections
+        return None

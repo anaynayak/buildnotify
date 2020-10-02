@@ -2,11 +2,11 @@ try:
     import pynotify
 except ImportError:
     pass
-from PyQt5.QtWidgets import QSystemTrayIcon
+from PyQt5.QtWidgets import QSystemTrayIcon, QWidget
 
 
 class Notification(object):
-    def __init__(self, widget):
+    def __init__(self, widget: QWidget):
         self.widget = widget
         self.notification = None
         try:
@@ -15,7 +15,7 @@ class Notification(object):
         except NameError:
             pass
 
-    def show_message(self, title, text):
+    def show_message(self, title: str, text: str):
         if self.notification:
             self.notification.update(title, text, None)
         if self.notification is None or not self.notification.show():
