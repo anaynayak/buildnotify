@@ -1,8 +1,11 @@
+from typing import Callable
+
 from PyQt5 import QtCore
+from PyQt5.QtCore import QObject
 
 
 class TimedEvent(object):
-    def __init__(self, parent, event_target, interval=2000):
+    def __init__(self, parent: QObject, event_target: Callable, interval=2000):
         self.event_target = event_target
         self.parent = parent
         self.interval = interval
@@ -14,5 +17,5 @@ class TimedEvent(object):
         self.timer.setSingleShot(True)
         self.timer.start()
 
-    def set_interval(self, interval):
+    def set_interval(self, interval: int):
         self.interval = interval

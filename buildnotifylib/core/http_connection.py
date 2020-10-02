@@ -1,13 +1,15 @@
 import platform
+from typing import Optional, Dict
 
 import requests
+from buildnotifylib.serverconfig import ServerConfig
 
 
 class HttpConnection(object):
     def __init__(self):
         self.user_agent = "%s-%s" % ("BuildNotify", platform.platform())
 
-    def connect(self, server, timeout, additional_headers=None):
+    def connect(self, server: ServerConfig, timeout: Optional[float], additional_headers: Dict[str, str] = None) -> str:
         headers = {'user-agent': self.user_agent}
         headers.update(additional_headers or {})
 

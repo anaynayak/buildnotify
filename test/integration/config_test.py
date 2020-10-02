@@ -2,8 +2,7 @@ import unittest
 
 from PyQt5 import QtCore
 
-from buildnotifylib.config import Config
-from buildnotifylib.preferences import Preferences
+from buildnotifylib.config import Config, Preferences
 from buildnotifylib.serverconfig import ServerConfig
 
 
@@ -17,14 +16,15 @@ class ConfigTest(unittest.TestCase):
         self.config.set_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml',
                                          ['buildnotify::test-server'])
         self.assertEqual(['buildnotify::test-server'],
-                          self.config.get_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml'))
+                         self.config.get_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml'))
 
     def test_should_persist_empty_user_project_excludes(self):
         self.config.set_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml', [])
         self.assertEqual([], self.config.get_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml'))
 
     def test_should_return_an_empty_list_if_unmapped(self):
-        self.assertEqual([], self.config.get_project_excludes('https://github.com/anaynayak/buildnotify/buildnotify.xml'))
+        self.assertEqual([],
+                         self.config.get_project_excludes('https://github.com/anaynayak/buildnotify/buildnotify.xml'))
 
     def test_should_store_server_preferences(self):
         self.config.save_server_config(

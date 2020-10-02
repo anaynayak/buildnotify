@@ -19,11 +19,11 @@ class BuildIcons(object):
                            'Failure.Building': self.failure_building,
                            'unavailable': self.unavailable}
 
-    def for_status(self, status):
+    def for_status(self, status) -> QtGui.QIcon:
         return QtGui.QIcon.fromTheme(self.get_path(self.theme_resource_path, status),
                                      QtGui.QIcon(QtGui.QPixmap(self.get_path(self.resource_path, status))))
 
-    def for_aggregate_status(self, status, count):
+    def for_aggregate_status(self, status, count) -> QtGui.QIcon:
         if count == 0:
             return self.for_status(status)
         icon = self.for_status(status)
@@ -34,7 +34,7 @@ class BuildIcons(object):
         painter.end()
         return QtGui.QIcon(pixmap)
 
-    def get_path(self, resource_path, status):
+    def get_path(self, resource_path: str, status: str) -> str:
         if status in self.all_status:
             return resource_path % self.all_status[status]
         return resource_path % self.all_status['unavailable']

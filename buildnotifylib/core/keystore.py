@@ -5,6 +5,7 @@ class FakeKeyring:
     def get_password(self, url, username):
         pass
 
+
 try:
     import keyring
 except ImportError:
@@ -13,13 +14,13 @@ except ImportError:
 
 class Keystore(object):
     @staticmethod
-    def isAvailable():
+    def is_available() -> bool:
         return not isinstance(keyring, FakeKeyring)
 
     @staticmethod
-    def save(url, username, password):
+    def save(url: str, username: str, password: str):
         keyring.set_password(url, username, password)
 
     @staticmethod
-    def load(url, username):
+    def load(url: str, username: str) -> str:
         return keyring.get_password(url, username)
