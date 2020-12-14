@@ -1,6 +1,7 @@
 from time import strftime
 
 from PyQt5 import QtCore
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QSystemTrayIcon, QApplication
 
 from buildnotifylib.app_menu import AppMenu
@@ -21,6 +22,11 @@ class AppUi(QtCore.QObject):
         self.app_menu = AppMenu(self.widget, conf, self.build_icons)
         self.app_menu.reload_data.connect(self.reload_data)  # type: ignore
         self.tray.setContextMenu(self.app_menu.menu)
+        self.tray.activated.connect(self.show_menu)
+
+    def show_menu(self, reason):
+        if reason == QSystemTrayIcon.Trigger:
+            self.app_menu.menu.popup(QCursor.pos())
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
         count = len(integration_status.get_failing_builds())
