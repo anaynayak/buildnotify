@@ -1,6 +1,8 @@
+import sys
 from time import strftime
 
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QSystemTrayIcon, QApplication
 
@@ -25,7 +27,7 @@ class AppUi(QtCore.QObject):
         self.tray.activated.connect(self.show_menu)
 
     def show_menu(self, reason):
-        if reason == QSystemTrayIcon.Trigger:
+        if not sys.platform.startswith('darwin') and reason == QSystemTrayIcon.Trigger:
             self.app_menu.menu.popup(QCursor.pos())
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
