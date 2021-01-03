@@ -1,3 +1,16 @@
+## [2.1.0] - 2021-01-03
+
+### Tech
+- Type declarations, mypy for static type checker
+- Use github actions for running builds
+- Bump dependencies
+
+### Added
+- Show context menu on left click for non-darwin platforms
+- Bearer token authentication by @Deuchnord
+- Enhance config windows UX by @Deuchnord
+- Snaps are automatically pushed to https://snapcraft.io/buildnotify-test
+
 ## [2.0.0] - 2019-08-16
 
 ### Added

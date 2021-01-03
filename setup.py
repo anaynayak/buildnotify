@@ -11,7 +11,7 @@ def readme():
 
 
 def version():
-    return getenv('BUILD_VERSION', "2.0.0")
+    return getenv('BUILD_VERSION', "2.1.0")
 
 
 setup(name='BuildNotify',
