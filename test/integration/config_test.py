@@ -52,7 +52,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual('http://url2', servers[1].url)
 
     def test_should_update_preferences(self):
-        self.config.update_preferences(Preferences(['url1'], 300, '/bin/sh', True, False, True, []))
+        self.config.update_preferences(Preferences(['url1'], 300, '/bin/sh', True, False, True, [], False))
 
         self.assertEqual(self.config.get_urls(), ['url1'])
         self.assertEqual(self.config.get_interval_in_seconds(), 300)
@@ -60,6 +60,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(self.config.get_custom_script_enabled(), True)
         self.assertEqual(self.config.get_sort_by_last_build_time(), False)
         self.assertEqual(self.config.get_sort_by_name(), True)
+        self.assertEqual(self.config.get_show_last_build_label(), False)
 
 
 if __name__ == '__main__':
