@@ -2,7 +2,6 @@ import sys
 from time import strftime
 
 from PyQt5 import QtCore
-from PyQt5 import QtWidgets
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QSystemTrayIcon, QApplication
 
