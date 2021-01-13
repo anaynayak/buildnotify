@@ -29,7 +29,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
         with:
-          coverageCommand: tox -e coverage
+          coverageCommand: tox -e coverage -- -m "not functional"
       - name: Test install
         run: |
           paver dist_pypi
