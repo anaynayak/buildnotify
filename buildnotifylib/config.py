@@ -8,7 +8,7 @@ from buildnotifylib.serverconfig import ServerConfig
 
 class Preferences(object):
     def __init__(self, urls, interval, custom_script_text, custom_script_checked,
-                 sort_by_build_time, sort_by_name, selections):
+                 sort_by_build_time, sort_by_name, selections, show_last_build_label):
         self.urls = urls
         self.interval = interval
         self.custom_script_text = custom_script_text
@@ -16,6 +16,7 @@ class Preferences(object):
         self.sort_by_build_time = sort_by_build_time
         self.sort_by_name = sort_by_name
         self.selections = selections
+        self.show_last_build_label = show_last_build_label
 
 
 class Config(object):
@@ -38,6 +39,8 @@ class Config(object):
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
     NONE_TIMEZONE = "None"
+
+    SHOW_LAST_BUILD_LABEL = "show_last_build_label"
 
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
@@ -126,6 +129,12 @@ class Config(object):
         return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME,
                                    type=str) == self.SORT_BY_NAME
 
+    def get_show_last_build_label(self) -> bool:
+        return self.settings.value(self.SHOW_LAST_BUILD_LABEL, False, bool)
+
+    def set_show_last_build_label(self, show_last_build_label: bool):
+        self.settings.setValue(self.SHOW_LAST_BUILD_LABEL, show_last_build_label)
+
     def set_sort_by_last_build_time(self):
         self.settings.setValue(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME)
 
@@ -189,6 +198,8 @@ class Config(object):
         self.set_custom_script(preferences.custom_script_text,
                                preferences.trigger_custom_script)
         self.set_custom_script_enabled(preferences.trigger_custom_script)
+        self.set_show_last_build_label(preferences.show_last_build_label)
+
         if preferences.sort_by_build_time:
             self.set_sort_by_last_build_time()
         if preferences.sort_by_name:

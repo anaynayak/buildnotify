@@ -24,10 +24,15 @@ class Project(object):
     def get_build_status(self) -> str:
         return self.status + "." + self.activity
 
-    def label(self) -> str:
+    def label(self, show_last_build_label: bool = False) -> str:
+        label = self.name
+
         if self.prefix:
-            return "[" + self.prefix + "] " + self.name
-        return self.name
+            label = '[%s] %s' % (self.prefix, self.name)
+        if show_last_build_label:
+            label = '%s (%s)' % (label, self.last_build_label)
+
+        return label
 
     def different_builds(self, project: 'Project') -> bool:
         return self.last_build_label != project.last_build_label
