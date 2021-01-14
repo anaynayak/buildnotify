@@ -42,6 +42,7 @@ class PreferencesDialog(QDialog):
         self.ui.scriptLineEdit.setText(self.conf.get_custom_script())
         self.ui.sortBuildByLastBuildTime.setChecked(self.conf.get_sort_by_last_build_time())
         self.ui.sortBuildByName.setChecked(self.conf.get_sort_by_name())
+        self.ui.showLastBuildLabelCheckbox.setChecked(self.conf.get_show_last_build_label())
 
     def item_selection_changed(self, status):
         self.ui.configureProjectButton.setEnabled(status)
@@ -86,6 +87,7 @@ class PreferencesDialog(QDialog):
                 custom_script_checked=self.ui.scriptCheckbox.isChecked(),
                 sort_by_build_time=self.ui.sortBuildByLastBuildTime.isChecked(),
                 sort_by_name=self.ui.sortBuildByName.isChecked(),
-                selections=self.get_selections()
+                selections=self.get_selections(),
+                show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked()
             )
         return None

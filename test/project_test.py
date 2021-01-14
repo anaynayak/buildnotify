@@ -38,6 +38,19 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(datetime.datetime(2009, 5, 29, 13, 54, 7, 0, tzlocal()), project.get_last_build_time())
         self.assertEqual("Success.Sleeping", project.get_build_status())
 
+    def test_should_display_last_build_label_on_demand(self):
+        project = Project('url', None, 'None', {
+            'name': 'proj1',
+            'lastBuildStatus': 'Success',
+            'activity': 'Sleeping',
+            'url': '1.2.3.4:8080/cc.xml',
+            'lastBuildLabel': 'master',
+            'lastBuildTime': '2009-05-29T13:54:07'
+        })
+
+        self.assertEqual('proj1', project.label())
+        self.assertEqual('proj1 (master)', project.label(True))
+
     def test_should_not_override_existing_url_scheme(self):
         project = Project('url', '', 'tz', {
             'name': 'proj1',

@@ -60,7 +60,7 @@ class AppMenu(QtCore.QObject):
         sys.exit()
 
     def create_menu_item(self, project: Project, icon: QIcon):
-        menu_item_label = project.label()
+        menu_item_label = project.label(self.conf.get_show_last_build_label())
         if self.conf.get_value("lastBuildTimeForProject"):
             menu_item_label = menu_item_label + ", " + DistanceOfTime(project.get_last_build_time()).age() + " ago"
 

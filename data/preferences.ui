@@ -27,7 +27,7 @@
    <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="serversTab">
       <property name="sizePolicy">
@@ -249,6 +249,23 @@
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <layout class="QGridLayout" name="gridLayout_5">
+         <item row="4" column="0">
+          <widget class="QLabel" name="pollingIntervalLabel">
+           <property name="text">
+            <string>Server polling interval</string>
+           </property>
+           <property name="buddy">
+            <cstring>pollingIntervalSpinBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QCheckBox" name="showLastBuildLabelCheckbox">
+           <property name="text">
+            <string>show last build label for each project</string>
+           </property>
+          </widget>
+         </item>
          <item row="4" column="1">
           <widget class="QSpinBox" name="pollingIntervalSpinBox">
            <property name="minimumSize">
@@ -277,16 +294,6 @@
            </property>
            <property name="singleStep">
             <number>1</number>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="pollingIntervalLabel">
-           <property name="text">
-            <string>Server polling interval</string>
-           </property>
-           <property name="buddy">
-            <cstring>pollingIntervalSpinBox</cstring>
            </property>
           </widget>
          </item>
