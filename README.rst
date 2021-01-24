@@ -37,3 +37,9 @@ Installing from PyPI
 ``pip install buildnotify --pre``
 
 Launch using ``.local/bin/buildnotifyapplet.py``
+
+
+Supported continuous integration systems
+========================================
+- See https://cctray.org/servers/
+
