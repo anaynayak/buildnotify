@@ -18,17 +18,13 @@ Features
 Building from source
 ====================
 
-The ubuntu package is pretty old!  This might mean you need to build from source.
+The ubuntu package is pretty old! You can use the pypi package which is in sync with latest releases.
 
 To do so do the following::
 
-    git clone https://github.com/anaynayak/buildnotify
-    cd buildnotify
-    virtualenv -p python3 venv
-    source venv/bin/activate.fish
-    pip install -e setup.py
+    pipx run --spec=buildnotify buildnotifyapplet.py
 
-this will put buildnotifyapplet.py at ``./venv/bin/buildnotifyapplet.py``
+this will launch buildnotifyapplet.py and show a icon in the menubar.
 
 
 Installing from PyPI
