@@ -1,7 +1,7 @@
 pytest==7.0.0
 pytest-qt==4.0.2
 pytest-cov==3.0.0
-pytest-mock==3.6.1
+pytest-mock==3.7.0
 pytest-pylint==0.18.0
 requests_mock==1.8.0
 pytest-xvfb==2.0.0
