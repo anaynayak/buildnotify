@@ -8,5 +8,5 @@ pytest-xvfb==2.0.0
 keyring==23.5.0
 mock==4.0.3
 flake8==4.0.1
-PyQt5-stubs==5.14.2.2
+PyQt5-stubs==5.15.6.0
 pytest-mypy==0.9.0
