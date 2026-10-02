@@ -12,6 +12,8 @@ Add a new server by clicking the `+` sign. Each server can use a username and pa
 
 ![Servers](images/servers.png)
 
+![Server dialog for a cctray feed](images/server-cctray.png)
+
 Customize notifications that you'd like to see
 
 ![Notifications](images/notifications.png)
@@ -30,6 +32,8 @@ BuildNotify can also watch GitHub Actions without a cctray feed. In the server d
 2. Workflow (optional): a workflow file such as `ci.yml`, or its name. Leave it empty for all workflows.
 3. Branch (optional): leave it empty for all branches.
 4. Token: a personal access token that can read Actions on the repository. A fine-grained token needs the "Actions: read" permission. Public repositories work without a token, but GitHub then allows only 60 requests an hour. The token is kept in the system keyring.
+
+![Server dialog for GitHub Actions](images/server-github.png)
 
 Each workflow and branch pair shows as one project, such as `CI (main)`. Its status comes from the last finished run: success is green, a failure, time-out or startup failure is red, and a cancelled or skipped run is unknown. While a run is queued or in progress the project shows as building, with the status of the run before it. Clicking a project opens the latest run on GitHub.
 
@@ -61,6 +65,12 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 3. All projects in the configured CI servers contribute to the overall build status which is displayed in the tray.
 4. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time.
 5. Clicking on any project in the tray menu would take you to the project page on the CI server.
+
+![Tray menu](images/projectlist.png)
+
+The tray icon shows the overall status: success, success while building, failure, failure while building, and no data. When builds fail it also shows how many. The second row is the symbolic set.
+
+![Tray icon states](images/tray-icons.png)
 
 ## Muting and pausing
 
