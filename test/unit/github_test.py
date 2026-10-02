@@ -121,8 +121,9 @@ def test_should_drop_excluded_projects_unless_asked_not_to():
     ],
 )
 def test_should_report_http_errors_in_one_short_line(name, status, message):
-    with pytest.raises(FetchError, match=f"^{re.escape(message)}$"):
+    with pytest.raises(FetchError, match=f"^{re.escape(message)}$") as raised:
         source(FakeApi(fixture(name, status))).fetch()
+    assert raised.value.status == status
 
 
 def test_should_report_a_body_that_is_not_a_runs_list():

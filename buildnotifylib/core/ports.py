@@ -13,6 +13,23 @@ class CertificateError(Exception):
 class FetchError(Exception):
     """Raised by a Connection when a fetch fails, with a short message free of URLs and credentials."""
 
+    def __init__(self, message: str, status: int | None = None):
+        super().__init__(message)
+        self.status = status
+        """The HTTP status, when the server answered with an error."""
+
+
+class CannotConnect(FetchError):
+    """No connection to the server could be made."""
+
+
+class HostNotFound(CannotConnect):
+    """The server's host name didn't resolve."""
+
+
+class FetchTimeout(FetchError):
+    """The server didn't answer in time."""
+
 
 @dataclass(frozen=True)
 class Response:

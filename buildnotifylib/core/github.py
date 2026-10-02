@@ -140,7 +140,7 @@ class GitHubSource:
             return
         if until is not None and response.status in LIMITED:
             raise RateLimited(until)
-        raise FetchError(ERRORS.get(response.status, f"GitHub returned HTTP {response.status}"))
+        raise FetchError(ERRORS.get(response.status, f"GitHub returned HTTP {response.status}"), response.status)
 
     def filtered(self, runs: list[Run]) -> list[Run]:
         workflow = self.server.workflow

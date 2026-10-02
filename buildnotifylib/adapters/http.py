@@ -1,10 +1,19 @@
+import socket
 import threading
 from urllib.parse import urlsplit
 
 import requests
 from requests.exceptions import HTTPError, RequestException, SSLError, Timeout
+from urllib3.exceptions import NameResolutionError
 
-from buildnotifylib.core.ports import CertificateError, FetchError, Response
+from buildnotifylib.core.ports import (
+    CannotConnect,
+    CertificateError,
+    FetchError,
+    FetchTimeout,
+    HostNotFound,
+    Response,
+)
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
 
@@ -37,7 +46,7 @@ class HttpConnection:
         except SSLError as ex:
             raise CertificateError(str(ex)) from ex
         except RequestException as ex:
-            raise FetchError(self.describe(ex, server.url)) from ex
+            raise self.describe(ex, server.url) from ex
         return response.content
 
     def request(self, url: str, timeout: float | None, headers: dict[str, str], verify: bool = True) -> Response:
@@ -49,20 +58,28 @@ class HttpConnection:
         except SSLError as ex:
             raise CertificateError(str(ex)) from ex
         except RequestException as ex:
-            raise FetchError(self.describe(ex, url)) from ex
+            raise self.describe(ex, url) from ex
         lowered = {name.lower(): value for name, value in response.headers.items()}
         return Response(response.status_code, lowered, response.content)
 
     @staticmethod
-    def describe(error: RequestException, url: str) -> str:
+    def describe(error: RequestException, url: str) -> FetchError:
         if isinstance(error, HTTPError) and error.response is not None:
-            return f"HTTP {error.response.status_code} {error.response.reason or ''}".strip()
+            status = error.response.status_code
+            return FetchError(f"HTTP {status} {error.response.reason or ''}".strip(), status)
         if isinstance(error, Timeout):
-            return "Timed out"
+            return FetchTimeout("Timed out")
         if isinstance(error, requests.ConnectionError):
-            return f"Could not connect to {urlsplit(url).hostname}"
-        return f"Request failed ({type(error).__name__})"
+            kind = HostNotFound if unresolved(error) else CannotConnect
+            return kind(f"Could not connect to {urlsplit(url).hostname}")
+        return FetchError(f"Request failed ({type(error).__name__})")
 
     @staticmethod
     def uses_basic_auth(server: ServerSettings) -> bool:
         return server.authentication_type == ServerSettings.AUTH_USERNAME_PASSWORD and server.has_creds()
+
+
+def unresolved(error: requests.ConnectionError) -> bool:
+    """requests wraps urllib3's MaxRetryError, whose reason is the error that ended the last attempt."""
+    cause = error.args[0] if error.args else None
+    return isinstance(getattr(cause, "reason", cause), NameResolutionError | socket.gaierror)

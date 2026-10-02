@@ -1,13 +1,15 @@
 import base64
+import socket
 import ssl
 import threading
 
 import pytest
 import requests
 import requests_mock
+from urllib3.exceptions import MaxRetryError, NameResolutionError
 
 from buildnotifylib.adapters.http import HttpConnection
-from buildnotifylib.core.ports import CertificateError, FetchError
+from buildnotifylib.core.ports import CannotConnect, CertificateError, FetchError, FetchTimeout, HostNotFound
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
@@ -155,6 +157,27 @@ def fetch_error(**response) -> Exception:
 )
 def test_should_report_request_failures_in_short_messages(response, message):
     assert str(fetch_error(**response)) == message
+
+
+def unresolved_host() -> requests.exceptions.ConnectionError:
+    reason = NameResolutionError("ci.example.com", None, socket.gaierror(8, "nodename nor servname provided"))  # type: ignore[arg-type]
+    return requests.exceptions.ConnectionError(MaxRetryError(None, SECRET_URL, reason))  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "response, kind",
+    [
+        ({"exc": requests.exceptions.ConnectTimeout(SECRET_URL)}, FetchTimeout),
+        ({"exc": requests.exceptions.ConnectionError(f"refused: {SECRET_URL}")}, CannotConnect),
+        ({"exc": unresolved_host()}, HostNotFound),
+    ],
+)
+def test_should_tell_timeouts_refused_connections_and_unknown_hosts_apart(response, kind):
+    assert type(fetch_error(**response)) is kind
+
+
+def test_should_keep_the_http_status_of_an_error_response():
+    assert fetch_error(status_code=401).status == 401
 
 
 @pytest.mark.parametrize("status_code", [401, 500])
