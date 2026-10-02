@@ -21,7 +21,7 @@ The PPA is currently setup at [https://launchpad.net/~anay/+archive/ppa](https:/
 
 ## Alternate/Manual installation
 
-* Install missing dependencies from setup.sh
 * pip install buildnotify
+* Launch it with `buildnotify`
 
 Once you have installed the application, [you can configure it to monitor CI servers](usage.md)

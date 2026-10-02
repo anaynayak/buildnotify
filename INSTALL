@@ -1,2 +1,2 @@
 * LINUX	
-  Use setup.sh to install the required dependencies
+  pip install buildnotify, then run buildnotify. See docs/installation.md

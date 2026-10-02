@@ -9,14 +9,14 @@ The work is tracked in Backlog.md (`backlog/`, local only and gitignored). The f
 
 ## Commands
 
-Until Phase 2 lands (there is no `pyproject.toml` before then):
-
 ```sh
-QT_QPA_PLATFORM=offscreen uv run --python 3.12 --with-requirements test-requirements.txt --with-editable . pytest -q
+uv sync --locked                                    # app + dev group from uv.lock
+QT_QPA_PLATFORM=offscreen uv run --locked pytest -q # full suite
+uv build                                            # sdist + wheel into dist/
 ```
 
-After Phase 2, use `just test`, `just lint`, `just types` and `just build`. Always run Qt tests
-with `QT_QPA_PLATFORM=offscreen`.
+Once TASK-19 adds the justfile, use `just test`, `just lint`, `just types` and `just build`.
+Always run Qt tests with `QT_QPA_PLATFORM=offscreen`.
 
 ## Backlog workflow
 

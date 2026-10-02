@@ -22,9 +22,9 @@ The ubuntu package is pretty old! You can use the pypi package which is in sync 
 
 To do so do the following::
 
-    pipx run --spec=buildnotify buildnotifyapplet.py
+    uvx --from buildnotify buildnotify
 
-this will launch buildnotifyapplet.py and show a icon in the menubar.
+this will launch buildnotify and show a icon in the menubar.
 
 
 Installing from PyPI
@@ -32,7 +32,7 @@ Installing from PyPI
 
 ``pip install buildnotify --pre``
 
-Launch using ``.local/bin/buildnotifyapplet.py``
+Launch using ``buildnotify``
 
 
 Supported continuous integration systems
