@@ -59,24 +59,30 @@ class ProjectsPopulator(QThread):
     def __init__(self, config: Config, parent: QObject = None):
         QThread.__init__(self, parent)
         self.config = config
+        self.server_configs: List[ServerConfig] = []
+        self.timeout: Optional[float] = None
 
     def load_from_server(self):
+        if self.isRunning():
+            return
+        self.server_configs = self.config.get_server_configs()
+        self.timeout = self.config.timeout
         self.start()
 
     def reload(self):
-        self.start()
+        self.load_from_server()
 
-    def process(self):
+    def process(self, server_configs: List[ServerConfig]):
         overall_status = []
-        for server_config in self.config.get_server_configs():
+        for server_config in server_configs:
             overall_status.append(self.check_nodes(server_config))
         self.updated_projects.emit(OverallIntegrationStatus(overall_status))
 
     def run(self):
-        self.process()
+        self.process(self.server_configs)
 
     def check_nodes(self, server_config: ServerConfig) -> FilteredContinuousIntegrationServer:
-        response = ProjectLoader(server_config, self.config.timeout).get_data()
+        response = ProjectLoader(server_config, self.timeout).get_data()
         return FilteredContinuousIntegrationServer(response.server, server_config.excluded_projects)
 
 

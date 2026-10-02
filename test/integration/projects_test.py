@@ -13,10 +13,9 @@ URL = 'http://localhost:8080/cc.xml'
 
 @pytest.mark.functional
 def test_should_fetch_projects(qtbot):
-    conf = ConfigBuilder().build()
-    populator = ProjectsPopulator(conf)
+    populator = ProjectsPopulator(ConfigBuilder().build())
     with qtbot.waitSignal(populator.updated_projects, timeout=1000):
-        populator.process()
+        populator.process([])
 
 
 def record_fetch_threads(mocker):
@@ -44,3 +43,25 @@ def test_reload_should_fetch_off_the_gui_thread(qtbot, mocker):
     assert threads and threading.get_ident() not in threads
     assert len(blocker.args[0].get_projects()) > 0
     assert populator.findChildren(QThread) == []
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize('trigger', ['load_from_server', 'reload'])
+def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
+    conf = ConfigBuilder().server(URL).build()
+    threads = []
+    original = conf.get_server_configs
+
+    def get_server_configs():
+        threads.append(threading.get_ident())
+        return original()
+
+    mocker.patch.object(conf, 'get_server_configs', get_server_configs)
+    with requests_mock.Mocker() as m:
+        m.get(URL, text=fake_content())
+        populator = ProjectsPopulator(conf)
+        with qtbot.waitSignal(populator.updated_projects, timeout=1000):
+            getattr(populator, trigger)()
+        populator.wait()
+
+    assert threads == [threading.get_ident()]
