@@ -1,0 +1,69 @@
+{
+  "total_count": 11,
+  "workflow_runs": [
+    {
+      "id": 30433500,
+      "name": "Nightly",
+      "node_id": "WFR_kwLOBbX30433646",
+      "check_suite_id": 30434646,
+      "check_suite_node_id": "CS_kwDO30433646",
+      "head_branch": "main",
+      "head_sha": "0000000000000000000000000000000001d0616e",
+      "path": ".github/workflows/nightly.yml",
+      "display_title": "Nightly on main",
+      "run_number": 11,
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow_id": 159041,
+      "url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646",
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/30433500",
+      "pull_requests": [],
+      "created_at": "2026-10-01T02:10:00Z",
+      "updated_at": "2026-10-01T02:10:00Z",
+      "run_attempt": 1,
+      "run_started_at": "2026-10-02T10:00:00Z",
+      "jobs_url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646/jobs",
+      "logs_url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646/logs",
+      "workflow_url": "https://api.github.com/repos/octo-org/hello-world/actions/workflows/159041",
+      "repository": {
+        "id": 1296269,
+        "name": "hello-world",
+        "full_name": "octo-org/hello-world",
+        "private": false
+      }
+    },
+    {
+      "id": 30433400,
+      "name": "Weekly",
+      "node_id": "WFR_kwLOBbX30433646",
+      "check_suite_id": 30434646,
+      "check_suite_node_id": "CS_kwDO30433646",
+      "head_branch": "main",
+      "head_sha": "0000000000000000000000000000000001d0616e",
+      "path": ".github/workflows/weekly.yml",
+      "display_title": "Nightly on main",
+      "run_number": 5,
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "failure",
+      "workflow_id": 999,
+      "url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646",
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/30433400",
+      "pull_requests": [],
+      "created_at": "2026-09-28T03:00:00Z",
+      "updated_at": "2026-09-28T03:00:00Z",
+      "run_attempt": 1,
+      "run_started_at": "2026-10-02T10:00:00Z",
+      "jobs_url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646/jobs",
+      "logs_url": "https://api.github.com/repos/octo-org/hello-world/actions/runs/30433646/logs",
+      "workflow_url": "https://api.github.com/repos/octo-org/hello-world/actions/workflows/159041",
+      "repository": {
+        "id": 1296269,
+        "name": "hello-world",
+        "full_name": "octo-org/hello-world",
+        "private": false
+      }
+    }
+  ]
+}

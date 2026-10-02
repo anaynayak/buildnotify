@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -27,6 +28,8 @@ ERRORS = {
 }
 LIMITED = (403, 429)
 DEFAULT_BACKOFF = timedelta(minutes=1)
+MAX_PAGES = 5
+NEXT_LINK = re.compile(r'<([^>]+)>\s*;\s*rel="next"')
 
 Run = Mapping[str, Any]
 Clock = Callable[[], datetime]
@@ -91,13 +94,29 @@ class GitHubSource:
         self.apply_excludes = apply_excludes
 
     def fetch(self) -> list[Project]:
-        self.rate_limits.check(self.rate_key())
-        response = self.connection.request(self.runs_url(), self.timeout, self.headers(), self.verify())
-        self.raise_for_status(response)
-        projects = [self.to_project(runs) for runs in group(self.filtered(read_runs(response.body)))]
+        projects = [self.to_project(runs) for runs in group(self.filtered(self.read_pages()))]
         if not self.apply_excludes:
             return projects
         return [project for project in projects if project.name not in self.server.excluded_projects]
+
+    def read_pages(self) -> list[Run]:
+        """Older pages too, a few at most, until the filtered runs include a finished one."""
+        runs: list[Run] = []
+        url = self.runs_url()
+        for _ in range(MAX_PAGES):
+            response = self.get(url)
+            runs += read_runs(response.body)
+            following = next_page(response)
+            if following is None or any(run.get("status") == "completed" for run in self.filtered(runs)):
+                break
+            url = following
+        return runs
+
+    def get(self, url: str) -> Response:
+        self.rate_limits.check(self.rate_key())
+        response = self.connection.request(url, self.timeout, self.headers(), self.verify())
+        self.raise_for_status(response)
+        return response
 
     def runs_url(self) -> str:
         query = {"per_page": "100"} | ({"branch": self.server.branch} if self.server.branch else {})
@@ -144,6 +163,14 @@ class GitHubSource:
             last_build_label=str(finished.get("run_number")) if finished else None,
             prefix=self.server.prefix,
         )
+
+
+def next_page(response: Response) -> str | None:
+    """The rel="next" link, if it points at the GitHub API, so the token is never sent anywhere else."""
+    match = NEXT_LINK.search(response.headers.get("link", ""))
+    if match is None or not match.group(1).startswith(f"{API}/"):
+        return None
+    return match.group(1)
 
 
 def read_runs(body: bytes) -> list[Run]:

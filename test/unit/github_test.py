@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from buildnotifylib.core.github import GitHubError, GitHubSource, RateLimits
+from buildnotifylib.core.github import MAX_PAGES, GitHubError, GitHubSource, RateLimits
 from buildnotifylib.core.model import Activity, Status
 from buildnotifylib.core.ports import FetchError, Response
 from buildnotifylib.core.projects import ProjectLoader
@@ -215,3 +215,56 @@ def test_should_keep_tokens_out_of_the_rate_limit_keys():
         source(FakeApi(limited), limits=limits).fetch()
 
     assert not any("ghp_token" in key for key in limits.until)
+
+
+def next_page(page: int) -> str:
+    return f'<{API}?per_page=100&page={page}>; rel="next", <{API}?per_page=100&page=9>; rel="last"'
+
+
+def test_should_read_older_pages_until_a_filtered_workflow_has_finished_a_run():
+    api = FakeApi(fixture("runs.json", link=next_page(2)), fixture("runs-page-2.json", link=next_page(3)))
+
+    projects = source(api, github(workflow="nightly.yml")).fetch()
+
+    assert rows(projects) == [("Nightly (main)", Status.SUCCESS, Activity.BUILDING, "11")]
+    assert [url for url, _, _ in api.requests] == [f"{API}?per_page=100", f"{API}?per_page=100&page=2"]
+    assert api.requests[1][1]["Authorization"] == "Bearer ghp_token"
+
+
+def test_should_find_a_workflow_that_only_ran_on_an_older_page():
+    api = FakeApi(fixture("runs.json", link=next_page(2)), fixture("runs-page-2.json"))
+
+    projects = source(api, github(workflow="Weekly")).fetch()
+
+    assert rows(projects) == [("Weekly (main)", Status.FAILURE, Activity.SLEEPING, "5")]
+
+
+def test_should_read_one_page_when_it_has_a_finished_run():
+    api = FakeApi(fixture("runs.json", link=next_page(2)))
+
+    assert len(source(api).fetch()) == 7
+    assert len(api.requests) == 1
+
+
+def test_should_stop_after_a_few_pages():
+    api = FakeApi(*[fixture("runs.json", link=next_page(page + 2)) for page in range(10)])
+
+    assert source(api, github(workflow="missing.yml")).fetch() == []
+    assert len(api.requests) == MAX_PAGES
+
+
+def test_should_only_follow_links_to_the_github_api():
+    api = FakeApi(fixture("runs.json", link='<https://evil.example.com/runs?page=2>; rel="next"'))
+
+    assert source(api, github(workflow="missing.yml")).fetch() == []
+    assert len(api.requests) == 1
+
+
+def test_should_stop_paging_on_a_rate_limit():
+    limited = fixture("rate-limited.json", 429, retry_after="60")
+    api, limits = FakeApi(fixture("runs.json", link=next_page(2)), limited), RateLimits(clock=lambda: NOW)
+
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, github(workflow="Weekly"), limits=limits).fetch()
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, limits=limits).fetch()
