@@ -34,3 +34,7 @@ ui:
 # Run the app against local fixture feeds with throwaway settings and no keychain
 demo *args:
     uv run --locked python scripts/demo.py {{args}}
+
+# Render the docs screenshots offscreen into docs/images
+screenshots:
+    uv run --locked python scripts/screenshots.py
