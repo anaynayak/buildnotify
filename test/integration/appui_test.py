@@ -27,3 +27,14 @@ def test_should_update_tooltip_on_poll(qtbot):
     widget.update_projects(OverallIntegrationStatus(servers))
 
     assert re.compile(r"Last checked: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d").match(str(widget.tray.toolTip())) is not None
+
+
+def test_should_hide_tray_when_app_is_quitting(qtbot, qapp):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons())
+    assert widget.tray.isVisible()
+
+    qapp.aboutToQuit.emit()
+
+    assert not widget.tray.isVisible()
