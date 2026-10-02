@@ -47,6 +47,7 @@ dev = [
     "requests-mock>=1.12",
     "flake8==7.0.0",
     "PyQt5-stubs==5.14.2.2",
+    "ruff>=0.16.10",
 ]
 
 [tool.hatch.version]
@@ -70,3 +71,11 @@ packages = ["buildnotifylib"]
 [tool.hatch.build.targets.wheel.shared-data]
 "buildnotify.desktop" = "share/applications/buildnotify.desktop"
 "buildnotify.svg" = "share/pixmaps/buildnotify.svg"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["buildnotifylib/generated"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
