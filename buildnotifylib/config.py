@@ -177,17 +177,23 @@ class Config(object):
         self.set_timezone(server_config.url, server_config.timezone)
         self.set_display_prefix(server_config.url, server_config.prefix)
         self.set_username(server_config.url, server_config.username)
-        self.set_password(server_config.url, server_config.username,
-                          server_config.password)
+        if self.uses_keyring(server_config.username, server_config.authentication_type):
+            self.set_password(server_config.url, server_config.username,
+                              server_config.password)
         self.set_skip_ssl_verification(server_config.url,
                                        server_config.skip_ssl_verification)
         self.set_authorization_type(server_config.url, server_config.authentication_type)
 
+    @staticmethod
+    def uses_keyring(username: str, authentication_type: int) -> bool:
+        return bool(username) or authentication_type == ServerConfig.AUTH_BEARER_TOKEN
+
     def get_server_config(self, url: str) -> ServerConfig:
         username = self.get_username(url)
+        authentication_type = self.get_authorization_type(url)
+        password = self.get_password(url, username) if self.uses_keyring(username, authentication_type) else ''
         return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url), self.get_display_prefix(url),
-                            username, self.get_password(url, username), self.get_skip_ssl_verification(url),
-                            self.get_authorization_type(url))
+                            username, password, self.get_skip_ssl_verification(url), authentication_type)
 
     def get_server_configs(self) -> List[ServerConfig]:
         return [self.get_server_config(url) for url in self.get_urls()]

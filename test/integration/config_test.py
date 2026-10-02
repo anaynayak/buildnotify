@@ -1,9 +1,19 @@
 import unittest
 
+import keyring
 import pytest
 
 from buildnotifylib.config import Config, Preferences
 from buildnotifylib.serverconfig import ServerConfig
+from test.fake_keyring import InMemoryKeyring
+
+
+class UntouchableKeyring(InMemoryKeyring):
+    def set_password(self, servicename, username, password):
+        raise AssertionError('keyring touched')
+
+    def get_password(self, servicename, username):
+        raise AssertionError('keyring touched')
 
 
 class ConfigTest(unittest.TestCase):
@@ -49,6 +59,17 @@ class ConfigTest(unittest.TestCase):
     def test_should_get_empty_if_missing(self):
         server = self.config.get_server_config('someurl')
         self.assertEqual('', server.username)
+
+    def test_should_not_touch_keyring_without_credentials(self):
+        keyring.set_keyring(UntouchableKeyring())
+        self.config.save_server_config(ServerConfig('url1', [], 'EDT', 'prefix', '', ''))
+        server = self.config.get_server_config('url1')
+        self.assertEqual('', server.password)
+
+    def test_should_store_bearer_token_without_username(self):
+        self.config.save_server_config(ServerConfig('url1', [], 'EDT', 'prefix', '', 'token', False,
+                                                    ServerConfig.AUTH_BEARER_TOKEN))
+        self.assertEqual('token', self.config.get_server_config('http://url1').password)
 
     def test_should_return_all_servers(self):
         self.config.save_server_config(ServerConfig('url1', [], 'EDT', 'prefix', 'user', 'pass'))
