@@ -17,6 +17,8 @@ just fmt           # ruff fixes + formatting
 just types         # mypy (config in pyproject.toml; skips buildnotifylib/generated)
 just build         # sdist + wheel into dist/
 just ui            # regenerate buildnotifylib/generated from data/*.ui
+just demo          # run the app against local fixture feeds, throwaway settings, null keyring
+just screenshots   # render docs/images offscreen from fixture data
 ```
 
 Run Qt tests outside `just` with `QT_QPA_PLATFORM=offscreen`. `pre-commit install` enables
@@ -43,10 +45,9 @@ the ruff, ruff-format and uv-lock hooks.
 2. **Never push, tag, publish, or write to GitHub.** That includes PRs, issues, comments and
    workflow enable/disable. Record these steps in `backlog/docs/user-actions.md` instead.
 3. **Tests must be hermetic.** They never touch the real keychain or the user's QSettings
-   (`test/conftest.py` handles this once TASK-2 is done). Until TASK-2 is done, deselect
-   `test/integration/config_test.py`. Never launch the app for a manual or smoke run against the
+   (`test/conftest.py` handles this). Never launch the app for a manual or smoke run against the
    real settings: on macOS, HOME/XDG overrides don't isolate QSettings. Use `--settings <tmp.ini>`
-   (TASK-45) and a null keyring.
+   (TASK-45) and a null keyring, or `just demo`, which does both.
 4. **Fix bugs test first.** Write a failing regression test, then the fix. Bug IDs (H1, M3,
    L7, ...) refer to the report. Put them in the commit body.
 5. **Don't widen scope.** If you spot a new bug, create a backlog task for it. Don't fix it
