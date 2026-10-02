@@ -296,7 +296,7 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
         qtbot.waitUntil(lambda: dialog.ui.stackedWidget.currentIndex() == 1)
 
     yes, no = QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No
-    question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, yes, no)
+    question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, yes | no, no)
     assert "bad-certificate" in question.call_args.args[2]
     assert dialog.get_server_config().skip_ssl_verification is True
     assert [r.verify for r in m.request_history] == [True, False]

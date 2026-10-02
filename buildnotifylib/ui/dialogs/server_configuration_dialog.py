@@ -148,7 +148,7 @@ class ServerConfigurationDialog(QDialog):
                 self,
                 "Failed to fetch projects",
                 f"<b>SSL error, retry without verification?:</b> {self.qtText(str(response.error))}",
-                QMessageBox.StandardButton.Yes,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
             )
             if reply == QMessageBox.StandardButton.Yes:
