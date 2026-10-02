@@ -1,15 +1,13 @@
 import re
-import threading
 
 import pytest
 import requests_mock
 from PyQt5.QtWidgets import QWidget
 
-from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.buildnotify import BuildNotify
-from buildnotifylib.projects_populator import ProjectsPopulator
+from buildnotifylib.ui.poller import Poller
 from test.fake_conf import ConfigBuilder
-from test.utils import FakeConnection, fake_content
+from test.utils import FakeConnection, GatedConnection, fake_content
 
 
 @pytest.mark.functional
@@ -64,6 +62,20 @@ def test_should_show_no_tray_message_and_exit_after_last_retry(mocker):
     run_app.assert_not_called()
 
 
+@pytest.mark.functional
+def test_should_retry_the_tray_on_a_timer_then_show_the_no_tray_message(qtbot, mocker):
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    critical = mocker.patch("buildnotifylib.buildnotify.QMessageBox.critical")
+    app = mocker.MagicMock()
+
+    b = BuildNotify(app, ConfigBuilder().build(), 10)
+
+    qtbot.waitUntil(lambda: app.exit.called, timeout=2000)
+    critical.assert_called_once()
+    app.exit.assert_called_once_with(1)
+    assert not b.tray_timer.isActive()
+
+
 def test_should_run_app_once_when_tray_is_available(mocker):
     mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
@@ -93,31 +105,31 @@ def test_should_wait_for_workers_after_the_event_loop_ends(mocker):
     sys_exit.assert_called_once_with(3)
 
 
-def test_should_wait_for_the_populator_thread(mocker):
+def test_should_wait_for_the_poller(mocker):
     mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
     b.wait_for_workers()
-    b.projects_populator = mocker.MagicMock()
+    b.poller = mocker.MagicMock()
 
     b.wait_for_workers()
 
-    b.projects_populator.wait.assert_called_once_with(BuildNotify.EXIT_WAIT_MS)
+    b.poller.wait.assert_called_once_with(BuildNotify.EXIT_WAIT_MS)
 
 
 def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
     mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     mocker.patch.object(BuildNotify, "EXIT_WAIT_MS", 50)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
-    release = threading.Event()
-    b.projects_populator = ProjectsPopulator(ConfigBuilder().build(), HttpConnection())
-    b.projects_populator.run = lambda: release.wait() and None
-    b.projects_populator.start()
+    url = "http://localhost:8080/cc.xml"
+    connection = GatedConnection(fake_content(), slow=[url])
+    b.poller = Poller(ConfigBuilder().server(url).build(), connection)
+    b.poller.reload()
 
     try:
         assert b.wait_for_workers() is False
     finally:
-        release.set()
-        b.projects_populator.wait()
+        connection.release.set()
+        b.poller.wait(5000)
 
 
 def test_should_exit_without_cleanup_when_a_fetch_is_stuck(mocker):
@@ -143,8 +155,10 @@ def test_should_poll_through_the_injected_connection(qapp, mocker):
     mocker.patch("buildnotifylib.buildnotify.AppNotification")
     connection = FakeConnection(fake_content())
     b = BuildNotify(qapp, ConfigBuilder().build(), 60000, connection=connection)
-    mocker.patch.object(b, "auto_poll")
+    mocker.patch.object(Poller, "start")
 
     b.run_app()
 
-    assert b.projects_populator.connection is connection
+    assert b.poller.connection is connection
+    assert b.poller.parent() is qapp
+    Poller.start.assert_called_once_with()

@@ -1,7 +1,7 @@
 import os
 import sys
 
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from buildnotifylib.adapters.http import HttpConnection
@@ -11,9 +11,7 @@ from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
-from buildnotifylib.core.timed_event import TimedEvent
-from buildnotifylib.projects_populator import ProjectsPopulator
+from buildnotifylib.ui.poller import Poller
 
 
 class BuildNotify:
@@ -33,8 +31,17 @@ class BuildNotify:
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
         self.ready = False
-        self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, self.TRAY_RETRIES, interval)
-        self.timed_event.start()
+        self.tray_attempts = 0
+        self.tray_timer = QTimer()
+        self.tray_timer.timeout.connect(self.retry_tray)
+        self.tray_timer.start(interval)
+
+    def retry_tray(self):
+        attempt = self.tray_attempts
+        self.tray_attempts += 1
+        if self.tray_attempts >= self.TRAY_RETRIES:
+            self.tray_timer.stop()
+        self.delayed_start(attempt)
 
     def delayed_start(self, event_count: int):
         if self.ready:
@@ -45,37 +52,25 @@ class BuildNotify:
                 self.app.exit(1)
             return
         self.ready = True
+        self.tray_timer.stop()
         self.run_app()
 
     def run_app(self):
-        self.projects_populator = ProjectsPopulator(self.store, self.connection, self.app)
-        self.projects_populator.updated_projects.connect(self.update_projects)
+        self.poller = Poller(self.store, self.connection, self.app)
+        self.poller.updated.connect(self.update_projects)
         self.app_ui = AppUi(self.app, self.store, self.build_icons)
-        self.app_ui.reload_data.connect(self.reload_project_data)
+        self.app_ui.reload_data.connect(self.poller.reload)
         self.app_notification = AppNotification(self.store, self.app_ui.tray)
-        self.auto_poll()
-
-    def reload_project_data(self):
-        self.projects_populator.reload()
+        self.poller.start()
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
         self.app_notification.update_projects(integration_status)
         self.app_ui.update_projects(integration_status)
 
-    def auto_poll(self):
-        self.timed_event = TimedEvent(self.app, self.check_nodes)
-        self.timed_event.set_interval(1000)
-        self.timed_event.start()
-
-    def check_nodes(self):
-        self.projects_populator.load_from_server()
-        self.timed_event.set_interval(self.store.settings.interval_seconds * 1000)
-        self.timed_event.start()
-
     def wait_for_workers(self) -> bool:
-        if not hasattr(self, "projects_populator"):
+        if not hasattr(self, "poller"):
             return True
-        return self.projects_populator.wait(self.EXIT_WAIT_MS)
+        return self.poller.wait(self.EXIT_WAIT_MS)
 
     @staticmethod
     def start():
