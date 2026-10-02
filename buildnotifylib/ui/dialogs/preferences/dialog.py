@@ -31,8 +31,9 @@ class PreferencesDialog(QDialog):
         self.tabs.addTab(self.notifications_page, self.tr("Notifications"))
         self.tabs.addTab(self.misc_page, self.tr("Misc"))
         self.tabs.setCurrentIndex(MISC_TAB)
-        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)

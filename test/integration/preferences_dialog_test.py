@@ -386,3 +386,48 @@ def test_should_configure_the_selected_server_on_enter(qtbot, mocker, key):
 
     edit.assert_called_once()
     assert dialog.isVisible()
+
+
+@pytest.mark.functional
+def test_should_offer_ok_and_cancel_in_a_button_box(qtbot):
+    dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    buttons = dialog.button_box.standardButtons()
+    assert buttons == QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+
+
+@pytest.mark.functional
+def test_cancel_button_rejects_and_discards_changes(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+    dialog.servers_page.add_server()
+    mocker.patch.object(
+        dialog, "exec", side_effect=lambda: dialog.button_box.button(QDialogButtonBox.StandardButton.Cancel).click()
+    )
+    mocker.patch.object(dialog, "reject", wraps=dialog.reject)
+
+    assert dialog.open() is None
+    assert conf.settings.servers == []
+
+
+@pytest.mark.functional
+def test_ok_button_saves_and_keeps_pauses_and_mutes(qtbot, mocker):
+    from dataclasses import replace
+    from datetime import datetime
+
+    paused = datetime(2030, 1, 1, 12, 0)
+    settings = replace(ConfigBuilder().build().settings, paused_until=paused)
+    dialog = PreferencesDialog(settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    def click_ok():
+        dialog.button_box.button(QDialogButtonBox.StandardButton.Ok).click()
+        return dialog.result()
+
+    mocker.patch.object(dialog, "exec", side_effect=click_ok)
+    saved = dialog.open()
+
+    assert saved is not None
+    assert saved.paused_until == paused
