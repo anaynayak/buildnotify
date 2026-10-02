@@ -1,8 +1,8 @@
 import pytest
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon, QImage
+from PySide6.QtGui import QColor, QIcon, QImage
 
-from buildnotifylib.ui.build_icons import BuildIcons
+from buildnotifylib.ui.build_icons import BADGE_RING, TRAY_SIZE, BuildIcons, badge_label, badge_rect
 
 
 @pytest.mark.functional
@@ -106,3 +106,57 @@ def test_should_draw_the_count_over_the_status_icon(qtbot):
     counted = icons.for_aggregate_status("Failure.Sleeping", 3, device_pixel_ratio=2.0).pixmap(QSize(22, 22), 2.0)
 
     assert counted.toImage() != plain
+
+
+@pytest.mark.parametrize("ratio", [1.0, 1.5, 2.0])
+@pytest.mark.parametrize("count", [1, 12, 345])
+def test_should_fit_the_badge_in_the_bottom_right_corner(ratio, count):
+    rect = badge_rect(count, ratio)
+
+    assert rect.right() == TRAY_SIZE.width() and rect.bottom() == TRAY_SIZE.height()
+    assert rect.left() >= 0 and rect.height() >= TRAY_SIZE.height() / 2
+    assert rect.width() >= rect.height()
+
+
+@pytest.mark.parametrize("ratio", [1.0, 1.5, 2.0])
+def test_should_snap_the_badge_to_whole_device_pixels(ratio):
+    rect = badge_rect(7, ratio)
+
+    for edge in (rect.left(), rect.top(), rect.width(), rect.height()):
+        assert (edge * ratio).is_integer()
+
+
+def test_should_widen_the_badge_for_more_digits():
+    assert badge_rect(1, 1.0).width() < badge_rect(12, 1.0).width() < badge_rect(345, 1.0).width()
+
+
+def test_should_cap_the_badge_label():
+    assert badge_label(7) == "7"
+    assert badge_label(99) == "99"
+    assert badge_label(100) == "99+"
+
+
+def pixel(icon: QIcon, x: float, y: float, ratio: float) -> QColor:
+    return icon.pixmap(TRAY_SIZE, ratio).toImage().pixelColor(int(x * ratio), int(y * ratio))
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("symbolic", [False, True])
+@pytest.mark.parametrize("ratio", [1.0, 2.0])
+def test_should_leave_the_icon_centre_clear_of_the_badge(qtbot, symbolic, ratio):
+    icons = BuildIcons()
+    plain = icons.for_status("Failure.Sleeping", symbolic)
+    counted = icons.for_aggregate_status("Failure.Sleeping", 3, ratio, symbolic=symbolic)
+
+    assert pixel(counted, 10.5, 10.5, ratio) == pixel(plain, 10.5, 10.5, ratio)
+    assert pixel(counted, 5, 5, ratio) == pixel(plain, 5, 5, ratio)
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_should_knock_out_a_ring_around_the_badge(qtbot, symbolic):
+    counted = BuildIcons().for_aggregate_status("Failure.Sleeping", 3, 2.0, symbolic=symbolic)
+    rect = badge_rect(3, 2.0)
+    ring = pixel(counted, int(rect.center().x()), rect.top() - BADGE_RING / 2, 2.0)
+
+    assert ring.alpha() == 0

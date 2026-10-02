@@ -1,3 +1,4 @@
+import math
 from importlib.resources import files
 
 from PySide6 import QtCore, QtGui
@@ -59,14 +60,49 @@ def rasterise(svg: bytes) -> QtGui.QImage:
     return reader.read()
 
 
+BADGE_COLOUR = QtGui.QColor("#c62828")
+BADGE_HEIGHT = 0.5
+BADGE_DIGIT_WIDTH = 0.45
+BADGE_RING = 1.0
+
+
+def badge_label(count: int) -> str:
+    return str(count) if count < 100 else "99+"
+
+
+def badge_rect(count: int, device_pixel_ratio: float) -> QtCore.QRectF:
+    """Bottom-right badge in logical pixels, snapped to whole device pixels."""
+
+    def snap(logical: float) -> float:
+        return math.ceil(logical * device_pixel_ratio) / device_pixel_ratio
+
+    height = snap(TRAY_SIZE.height() * BADGE_HEIGHT)
+    extra_digits = len(badge_label(count)) - 1
+    width = min(snap(height * (1 + BADGE_DIGIT_WIDTH * extra_digits)), TRAY_SIZE.width())
+    return QtCore.QRectF(TRAY_SIZE.width() - width, TRAY_SIZE.height() - height, width, height)
+
+
 def draw_count(pixmap: QtGui.QPixmap, count: int) -> None:
     """Paint in logical pixels; QPainter scales to the pixmap's device pixel ratio."""
+    rect = badge_rect(count, pixmap.devicePixelRatio())
+    radius = rect.height() / 2
+    ring = rect.adjusted(-BADGE_RING, -BADGE_RING, BADGE_RING, BADGE_RING)
     painter = QtGui.QPainter(pixmap)
-    painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
+    painter.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing | QtGui.QPainter.RenderHint.TextAntialiasing)
+    painter.setPen(QtCore.Qt.PenStyle.NoPen)
+    painter.setBrush(BADGE_COLOUR)
+    painter.setCompositionMode(QtGui.QPainter.CompositionMode.CompositionMode_Clear)
+    painter.drawRoundedRect(ring, radius + BADGE_RING, radius + BADGE_RING)
+    painter.setCompositionMode(QtGui.QPainter.CompositionMode.CompositionMode_SourceOver)
+    painter.drawRoundedRect(rect, radius, radius)
+    draw_label(painter, rect, badge_label(count))
+    painter.end()
+
+
+def draw_label(painter: QtGui.QPainter, rect: QtCore.QRectF, label: str) -> None:
     font = painter.font()
     font.setBold(True)
-    font.setPixelSize(TRAY_SIZE.height() * 2 // 3)
+    font.setPixelSize(round(rect.height() * 0.8))
     painter.setFont(font)
-    rect = QtCore.QRect(QtCore.QPoint(0, 0), TRAY_SIZE)
-    painter.drawText(rect, QtCore.Qt.AlignmentFlag.AlignCenter, str(count))
-    painter.end()
+    painter.setPen(QtGui.QColor("white"))
+    painter.drawText(rect, QtCore.Qt.AlignmentFlag.AlignCenter, label)
