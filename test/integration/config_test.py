@@ -91,5 +91,11 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(self.config.get_show_last_build_label(), False)
 
 
+    def test_should_keep_custom_script_when_disabled(self):
+        self.config.update_preferences(Preferences(['url1'], 300, 'my-hook', False, False, True, [], False))
+
+        self.assertEqual(self.config.get_custom_script(), 'my-hook')
+        self.assertEqual(self.config.get_custom_script_enabled(), False)
+
 if __name__ == '__main__':
     unittest.main()

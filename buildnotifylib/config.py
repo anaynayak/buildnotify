@@ -107,9 +107,8 @@ class Config(object):
     def get_project_excludes(self, url: str) -> List[str]:
         return self.settings.value(self.EXCLUDES % url, [], type=str)
 
-    def set_custom_script(self, user_script: str, status: bool):
-        script = user_script if status else self.default_script
-        self.settings.setValue(self.CUSTOM_SCRIPT, script)
+    def set_custom_script(self, user_script: str):
+        self.settings.setValue(self.CUSTOM_SCRIPT, user_script)
 
     def set_custom_script_enabled(self, status: bool):
         self.settings.setValue(self.SCRIPT_ENABLED, status)
@@ -201,8 +200,7 @@ class Config(object):
     def update_preferences(self, preferences: Preferences):
         self.update_urls(preferences.urls)
         self.set_interval_in_seconds(preferences.interval)
-        self.set_custom_script(preferences.custom_script_text,
-                               preferences.trigger_custom_script)
+        self.set_custom_script(preferences.custom_script_text)
         self.set_custom_script_enabled(preferences.trigger_custom_script)
         self.set_show_last_build_label(preferences.show_last_build_label)
 
