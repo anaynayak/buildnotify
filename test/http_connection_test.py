@@ -14,7 +14,7 @@ def test_should_pass_auth_if_provided():
     with requests_mock.Mocker() as m:
         m.get('http://localhost:8080/cc.xml', text='content')
         response = HttpConnection().connect(ServerConfig('http://localhost:8080/cc.xml', [], '', '', 'user', 'pass'), 3)
-        assert str(response) == 'content'
+        assert response == b'content'
         assert m.last_request.headers.get("Authorization")
 
 
@@ -22,7 +22,7 @@ def test_should_fetch_data_without_auth():
     with requests_mock.Mocker() as m:
         m.get('http://localhost:8080/cc.xml', text='content')
         response = HttpConnection().connect(ServerConfig('localhost:8080/cc.xml', [], '', '', None, None), 3)
-        assert str(response) == 'content'
+        assert response == b'content'
         assert not m.last_request.headers.get("Authorization")
 
 
@@ -75,3 +75,13 @@ def test_should_reuse_one_session_across_polls(mocker):
         connection.connect(config, 3)
         assert m.call_count == 2
     assert new_session.call_count == 0
+
+
+def test_should_honour_encoding_declared_in_the_feed():
+    body = ('<?xml version="1.0" encoding="ISO-8859-1"?>'
+            '<Projects><Project name="café" activity="Sleeping" lastBuildStatus="Success"/></Projects>')
+    with requests_mock.Mocker() as m:
+        m.get('http://localhost:8080/cc.xml', content=body.encode('iso-8859-1'))
+        config = ServerConfig('localhost:8080/cc.xml', [], '', '', None, None)
+        response = ProjectLoader(config, 3, HttpConnection()).get_data()
+        assert [p.name for p in response.server.get_projects()] == ['café']
