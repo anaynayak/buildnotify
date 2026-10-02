@@ -5,6 +5,7 @@ import keyring
 import pytest
 from PyQt5 import QtCore
 
+from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore, migrate
 from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey
 
@@ -91,23 +92,23 @@ def legacy_keys(qsettings: QtCore.QSettings) -> list[str]:
 
 
 def test_should_migrate_every_2_1_value(v21):
-    assert SettingsStore(open_ini(v21)).settings == V21_SETTINGS
+    assert SettingsStore(open_ini(v21), Keystore()).settings == V21_SETTINGS
 
 
 def test_should_migrate_one_item_lists_and_bool_strings(single_server):
-    assert SettingsStore(open_ini(single_server)).settings == SINGLE_SERVER_SETTINGS
+    assert SettingsStore(open_ini(single_server), Keystore()).settings == SINGLE_SERVER_SETTINGS
 
 
 @pytest.mark.parametrize("fixture, expected", [("v21", V21_SETTINGS), ("single_server", SINGLE_SERVER_SETTINGS)])
 def test_should_round_trip_migrated_settings(request, fixture, expected):
     path = request.getfixturevalue(fixture)
-    SettingsStore(open_ini(path)).save(SettingsStore(open_ini(path)).settings)
+    SettingsStore(open_ini(path), Keystore()).save(SettingsStore(open_ini(path), Keystore()).settings)
 
-    assert SettingsStore(open_ini(path)).settings == expected
+    assert SettingsStore(open_ini(path), Keystore()).settings == expected
 
 
 def test_should_replace_the_2x_layout(v21):
-    SettingsStore(open_ini(v21))
+    SettingsStore(open_ini(v21), Keystore())
 
     qsettings = open_ini(v21)
     assert legacy_keys(qsettings) == []
@@ -122,7 +123,7 @@ def test_should_be_idempotent(v21):
     migrate(open_ini(v21))
 
     assert Path(v21).read_text() == migrated
-    assert SettingsStore(open_ini(v21)).settings == V21_SETTINGS
+    assert SettingsStore(open_ini(v21), Keystore()).settings == V21_SETTINGS
 
 
 @pytest.mark.parametrize("failing_key", ["url", "schema_version"])
@@ -133,12 +134,12 @@ def test_should_keep_the_2x_keys_until_the_new_ones_are_written(v21, failing_key
         migrate(FailingSettings(v21, failing_key))
 
     assert legacy_keys(open_ini(v21)) == before
-    assert SettingsStore(open_ini(v21)).settings == V21_SETTINGS
+    assert SettingsStore(open_ini(v21), Keystore()).settings == V21_SETTINGS
 
 
 def test_should_leave_current_settings_alone(tmp_path):
     path = str(tmp_path / "settings.ini")
-    SettingsStore(open_ini(path)).save(V21_SETTINGS)
+    SettingsStore(open_ini(path), Keystore()).save(V21_SETTINGS)
     saved = Path(path).read_text()
 
     migrate(open_ini(path))

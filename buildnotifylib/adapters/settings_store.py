@@ -2,7 +2,6 @@ from typing import Any
 
 from PyQt5.QtCore import QSettings
 
-from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.core.ports import CredentialStore
 from buildnotifylib.core.settings import (
     DEFAULT_NOTIFICATIONS,
@@ -39,9 +38,9 @@ LEGACY_SERVER_GROUPS = [key for key in SERVER_KEYS.values() if key != "url"]
 
 
 class SettingsStore:
-    def __init__(self, qsettings: QSettings, keystore: CredentialStore | None = None):
+    def __init__(self, qsettings: QSettings, keystore: CredentialStore):
         self.qsettings = qsettings
-        self.keystore = keystore or Keystore()
+        self.keystore = keystore
         migrate(qsettings)
         self.settings = self.load()
 

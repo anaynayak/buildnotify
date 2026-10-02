@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtCore import QSettings, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
+from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.hooks import ShellScriptHook
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
@@ -26,7 +27,7 @@ class BuildNotify:
         interval=2000,
         connection: Connection | None = None,
     ):
-        self.store = store if store is not None else SettingsStore(QSettings("BuildNotify", "BuildNotify"))
+        self.store = store if store is not None else SettingsStore(QSettings("BuildNotify", "BuildNotify"), Keystore())
         self.connection = connection or HttpConnection()
         self.build_icons = BuildIcons()
         self.app = app
