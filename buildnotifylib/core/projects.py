@@ -59,6 +59,7 @@ class ProjectsPopulator(QThread):
         self.config = config
         self.server_configs: List[ServerConfig] = []
         self.timeout: Optional[float] = None
+        self.last_known: Dict[str, List[Project]] = {}
 
     def load_from_server(self):
         if self.isRunning():
@@ -80,8 +81,14 @@ class ProjectsPopulator(QThread):
         self.process(self.server_configs)
 
     def check_nodes(self, server_config: ServerConfig) -> FilteredContinuousIntegrationServer:
-        response = ProjectLoader(server_config, self.timeout).get_data()
-        return FilteredContinuousIntegrationServer(response.server, server_config.excluded_projects)
+        server = self.with_last_known(ProjectLoader(server_config, self.timeout).get_data().server)
+        return FilteredContinuousIntegrationServer(server, server_config.excluded_projects)
+
+    def with_last_known(self, server: ContinuousIntegrationServer) -> ContinuousIntegrationServer:
+        if server.unavailable:
+            return ContinuousIntegrationServer(server.url, self.last_known.get(server.url, []), True)
+        self.last_known[server.url] = server.get_projects()
+        return server
 
 
 class ProjectLoader(object):
