@@ -63,3 +63,15 @@ def test_should_report_ssl_error():
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
         assert response.ssl_error()
         assert response.server.unavailable
+
+
+def test_should_reuse_one_session_across_polls(mocker):
+    connection = HttpConnection()
+    new_session = mocker.spy(requests.sessions.Session, '__init__')
+    with requests_mock.Mocker() as m:
+        m.get('http://localhost:8080/cc.xml', text='content')
+        config = ServerConfig('localhost:8080/cc.xml', [], '', '', None, None)
+        connection.connect(config, 3)
+        connection.connect(config, 3)
+        assert m.call_count == 2
+    assert new_session.call_count == 0
