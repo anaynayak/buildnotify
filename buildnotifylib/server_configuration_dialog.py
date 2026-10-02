@@ -100,7 +100,7 @@ class ServerConfigurationDialog(QDialog):
 
         self.ui.stackedWidget.setCurrentIndex(1)
         projects_model = QtGui.QStandardItemModel()
-        projects_model.itemChanged.connect(self.project_checked)  # type: ignore
+        projects_model.itemChanged.connect(self.project_checked)
         projects_model.setHorizontalHeaderLabels(["Select Projects"])
         self.projects_list = QtGui.QStandardItem("All")
         self.projects_list.setCheckable(True)

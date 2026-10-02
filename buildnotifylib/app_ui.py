@@ -21,7 +21,7 @@ class AppUi(QtCore.QObject):
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
         self.tray.show()
         self.app_menu = AppMenu(self.widget, conf, self.build_icons)
-        self.app_menu.reload_data.connect(self.reload_data)  # type: ignore
+        self.app_menu.reload_data.connect(self.reload_data)
         self.tray.setContextMenu(self.app_menu.menu)
         self.tray.activated.connect(self.show_menu)
         QApplication.instance().aboutToQuit.connect(self.tray.hide)
