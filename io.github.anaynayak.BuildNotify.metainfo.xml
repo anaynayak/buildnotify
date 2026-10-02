@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.anaynayak.BuildNotify</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>BuildNotify</name>
+  <summary>Watch continuous integration builds from the system tray</summary>
+  <developer id="io.github.anaynayak">
+    <name>Anay Nayak</name>
+  </developer>
+  <description>
+    <p>
+      BuildNotify is a CCMenu/CCTray equivalent for Linux. It sits in the system tray and shows the
+      build status of projects on any continuous integration server that publishes a cctray.xml feed,
+      such as GoCD, Jenkins, GitLab or CruiseControl.
+    </p>
+    <ul>
+      <li>Monitor projects on several CI servers at once</li>
+      <li>See the overall build status from the tray icon</li>
+      <li>Open individual project pages from the tray menu</li>
+      <li>Get notified when builds break, are fixed or keep failing</li>
+      <li>See the last build time and build label of each project</li>
+      <li>Run your own script when a build changes</li>
+    </ul>
+    <p>
+      The tray icon needs a desktop that supports StatusNotifierItem. On GNOME, install the
+      AppIndicator and KStatusNotifierItem Support extension.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.anaynayak.BuildNotify.desktop</launchable>
+  <provides>
+    <binary>buildnotify</binary>
+  </provides>
+  <url type="homepage">https://anaynayak.github.io/buildnotify/</url>
+  <url type="bugtracker">https://github.com/anaynayak/buildnotify/issues</url>
+  <url type="vcs-browser">https://github.com/anaynayak/buildnotify</url>
+  <categories>
+    <category>Development</category>
+  </categories>
+  <keywords>
+    <keyword>CI</keyword>
+    <keyword>cctray</keyword>
+    <keyword>build</keyword>
+    <keyword>continuous integration</keyword>
+  </keywords>
+  <screenshots>
+    <screenshot type="default">
+      <caption>The project list in the tray menu</caption>
+      <image>https://anaynayak.github.io/buildnotify/images/projectlist.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>CI servers in the preferences</caption>
+      <image>https://anaynayak.github.io/buildnotify/images/servers.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Notification preferences</caption>
+      <image>https://anaynayak.github.io/buildnotify/images/notifications.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Other preferences</caption>
+      <image>https://anaynayak.github.io/buildnotify/images/misc.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <releases>
+    <release version="3.0.0" type="development" date="2026-10-02">
+      <description>
+        <p>A rewrite on PySide6 and Python 3.11 or newer.</p>
+        <ul>
+          <li>Settings from 2.x are migrated on first start</li>
+          <li>All servers are polled in parallel</li>
+          <li>Failing projects are listed in the tray tooltip</li>
+          <li>Optional symbolic tray icons that differ by shape</li>
+          <li>The custom script gets BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS environment variables</li>
+        </ul>
+      </description>
+    </release>
+    <release version="2.1.0" date="2021-01-03">
+      <description>
+        <p>Bearer token authentication, a context menu on left click and a clearer server configuration window.</p>
+      </description>
+    </release>
+    <release version="2.0.0" date="2019-08-16">
+      <description>
+        <p>Moves to Python 3.</p>
+      </description>
+    </release>
+    <release version="1.0.4" date="2017-12-14"/>
+    <release version="1.0.3" date="2017-12-14"/>
+    <release version="1.0.2" date="2017-12-13"/>
+    <release version="1.0.1" date="2017-12-09"/>
+    <release version="1.0.0" date="2017-08-17"/>
+  </releases>
+</component>

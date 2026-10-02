@@ -60,6 +60,7 @@ include = [
     "/test",
     "/io.github.anaynayak.BuildNotify.desktop",
     "/io.github.anaynayak.BuildNotify.svg",
+    "/io.github.anaynayak.BuildNotify.metainfo.xml",
     "/CHANGELOG",
     "/pytest.ini",
 ]
@@ -70,6 +71,7 @@ packages = ["buildnotifylib"]
 [tool.hatch.build.targets.wheel.shared-data]
 "io.github.anaynayak.BuildNotify.desktop" = "share/applications/io.github.anaynayak.BuildNotify.desktop"
 "io.github.anaynayak.BuildNotify.svg" = "share/icons/hicolor/scalable/apps/io.github.anaynayak.BuildNotify.svg"
+"io.github.anaynayak.BuildNotify.metainfo.xml" = "share/metainfo/io.github.anaynayak.BuildNotify.metainfo.xml"
 
 [tool.ruff]
 target-version = "py311"
