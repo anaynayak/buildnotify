@@ -56,6 +56,7 @@ class PreferencesDialog(QDialog):
         self.ui.sortBuildByLastBuildTime.setChecked(self.settings.sort_key is SortKey.LAST_BUILD_TIME)
         self.ui.sortBuildByName.setChecked(self.settings.sort_key is SortKey.NAME)
         self.ui.showLastBuildLabelCheckbox.setChecked(self.settings.show_last_build_label)
+        self.ui.symbolicIconsCheckbox.setChecked(self.settings.symbolic_icons)
 
     def item_selection_changed(self, status):
         self.ui.configureProjectButton.setEnabled(status)
@@ -117,6 +118,7 @@ class PreferencesDialog(QDialog):
             custom_script_enabled=self.ui.scriptCheckbox.isChecked(),
             sort_key=self.sort_key(),
             show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked(),
+            symbolic_icons=self.ui.symbolicIconsCheckbox.isChecked(),
             notifications=self.get_selections(),
         )
 

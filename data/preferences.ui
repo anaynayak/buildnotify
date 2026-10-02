@@ -304,6 +304,13 @@
            </property>
           </widget>
          </item>
+         <item row="7" column="1">
+          <widget class="QCheckBox" name="symbolicIconsCheckbox">
+           <property name="text">
+            <string>use symbolic tray icons (shapes instead of coloured squares)</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>

@@ -74,4 +74,16 @@ def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker):
 
     widget.update_projects(OverallIntegrationStatus([ServerSnapshot("someurl", (project,))]))
 
-    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0)
+    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0, symbolic=False)
+
+
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_should_pick_tray_icons_from_the_symbolic_icons_setting(qtbot, mocker, symbolic):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder(symbolic_icons=symbolic).build(), BuildIcons(), FakeConnection(fake_content()))
+    icon = mocker.spy(widget.build_icons, "for_aggregate_status")
+
+    widget.update_projects(OverallIntegrationStatus([]))
+
+    assert icon.call_args.kwargs["symbolic"] is symbolic

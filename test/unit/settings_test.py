@@ -40,6 +40,7 @@ def test_should_default_to_the_2x_behaviour():
     assert not settings.custom_script_enabled
     assert settings.sort_key is SortKey.LAST_BUILD_TIME
     assert not settings.show_last_build_label
+    assert not settings.symbolic_icons
 
 
 def test_should_default_notifications_per_event():

@@ -18,8 +18,9 @@ class AppUi(QtCore.QObject):
     def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
         super().__init__(parent)
         self.widget = QWidget()
+        self.store = store
         self.build_icons = build_icons
-        self.tray = QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
+        self.tray = QSystemTrayIcon(self.build_icons.for_status(None, store.settings.symbolic_icons), self.widget)
         self.tray.show()
         self.app_menu = AppMenu(self.widget, store, self.build_icons, connection)
         self.app_menu.reload_data.connect(self.reload_data)
@@ -36,6 +37,7 @@ class AppUi(QtCore.QObject):
     def update_projects(self, integration_status: OverallIntegrationStatus):
         count = len(integration_status.get_failing_builds())
         status = integration_status.get_build_status()
-        self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, self.widget.devicePixelRatio()))
+        ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
+        self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic))
         self.app_menu.update(integration_status.get_projects())
         self.tray.setToolTip(f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}")

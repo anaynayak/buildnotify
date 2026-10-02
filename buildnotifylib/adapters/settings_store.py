@@ -20,6 +20,7 @@ GLOBAL_KEYS = {
     "custom_script": "notifications/custom_script",
     "custom_script_enabled": "notifications/custom_script_enabled",
     "show_last_build_label": "show_last_build_label",
+    "symbolic_icons": "tray/symbolic_icons",
 }
 SORT_KEY = "sort_key"
 NOTIFICATION = "values/%s"

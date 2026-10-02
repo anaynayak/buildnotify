@@ -259,6 +259,7 @@ def test_should_return_every_unchanged_setting_on_ok(qtbot, mocker):
         custom_script_enabled=True,
         sort_key=SortKey.NAME,
         show_last_build_label=True,
+        symbolic_icons=True,
         notifications=notifications,
     )
     conf = builder.server("http://one/cctray.xml", username="alice", password="pw").server("http://two").build()
@@ -309,3 +310,15 @@ def test_should_reject_editing_a_server_url_to_another_servers_url(qtbot, mocker
 
     assert dialog.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml"]
     assert dialog.open().servers == conf.settings.servers
+
+
+@pytest.mark.functional
+def test_should_return_the_symbolic_icons_choice(qtbot, mocker):
+    dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    assert not dialog.ui.symbolicIconsCheckbox.isChecked()
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
+
+    dialog.ui.symbolicIconsCheckbox.setChecked(True)
+
+    assert dialog.open().symbolic_icons

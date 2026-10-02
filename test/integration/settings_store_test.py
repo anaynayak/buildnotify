@@ -46,6 +46,7 @@ def full_settings() -> AppSettings:
         custom_script_enabled=True,
         sort_key=SortKey.NAME,
         show_last_build_label=True,
+        symbolic_icons=True,
         notifications={"successfulBuild": True, "brokenBuild": False},
     )
 
@@ -175,3 +176,9 @@ def test_should_keep_passwords_in_the_injected_keystore(qsettings):
     assert keystore.passwords == {("http://ci/cc.xml", "alice"): "pw"}
     assert keyring.get_password("http://ci/cc.xml", "alice") is None
     assert SettingsStore(qsettings, keystore).settings.servers[0].password == "pw"
+
+
+def test_should_read_a_symbolic_icons_flag_written_as_text(qsettings):
+    qsettings.setValue("tray/symbolic_icons", "true")
+
+    assert SettingsStore(qsettings, Keystore()).settings.symbolic_icons

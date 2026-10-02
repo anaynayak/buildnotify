@@ -55,6 +55,7 @@ class AppSettings:
     custom_script_enabled: bool = False
     sort_key: SortKey = SortKey.LAST_BUILD_TIME
     show_last_build_label: bool = False
+    symbolic_icons: bool = False
     notifications: dict[str, bool] = field(default_factory=dict)
 
     def notify(self, event: str) -> bool:

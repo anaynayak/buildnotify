@@ -198,6 +198,11 @@ class Ui_Preferences(object):
 
         self.gridLayout_5.addWidget(self.showLastBuildTimeCheckbox, 5, 1, 1, 1)
 
+        self.symbolicIconsCheckbox = QCheckBox(self.miscTab)
+        self.symbolicIconsCheckbox.setObjectName(u"symbolicIconsCheckbox")
+
+        self.gridLayout_5.addWidget(self.symbolicIconsCheckbox, 7, 1, 1, 1)
+
 
         self.verticalLayout_5.addLayout(self.gridLayout_5)
 
@@ -272,6 +277,7 @@ class Ui_Preferences(object):
         self.showLastBuildLabelCheckbox.setText(QCoreApplication.translate("Preferences", u"show last build label for each project", None))
         self.pollingIntervalSpinBox.setSuffix(QCoreApplication.translate("Preferences", u" seconds", None))
         self.showLastBuildTimeCheckbox.setText(QCoreApplication.translate("Preferences", u"show last build time for each project", None))
+        self.symbolicIconsCheckbox.setText(QCoreApplication.translate("Preferences", u"use symbolic tray icons (shapes instead of coloured squares)", None))
         self.groupBox_4.setTitle(QCoreApplication.translate("Preferences", u"Build Sort order", None))
         self.sortBuildByName.setText(QCoreApplication.translate("Preferences", u"Sort builds by name", None))
         self.sortBuildByLastBuildTime.setText(QCoreApplication.translate("Preferences", u"Sort builds by last build time", None))
