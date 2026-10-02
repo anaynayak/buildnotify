@@ -283,6 +283,16 @@ class DiffTest(unittest.TestCase):
         self.assertEqual(1, len(still_successful_builds))
         self.assertEqual("Successbuild", still_successful_builds[0])
 
+    def test_should_classify_new_builds_by_status(self):
+        def project(name, status):
+            attrs = {"name": name, "lastBuildStatus": status, "activity": "Sleeping", "url": "someurl"}
+            return ProjectBuilder(attrs).build()
+
+        events = diff([], [project("broken", "Failure"), project("green", "Success"), project("odd", "Unknown")])
+        self.assertEqual(["broken"], labels(events, Change.BROKEN))
+        self.assertEqual(["green"], labels(events, Change.STILL_SUCCESSFUL))
+        self.assertEqual(2, len(events))
+
     def test_should_include_prefix_in_notification(self):
         old_projects = [
             ProjectBuilder(

@@ -25,6 +25,7 @@ TRANSITIONS = {
     (Status.FAILURE, Status.SUCCESS): Change.FIXED,
 }
 REPEATS = {Status.FAILURE: Change.STILL_FAILING, Status.SUCCESS: Change.STILL_SUCCESSFUL}
+ARRIVALS = {Status.FAILURE: Change.BROKEN, Status.SUCCESS: Change.STILL_SUCCESSFUL}
 
 
 def key(project: Project) -> Key:
@@ -40,12 +41,15 @@ def diff(old: Iterable[Project], new: Iterable[Project]) -> list[Event]:
 
 
 def event_for(old: Project | None, new: Project) -> Event | None:
-    if old is None:
-        return Event(Change.STILL_SUCCESSFUL, new)
+    change = ARRIVALS.get(new.status) if old is None else change_between(old, new)
+    return None if change is None else Event(change, new)
+
+
+def change_between(old: Project, new: Project) -> Change | None:
     change = TRANSITIONS.get((old.status, new.status))
     if change is None and old.status is new.status and new.different_builds(old):
         change = REPEATS.get(new.status)
-    return None if change is None else Event(change, new)
+    return change
 
 
 def labels(events: Iterable[Event], change: Change) -> list[str]:
