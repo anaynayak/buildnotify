@@ -6,7 +6,8 @@ import pytest
 
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus
-from buildnotifylib.project_status_notification import ProjectStatus, ProjectStatusNotification
+from buildnotifylib.app_notification import AppNotification
+from buildnotifylib.project_status_notification import ProjectStatus, ProjectStatusNotification, TimedProjectFilter
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 
@@ -257,3 +258,41 @@ def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def test_should_back_off_repeated_connectivity_notifications():
+    timed_filter = TimedProjectFilter()
+
+    shown = [timed_filter.filter(['url']) == ['url'] for _ in range(8)]
+
+    assert shown == [True, True, True, False, True, False, False, True]
+
+
+def test_should_not_share_back_off_state_between_filters():
+    TimedProjectFilter().filter(['url'])
+
+    assert TimedProjectFilter().map == {}
+
+
+def test_should_reset_back_off_when_server_recovers():
+    timed_filter = TimedProjectFilter()
+    for _ in range(3):
+        timed_filter.filter(['url'])
+
+    timed_filter.filter([])
+
+    assert timed_filter.filter(['url']) == ['url']
+
+
+def _unavailable_status():
+    return OverallIntegrationStatus([ContinuousIntegrationServer('url', [], True)])
+
+
+def test_should_keep_back_off_across_polls(mocker):
+    app_notification = AppNotification(ConfigBuilder().build(), None)
+    show = mocker.patch.object(app_notification.notification, 'show_message')
+
+    for _ in range(5):
+        app_notification.update_projects(_unavailable_status())
+
+    assert show.call_count == 3

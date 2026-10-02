@@ -5,7 +5,7 @@ from buildnotifylib.core.projects import OverallIntegrationStatus
 
 from buildnotifylib.config import Config
 from buildnotifylib.notifications import Notification
-from buildnotifylib.project_status_notification import ProjectStatusNotification
+from buildnotifylib.project_status_notification import ProjectStatusNotification, TimedProjectFilter
 
 
 class AppNotification(object):
@@ -13,9 +13,10 @@ class AppNotification(object):
         self.config = config
         self.notification = Notification(widget)
         self.integration_status: Optional[OverallIntegrationStatus] = None
+        self.timed_project_filter = TimedProjectFilter()
 
     def update_projects(self, new_integration_status: OverallIntegrationStatus):
         if self.integration_status is not None:
             ProjectStatusNotification(self.config, self.integration_status, new_integration_status,
-                                      self.notification).show_notifications()
+                                      self.notification, self.timed_project_filter).show_notifications()
         self.integration_status = new_integration_status

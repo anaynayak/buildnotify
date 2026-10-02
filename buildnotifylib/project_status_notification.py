@@ -12,12 +12,13 @@ from buildnotifylib.notifications import Notification
 
 class ProjectStatusNotification(object):
     def __init__(self, config: Config, old_integration_status: OverallIntegrationStatus,
-                 current_integration_status: OverallIntegrationStatus, notification: Notification):
+                 current_integration_status: OverallIntegrationStatus, notification: Notification,
+                 timed_project_filter: Optional['TimedProjectFilter'] = None):
         self.config = config
         self.old_integration_status = old_integration_status
         self.current_integration_status = current_integration_status
         self.notification = notification
-        self.timed_project_filter = TimedProjectFilter()
+        self.timed_project_filter = timed_project_filter or TimedProjectFilter()
 
     def show_notifications(self):
         project_status = ProjectStatus(self.old_integration_status.get_projects(),
@@ -53,13 +54,13 @@ class ProjectStatusNotification(object):
 
 
 class TimedProjectFilter(object):
-    map: Dict[str, Tuple[datetime, int]] = dict()
     fact = [1, 2, 3, 5, 8, 13, 21]
 
     def __init__(self):
-        pass
+        self.map: Dict[str, Tuple[datetime, int]] = {}
 
     def filter(self, urls: List[str]) -> List[str]:
+        self.map = {url: state for url, state in self.map.items() if url in urls}
         return [url for url in urls if self.is_new(url)]
 
     def is_new(self, url: str) -> bool:
