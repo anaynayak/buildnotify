@@ -10,10 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Build dist
-        run: |
-          BUILD_VERSION=$(uv run --python 3.12 python buildnotifylib/version.py)
-          export BUILD_VERSION
-          uv build --sdist
+        run: uv build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
