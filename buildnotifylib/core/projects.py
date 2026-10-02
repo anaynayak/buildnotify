@@ -95,11 +95,15 @@ class ProjectLoader(object):
                 headers['Authorization'] = 'Bearer %s' % self.server_config.password
 
             data = self.connection.connect(self.server_config, self.timeout, headers)
+            projects = self.parse(data)
         except Exception as ex:
             print(ex)
             return Response(ContinuousIntegrationServer(self.server_config.url, [], True), ex)
-        dom = minidom.parseString(data)
         print("processed %s" % self.server_config.url)
+        return Response(ContinuousIntegrationServer(self.server_config.url, projects))
+
+    def parse(self, data) -> List[Project]:
+        dom = minidom.parseString(data)
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(
@@ -111,4 +115,4 @@ class ProjectLoader(object):
                     'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),
                     'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')
                 }))
-        return Response(ContinuousIntegrationServer(self.server_config.url, projects))
+        return projects

@@ -145,3 +145,24 @@ def test_should_disable_authentication_if_keystore_is_unavailable(qtbot, mocker)
             assert dialog.ui.authenticationSettings.title() == 'Authentication (keyring dependency missing)'
 
         qtbot.wait_until(alert_shown)
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker):
+    with requests_mock.Mocker() as r:
+        url = 'http://localhost:8080/cc.xml'
+        r.get(url, text='<html><body>Please log in</body></html')
+        conf = ConfigBuilder().server(url).build()
+        dialog = ServerConfigurationDialog(url, conf)
+        dialog.show()
+        qtbot.addWidget(dialog)
+        m = mocker.patch.object(QMessageBox, 'critical', return_value=QMessageBox.Ok)
+
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+
+        def alert_shown():
+            m.assert_called_once_with(dialog, ANY, ANY)
+            assert dialog.ui.loadUrlButton.isEnabled()
+
+        qtbot.wait_until(alert_shown)

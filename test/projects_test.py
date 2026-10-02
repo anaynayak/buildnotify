@@ -75,6 +75,21 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEqual(True, response.server.unavailable)
         self.assertIs(error, response.error)
 
+    def test_should_mark_server_unavailable_for_html_body(self):
+        self.assert_unavailable("<html><body><form>Login</form></body></html")
+
+    def test_should_mark_server_unavailable_for_empty_body(self):
+        self.assert_unavailable("")
+
+    def test_should_mark_server_unavailable_for_truncated_xml(self):
+        self.assert_unavailable('<?xml version="1.0"?><Projects><Project name="project" activity=')
+
+    def assert_unavailable(self, body):
+        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection(body)).get_data()
+        self.assertEqual([], response.server.get_projects())
+        self.assertEqual(True, response.server.unavailable)
+        self.assertEqual(True, response.failed())
+
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
                                         <Projects>
