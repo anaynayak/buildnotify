@@ -12,24 +12,27 @@ from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 
 
 class BuildNotify(object):
+    TRAY_RETRIES = 5
+
     def __init__(self, app: QApplication, conf=None, interval=2000):
         self.conf = conf if conf is not None else Config()
         self.build_icons = BuildIcons()
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
         self.ready = False
-        self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, 5, interval)
+        self.timed_event = RepeatTimedEvent(self.app, self.delayed_start, self.TRAY_RETRIES, interval)
         self.timed_event.start()
 
     def delayed_start(self, event_count: int):
+        if self.ready:
+            return
         if not QSystemTrayIcon.isSystemTrayAvailable():
-            if event_count == 5:
+            if event_count == self.TRAY_RETRIES - 1:
                 QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
-                sys.exit(1)
-            self.timed_event.start()
-        if not self.ready:
-            self.ready = True
-            self.run_app()
+                self.app.exit(1)
+            return
+        self.ready = True
+        self.run_app()
 
     def run_app(self):
         self.projects_populator = ProjectsPopulator(self.conf, self.app)
