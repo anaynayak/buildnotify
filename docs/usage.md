@@ -62,6 +62,14 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 4. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time.
 5. Clicking on any project in the tray menu would take you to the project page on the CI server.
 
+## Muting and pausing
+
+The `Mute` submenu lists each server and each project with a checkbox. A muted server or project gets no notifications, and the custom script does not run for it. Muting a server also mutes all its projects and its connectivity notifications.
+
+Muted projects stay in the menu, marked `(muted)`, and still count towards the tray icon, the failing count and the tooltip. Muting only silences notifications. To hide a project completely, untick it in the server dialog.
+
+`Pause notifications for 1 hour` silences every notification and the custom script until the hour is up. The menu then shows `Resume notifications (paused until 14:05)`, which ends the pause early. Mutes and the pause end time are kept in the settings, so they survive a restart, and a pause that ran out while BuildNotify was closed is over when it starts again.
+
 ## Command line options
 
 1. `--settings PATH` reads and writes settings in this INI file instead of the default location. It is handy for trying a configuration without touching your real one.
