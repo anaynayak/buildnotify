@@ -2,6 +2,7 @@ import threading
 from unittest.mock import ANY
 
 import pytest
+import requests
 import requests_mock
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
@@ -280,3 +281,21 @@ def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
 
     assert dialog.ui.stackedWidget.currentIndex() == 0
     assert m.call_count == 1
+
+
+@pytest.mark.functional
+def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mocker):
+    url = "https://localhost:8080/cc.xml"
+    with requests_mock.Mocker() as m:
+        m.get(url, [{"exc": requests.exceptions.SSLError("bad-certificate")}, {"text": fake_content()}])
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
+        qtbot.addWidget(dialog)
+        question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.Yes)
+
+        dialog.fetch_data()
+        qtbot.waitUntil(lambda: dialog.ui.stackedWidget.currentIndex() == 1)
+
+    question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, QMessageBox.Yes, QMessageBox.No)
+    assert "bad-certificate" in question.call_args.args[2]
+    assert dialog.get_server_config().skip_ssl_verification is True
+    assert [r.verify for r in m.request_history] == [True, False]
