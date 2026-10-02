@@ -4,7 +4,7 @@ from buildnotifylib.core.continous_integration_server import ContinuousIntegrati
 
 
 class Response:
-    def __init__(self, server: ContinuousIntegrationServer, error: Exception = None):
+    def __init__(self, server: ContinuousIntegrationServer, error: Exception | None = None):
         self.server = server
         self.error = error
 

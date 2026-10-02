@@ -15,7 +15,7 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class ServerConfigurationDialog(QDialog):
-    def __init__(self, url: str | None, conf: Config, parent: QWidget = None):
+    def __init__(self, url: str | None, conf: Config, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)

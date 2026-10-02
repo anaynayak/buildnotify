@@ -8,7 +8,7 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, conf: Config, parent: QWidget = None):
+    def __init__(self, conf: Config, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.conf = conf
         self.added_servers: dict[str, ServerConfig] = {}

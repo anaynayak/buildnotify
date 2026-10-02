@@ -7,7 +7,7 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal
 class BackgroundEvent(QThread):
     completed = pyqtSignal("PyQt_PyObject")
 
-    def __init__(self, task: Callable[[], Any], parent: QObject = None):
+    def __init__(self, task: Callable[[], Any], parent: QObject | None = None):
         QThread.__init__(self, parent)
         self.task = task
 
