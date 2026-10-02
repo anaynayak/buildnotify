@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from urllib.parse import urlparse
 
@@ -83,6 +83,11 @@ class ServerSnapshot:
     url: str
     projects: tuple[Project, ...] = ()
     error: Exception | None = field(default=None, compare=False)
+    error_at: datetime | None = field(default=None, compare=False)
+
+    def __post_init__(self) -> None:
+        if self.error is not None and self.error_at is None:
+            object.__setattr__(self, "error_at", datetime.now(UTC))
 
     @property
     def unavailable(self) -> bool:

@@ -123,6 +123,16 @@ def test_should_keep_last_known_projects_while_server_is_down(qtbot, make_poller
 
 
 @pytest.mark.functional
+def test_should_keep_the_error_time_when_falling_back_to_last_known_projects(qtbot, make_poller):
+    poller = make_poller(ConfigBuilder().server(URL).build())
+    snapshot = ServerSnapshot(URL, error=OSError("down"))
+
+    kept = poller.with_last_known(snapshot, [])
+
+    assert kept.error_at == snapshot.error_at
+
+
+@pytest.mark.functional
 def test_should_apply_new_excludes_to_last_known_projects(qtbot, make_poller):
     conf = ConfigBuilder().server(URL).build()
     poller = make_poller(conf)

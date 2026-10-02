@@ -1,4 +1,5 @@
 import dataclasses
+from datetime import UTC, datetime
 
 import pytest
 
@@ -84,3 +85,18 @@ def test_should_detect_new_label():
 
 def test_should_detect_new_build_time_with_same_label():
     assert build("", "2009-05-29T14:00:00").different_builds(build("", "2009-05-29T13:54:07"))
+
+
+def test_snapshot_should_stamp_an_error_with_the_time_it_was_captured():
+    before = datetime.now(UTC)
+    snapshot = ServerSnapshot("s", error=OSError("down"))
+    assert snapshot.error_at is not None and before <= snapshot.error_at <= datetime.now(UTC)
+
+
+def test_snapshot_should_keep_a_given_error_time():
+    at = datetime(2026, 1, 2, 3, 4, tzinfo=UTC)
+    assert ServerSnapshot("s", error=OSError("down"), error_at=at).error_at == at
+
+
+def test_snapshot_should_have_no_error_time_without_an_error():
+    assert ServerSnapshot("s", (project(),)).error_at is None

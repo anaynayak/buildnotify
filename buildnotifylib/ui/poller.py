@@ -188,6 +188,6 @@ class Poller(QObject):
     def with_last_known(self, snapshot: ServerSnapshot, excluded: list[str]) -> ServerSnapshot:
         if snapshot.unavailable:
             cached = tuple(p for p in self.last_known.get(snapshot.url, ()) if p.name not in excluded)
-            return ServerSnapshot(snapshot.url, cached, snapshot.error)
+            return ServerSnapshot(snapshot.url, cached, snapshot.error, snapshot.error_at)
         self.last_known[snapshot.url] = snapshot.projects
         return snapshot
