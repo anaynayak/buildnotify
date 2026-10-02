@@ -4,6 +4,20 @@ from typing import ClassVar
 
 from buildnotifylib.core.model import NONE_TIMEZONE, normalise_url
 
+GITHUB_URL = "https://github.com/"
+
+
+class SourceKind(StrEnum):
+    CCTRAY = "cctray"
+    GITHUB = "github"
+
+    @classmethod
+    def parse(cls, value: str) -> "SourceKind":
+        try:
+            return cls(value)
+        except ValueError:
+            return cls.CCTRAY
+
 
 @dataclass
 class ServerSettings:
@@ -18,8 +32,15 @@ class ServerSettings:
     password: str = ""
     skip_ssl_verification: bool = False
     authentication_type: int = AUTH_USERNAME_PASSWORD
+    kind: SourceKind = SourceKind.CCTRAY
+    repository: str = ""
+    workflow: str = ""
+    branch: str = ""
 
     def __post_init__(self) -> None:
+        self.kind = SourceKind.parse(self.kind)
+        if self.kind is SourceKind.GITHUB and self.repository:
+            self.url = GITHUB_URL + self.repository
         self.url = normalise_url(self.url)
 
     def has_creds(self) -> bool:
@@ -29,7 +50,7 @@ class ServerSettings:
         return self.has_creds() or self.authentication_type == self.AUTH_BEARER_TOKEN
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 DEFAULT_SCRIPT = "echo #status# #projects# >> /tmp/buildnotify.log"
 DEFAULT_NOTIFICATIONS = {
     "successfulBuild": False,

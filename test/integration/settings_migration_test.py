@@ -7,7 +7,7 @@ from PySide6 import QtCore
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore, migrate
-from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey
+from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey, SourceKind
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "settings"
 LEGACY_GROUPS = ("excludes", "timezone", "username", "skip_ssl_verification", "authorization_type", "display_prefix")
@@ -145,3 +145,29 @@ def test_should_leave_current_settings_alone(tmp_path):
     migrate(open_ini(path))
 
     assert Path(path).read_text() == saved
+
+
+@pytest.fixture
+def v30(tmp_path):
+    keyring.set_password("https://ci.example.com/go/cctray.xml", "alice", "s3cret")
+    return str(shutil.copy(FIXTURES / "buildnotify-3.0.conf", tmp_path / "BuildNotify.conf"))
+
+
+def test_should_keep_3_0_servers_as_cctray_feeds(v30):
+    servers = SettingsStore(open_ini(v30), Keystore()).settings.servers
+
+    assert [(s.url, s.kind) for s in servers] == [
+        ("https://ci.example.com/go/cctray.xml", SourceKind.CCTRAY),
+        ("http://jenkins.local:8080/cc.xml", SourceKind.CCTRAY),
+    ]
+    url = "https://ci.example.com/go/cctray.xml"
+    assert servers[0] == ServerSettings(url, ["deploy-prod"], "US/Eastern", "go", "alice", "s3cret")
+
+
+def test_should_write_the_kind_of_each_3_0_server(v30):
+    migrate(open_ini(v30))
+
+    qsettings = open_ini(v30)
+    assert int(qsettings.value("schema_version")) == SCHEMA_VERSION
+    assert [qsettings.value(f"servers/{i}/kind") for i in (1, 2)] == ["cctray", "cctray"]
+    assert int(qsettings.value("servers/size")) == 2

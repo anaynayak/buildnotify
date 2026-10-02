@@ -10,6 +10,7 @@ from buildnotifylib.core.settings import (
     AppSettings,
     ServerSettings,
     SortKey,
+    SourceKind,
 )
 
 DEFAULTS = AppSettings()
@@ -32,11 +33,23 @@ SERVER_KEYS = {
     "username": "username",
     "skip_ssl_verification": "skip_ssl_verification",
     "authentication_type": "authorization_type",
+    "kind": "kind",
+    "repository": "repository",
+    "workflow": "workflow",
+    "branch": "branch",
 }
 
 VERSION = "schema_version"
 LEGACY_URLS = "connection/urls"
-LEGACY_SERVER_GROUPS = [key for key in SERVER_KEYS.values() if key != "url"]
+LEGACY_SERVER_GROUPS = [
+    "excludes",
+    "timezone",
+    "display_prefix",
+    "username",
+    "skip_ssl_verification",
+    "authorization_type",
+]
+FIRST_ARRAY_VERSION = 3
 
 ValueReader = Callable[[str], Any]
 
@@ -100,13 +113,29 @@ class SettingsStore:
 
 def migrate(qsettings: QSettings) -> None:
     """Move 2.x per-URL keys into the servers array; the old keys go only once the new ones are on disk."""
-    if as_int(qsettings.value(VERSION), 2) < SCHEMA_VERSION:
+    version = as_int(qsettings.value(VERSION), 2)
+    if version < FIRST_ARRAY_VERSION:
         urls = coerce(qsettings.value(LEGACY_URLS), [])
         write_servers(qsettings, [read_server(legacy_value(qsettings, url)) for url in urls])
+    elif version < SCHEMA_VERSION:
+        add_server_kinds(qsettings)
+    if version < SCHEMA_VERSION:
         qsettings.setValue(VERSION, SCHEMA_VERSION)
         qsettings.sync()
     if qsettings.status() == QSettings.Status.NoError and qsettings.contains(LEGACY_URLS):
         remove_legacy_keys(qsettings)
+
+
+def add_server_kinds(qsettings: QSettings) -> None:
+    """3.0 servers predate source kinds, so each one is a cctray feed."""
+    size = qsettings.beginReadArray(SERVERS)
+    qsettings.endArray()
+    qsettings.beginWriteArray(SERVERS, size)
+    for index in range(size):
+        qsettings.setArrayIndex(index)
+        if not qsettings.contains("kind"):
+            qsettings.setValue("kind", SourceKind.CCTRAY.value)
+    qsettings.endArray()
 
 
 def legacy_value(qsettings: QSettings, url: str) -> ValueReader:
@@ -132,7 +161,8 @@ def write_servers(qsettings: QSettings, servers: list[ServerSettings]) -> None:
     for index, server in enumerate(servers):
         qsettings.setArrayIndex(index)
         for field, key in SERVER_KEYS.items():
-            qsettings.setValue(key, getattr(server, field))
+            value = getattr(server, field)
+            qsettings.setValue(key, value.value if isinstance(value, SourceKind) else value)
     qsettings.endArray()
 
 

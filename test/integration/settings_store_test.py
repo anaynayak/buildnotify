@@ -7,7 +7,7 @@ from PySide6 import QtCore
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore
-from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
+from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey, SourceKind
 from test.fake_keyring import InMemoryKeyring
 
 
@@ -39,6 +39,17 @@ def full_settings() -> AppSettings:
                 prefix="inner",
                 password="token",
                 authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
+            ),
+            ServerSettings(
+                "",
+                ["CI (main)"],
+                prefix="gh",
+                password="ghp_token",
+                authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
+                kind=SourceKind.GITHUB,
+                repository="octo-org/hello-world",
+                workflow="ci.yml",
+                branch="main",
             ),
         ],
         interval_seconds=300,
@@ -95,7 +106,8 @@ def test_should_keep_the_saved_settings_current(qsettings):
 def test_should_store_servers_as_an_array(qsettings):
     SettingsStore(qsettings, Keystore()).save(full_settings())
 
-    assert qsettings.value("servers/size") == 3
+    assert qsettings.value("servers/size") == 4
+    assert qsettings.value("servers/4/kind") == "github"
     assert qsettings.value("servers/2/url") == "http://host:8080"
 
 
@@ -105,6 +117,8 @@ def test_should_keep_passwords_out_of_the_settings_file(ini):
     assert "pw" not in open(ini).read()
     assert keyring.get_password("https://ci.example.com/go/cctray.xml", "alice") == "pw"
     assert keyring.get_password("http://host:8080/cc.xml", "") == "token"
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "") == "ghp_token"
+    assert "ghp_token" not in open(ini).read()
 
 
 def test_should_keep_a_server_nested_under_a_removed_one(ini):
@@ -112,7 +126,7 @@ def test_should_keep_a_server_nested_under_a_removed_one(ini):
     store = reopen(ini)
     store.save(AppSettings(servers=[s for s in store.settings.servers if s.prefix != "outer"]))
 
-    assert [s.prefix for s in reopen(ini).settings.servers] == ["go", "inner"]
+    assert [s.prefix for s in reopen(ini).settings.servers] == ["go", "inner", "gh"]
 
 
 def test_should_persist_removing_the_last_server(ini):

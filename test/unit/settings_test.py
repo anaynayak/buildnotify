@@ -1,6 +1,6 @@
 import pytest
 
-from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey
+from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey, SourceKind
 
 
 @pytest.mark.parametrize(
@@ -58,5 +58,21 @@ def test_should_store_sort_keys_with_their_2x_names():
     assert [key.value for key in SortKey] == ["sort_build_time", "sort_name"]
 
 
-def test_should_be_past_the_2x_layout():
-    assert SCHEMA_VERSION == 3
+def test_should_be_on_the_layout_with_source_kinds():
+    assert SCHEMA_VERSION == 4
+
+
+def test_should_default_a_server_to_a_cctray_feed():
+    assert ServerSettings("http://ci/cc.xml").kind is SourceKind.CCTRAY
+
+
+@pytest.mark.parametrize(
+    "value, kind", [("github", SourceKind.GITHUB), ("cctray", SourceKind.CCTRAY), ("", SourceKind.CCTRAY)]
+)
+def test_should_parse_the_stored_kind(value, kind):
+    assert ServerSettings("http://ci/cc.xml", kind=value).kind is kind
+
+
+def test_should_point_a_github_server_at_its_repository():
+    server = ServerSettings("", kind=SourceKind.GITHUB, repository="octo-org/hello-world")
+    assert server.url == "https://github.com/octo-org/hello-world"
