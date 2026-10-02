@@ -1,5 +1,6 @@
 import base64
 import ssl
+import threading
 
 import pytest
 import requests
@@ -75,7 +76,7 @@ def test_should_report_ssl_error():
         assert response.unavailable
 
 
-def test_should_reuse_one_session_across_polls(mocker):
+def test_should_reuse_one_session_per_thread_across_polls(mocker):
     connection = HttpConnection()
     new_session = mocker.spy(requests.sessions.Session, "__init__")
     with requests_mock.Mocker() as m:
@@ -84,7 +85,18 @@ def test_should_reuse_one_session_across_polls(mocker):
         connection.connect(config, 3)
         connection.connect(config, 3)
         assert m.call_count == 2
-    assert new_session.call_count == 0
+    assert new_session.call_count == 1
+
+
+def test_should_not_share_a_session_between_fetch_threads():
+    connection = HttpConnection()
+    sessions = [connection.session]
+    worker = threading.Thread(target=lambda: sessions.append(connection.session))
+    worker.start()
+    worker.join(5)
+
+    assert len(sessions) == 2 and sessions[0] is not sessions[1]
+    assert connection.session is sessions[0]
 
 
 def test_should_honour_encoding_declared_in_the_feed():

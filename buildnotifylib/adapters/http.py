@@ -1,3 +1,5 @@
+import threading
+
 import requests
 from requests.exceptions import SSLError
 
@@ -8,7 +10,14 @@ from buildnotifylib.version import VERSION
 class HttpConnection:
     def __init__(self):
         self.user_agent = f"BuildNotify/{VERSION}"
-        self.session = requests.Session()
+        self.local = threading.local()
+
+    @property
+    def session(self) -> requests.Session:
+        """One Session per thread: the poller fetches servers in parallel and Session is not thread-safe."""
+        if not hasattr(self.local, "session"):
+            self.local.session = requests.Session()
+        return self.local.session
 
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None
