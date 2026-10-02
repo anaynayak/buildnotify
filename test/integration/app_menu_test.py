@@ -9,13 +9,14 @@ from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.preferences import PreferencesDialog
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
+from test.utils import FakeConnection, fake_content
 
 
 @pytest.mark.functional
 def test_should_set_menu_items_for_projects(qtbot):
     conf = ConfigBuilder().server("someurl").build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     project1 = (
         ProjectBuilder(
@@ -40,7 +41,7 @@ def test_should_set_menu_items_for_projects(qtbot):
 def test_should_suffix_build_time(qtbot):
     conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     one_year_ago = (datetime.now() - timedelta(days=367)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = (
@@ -73,7 +74,7 @@ def test_should_suffix_build_time(qtbot):
 def test_should_show_future_build_time_as_in(qtbot):
     conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     project1 = ProjectBuilder(
         {
@@ -94,7 +95,7 @@ def test_should_show_future_build_time_as_in(qtbot):
 def test_should_sort_by_name(qtbot):
     conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME).build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder(
@@ -139,7 +140,7 @@ def test_should_add_display_prefix(qtbot):
         .build()
     )
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = (
@@ -193,7 +194,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
         .build()
     )
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = (
@@ -259,7 +260,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
 def test_should_show_recent_build_first(qtbot):
     conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.LAST_BUILD_TIME).build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     project1 = ProjectBuilder(
         {
@@ -298,7 +299,7 @@ def test_should_show_recent_build_first(qtbot):
 def test_should_show_preferences(qtbot, mocker):
     conf = ConfigBuilder().build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
 
     mocker.patch.object(PreferencesDialog, "open", return_value=AppSettings(interval_seconds=30))
@@ -312,7 +313,7 @@ def test_should_show_preferences(qtbot, mocker):
 def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
     conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}, sort_key=SortKey.LAST_BUILD_TIME).build()
     parent = QWidget()
-    app_menu = AppMenu(parent, conf, BuildIcons())
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     broken = (
         ProjectBuilder(
@@ -352,7 +353,7 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
 @pytest.mark.functional
 def test_should_quit_the_application_on_exit(qtbot, mocker):
     parent = QWidget()
-    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
+    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     quit_app = mocker.patch("buildnotifylib.app_menu.QApplication.quit")
     sys_exit = mocker.patch("sys.exit")
@@ -366,7 +367,7 @@ def test_should_quit_the_application_on_exit(qtbot, mocker):
 @pytest.mark.functional
 def test_should_delete_preferences_dialog_after_use(qtbot, mocker):
     parent = QWidget()
-    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
+    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
     mocker.patch.object(PreferencesDialog, "open", return_value=None)
     delete_later = mocker.patch.object(PreferencesDialog, "deleteLater")
@@ -374,3 +375,17 @@ def test_should_delete_preferences_dialog_after_use(qtbot, mocker):
     app_menu.preferences_clicked(None)
 
     delete_later.assert_called_once()
+
+
+def test_should_pass_the_injected_connection_to_preferences(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    parent = QWidget()
+    qtbot.addWidget(parent)
+    connection = FakeConnection(fake_content())
+    app_menu = AppMenu(parent, conf, BuildIcons(), connection)
+    preferences = mocker.patch("buildnotifylib.app_menu.PreferencesDialog")
+    preferences.return_value.open.return_value = None
+
+    app_menu.preferences_clicked(None)
+
+    preferences.assert_called_once_with(conf.settings, connection, app_menu.menu)

@@ -151,7 +151,7 @@ def test_should_exit_without_cleanup_when_a_fetch_is_stuck(mocker):
 
 def test_should_poll_through_the_injected_connection(qapp, mocker):
     mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    mocker.patch("buildnotifylib.buildnotify.AppUi")
+    app_ui = mocker.patch("buildnotifylib.buildnotify.AppUi")
     mocker.patch("buildnotifylib.buildnotify.AppNotification")
     connection = FakeConnection(fake_content())
     b = BuildNotify(qapp, ConfigBuilder().build(), 60000, connection=connection)
@@ -160,5 +160,6 @@ def test_should_poll_through_the_injected_connection(qapp, mocker):
     b.run_app()
 
     assert b.poller.connection is connection
+    app_ui.assert_called_once_with(qapp, b.store, b.build_icons, connection)
     assert b.poller.parent() is qapp
     Poller.start.assert_called_once_with()

@@ -10,6 +10,7 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core import humanize
 from buildnotifylib.core.model import Project
+from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import SortKey
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
@@ -18,10 +19,11 @@ from buildnotifylib.version import VERSION
 class AppMenu(QtCore.QObject):
     reload_data = QtCore.pyqtSignal()
 
-    def __init__(self, widget: QWidget, store: SettingsStore, build_icons: BuildIcons):
+    def __init__(self, widget: QWidget, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
         super().__init__(widget)
         self.menu = QMenu(widget)
         self.store = store
+        self.connection = connection
         self.build_icons = build_icons
         self.create_default_menu_items()
 
@@ -61,7 +63,7 @@ class AppMenu(QtCore.QObject):
         )
 
     def preferences_clicked(self, widget: QWidget):
-        dialog = PreferencesDialog(self.store.settings, self.menu)
+        dialog = PreferencesDialog(self.store.settings, self.connection, self.menu)
         settings = dialog.open()
         dialog.deleteLater()
         if settings is not None:

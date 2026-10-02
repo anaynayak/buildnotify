@@ -59,7 +59,7 @@ class BuildNotify:
     def run_app(self):
         self.poller = Poller(self.store, self.connection, self.app)
         self.poller.updated.connect(self.update_projects)
-        self.app_ui = AppUi(self.app, self.store, self.build_icons)
+        self.app_ui = AppUi(self.app, self.store, self.build_icons, self.connection)
         self.app_ui.reload_data.connect(self.poller.reload)
         self.app_notification = AppNotification(self.store, self.app_ui.tray, ShellScriptHook())
         self.poller.start()

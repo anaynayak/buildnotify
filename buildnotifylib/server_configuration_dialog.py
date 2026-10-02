@@ -6,7 +6,7 @@ from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
 from buildnotifylib.adapters.credentials import Keystore
-from buildnotifylib.adapters.http import HttpConnection, is_ssl_error
+from buildnotifylib.adapters.http import is_ssl_error
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectLoader
@@ -22,11 +22,11 @@ class ServerConfigurationDialog(QDialog):
         self,
         server: ServerSettings | None,
         timeout: int,
+        connection: Connection,
         parent: QWidget | None = None,
-        connection: Connection | None = None,
     ):
         QDialog.__init__(self, parent)
-        self.connection = connection or HttpConnection()
+        self.connection = connection
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
 

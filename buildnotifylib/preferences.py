@@ -3,15 +3,17 @@ from dataclasses import replace
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
 
+from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, settings: AppSettings, parent: QWidget | None = None):
+    def __init__(self, settings: AppSettings, connection: Connection, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.settings = settings
+        self.connection = connection
         self.servers = {server.url: server for server in settings.servers}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
@@ -79,7 +81,7 @@ class PreferencesDialog(QDialog):
             self.ui.cctrayPathList.model().setData(index, server.url)
 
     def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
-        dialog = ServerConfigurationDialog(server, self.settings.timeout_seconds, self)
+        dialog = ServerConfigurationDialog(server, self.settings.timeout_seconds, self.connection, self)
         edited = dialog.open()
         dialog.deleteLater()
         return edited

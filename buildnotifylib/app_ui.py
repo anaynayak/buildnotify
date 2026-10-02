@@ -9,18 +9,19 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.app_menu import AppMenu
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.ports import Connection
 
 
 class AppUi(QtCore.QObject):
     reload_data = QtCore.pyqtSignal()
 
-    def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons):
+    def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
         super().__init__(parent)
         self.widget = QWidget()
         self.build_icons = build_icons
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None), self.widget)
         self.tray.show()
-        self.app_menu = AppMenu(self.widget, store, self.build_icons)
+        self.app_menu = AppMenu(self.widget, store, self.build_icons, connection)
         self.app_menu.reload_data.connect(self.reload_data)
         self.tray.setContextMenu(self.app_menu.menu)
         self.tray.activated.connect(self.show_menu)
