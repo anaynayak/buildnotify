@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import ClassVar
 
 from buildnotifylib.core.model import NONE_TIMEZONE, normalise_url
@@ -26,3 +27,38 @@ class ServerSettings:
 
     def uses_keyring(self) -> bool:
         return self.has_creds() or self.authentication_type == self.AUTH_BEARER_TOKEN
+
+
+SCHEMA_VERSION = 3
+DEFAULT_SCRIPT = "echo #status# #projects# >> /tmp/buildnotify.log"
+DEFAULT_NOTIFICATIONS = {
+    "successfulBuild": False,
+    "brokenBuild": True,
+    "fixedBuild": True,
+    "stillFailingBuild": True,
+    "connectivityIssues": True,
+    "lastBuildTimeForProject": True,
+}
+
+
+class SortKey(StrEnum):
+    LAST_BUILD_TIME = "sort_build_time"
+    NAME = "sort_name"
+
+
+@dataclass
+class AppSettings:
+    servers: list[ServerSettings] = field(default_factory=list)
+    interval_seconds: int = 120
+    timeout_seconds: int = 10
+    custom_script: str = DEFAULT_SCRIPT
+    custom_script_enabled: bool = False
+    sort_key: SortKey = SortKey.LAST_BUILD_TIME
+    show_last_build_label: bool = False
+    notifications: dict[str, bool] = field(default_factory=dict)
+
+    def notify(self, event: str) -> bool:
+        return self.notifications.get(event, DEFAULT_NOTIFICATIONS[event])
+
+    def server(self, url: str) -> ServerSettings | None:
+        return next((server for server in self.servers if server.url == url), None)

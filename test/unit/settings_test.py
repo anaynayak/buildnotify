@@ -1,6 +1,6 @@
 import pytest
 
-from buildnotifylib.core.settings import ServerSettings
+from buildnotifylib.core.settings import SCHEMA_VERSION, AppSettings, ServerSettings, SortKey
 
 
 @pytest.mark.parametrize(
@@ -29,3 +29,40 @@ def test_should_default_to_no_credentials():
 def test_should_use_the_keyring_for_a_username_or_a_bearer_token():
     assert ServerSettings("ci", username="alice").uses_keyring()
     assert ServerSettings("ci", authentication_type=ServerSettings.AUTH_BEARER_TOKEN).uses_keyring()
+
+
+def test_should_default_to_the_2x_behaviour():
+    settings = AppSettings()
+
+    assert settings.servers == []
+    assert (settings.interval_seconds, settings.timeout_seconds) == (120, 10)
+    assert settings.custom_script == "echo #status# #projects# >> /tmp/buildnotify.log"
+    assert not settings.custom_script_enabled
+    assert settings.sort_key is SortKey.LAST_BUILD_TIME
+    assert not settings.show_last_build_label
+
+
+def test_should_default_notifications_per_event():
+    settings = AppSettings()
+
+    assert settings.notify("brokenBuild")
+    assert not settings.notify("successfulBuild")
+
+
+def test_should_prefer_a_configured_notification():
+    assert AppSettings(notifications={"successfulBuild": True}).notify("successfulBuild")
+
+
+def test_should_find_a_server_by_url():
+    server = ServerSettings("http://ci/cc.xml")
+
+    assert AppSettings(servers=[server]).server("http://ci/cc.xml") is server
+    assert AppSettings().server("http://ci/cc.xml") is None
+
+
+def test_should_store_sort_keys_with_their_2x_names():
+    assert [key.value for key in SortKey] == ["sort_build_time", "sort_name"]
+
+
+def test_should_be_past_the_2x_layout():
+    assert SCHEMA_VERSION == 3
