@@ -12,7 +12,8 @@
     <p>
       BuildNotify is a CCMenu/CCTray equivalent for Linux. It sits in the system tray and shows the
       build status of projects on any continuous integration server that publishes a cctray.xml feed,
-      such as GoCD, Jenkins, GitLab or CruiseControl.
+      such as GoCD, Jenkins, GitLab or CruiseControl. It can also watch GitHub Actions workflows
+      through the GitHub API.
     </p>
     <ul>
       <li>Monitor projects on several CI servers at once</li>
@@ -21,6 +22,8 @@
       <li>Get notified when builds break, are fixed or keep failing</li>
       <li>See the last build time and build label of each project</li>
       <li>Run your own script when a build changes</li>
+      <li>See unreachable servers and their last error in the tray menu</li>
+      <li>Mute a server or project, or pause notifications for an hour</li>
     </ul>
     <p>
       The tray icon needs a desktop that supports StatusNotifierItem. On GNOME, install the
@@ -42,6 +45,7 @@
     <keyword>cctray</keyword>
     <keyword>build</keyword>
     <keyword>continuous integration</keyword>
+    <keyword>GitHub Actions</keyword>
   </keywords>
   <screenshots>
     <screenshot type="default">
