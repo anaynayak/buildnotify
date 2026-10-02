@@ -2,10 +2,10 @@
 Type=Application
 Name=BuildNotify
 GenericName=Build Monitor
-Comment=Show continuous integration build status from cctray.xml feeds in the system tray
+Comment=Show continuous integration build status from cctray.xml feeds and GitHub Actions in the system tray
 Exec=buildnotify
 Icon=io.github.anaynayak.BuildNotify
 Categories=Development;
-Keywords=CI;cctray;build;continuous integration;
+Keywords=CI;cctray;build;continuous integration;GitHub Actions;
 StartupNotify=false
 Terminal=false
