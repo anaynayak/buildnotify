@@ -1,15 +1,12 @@
 import os
 import re
 
-import keyring
-import keyring.backend
 import pytest
 import requests_mock
 from PyQt5.QtWidgets import QWidget, QSystemTrayIcon
 
 from buildnotifylib import BuildNotify
 from test.fake_conf import ConfigBuilder
-from test.fake_keyring import FakeKeyring
 from test.utils import fake_content
 
 
@@ -18,7 +15,6 @@ def test_should_consolidate_build_status(qtbot):
     with requests_mock.Mocker() as m:
         url = 'http://localhost:8080/cc.xml'
         m.get(url, text=fake_content())
-        keyring.set_keyring(FakeKeyring())
         parent = QWidget()
         conf = ConfigBuilder().server(url).build()
         b = BuildNotify(parent, conf, 10)
