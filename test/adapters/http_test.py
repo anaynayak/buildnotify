@@ -6,7 +6,8 @@ import pytest
 import requests
 import requests_mock
 
-from buildnotifylib.adapters.http import HttpConnection, is_ssl_error
+from buildnotifylib.adapters.http import HttpConnection
+from buildnotifylib.core.ports import CertificateError
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
@@ -72,7 +73,8 @@ def test_should_report_ssl_error():
         m.get("https://localhost:8080/cc.xml", exc=requests.exceptions.SSLError("bad certificate"))
         config = ServerSettings("https://localhost:8080/cc.xml", [], "", "", None, None)
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
-        assert is_ssl_error(response.error)
+        assert isinstance(response.error, CertificateError)
+        assert str(response.error) == "bad certificate"
         assert response.unavailable
 
 
@@ -111,14 +113,20 @@ def test_should_honour_encoding_declared_in_the_feed():
         assert [p.name for p in response.projects] == ["café"]
 
 
+def load_failing_with(error: Exception) -> Exception | None:
+    with requests_mock.Mocker() as m:
+        m.get("https://localhost:8080/cc.xml", exc=error)
+        config = ServerSettings("https://localhost:8080/cc.xml")
+        return ProjectLoader(config, 3, HttpConnection()).get_data().error
+
+
 def test_should_recognise_ssl_error_subclasses():
-    class CertificateError(requests.exceptions.SSLError):
+    class BadCertificate(requests.exceptions.SSLError):
         pass
 
-    assert is_ssl_error(requests.exceptions.SSLError())
-    assert is_ssl_error(CertificateError())
+    assert isinstance(load_failing_with(BadCertificate()), CertificateError)
 
 
-@pytest.mark.parametrize("error", [None, ValueError(), ssl.SSLError()])
+@pytest.mark.parametrize("error", [ValueError(), ssl.SSLError(), requests.exceptions.ConnectionError()])
 def test_should_not_treat_other_errors_as_ssl_errors(error):
-    assert not is_ssl_error(error)
+    assert not isinstance(load_failing_with(error), CertificateError)

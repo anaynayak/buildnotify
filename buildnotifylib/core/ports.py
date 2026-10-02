@@ -3,6 +3,10 @@ from typing import Protocol
 from buildnotifylib.core.settings import ServerSettings
 
 
+class CertificateError(Exception):
+    """Raised by a Connection when the server's TLS certificate can't be verified."""
+
+
 class Connection(Protocol):
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None

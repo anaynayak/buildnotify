@@ -5,9 +5,8 @@ from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
-from buildnotifylib.adapters.http import is_ssl_error
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
-from buildnotifylib.core.ports import Connection
+from buildnotifylib.core.ports import CertificateError, Connection
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
@@ -144,7 +143,7 @@ class ServerConfigurationDialog(QDialog):
         return Qt.convertFromPlainText(txt)  # type: ignore
 
     def handle_errors(self, response: ServerSnapshot):
-        if is_ssl_error(response.error):
+        if isinstance(response.error, CertificateError):
             reply = QMessageBox.question(
                 self,
                 "Failed to fetch projects",
