@@ -91,3 +91,14 @@ def test_should_remove_configured_servers(qtbot):
     qtbot.mouseClick(dialog.ui.removeButton, Qt.LeftButton)
 
     assert [str(s) for s in dialog.ui.cctrayPathList.model().stringList()] == []
+
+
+@pytest.mark.functional
+def test_should_not_remove_anything_without_a_selection(qtbot):
+    conf = ConfigBuilder().server("http://one/cctray.xml").server("http://two/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+
+    dialog.remove_element()
+
+    assert dialog.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml"]

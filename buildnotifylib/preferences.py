@@ -57,6 +57,8 @@ class PreferencesDialog(QDialog):
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
+        if not index.isValid():
+            return
         urls = self.ui.cctrayPathList.model().stringList()
         urls.pop(index.row())
         self.ui.cctrayPathList.setModel(QStringListModel(urls))
