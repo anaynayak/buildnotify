@@ -1,11 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
+from PySide6 import QtCore
 from PySide6.QtWidgets import QWidget
 
+from buildnotifylib.adapters.credentials import Keystore
+from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.ports import FetchError
-from buildnotifylib.core.settings import AppSettings, SortKey
+from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
@@ -36,7 +39,15 @@ def test_should_set_menu_items_for_projects(qtbot):
     app_menu.update([project1])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ["Project 1", "", "About", "Preferences", "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Project 1",
+        "",
+        "Pause notifications for 1 hour",
+        "Mute",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
@@ -66,6 +77,8 @@ def test_should_suffix_build_time(qtbot):
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
         "Project 1, 1 year ago",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -127,6 +140,8 @@ def test_should_sort_by_name(qtbot):
         "AProject",
         "BProject",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -181,6 +196,8 @@ def test_should_add_display_prefix(qtbot):
         "AProject",
         "[R1] BProject",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -252,6 +269,8 @@ def test_should_consider_prefix_for_sorting(qtbot):
         "[R2] AProject",
         "[R2] CProject",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -291,6 +310,8 @@ def test_should_show_recent_build_first(qtbot):
         "AProject",
         "BProject",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -346,6 +367,8 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
         "Recent, 1 minute ago",
         "Broken",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -431,6 +454,8 @@ def test_should_show_a_row_with_the_last_error_and_its_time_for_an_unavailable_s
         "",
         "Project 1",
         "",
+        "Pause notifications for 1 hour",
+        "Mute",
         "About",
         "Preferences",
         "Exit",
@@ -456,3 +481,128 @@ def test_should_keep_tracebacks_out_of_the_error_row(error_menu):
     app_menu.update([], [ServerSnapshot("http://ci/cc.xml", error=error)])
 
     assert app_menu.menu.actions()[0].text().startswith("ci/cc.xml: boom (")
+
+
+CI = "http://ci/cc.xml"
+OTHER = "http://other/cc.xml"
+NOW = datetime(2026, 10, 2, 12, 0, tzinfo=UTC)
+
+
+def built(name, server_url=CI):
+    attrs = {"name": name, "lastBuildStatus": "Success", "activity": "Sleeping"}
+    return ProjectBuilder(attrs).server(server_url).build()
+
+
+@pytest.fixture
+def mute_menu(qtbot):
+    parents = []
+
+    def make(*servers, now=NOW, **fields):
+        parent = QWidget()
+        parents.append(parent)
+        qtbot.addWidget(parent)
+        store = ConfigBuilder(servers=list(servers), **fields).build()
+        return AppMenu(parent, store, BuildIcons(), FakeConnection(fake_content()), clock=lambda: now)
+
+    yield make
+
+
+def texts(menu):
+    return [a.text() for a in menu.actions()]
+
+
+def action(menu, text):
+    return next(a for a in menu.actions() if a.text() == text)
+
+
+def submenu(app_menu):
+    return action(app_menu.menu, "Mute").menu()
+
+
+def reopened(app_menu):
+    path = app_menu.store.qsettings.fileName()
+    return SettingsStore(QtCore.QSettings(path, QtCore.QSettings.Format.IniFormat), Keystore()).settings
+
+
+@pytest.mark.functional
+def test_should_mark_muted_projects_but_keep_them_in_the_menu(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER, muted=True))
+
+    app_menu.update([built("api"), built("web"), built("docs", OTHER)])
+
+    assert sorted(texts(app_menu.menu)[:3]) == ["api (muted)", "docs (muted)", "web"]
+
+
+@pytest.mark.functional
+def test_should_list_servers_and_projects_to_mute(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER, muted=True))
+
+    app_menu.update([built("api"), built("web")])
+
+    menu = submenu(app_menu)
+    assert sorted(texts(menu)) == sorted(["ci/cc.xml", "other/cc.xml", "", "api", "web"])
+    checked = {a.text(): a.isChecked() for a in menu.actions() if a.isCheckable()}
+    assert checked == {"ci/cc.xml": False, "other/cc.xml": True, "api": True, "web": False}
+
+
+@pytest.mark.functional
+def test_should_disable_mute_without_servers(mute_menu):
+    assert not submenu(mute_menu()).isEnabled()
+
+
+@pytest.mark.functional
+def test_should_mute_a_server_from_the_menu_and_persist_it(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI))
+    app_menu.update([built("api")])
+
+    action(submenu(app_menu), "ci/cc.xml").trigger()
+
+    assert app_menu.store.settings.servers[0].muted
+    assert reopened(app_menu).servers[0].muted
+    assert texts(app_menu.menu)[0] == "api (muted)"
+    assert action(submenu(app_menu), "ci/cc.xml").isChecked()
+
+
+@pytest.mark.functional
+def test_should_unmute_a_project_from_the_menu_and_persist_it(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]))
+    app_menu.update([built("api")])
+
+    action(submenu(app_menu), "api").trigger()
+
+    assert reopened(app_menu).servers[0].muted_projects == []
+    assert texts(app_menu.menu)[0] == "api"
+
+
+@pytest.mark.functional
+def test_should_pause_for_an_hour_and_persist_the_expiry(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI))
+    app_menu.update([built("api")])
+
+    action(app_menu.menu, "Pause notifications for 1 hour").trigger()
+
+    assert reopened(app_menu).paused_until == NOW + timedelta(hours=1)
+    until = (NOW + timedelta(hours=1)).astimezone().strftime("%H:%M")
+    assert f"Resume notifications (paused until {until})" in texts(app_menu.menu)
+
+
+@pytest.mark.functional
+def test_should_resume_from_the_menu(mute_menu):
+    paused_until = NOW + timedelta(minutes=30)
+    app_menu = mute_menu(ServerSettings(CI), paused_until=paused_until)
+    app_menu.update([])
+    resume = f"Resume notifications (paused until {paused_until.astimezone().strftime('%H:%M')})"
+
+    action(app_menu.menu, resume).trigger()
+
+    assert reopened(app_menu).paused_until is None
+    assert "Pause notifications for 1 hour" in texts(app_menu.menu)
+
+
+@pytest.mark.functional
+def test_should_offer_to_pause_again_once_the_pause_expired(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), paused_until=NOW - timedelta(seconds=1))
+
+    app_menu.update([])
+
+    assert "Pause notifications for 1 hour" in texts(app_menu.menu)
