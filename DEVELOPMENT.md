@@ -39,3 +39,20 @@ The status icons are plain SVG files in `buildnotifylib/resources/icons` and shi
 CI runs lint, format, mypy and the generated UI check, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel and installs it into a clean venv.
 
 Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing.
+
+## Flatpak
+
+The Flatpak manifest is `packaging/flatpak/io.github.anaynayak.BuildNotify.yml`. It builds on the KDE runtime with PySide6 from `io.qt.PySide.BaseApp`. The other Python deps are in `python3-requirements.json`, generated from `uv.lock`. Regenerate it after a dependency change:
+
+```shell
+uv run --with packaging python packaging/flatpak/generate-requirements.py
+```
+
+Build and run it on Linux with:
+
+```shell
+flatpak-builder --user --install --force-clean --install-deps-from=flathub build-dir packaging/flatpak/io.github.anaynayak.BuildNotify.yml
+flatpak run io.github.anaynayak.BuildNotify
+```
+
+The desktop file, icon and AppStream metainfo at the repo root are named after the app id and ship in the wheel under `share/`. Check them with `desktop-file-validate` and `appstreamcli validate`.
