@@ -21,19 +21,16 @@ class ConfigBuilder:
     def __init__(self, overrides=None):
         if overrides is None:
             overrides = {}
-        self.conf = {
-            'sort_by_name': True,
-            'values/lastBuildTimeForProject': False
-        }
+        self.conf = {"sort_by_name": True, "values/lastBuildTimeForProject": False}
         self._merge(overrides)
 
     def server(self, url, overrides=None):
         if overrides is None:
             overrides = {}
-        urls = self.conf.get('connection/urls', [])
+        urls = self.conf.get("connection/urls", [])
         urls.append(url)
-        self._merge({'connection/urls': urls})
-        self._merge({'display_prefix/%s' % url: ""})
+        self._merge({"connection/urls": urls})
+        self._merge({"display_prefix/%s" % url: ""})
         self._merge(overrides)
         return self
 

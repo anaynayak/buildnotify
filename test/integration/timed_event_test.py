@@ -15,7 +15,7 @@ class TargetTimedEvent:
 
 @pytest.mark.functional
 def test_should_trigger_event_on_timeout(qtbot, mocker):
-    m = mocker.patch.object(TargetTimedEvent, 'method')
+    m = mocker.patch.object(TargetTimedEvent, "method")
     widget = QWidget()
     qtbot.addWidget(widget)
     event = TimedEvent(widget, TargetTimedEvent().method, 20)
@@ -26,7 +26,7 @@ def test_should_trigger_event_on_timeout(qtbot, mocker):
 
 @pytest.mark.functional
 def test_should_repeat_trigger_event(qtbot, mocker):
-    m = mocker.patch.object(TargetTimedEvent, 'method')
+    m = mocker.patch.object(TargetTimedEvent, "method")
     widget = QWidget()
     qtbot.addWidget(widget)
     target = TargetTimedEvent()

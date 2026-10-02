@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from buildnotifylib.config import Config
 from buildnotifylib.serverconfig import ServerConfig
 
-FAILURE_STATUSES = ('Failure', 'Exception')
+FAILURE_STATUSES = ("Failure", "Exception")
 
 
 class Project:
@@ -12,16 +12,16 @@ class Project:
         self.server_url = server_url
         self.prefix = prefix
         self.timezone = timezone
-        self.name = props['name']
-        self.status = props['lastBuildStatus']
-        self.activity = props['activity']
-        self.url = ServerConfig.cleanup(props['url'])
-        self.last_build_time = props['lastBuildTime']
+        self.name = props["name"]
+        self.status = props["lastBuildStatus"]
+        self.activity = props["activity"]
+        self.url = ServerConfig.cleanup(props["url"])
+        self.last_build_time = props["lastBuildTime"]
         self.build_time = parse_build_time(self.last_build_time, timezone)
-        self.last_build_label = props.get('lastBuildLabel', None)
+        self.last_build_label = props.get("lastBuildLabel", None)
 
     def effective_status(self) -> str:
-        return 'Failure' if self.status in FAILURE_STATUSES else self.status
+        return "Failure" if self.status in FAILURE_STATUSES else self.status
 
     def get_build_status(self) -> str:
         return self.effective_status() + "." + self.activity
@@ -30,16 +30,16 @@ class Project:
         label = self.name
 
         if self.prefix:
-            label = '[%s] %s' % (self.prefix, self.name)
+            label = "[%s] %s" % (self.prefix, self.name)
         if show_last_build_label:
-            label = '%s (%s)' % (label, self.last_build_label)
+            label = "%s (%s)" % (label, self.last_build_label)
 
         return label
 
-    def different_builds(self, project: 'Project') -> bool:
+    def different_builds(self, project: "Project") -> bool:
         return (self.last_build_label, self.last_build_time) != (project.last_build_label, project.last_build_time)
 
-    def matches(self, other: 'Project') -> bool:
+    def matches(self, other: "Project") -> bool:
         return other.name == self.name and other.server_url == self.server_url
 
     def get_last_build_time(self) -> datetime | None:

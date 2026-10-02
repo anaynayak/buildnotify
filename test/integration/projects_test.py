@@ -9,7 +9,7 @@ from buildnotifylib.project_status_notification import ProjectStatus
 from test.fake_conf import ConfigBuilder
 from test.utils import fake_content
 
-URL = 'http://localhost:8080/cc.xml'
+URL = "http://localhost:8080/cc.xml"
 
 
 @pytest.mark.functional
@@ -27,7 +27,7 @@ def record_fetch_threads(mocker):
         threads.append(threading.get_ident())
         return original(loader)
 
-    mocker.patch.object(ProjectLoader, 'get_data', get_data)
+    mocker.patch.object(ProjectLoader, "get_data", get_data)
     return threads
 
 
@@ -47,7 +47,7 @@ def test_reload_should_fetch_off_the_gui_thread(qtbot, mocker):
 
 
 @pytest.mark.functional
-@pytest.mark.parametrize('trigger', ['load_from_server', 'reload'])
+@pytest.mark.parametrize("trigger", ["load_from_server", "reload"])
 def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
     conf = ConfigBuilder().server(URL).build()
     threads = []
@@ -57,7 +57,7 @@ def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
         threads.append(threading.get_ident())
         return original()
 
-    mocker.patch.object(conf, 'get_server_configs', get_server_configs)
+    mocker.patch.object(conf, "get_server_configs", get_server_configs)
     with requests_mock.Mocker() as m:
         m.get(URL, text=fake_content())
         populator = ProjectsPopulator(conf)
@@ -69,8 +69,10 @@ def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
 
 
 def cctray(status):
-    return ('<Projects><Project name="proj1" activity="Sleeping" lastBuildStatus="%s" lastBuildLabel="1" '
-            'lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/></Projects>' % status)
+    return (
+        '<Projects><Project name="proj1" activity="Sleeping" lastBuildStatus="%s" lastBuildLabel="1" '
+        'lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/></Projects>' % status
+    )
 
 
 def poll(qtbot, populator, configs, **response):
@@ -87,12 +89,12 @@ def test_should_keep_last_known_projects_while_server_is_down(qtbot):
     populator = ProjectsPopulator(conf)
     configs = conf.get_server_configs()
 
-    poll(qtbot, populator, configs, text=cctray('Failure'))
+    poll(qtbot, populator, configs, text=cctray("Failure"))
     status = poll(qtbot, populator, configs, status_code=500)
 
     assert [s.url for s in status.unavailable_servers()] == [URL]
-    assert [p.name for p in status.get_projects()] == ['proj1']
-    assert status.get_build_status() == 'Failure.Sleeping'
+    assert [p.name for p in status.get_projects()] == ["proj1"]
+    assert status.get_build_status() == "Failure.Sleeping"
 
 
 @pytest.mark.functional
@@ -101,11 +103,11 @@ def test_should_report_broken_build_after_outage(qtbot):
     populator = ProjectsPopulator(conf)
     configs = conf.get_server_configs()
 
-    poll(qtbot, populator, configs, text=cctray('Success'))
+    poll(qtbot, populator, configs, text=cctray("Success"))
     down = poll(qtbot, populator, configs, status_code=500)
-    up = poll(qtbot, populator, configs, text=cctray('Failure'))
+    up = poll(qtbot, populator, configs, text=cctray("Failure"))
 
-    assert ProjectStatus(down.get_projects(), up.get_projects()).failing_builds() == ['proj1']
+    assert ProjectStatus(down.get_projects(), up.get_projects()).failing_builds() == ["proj1"]
     assert up.unavailable_servers() == []
 
 
@@ -119,14 +121,14 @@ def test_reload_during_a_fetch_should_fetch_again_with_new_config(qtbot, mocker)
         release.wait(5)
         return original(loader)
 
-    mocker.patch.object(ProjectLoader, 'get_data', get_data)
+    mocker.patch.object(ProjectLoader, "get_data", get_data)
     statuses = []
     with requests_mock.Mocker() as m:
-        m.get(URL, text=cctray('Success'))
+        m.get(URL, text=cctray("Success"))
         populator = ProjectsPopulator(conf)
         populator.updated_projects.connect(statuses.append)
         populator.load_from_server()
-        mocker.patch.object(conf, 'get_server_configs', return_value=[])
+        mocker.patch.object(conf, "get_server_configs", return_value=[])
         populator.reload()
         release.set()
         qtbot.waitUntil(lambda: len(statuses) == 2, timeout=2000)

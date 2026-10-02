@@ -11,11 +11,11 @@ def test_should_use_in_memory_keyring():
 
 
 def test_should_not_leak_passwords_between_tests_part_one():
-    keyring.set_password('svc', 'user', 'secret')
+    keyring.set_password("svc", "user", "secret")
 
 
 def test_should_not_leak_passwords_between_tests_part_two():
-    assert keyring.get_password('svc', 'user') is None
+    assert keyring.get_password("svc", "user") is None
 
 
 def test_should_not_open_real_qsettings_on_import():
@@ -30,4 +30,4 @@ def test_should_not_open_real_qsettings_on_import():
         "import buildnotifylib.buildnotify\n"
         "assert not calls, calls\n"
     )
-    subprocess.run([sys.executable, '-c', script], check=True)
+    subprocess.run([sys.executable, "-c", script], check=True)

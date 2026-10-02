@@ -1,4 +1,3 @@
-
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.project import Project
 

@@ -16,4 +16,4 @@ def in_memory_keyring():
 
 @pytest.fixture
 def qsettings(tmp_path):
-    return QtCore.QSettings(str(tmp_path / 'settings.ini'), QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(str(tmp_path / "settings.ini"), QtCore.QSettings.IniFormat)

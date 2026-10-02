@@ -49,9 +49,13 @@ class AppMenu(QtCore.QObject):
         self.menu.addAction(QAction("Exit", self.menu, triggered=self.exit))
 
     def about_clicked(self, widget: QWidget):
-        QMessageBox.about(self.menu, "About BuildNotify %s" % VERSION,
-                          "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs," % VERSION +
-                          "please visit <a href=\"https://git.io/buildnotify\">https://git.io/buildnotify</a> and provide your feedback.")
+        QMessageBox.about(
+            self.menu,
+            "About BuildNotify %s" % VERSION,
+            "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs,"
+            % VERSION
+            + 'please visit <a href="https://git.io/buildnotify">https://git.io/buildnotify</a> and provide your feedback.',
+        )
 
     def preferences_clicked(self, widget: QWidget):
         dialog = PreferencesDialog(self.conf, self.menu)

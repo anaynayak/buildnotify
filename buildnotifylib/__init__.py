@@ -1,1 +1,1 @@
-from buildnotifylib.buildnotify import BuildNotify   # NOQA
+from buildnotifylib.buildnotify import BuildNotify  # NOQA

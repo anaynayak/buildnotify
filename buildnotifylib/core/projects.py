@@ -1,4 +1,3 @@
-
 from defusedxml import minidom
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QThread
@@ -11,9 +10,18 @@ from buildnotifylib.core.project import Project
 from buildnotifylib.core.response import Response
 from buildnotifylib.serverconfig import ServerConfig
 
-STATUS_PRIORITY = ['Failure.Building', 'Failure.Sleeping', 'Failure.CheckingModifications',
-                   'Success.Building', 'Success.Sleeping', 'Success.CheckingModifications',
-                   'Unknown.Building', 'Unknown.Sleeping', 'Unknown.CheckingModifications', 'Unknown.Unknown']
+STATUS_PRIORITY = [
+    "Failure.Building",
+    "Failure.Sleeping",
+    "Failure.CheckingModifications",
+    "Success.Building",
+    "Success.Sleeping",
+    "Success.CheckingModifications",
+    "Unknown.Building",
+    "Unknown.Sleeping",
+    "Unknown.CheckingModifications",
+    "Unknown.Unknown",
+]
 
 
 class OverallIntegrationStatus:
@@ -28,7 +36,7 @@ class OverallIntegrationStatus:
         return None
 
     def get_failing_builds(self) -> list[Project]:
-        return [p for p in self.get_projects() if p.effective_status() == 'Failure']
+        return [p for p in self.get_projects() if p.effective_status() == "Failure"]
 
     def to_map(self) -> dict[str, list[Project]]:
         status: dict[str, list[Project]] = {key: [] for key in STATUS_PRIORITY}
@@ -36,7 +44,7 @@ class OverallIntegrationStatus:
             if project.get_build_status() in status:
                 status[project.get_build_status()].append(project)
             else:
-                status['Unknown.Unknown'].append(project)
+                status["Unknown.Unknown"].append(project)
         return status
 
     def get_projects(self) -> list[Project]:
@@ -109,7 +117,7 @@ class ProjectLoader:
         try:
             headers = {}
             if self.server_config.authentication_type == ServerConfig.AUTH_BEARER_TOKEN:
-                headers['Authorization'] = 'Bearer %s' % self.server_config.password
+                headers["Authorization"] = "Bearer %s" % self.server_config.password
 
             data = self.connection.connect(self.server_config, self.timeout, headers)
             projects = self.parse(data)
@@ -122,17 +130,23 @@ class ProjectLoader:
     def parse(self, data) -> list[Project]:
         dom = minidom.parseString(data)
         root = dom.documentElement.tagName
-        if root != 'Projects':
-            raise ValueError('Not a cctray feed: expected <Projects> as the root element, got <%s>' % root)
+        if root != "Projects":
+            raise ValueError("Not a cctray feed: expected <Projects> as the root element, got <%s>" % root)
         projects = []
-        for node in dom.getElementsByTagName('Project'):
-            projects.append(Project(
-                self.server_config.url,
-                self.server_config.prefix,
-                self.server_config.timezone,
-                {
-                    'name': node.getAttribute('name'), 'lastBuildStatus': node.getAttribute('lastBuildStatus'),
-                    'lastBuildLabel': node.getAttribute('lastBuildLabel'), 'activity': node.getAttribute('activity'),
-                    'url': node.getAttribute('webUrl'), 'lastBuildTime': node.getAttribute('lastBuildTime')
-                }))
+        for node in dom.getElementsByTagName("Project"):
+            projects.append(
+                Project(
+                    self.server_config.url,
+                    self.server_config.prefix,
+                    self.server_config.timezone,
+                    {
+                        "name": node.getAttribute("name"),
+                        "lastBuildStatus": node.getAttribute("lastBuildStatus"),
+                        "lastBuildLabel": node.getAttribute("lastBuildLabel"),
+                        "activity": node.getAttribute("activity"),
+                        "url": node.getAttribute("webUrl"),
+                        "lastBuildTime": node.getAttribute("lastBuildTime"),
+                    },
+                )
+            )
         return projects

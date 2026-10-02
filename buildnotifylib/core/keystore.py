@@ -1,5 +1,3 @@
-
-
 class FakeKeyring:
     def set_password(self, url, username, password):
         pass

@@ -1,4 +1,3 @@
-
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
 
@@ -15,11 +14,14 @@ class PreferencesDialog(QDialog):
         self.added_servers: dict[str, ServerConfig] = {}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
-        self.checkboxes = dict(successfulBuild=self.ui.successfulBuildsCheckbox,
-                               brokenBuild=self.ui.brokenBuildsCheckbox, fixedBuild=self.ui.fixedBuildsCheckbox,
-                               stillFailingBuild=self.ui.stillFailingBuildsCheckbox,
-                               connectivityIssues=self.ui.connectivityIssuesCheckbox,
-                               lastBuildTimeForProject=self.ui.showLastBuildTimeCheckbox)
+        self.checkboxes = dict(
+            successfulBuild=self.ui.successfulBuildsCheckbox,
+            brokenBuild=self.ui.brokenBuildsCheckbox,
+            fixedBuild=self.ui.fixedBuildsCheckbox,
+            stillFailingBuild=self.ui.stillFailingBuildsCheckbox,
+            connectivityIssues=self.ui.connectivityIssuesCheckbox,
+            lastBuildTimeForProject=self.ui.showLastBuildTimeCheckbox,
+        )
         self.set_values_from_config()
 
         # Connect up the buttons.
@@ -112,6 +114,6 @@ class PreferencesDialog(QDialog):
                 sort_by_build_time=self.ui.sortBuildByLastBuildTime.isChecked(),
                 sort_by_name=self.ui.sortBuildByName.isChecked(),
                 selections=self.get_selections(),
-                show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked()
+                show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked(),
             )
         return None

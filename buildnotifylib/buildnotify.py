@@ -62,7 +62,7 @@ class BuildNotify:
         self.timed_event.start()
 
     def wait_for_workers(self) -> bool:
-        if not hasattr(self, 'projects_populator'):
+        if not hasattr(self, "projects_populator"):
             return True
         return self.projects_populator.wait(self.EXIT_WAIT_MS)
 
@@ -79,5 +79,5 @@ class BuildNotify:
             sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     BuildNotify.start()

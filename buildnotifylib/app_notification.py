@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import QWidget
 
 from buildnotifylib.config import Config
@@ -16,6 +15,11 @@ class AppNotification:
 
     def update_projects(self, new_integration_status: OverallIntegrationStatus):
         if self.integration_status is not None:
-            ProjectStatusNotification(self.config, self.integration_status, new_integration_status,
-                                      self.notification, self.timed_project_filter).show_notifications()
+            ProjectStatusNotification(
+                self.config,
+                self.integration_status,
+                new_integration_status,
+                self.notification,
+                self.timed_project_filter,
+            ).show_notifications()
         self.integration_status = new_integration_status

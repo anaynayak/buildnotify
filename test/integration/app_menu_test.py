@@ -12,207 +12,285 @@ from test.project_builder import ProjectBuilder
 
 @pytest.mark.functional
 def test_should_set_menu_items_for_projects(qtbot):
-    conf = ConfigBuilder().server('someurl').build()
+    conf = ConfigBuilder().server("someurl").build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    project1 = ProjectBuilder({
-        'name': 'Project 1',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': '2016-09-17 11:31:12'
-    }).server('someurl').build()
+    project1 = (
+        ProjectBuilder(
+            {
+                "name": "Project 1",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": "2016-09-17 11:31:12",
+            }
+        )
+        .server("someurl")
+        .build()
+    )
     app_menu.update([project1])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['Project 1',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == ["Project 1", "", "About", "Preferences", "Exit"]
 
 
 @pytest.mark.functional
 def test_should_suffix_build_time(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': True}).build()
+    conf = ConfigBuilder({"values/lastBuildTimeForProject": True}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     one_year_ago = (datetime.now() - timedelta(days=367)).strftime("%Y-%m-%d %H:%M:%S")
-    project1 = ProjectBuilder({
-        'name': 'Project 1',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': one_year_ago
-    }).timezone('US/Central').build()
+    project1 = (
+        ProjectBuilder(
+            {
+                "name": "Project 1",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": one_year_ago,
+            }
+        )
+        .timezone("US/Central")
+        .build()
+    )
 
     app_menu.update([project1])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['Project 1, 1 year ago',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Project 1, 1 year ago",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
 def test_should_show_future_build_time_as_in(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': True}).build()
+    conf = ConfigBuilder({"values/lastBuildTimeForProject": True}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    project1 = ProjectBuilder({
-        'name': 'Project 1',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': (datetime.now() + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%S")
-    }).build()
+    project1 = ProjectBuilder(
+        {
+            "name": "Project 1",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": (datetime.now() + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%S"),
+        }
+    ).build()
 
     app_menu.update([project1])
 
-    assert str(app_menu.menu.actions()[0].text()) == 'Project 1, in 5 hours'
+    assert str(app_menu.menu.actions()[0].text()) == "Project 1, in 5 hours"
 
 
 @pytest.mark.functional
 def test_should_sort_by_name(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).build()
+    conf = ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
-    project1 = ProjectBuilder({
-        'name': 'BProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': time
-    }).build()
+    project1 = ProjectBuilder(
+        {
+            "name": "BProject",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": time,
+        }
+    ).build()
 
-    project2 = ProjectBuilder({
-        'name': 'AProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': time
-    }).build()
+    project2 = ProjectBuilder(
+        {
+            "name": "AProject",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": time,
+        }
+    ).build()
 
     app_menu.update([project1, project2])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['AProject',
-                                                                'BProject',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "AProject",
+        "BProject",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
 def test_should_add_display_prefix(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
-        "Server2").build()
+    conf = (
+        ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"})
+        .server("Server1")
+        .server("Server2")
+        .build()
+    )
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
-    project1 = ProjectBuilder({
-        'name': 'BProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': time
-    }).server('Server2').prefix('R1').build()
+    project1 = (
+        ProjectBuilder(
+            {
+                "name": "BProject",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": time,
+            }
+        )
+        .server("Server2")
+        .prefix("R1")
+        .build()
+    )
 
-    project2 = ProjectBuilder({
-        'name': 'AProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': time
-    }).server('Server1').build()
+    project2 = (
+        ProjectBuilder(
+            {
+                "name": "AProject",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": time,
+            }
+        )
+        .server("Server1")
+        .build()
+    )
 
     app_menu.update([project1, project2])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['AProject',
-                                                                '[R1] BProject',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "AProject",
+        "[R1] BProject",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
 def test_should_consider_prefix_for_sorting(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).server("Server1").server(
-        "Server2", {
-            'display_prefix/Server2': 'R1'}).build()
+    conf = (
+        ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"})
+        .server("Server1")
+        .server("Server2", {"display_prefix/Server2": "R1"})
+        .build()
+    )
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
     time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
-    project1 = ProjectBuilder({
-        'name': 'BProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
-        'activity': 'Sleeping', 'lastBuildTime': time
-    }).server('Server2').prefix('R1').build()
+    project1 = (
+        ProjectBuilder(
+            {
+                "name": "BProject",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": time,
+            }
+        )
+        .server("Server2")
+        .prefix("R1")
+        .build()
+    )
 
-    project2 = ProjectBuilder({
-        'name': 'AProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
-        'activity': 'Sleeping', 'lastBuildTime': time
-    }).server('Server1').prefix('R2').build()
+    project2 = (
+        ProjectBuilder(
+            {
+                "name": "AProject",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": time,
+            }
+        )
+        .server("Server1")
+        .prefix("R2")
+        .build()
+    )
 
-    project3 = ProjectBuilder({
-        'name': 'CProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
-        'activity': 'Sleeping', 'lastBuildTime': time
-    }).server('Server1').prefix('R2').build()
+    project3 = (
+        ProjectBuilder(
+            {
+                "name": "CProject",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": time,
+            }
+        )
+        .server("Server1")
+        .prefix("R2")
+        .build()
+    )
 
     app_menu.update([project1, project2, project3])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['[R1] BProject',
-                                                                '[R2] AProject',
-                                                                '[R2] CProject',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "[R1] BProject",
+        "[R2] AProject",
+        "[R2] CProject",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
 def test_should_show_recent_build_first(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_build_time'}).build()
+    conf = ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_build_time"}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    project1 = ProjectBuilder({
-        'name': 'BProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': ((datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S"))
-    }).build()
+    project1 = ProjectBuilder(
+        {
+            "name": "BProject",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": ((datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")),
+        }
+    ).build()
 
-    project2 = ProjectBuilder({
-        'name': 'AProject',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': ((datetime.now() - timedelta(0)).strftime("%Y-%m-%d %H:%M:%S"))
-    }).build()
+    project2 = ProjectBuilder(
+        {
+            "name": "AProject",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": ((datetime.now() - timedelta(0)).strftime("%Y-%m-%d %H:%M:%S")),
+        }
+    ).build()
 
     app_menu.update([project1, project2])
     app_menu.menu.show()
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['AProject',
-                                                                'BProject',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "AProject",
+        "BProject",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
@@ -222,41 +300,51 @@ def test_should_show_preferences(qtbot, mocker):
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
 
-    mocker.patch.object(PreferencesDialog, 'open', return_value="some preferences")
-    mocker.patch.object(conf, 'update_preferences')
+    mocker.patch.object(PreferencesDialog, "open", return_value="some preferences")
+    mocker.patch.object(conf, "update_preferences")
     with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
         app_menu.preferences_clicked(None)
 
 
 @pytest.mark.functional
 def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
-    conf = ConfigBuilder({'values/lastBuildTimeForProject': True, 'sort_key': 'sort_build_time'}).build()
+    conf = ConfigBuilder({"values/lastBuildTimeForProject": True, "sort_key": "sort_build_time"}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    broken = ProjectBuilder({
-        'name': 'Broken',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': 'garbage'
-    }).timezone('No/Such_Zone').build()
-    recent = ProjectBuilder({
-        'name': 'Recent',
-        'url': 'dummyurl',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    }).build()
+    broken = (
+        ProjectBuilder(
+            {
+                "name": "Broken",
+                "url": "dummyurl",
+                "lastBuildStatus": "Success",
+                "activity": "Sleeping",
+                "lastBuildTime": "garbage",
+            }
+        )
+        .timezone("No/Such_Zone")
+        .build()
+    )
+    recent = ProjectBuilder(
+        {
+            "name": "Recent",
+            "url": "dummyurl",
+            "lastBuildStatus": "Success",
+            "activity": "Sleeping",
+            "lastBuildTime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        }
+    ).build()
 
     app_menu.update([broken, recent])
 
-    assert [str(a.text()) for a in app_menu.menu.actions()] == ['Recent, 1 minute ago',
-                                                                'Broken',
-                                                                "",
-                                                                "About",
-                                                                "Preferences",
-                                                                "Exit"]
+    assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Recent, 1 minute ago",
+        "Broken",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
 
 
 @pytest.mark.functional
@@ -264,8 +352,8 @@ def test_should_quit_the_application_on_exit(qtbot, mocker):
     parent = QWidget()
     app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
     qtbot.addWidget(parent)
-    quit_app = mocker.patch('buildnotifylib.app_menu.QApplication.quit')
-    sys_exit = mocker.patch('sys.exit')
+    quit_app = mocker.patch("buildnotifylib.app_menu.QApplication.quit")
+    sys_exit = mocker.patch("sys.exit")
 
     app_menu.exit(None)
 
@@ -278,8 +366,8 @@ def test_should_delete_preferences_dialog_after_use(qtbot, mocker):
     parent = QWidget()
     app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
     qtbot.addWidget(parent)
-    mocker.patch.object(PreferencesDialog, 'open', return_value=None)
-    delete_later = mocker.patch.object(PreferencesDialog, 'deleteLater')
+    mocker.patch.object(PreferencesDialog, "open", return_value=None)
+    delete_later = mocker.patch.object(PreferencesDialog, "deleteLater")
 
     app_menu.preferences_clicked(None)
 

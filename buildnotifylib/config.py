@@ -1,4 +1,3 @@
-
 from PyQt5 import QtCore
 
 from buildnotifylib.core.keystore import Keystore
@@ -6,8 +5,17 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class Preferences:
-    def __init__(self, urls, interval, custom_script_text, custom_script_checked,
-                 sort_by_build_time, sort_by_name, selections, show_last_build_label):
+    def __init__(
+        self,
+        urls,
+        interval,
+        custom_script_text,
+        custom_script_checked,
+        sort_by_build_time,
+        sort_by_name,
+        selections,
+        show_last_build_label,
+    ):
         self.urls = urls
         self.interval = interval
         self.custom_script_text = custom_script_text
@@ -19,10 +27,14 @@ class Preferences:
 
 
 class Config:
-    default_options = dict(successfulBuild=False, brokenBuild=True,
-                           fixedBuild=True, stillFailingBuild=True,
-                           connectivityIssues=True,
-                           lastBuildTimeForProject=True)
+    default_options = dict(
+        successfulBuild=False,
+        brokenBuild=True,
+        fixedBuild=True,
+        stillFailingBuild=True,
+        connectivityIssues=True,
+        lastBuildTimeForProject=True,
+    )
 
     default_script = "echo #status# #projects# >> /tmp/buildnotify.log"
     CUSTOM_SCRIPT = "notifications/custom_script"
@@ -49,8 +61,7 @@ class Config:
         self.settings = settings if settings is not None else QtCore.QSettings("BuildNotify", "BuildNotify")
         self.keystore = Keystore()
         self.timeout = self.get_with_default("connection/timeout", 10, int)
-        self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60,
-                                              int)
+        self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60, int)
 
     def get_with_default(self, key: str, default, usertype):
         if self.settings.value(key, "notset") == "notset":
@@ -74,14 +85,13 @@ class Config:
         username = self.get_username(url)
         if self.uses_keyring(username, self.get_authorization_type(url)):
             self.keystore.delete(url, username)
-        if any(other.startswith(url + '/') for other in remaining_urls):
+        if any(other.startswith(url + "/") for other in remaining_urls):
             return
         for key in self.SERVER_KEYS:
             self.settings.remove(key % url)
 
     def get_urls(self) -> list[str]:
-        return [str(url) for url in
-                self.settings.value(self.CONNECTION_URLS, [])]
+        return [str(url) for url in self.settings.value(self.CONNECTION_URLS, [])]
 
     def set_interval_in_seconds(self, interval: int):
         self.settings.setValue(self.INTERVAL_IN_SECONDS, interval)
@@ -94,8 +104,7 @@ class Config:
         return self.get_interval_in_seconds() * 1000
 
     def get_value(self, key: str) -> bool:
-        return self.get_with_default(self.VALUES % key,
-                                     self.default_options[key], bool)
+        return self.get_with_default(self.VALUES % key, self.default_options[key], bool)
 
     def set_value(self, key: str, value: bool):
         return self.settings.setValue(self.VALUES % key, value)
@@ -125,19 +134,18 @@ class Config:
         self.settings.setValue(self.SCRIPT_ENABLED, status)
 
     def get_custom_script(self) -> str:
-        return self.settings.value(self.CUSTOM_SCRIPT, self.default_script,
-                                   type=str)
+        return self.settings.value(self.CUSTOM_SCRIPT, self.default_script, type=str)
 
     def get_custom_script_enabled(self) -> bool:
         return self.settings.value(self.SCRIPT_ENABLED, False, bool)
 
     def get_sort_by_last_build_time(self) -> bool:
-        return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME,
-                                   type=str) == self.SORT_BY_LAST_BUILD_TIME
+        return (
+            self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME, type=str) == self.SORT_BY_LAST_BUILD_TIME
+        )
 
     def get_sort_by_name(self) -> bool:
-        return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME,
-                                   type=str) == self.SORT_BY_NAME
+        return self.settings.value(self.SORT_KEY, self.SORT_BY_LAST_BUILD_TIME, type=str) == self.SORT_BY_NAME
 
     def get_show_last_build_label(self) -> bool:
         return self.settings.value(self.SHOW_LAST_BUILD_LABEL, False, bool)
@@ -155,43 +163,35 @@ class Config:
         self.settings.setValue(self.USERNAME % url, username)
 
     def get_username(self, url: str) -> str:
-        return self.settings.value(self.USERNAME % url, '', type=str)
+        return self.settings.value(self.USERNAME % url, "", type=str)
 
     def set_password(self, url: str, username: str, password: str):
         self.keystore.save(url, username, password)
 
     def get_password(self, url: str, username: str) -> str:
-        return self.keystore.load(url, username) or ''
+        return self.keystore.load(url, username) or ""
 
     def set_skip_ssl_verification(self, url: str, skip_ssl_verification: bool):
-        self.settings.setValue(self.SKIP_SSL_VERIFICATION % url,
-                               skip_ssl_verification)
+        self.settings.setValue(self.SKIP_SSL_VERIFICATION % url, skip_ssl_verification)
 
     def get_skip_ssl_verification(self, url: str) -> bool:
-        return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False,
-                                   bool)
+        return self.settings.value(self.SKIP_SSL_VERIFICATION % url, False, bool)
 
     def set_authorization_type(self, url: str, authorization_type: int):
-        self.settings.setValue(self.AUTHORIZATION_TYPE % url,
-                               authorization_type)
+        self.settings.setValue(self.AUTHORIZATION_TYPE % url, authorization_type)
 
     def get_authorization_type(self, url: str) -> int:
-        return self.settings.value(self.AUTHORIZATION_TYPE % url,
-                                   ServerConfig.AUTH_USERNAME_PASSWORD,
-                                   int)
+        return self.settings.value(self.AUTHORIZATION_TYPE % url, ServerConfig.AUTH_USERNAME_PASSWORD, int)
 
     def save_server_config(self, server_config: ServerConfig):
         self.add_server_url(server_config.url)
-        self.set_project_excludes(server_config.url,
-                                  server_config.excluded_projects)
+        self.set_project_excludes(server_config.url, server_config.excluded_projects)
         self.set_timezone(server_config.url, server_config.timezone)
         self.set_display_prefix(server_config.url, server_config.prefix)
         self.set_username(server_config.url, server_config.username)
         if self.uses_keyring(server_config.username, server_config.authentication_type):
-            self.set_password(server_config.url, server_config.username,
-                              server_config.password)
-        self.set_skip_ssl_verification(server_config.url,
-                                       server_config.skip_ssl_verification)
+            self.set_password(server_config.url, server_config.username, server_config.password)
+        self.set_skip_ssl_verification(server_config.url, server_config.skip_ssl_verification)
         self.set_authorization_type(server_config.url, server_config.authentication_type)
 
     @staticmethod
@@ -201,9 +201,17 @@ class Config:
     def get_server_config(self, url: str) -> ServerConfig:
         username = self.get_username(url)
         authentication_type = self.get_authorization_type(url)
-        password = self.get_password(url, username) if self.uses_keyring(username, authentication_type) else ''
-        return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url), self.get_display_prefix(url),
-                            username, password, self.get_skip_ssl_verification(url), authentication_type)
+        password = self.get_password(url, username) if self.uses_keyring(username, authentication_type) else ""
+        return ServerConfig(
+            url,
+            self.get_project_excludes(url),
+            self.get_timezone(url),
+            self.get_display_prefix(url),
+            username,
+            password,
+            self.get_skip_ssl_verification(url),
+            authentication_type,
+        )
 
     def get_server_configs(self) -> list[ServerConfig]:
         return [self.get_server_config(url) for url in self.get_urls()]

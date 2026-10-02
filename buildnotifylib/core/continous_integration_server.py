@@ -1,4 +1,3 @@
-
 from buildnotifylib.core.project import Project
 
 

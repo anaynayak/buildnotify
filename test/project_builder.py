@@ -3,7 +3,7 @@ from buildnotifylib.core.project import Project
 
 
 class ProjectBuilder:
-    def __init__(self, attrs, url='someurl', prefix=None):
+    def __init__(self, attrs, url="someurl", prefix=None):
         self.attrs = attrs
         self.url = url
         self._prefix = prefix

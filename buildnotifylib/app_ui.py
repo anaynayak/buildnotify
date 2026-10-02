@@ -27,7 +27,7 @@ class AppUi(QtCore.QObject):
         QApplication.instance().aboutToQuit.connect(self.tray.hide)
 
     def show_menu(self, reason):
-        if not sys.platform.startswith('darwin') and reason == QSystemTrayIcon.Trigger:
+        if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.Trigger:
             self.app_menu.menu.popup(QCursor.pos())
 
     def update_projects(self, integration_status: OverallIntegrationStatus):

@@ -17,13 +17,10 @@ def test_should_update_tooltip_on_poll(qtbot):
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)
     widget = AppUi(parent, conf, BuildIcons())
-    project1 = ProjectBuilder({
-        'name': 'a',
-        'lastBuildStatus': 'Success',
-        'activity': 'Sleeping',
-        'lastBuildTime': '2016-09-17 11:31:12'
-    }).build()
-    servers = [ContinuousIntegrationServer('someurl', [project1])]
+    project1 = ProjectBuilder(
+        {"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping", "lastBuildTime": "2016-09-17 11:31:12"}
+    ).build()
+    servers = [ContinuousIntegrationServer("someurl", [project1])]
 
     widget.update_projects(OverallIntegrationStatus(servers))
 

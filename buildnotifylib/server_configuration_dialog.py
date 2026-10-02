@@ -37,12 +37,12 @@ class ServerConfigurationDialog(QDialog):
             self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
             self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
         else:
-            self.server = ServerConfig('', [], '', '', '', '')
+            self.server = ServerConfig("", [], "", "", "", "")
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
 
         if not Keystore.is_available():
-            self.ui.authenticationSettings.setTitle('Authentication (keyring dependency missing)')
+            self.ui.authenticationSettings.setTitle("Authentication (keyring dependency missing)")
             self.ui.authentication_type.setEnabled(False)
             self.ui.username.setEnabled(False)
             self.ui.password.setEnabled(False)
@@ -52,23 +52,24 @@ class ServerConfigurationDialog(QDialog):
         self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
 
     def set_authentication_type(self, index: int):
-        self.ui.username.setText('')
-        self.ui.password.setText('')
+        self.ui.username.setText("")
+        self.ui.password.setText("")
         if ServerConfig.AUTH_USERNAME_PASSWORD == index:
             # Username/password selected
             self.ui.username.setVisible(True)
             self.ui.usernameLabel.setVisible(True)
-            self.ui.passwordLabel.setText('Password')
+            self.ui.passwordLabel.setText("Password")
             self.ui.password.setPlaceholderText(None)
         elif ServerConfig.AUTH_BEARER_TOKEN == index:
             # Bearer token selected
             self.ui.username.setVisible(False)
             self.ui.usernameLabel.setVisible(False)
-            self.ui.passwordLabel.setText('Bearer token')
+            self.ui.passwordLabel.setText("Bearer token")
             self.ui.password.setPlaceholderText("Do not include the 'Bearer' keyword")
         else:
-            raise NotImplementedError('Unsupported value: "%s". An implementation is missing.'
-                                      % self.ui.authentication_type.currentText())
+            raise NotImplementedError(
+                'Unsupported value: "%s". An implementation is missing.' % self.ui.authentication_type.currentText()
+            )
 
     def fetch_data(self):
         error = self.url_error()
@@ -84,9 +85,9 @@ class ServerConfigurationDialog(QDialog):
 
     def url_error(self) -> str | None:
         url = self.ui.addServerUrl.text()
-        if '' == url:
+        if "" == url:
             return "Path field cannot be empty."
-        if not url.lower().startswith(('http://', 'https://')):
+        if not url.lower().startswith(("http://", "https://")):
             return "Only http:// and https:// URLs are supported."
         return None
 
@@ -100,7 +101,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.stackedWidget.setCurrentIndex(1)
         projects_model = QtGui.QStandardItemModel()
         projects_model.itemChanged.connect(self.project_checked)  # type: ignore
-        projects_model.setHorizontalHeaderLabels(['Select Projects'])
+        projects_model.setHorizontalHeaderLabels(["Select Projects"])
         self.projects_list = QtGui.QStandardItem("All")
         self.projects_list.setCheckable(True)
         for project in response.server.projects:
@@ -120,18 +121,22 @@ class ServerConfigurationDialog(QDialog):
 
     def handle_errors(self, response: Response):
         if response.ssl_error():
-            reply = QMessageBox.question(self, "Failed to fetch projects",
-                                         "<b>SSL error, retry without verification?:</b> %s" % self.qtText(
-                                             str(response.error)),
-                                         QMessageBox.Yes, QMessageBox.No)
+            reply = QMessageBox.question(
+                self,
+                "Failed to fetch projects",
+                "<b>SSL error, retry without verification?:</b> %s" % self.qtText(str(response.error)),
+                QMessageBox.Yes,
+                QMessageBox.No,
+            )
             if reply == QMessageBox.Yes:
                 self.skip_ssl_verification = True
                 self.fetch_data()
             return
 
         if response.failed():
-            QMessageBox.critical(self, "Failed to fetch projects",
-                                 "<b>Error:</b> %s" % self.qtText(str(response.error)))
+            QMessageBox.critical(
+                self, "Failed to fetch projects", "<b>Error:</b> %s" % self.qtText(str(response.error))
+            )
 
     def project_checked(self, item: QStandardItem):
         if item.hasChildren():
@@ -147,12 +152,21 @@ class ServerConfigurationDialog(QDialog):
         def project(i, model):
             return model.index(i, 0, self.projects_list.index())
 
-        excluded_projects = [project(i, projects_model).data() for i in range(self.projects_list.rowCount()) if
-                             project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked]
-        return ServerConfig(self.server_url(), excluded_projects,
-                            str(self.ui.timezoneList.currentText()), str(self.ui.displayPrefix.text()),
-                            str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification,
-                            int(self.ui.authentication_type.currentIndex()))
+        excluded_projects = [
+            project(i, projects_model).data()
+            for i in range(self.projects_list.rowCount())
+            if project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked
+        ]
+        return ServerConfig(
+            self.server_url(),
+            excluded_projects,
+            str(self.ui.timezoneList.currentText()),
+            str(self.ui.displayPrefix.text()),
+            str(self.ui.username.text()),
+            str(self.ui.password.text()),
+            self.skip_ssl_verification,
+            int(self.ui.authentication_type.currentIndex()),
+        )
 
     def open(self) -> ServerConfig | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:

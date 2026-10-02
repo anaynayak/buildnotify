@@ -13,9 +13,9 @@ from test.utils import fake_content
 
 @pytest.mark.functional
 def test_should_consolidate_build_status(qtbot, mocker):
-    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=True)
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
     with requests_mock.Mocker() as m:
-        url = 'http://localhost:8080/cc.xml'
+        url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
         parent = QWidget()
         conf = ConfigBuilder().server(url).build()
@@ -23,7 +23,7 @@ def test_should_consolidate_build_status(qtbot, mocker):
         qtbot.addWidget(b.app)
         parent.show()
 
-        qtbot.waitUntil(lambda: hasattr(b, 'app_ui'))
+        qtbot.waitUntil(lambda: hasattr(b, "app_ui"))
 
         def projects_loaded():
             assert len([str(a.text()) for a in b.app_ui.app_menu.menu.actions()]) == 11
@@ -33,11 +33,11 @@ def test_should_consolidate_build_status(qtbot, mocker):
 
 
 def no_tray_app(mocker):
-    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=False)
-    critical = mocker.patch('buildnotifylib.buildnotify.QMessageBox.critical')
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    critical = mocker.patch("buildnotifylib.buildnotify.QMessageBox.critical")
     app = mocker.MagicMock()
     b = BuildNotify(app, ConfigBuilder().build(), 60000)
-    run_app = mocker.patch.object(b, 'run_app')
+    run_app = mocker.patch.object(b, "run_app")
     return b, app, critical, run_app
 
 
@@ -64,9 +64,9 @@ def test_should_show_no_tray_message_and_exit_after_last_retry(mocker):
 
 
 def test_should_run_app_once_when_tray_is_available(mocker):
-    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=True)
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
-    run_app = mocker.patch.object(b, 'run_app')
+    run_app = mocker.patch.object(b, "run_app")
 
     for count in range(5):
         b.delayed_start(count)
@@ -78,13 +78,13 @@ def test_should_wait_for_workers_after_the_event_loop_ends(mocker):
     calls = mocker.MagicMock()
     app = calls.app
     app.exec_.return_value = 3
-    mocker.patch('buildnotifylib.buildnotify.QApplication', return_value=app)
+    mocker.patch("buildnotifylib.buildnotify.QApplication", return_value=app)
     b = mocker.MagicMock()
     b.app = app
     b.wait_for_workers = calls.wait_for_workers
     calls.wait_for_workers.return_value = True
-    mocker.patch('buildnotifylib.buildnotify.BuildNotify', return_value=b)
-    sys_exit = mocker.patch('sys.exit')
+    mocker.patch("buildnotifylib.buildnotify.BuildNotify", return_value=b)
+    sys_exit = mocker.patch("sys.exit")
 
     BuildNotify.start()
 
@@ -93,7 +93,7 @@ def test_should_wait_for_workers_after_the_event_loop_ends(mocker):
 
 
 def test_should_wait_for_the_populator_thread(mocker):
-    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=False)
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
     b.wait_for_workers()
     b.projects_populator = mocker.MagicMock()
@@ -104,8 +104,8 @@ def test_should_wait_for_the_populator_thread(mocker):
 
 
 def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
-    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=False)
-    mocker.patch.object(BuildNotify, 'EXIT_WAIT_MS', 50)
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    mocker.patch.object(BuildNotify, "EXIT_WAIT_MS", 50)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
     release = threading.Event()
     b.projects_populator = ProjectsPopulator(ConfigBuilder().build())
@@ -122,13 +122,13 @@ def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
 def test_should_exit_without_cleanup_when_a_fetch_is_stuck(mocker):
     app = mocker.MagicMock()
     app.exec_.return_value = 0
-    mocker.patch('buildnotifylib.buildnotify.QApplication', return_value=app)
+    mocker.patch("buildnotifylib.buildnotify.QApplication", return_value=app)
     b = mocker.MagicMock()
     b.app = app
     b.wait_for_workers.return_value = False
-    mocker.patch('buildnotifylib.buildnotify.BuildNotify', return_value=b)
-    hard_exit = mocker.patch('os._exit')
-    sys_exit = mocker.patch('sys.exit')
+    mocker.patch("buildnotifylib.buildnotify.BuildNotify", return_value=b)
+    hard_exit = mocker.patch("os._exit")
+    sys_exit = mocker.patch("sys.exit")
 
     BuildNotify.start()
 
