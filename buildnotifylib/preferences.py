@@ -76,9 +76,13 @@ class PreferencesDialog(QDialog):
         if not url:
             return
         server = self.open_server_dialog(self.servers.get(url, ServerSettings(url)))
-        if server is not None:
-            self.servers[server.url] = server
-            self.ui.cctrayPathList.model().setData(index, server.url)
+        if server is None or self.duplicates_another(url, server.url):
+            return
+        self.servers[server.url] = server
+        self.ui.cctrayPathList.model().setData(index, server.url)
+
+    def duplicates_another(self, url: str, edited_url: str) -> bool:
+        return edited_url != url and edited_url in self.get_urls()
 
     def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
         dialog = ServerConfigurationDialog(server, self.settings.timeout_seconds, self.connection, self)

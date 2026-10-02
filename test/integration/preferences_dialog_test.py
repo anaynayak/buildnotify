@@ -280,3 +280,18 @@ def test_should_open_the_server_dialog_with_the_injected_connection(qtbot, mocke
     dialog.add_server()
 
     server_dialog.assert_called_once_with(None, conf.settings.timeout_seconds, connection, dialog)
+
+
+@pytest.mark.functional
+def test_should_reject_editing_a_server_url_to_another_servers_url(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").server("http://two/cctray.xml", username="bob").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    select_row(dialog, 0)
+    stub_server_dialog(mocker, "http://two/cctray.xml")
+    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+
+    dialog.configure_projects()
+
+    assert dialog.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml"]
+    assert dialog.open().servers == conf.settings.servers
