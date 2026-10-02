@@ -1,3 +1,5 @@
+import threading
+
 import pytest
 import requests_mock
 from PyQt5 import QtCore
@@ -187,3 +189,27 @@ def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker)
             assert dialog.ui.loadUrlButton.isEnabled()
 
         qtbot.wait_until(alert_shown)
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
+    with requests_mock.Mocker() as r:
+        url = 'http://localhost:8080/cc.xml'
+        r.get(url, text=fake_content())
+        dialog = ServerConfigurationDialog(url, ConfigBuilder().server(url).build())
+        qtbot.addWidget(dialog)
+        threads = []
+        original = dialog.get_server_config
+
+        def get_server_config():
+            threads.append(threading.get_ident())
+            return original()
+
+        mocker.patch.object(dialog, 'get_server_config', get_server_config)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+
+        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+        dialog.event.wait()
+
+    assert threads == [threading.get_ident()]

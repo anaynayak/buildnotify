@@ -77,14 +77,10 @@ class ServerConfigurationDialog(QDialog):
             return
 
         self.ui.loadUrlButton.setEnabled(False)
-        self.event = BackgroundEvent(self.load_projects, self)
+        self.project_loader = ProjectLoader(self.get_server_config(), self.conf.timeout)
+        self.event = BackgroundEvent(self.project_loader.get_data, self)
         self.event.completed.connect(self.load_data)
         self.event.start()
-
-    def load_projects(self) -> Response:
-        config = self.get_server_config()
-        self.project_loader = ProjectLoader(config, self.conf.timeout)
-        return self.project_loader.get_data()
 
     def load_data(self, response: Response):
         self.ui.loadUrlButton.setEnabled(True)
