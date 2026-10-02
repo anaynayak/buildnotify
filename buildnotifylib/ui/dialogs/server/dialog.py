@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from buildnotifylib.core.errors import host
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import CertificateError, Connection
 from buildnotifylib.core.projects import ProjectLoader
@@ -32,6 +33,12 @@ from buildnotifylib.ui.widgets.forms import add_row, form_layout, section
 
 KINDS = [SourceKind.CCTRAY, SourceKind.GITHUB]
 REPOSITORY = re.compile(r"[\w.-]+/[\w.-]+")
+
+
+def server_name(server: ServerSettings) -> str:
+    if server.prefix:
+        return server.prefix
+    return server.repository if server.kind is SourceKind.GITHUB else host(server.url)
 
 
 def button_row(*buttons: QPushButton) -> QHBoxLayout:
@@ -56,7 +63,6 @@ class ServerConfigurationDialog(QDialog):
     ):
         super().__init__(parent)
         self.connection = connection
-        self.setWindowTitle(self.tr("Add Server"))
         self.pages = QStackedWidget()
         self.pages.addWidget(self.source_page())
         self.pages.addWidget(self.projects_page())
@@ -71,6 +77,7 @@ class ServerConfigurationDialog(QDialog):
             self.set_value(server)
         else:
             self.server = ServerSettings("", timezone="")
+        self.setWindowTitle(self.title(server))
 
         self.load_button.clicked.connect(self.fetch_data)
         self.loads = QThreadPool.globalInstance()
@@ -137,6 +144,11 @@ class ServerConfigurationDialog(QDialog):
         self.auth.set_value(Credentials(server.authentication_type, server.username, server.password))
         self.source_kind.setCurrentIndex(KINDS.index(server.kind))
         self.github.set_value(GithubSource(server.repository, server.workflow, server.branch))
+
+    def title(self, server: ServerSettings | None) -> str:
+        if server is None:
+            return self.tr("Add server")
+        return self.tr("Edit server - {}").format(server_name(server))
 
     def kind(self) -> SourceKind:
         return KINDS[self.source_kind.currentIndex()]

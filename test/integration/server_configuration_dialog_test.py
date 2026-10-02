@@ -472,3 +472,20 @@ def test_should_not_cap_the_dialog_size(qtbot):
     qtbot.addWidget(dialog)
 
     assert dialog.maximumSize() == QtCore.QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX)
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize(
+    ("server", "title"),
+    [
+        (None, "Add server"),
+        (ServerSettings(URL_JENKINS, prefix="jenkins"), "Edit server - jenkins"),
+        (ServerSettings(URL_JENKINS), "Edit server - jenkins.local:8080"),
+        (github_server(), "Edit server - octo-org/hello-world"),
+    ],
+)
+def test_should_title_the_dialog_for_adding_or_editing(qtbot, server, title):
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.windowTitle() == title
