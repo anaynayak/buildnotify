@@ -34,6 +34,27 @@ def test_should_show_configured_urls(qtbot):
 
 
 @pytest.mark.functional
+def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
+    url = 'http://localhost:8080/cc.xml'
+    conf = ConfigBuilder().server(url, {"timezone/%s" % url: 'EDT'}).build()
+    dialog = ServerConfigurationDialog(url, conf)
+    qtbot.addWidget(dialog)
+
+    assert dialog.ui.timezoneList.currentText() == 'None'
+
+
+@pytest.mark.functional
+def test_should_list_zoneinfo_timezones_sorted(qtbot):
+    dialog = ServerConfigurationDialog(None, ConfigBuilder().build())
+    qtbot.addWidget(dialog)
+    zones = [dialog.ui.timezoneList.itemText(i) for i in range(dialog.ui.timezoneList.count())]
+
+    assert zones[0] == 'None'
+    assert 'Asia/Kolkata' in zones
+    assert zones[1:] == sorted(zones[1:])
+
+
+@pytest.mark.functional
 @pytest.mark.requireshead
 def test_should_save_restore_config(qtbot):
     with requests_mock.Mocker() as m:

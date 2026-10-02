@@ -1,6 +1,6 @@
 from typing import Optional
+from zoneinfo import available_timezones
 
-import pytz
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem
@@ -24,13 +24,13 @@ class ServerConfigurationDialog(QDialog):
         self.conf = conf
         self.projects_list = QtGui.QStandardItem("All")
         all_timezones = [Config.NONE_TIMEZONE]
-        all_timezones.extend(pytz.all_timezones)
+        all_timezones.extend(sorted(available_timezones()))
         self.ui.timezoneList.addItems(all_timezones)
 
         if url is not None:
             self.ui.addServerUrl.setText(url)
             self.server = conf.get_server_config(url)
-            self.ui.timezoneList.setCurrentIndex(all_timezones.index(self.server.timezone))
+            self.ui.timezoneList.setCurrentIndex(max(self.ui.timezoneList.findText(self.server.timezone), 0))
             self.ui.displayPrefix.setText(self.server.prefix)
             self.ui.username.setText(self.server.username)
             self.ui.password.setText(self.server.password)

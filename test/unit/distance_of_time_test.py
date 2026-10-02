@@ -1,11 +1,11 @@
 from datetime import datetime
-from pytz import timezone
+from zoneinfo import ZoneInfo
 
 from buildnotifylib.core.distance_of_time import DistanceOfTime
 
 
 def test_should_get_relative_distance():
-    assert "1 minute" == DistanceOfTime(datetime.now(timezone('US/Eastern'))).age()
+    assert "1 minute" == DistanceOfTime(datetime.now(ZoneInfo('US/Eastern'))).age()
 
 
 def test_should_get_relative_distance_for_tz_unaware():
