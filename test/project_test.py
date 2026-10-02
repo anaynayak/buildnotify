@@ -149,5 +149,21 @@ class ProjectTimezoneTest(unittest.TestCase):
         self.assertEqual(datetime.datetime(2015, 2, 14, 13, 23, 20).astimezone(), build_time)
 
 
+def build(label, build_time):
+    return Project('url', None, 'None', {'name': 'proj1', 'lastBuildStatus': 'Success', 'activity': 'Sleeping',
+                                         'url': 'u', 'lastBuildLabel': label, 'lastBuildTime': build_time})
+
+
+class DifferentBuildsTest(unittest.TestCase):
+    def test_should_treat_same_label_and_time_as_same_build(self):
+        self.assertFalse(build('1', '2009-05-29T13:54:07').different_builds(build('1', '2009-05-29T13:54:07')))
+
+    def test_should_detect_new_label(self):
+        self.assertTrue(build('2', '2009-05-29T13:54:07').different_builds(build('1', '2009-05-29T13:54:07')))
+
+    def test_should_detect_new_build_time_with_same_label(self):
+        self.assertTrue(build('', '2009-05-29T14:00:00').different_builds(build('', '2009-05-29T13:54:07')))
+
+
 if __name__ == '__main__':
     unittest.main()

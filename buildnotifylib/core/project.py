@@ -38,7 +38,7 @@ class Project(object):
         return label
 
     def different_builds(self, project: 'Project') -> bool:
-        return self.last_build_label != project.last_build_label
+        return (self.last_build_label, self.last_build_time) != (project.last_build_label, project.last_build_time)
 
     def matches(self, other: 'Project') -> bool:
         return other.name == self.name and other.server_url == self.server_url
