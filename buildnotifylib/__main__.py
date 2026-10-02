@@ -14,6 +14,7 @@ from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.ui.buildnotify import BuildNotify
 
+APP_ID = "io.github.anaynayak.BuildNotify"
 LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 
 
@@ -41,6 +42,7 @@ def main(argv: list[str] | None = None) -> None:
     options, qt_args = parse_args(argv[1:])
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.WARNING, format=LOG_FORMAT)
     app = QApplication([argv[0], *qt_args])
+    app.setDesktopFileName(APP_ID)
     app.setQuitOnLastWindowClosed(False)
     buildnotify = build(app, options.settings)
     exit_code = app.exec()

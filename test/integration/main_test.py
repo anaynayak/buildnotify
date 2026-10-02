@@ -56,6 +56,15 @@ def test_should_build_the_app_from_the_application(mocker):
     build.assert_called_once_with(calls.app, None)
 
 
+def test_should_set_the_desktop_file_name_to_the_app_id(mocker):
+    calls, _, _ = fake_run(mocker)
+    mocker.patch("sys.exit")
+
+    entry.main(["buildnotify"])
+
+    calls.app.setDesktopFileName.assert_called_once_with("io.github.anaynayak.BuildNotify")
+
+
 def test_should_pass_the_settings_path_to_build(mocker, tmp_path):
     calls, application, build = fake_run(mocker)
     mocker.patch("sys.exit")
