@@ -1,31 +1,11 @@
-class FakeKeyring:
-    def set_password(self, url, username, password):
-        pass
-
-    def get_password(self, url, username):
-        pass
-
-    def delete_password(self, url, username):
-        pass
-
-
-class KeyringError(Exception):
-    pass
-
-
-try:
-    import keyring
-    from keyring.backends import fail
-    from keyring.errors import KeyringError  # noqa: F811
-except ImportError:
-    keyring = FakeKeyring()
+import keyring
+from keyring.backends import fail
+from keyring.errors import KeyringError
 
 
 class Keystore:
     @staticmethod
     def is_available() -> bool:
-        if isinstance(keyring, FakeKeyring):
-            return False
         return not isinstance(keyring.get_keyring(), fail.Keyring)
 
     @staticmethod
