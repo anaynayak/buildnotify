@@ -1,0 +1,6 @@
+<Projects>
+  <Project webUrl="https://jenkins.example.org/job/payments-api/" name="payments-api" lastBuildLabel="1287" lastBuildTime="2026-09-30T08:14:02Z" lastBuildStatus="Success" activity="Sleeping"/>
+  <Project webUrl="https://jenkins.example.org/job/platform/job/infra-deploy/" name="platform » infra-deploy" lastBuildLabel="96" lastBuildTime="2026-09-30T09:41:37Z" lastBuildStatus="Failure" activity="Building"/>
+  <Project webUrl="https://jenkins.example.org/job/platform/job/nightly-e2e/" name="platform » nightly-e2e" lastBuildLabel="412" lastBuildTime="2026-09-29T23:05:11Z" lastBuildStatus="Exception" activity="Sleeping"/>
+  <Project webUrl="https://jenkins.example.org/job/new-service/" name="new-service" lastBuildLabel="" lastBuildTime="" lastBuildStatus="Unknown" activity="Sleeping"/>
+</Projects>

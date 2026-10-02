@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Projects>
+  <Project name="build-linux :: compile" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="214" lastBuildTime="2026-09-30T08:59:12Z" webUrl="https://gocd.example.org/go/pipelines/build-linux/214/compile/1"/>
+  <Project name="build-linux :: compile :: unit-tests" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="214" lastBuildTime="2026-09-30T08:59:12Z" webUrl="https://gocd.example.org/go/tab/build/detail/build-linux/214/compile/1/unit-tests"/>
+  <Project name="release :: deploy" activity="Building" lastBuildStatus="Failure" lastBuildLabel="57 :: 2" lastBuildTime="2026-09-30T09:20:48Z" webUrl="https://gocd.example.org/go/pipelines/release/57/deploy/2">
+    <messages>
+      <message text="Priya Shah &lt;priya@example.org&gt;" kind="Breakers"/>
+    </messages>
+  </Project>
+  <Project name="release :: deploy :: smoke" activity="Building" lastBuildStatus="Failure" lastBuildLabel="57 :: 2" lastBuildTime="2026-09-30T09:20:48Z" webUrl="https://gocd.example.org/go/tab/build/detail/release/57/deploy/2/smoke">
+    <messages>
+      <message text="Priya Shah &lt;priya@example.org&gt;" kind="Breakers"/>
+    </messages>
+  </Project>
+</Projects>

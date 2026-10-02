@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Projects>
+  <Project name="web/storefront:main" activity="Sleeping" lastBuildStatus="Success" lastBuildLabel="1468203" lastBuildTime="2026-09-30T10:02:51.418+00:00" webUrl="https://gitlab.example.com/web/storefront/-/pipelines/1468203"/>
+  <Project name="web/storefront:release/2.4" activity="Building" lastBuildStatus="Success" lastBuildLabel="1468177" lastBuildTime="2026-09-30T09:58:03.006+00:00" webUrl="https://gitlab.example.com/web/storefront/-/pipelines/1468177"/>
+  <Project name="data/ingest:main" activity="Sleeping" lastBuildStatus="Failure" lastBuildLabel="1467950" lastBuildTime="2026-09-30T07:31:44.912+05:30" webUrl="https://gitlab.example.com/data/ingest/-/pipelines/1467950"/>
+</Projects>

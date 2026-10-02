@@ -20,3 +20,4 @@ reports
 .mypy_cache
 .pytest_cache
 backlog/
+!test/fixtures/**/*.html
