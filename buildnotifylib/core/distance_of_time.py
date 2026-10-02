@@ -1,12 +1,14 @@
 from datetime import datetime
+from typing import Optional
 
 
 class DistanceOfTime(object):
-    def __init__(self, from_date: datetime):
+    def __init__(self, from_date: datetime, now: Optional[datetime] = None):
         self.from_date = from_date
+        self.now = now
 
     def age(self) -> str:
-        since_date = datetime.now(tz=self.from_date.tzinfo)
+        since_date = self.now or datetime.now(tz=self.from_date.tzinfo)
 
         distance_in_time = since_date - self.from_date
         distance_in_seconds = int(round(abs(distance_in_time.days * 86400 + distance_in_time.seconds)))
@@ -17,7 +19,7 @@ class DistanceOfTime(object):
                    (90, "1 hour"),
                    (1440, "%d hours" % (round(distance_in_minutes / 60.0))),
                    (2880, "1 day"),
-                   (43220, "%d days" % (round(distance_in_minutes / 1440))),
+                   (43200, "%d days" % (round(distance_in_minutes / 1440))),
                    (86400, "1 month"),
                    (525600, "%d months" % (round(distance_in_minutes / 43200))),
                    (1051200, "1 year")]
