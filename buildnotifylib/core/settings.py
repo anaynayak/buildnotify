@@ -53,7 +53,7 @@ class ServerSettings:
         return self.has_creds() or self.authentication_type == self.AUTH_BEARER_TOKEN
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 DEFAULT_SCRIPT = "echo #status# #projects# >> /tmp/buildnotify.log"
 DEFAULT_NOTIFICATIONS = {
     "successfulBuild": False,

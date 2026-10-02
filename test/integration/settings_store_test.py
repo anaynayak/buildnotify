@@ -1,5 +1,7 @@
 import shutil
 import sys
+from dataclasses import replace
+from datetime import UTC, datetime
 
 import keyring
 import pytest
@@ -32,12 +34,13 @@ def full_settings() -> AppSettings:
     return AppSettings(
         servers=[
             ServerSettings("https://ci.example.com/go/cctray.xml", ["deploy-prod"], "US/Eastern", "go", "alice", "pw"),
-            ServerSettings("http://host:8080", [], "None", "outer", skip_ssl_verification=True),
+            ServerSettings("http://host:8080", [], "None", "outer", skip_ssl_verification=True, muted=True),
             ServerSettings(
                 "http://host:8080/cc.xml",
                 ["a", "b :: c"],
                 prefix="inner",
                 password="token",
+                muted_projects=["b :: c"],
                 authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
             ),
             ServerSettings(
@@ -50,6 +53,7 @@ def full_settings() -> AppSettings:
                 repository="octo-org/hello-world",
                 workflow="ci.yml",
                 branch="main",
+                muted_projects=["CI (main)", "Docs (main)"],
             ),
         ],
         interval_seconds=300,
@@ -60,6 +64,7 @@ def full_settings() -> AppSettings:
         show_last_build_label=True,
         symbolic_icons=True,
         notifications={"successfulBuild": True, "brokenBuild": False},
+        paused_until=datetime(2026, 10, 2, 13, 30, tzinfo=UTC),
     )
 
 
@@ -203,3 +208,19 @@ def test_should_read_a_symbolic_icons_flag_written_as_text(qsettings):
     qsettings.setValue("tray/symbolic_icons", "true")
 
     assert SettingsStore(qsettings, Keystore()).settings.symbolic_icons
+
+
+def test_should_resume_notifications_on_save(ini):
+    reopen(ini).save(full_settings())
+    store = reopen(ini)
+
+    store.save(replace(store.settings, paused_until=None))
+
+    assert reopen(ini).settings.paused_until is None
+
+
+@pytest.mark.parametrize("value", ["", "soon", "2026-10-02T13:30:00"])
+def test_should_ignore_a_pause_without_a_valid_utc_time(qsettings, value):
+    qsettings.setValue("notifications/paused_until", value)
+
+    assert SettingsStore(qsettings, Keystore()).settings.paused_until is None

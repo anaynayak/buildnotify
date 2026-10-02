@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import datetime
 from typing import Any
 
 from PySide6.QtCore import QSettings
@@ -24,6 +25,7 @@ GLOBAL_KEYS = {
     "symbolic_icons": "tray/symbolic_icons",
 }
 SORT_KEY = "sort_key"
+PAUSED_UNTIL = "notifications/paused_until"
 NOTIFICATION = "values/%s"
 SERVER_KEYS = {
     "url": "url",
@@ -37,6 +39,8 @@ SERVER_KEYS = {
     "repository": "repository",
     "workflow": "workflow",
     "branch": "branch",
+    "muted": "muted",
+    "muted_projects": "muted_projects",
 }
 
 VERSION = "schema_version"
@@ -50,6 +54,7 @@ LEGACY_SERVER_GROUPS = [
     "authorization_type",
 ]
 FIRST_ARRAY_VERSION = 3
+SERVER_KEYS_ADDED: dict[int, dict[str, Any]] = {4: {"kind": SourceKind.CCTRAY.value}, 5: {"muted": False}}
 
 ValueReader = Callable[[str], Any]
 
@@ -67,6 +72,7 @@ class SettingsStore:
             servers=[self.with_password(server) for server in self.read_servers()],
             sort_key=sort_key(self.qsettings.value(SORT_KEY)),
             notifications=self.read_notifications(),
+            paused_until=paused_until(self.qsettings.value(PAUSED_UNTIL)),
             **values,
         )
 
@@ -74,6 +80,7 @@ class SettingsStore:
         for field, key in GLOBAL_KEYS.items():
             self.qsettings.setValue(key, getattr(settings, field))
         self.qsettings.setValue(SORT_KEY, settings.sort_key.value)
+        self.qsettings.setValue(PAUSED_UNTIL, settings.paused_until.isoformat() if settings.paused_until else "")
         for event, enabled in settings.notifications.items():
             self.qsettings.setValue(NOTIFICATION % event, enabled)
         write_servers(self.qsettings, settings.servers)
@@ -118,7 +125,7 @@ def migrate(qsettings: QSettings) -> None:
         urls = coerce(qsettings.value(LEGACY_URLS), [])
         write_servers(qsettings, [read_server(legacy_value(qsettings, url)) for url in urls])
     elif version < SCHEMA_VERSION:
-        add_server_kinds(qsettings)
+        add_server_keys(qsettings, version)
     if version < SCHEMA_VERSION:
         qsettings.setValue(VERSION, SCHEMA_VERSION)
         qsettings.sync()
@@ -126,15 +133,17 @@ def migrate(qsettings: QSettings) -> None:
         remove_legacy_keys(qsettings)
 
 
-def add_server_kinds(qsettings: QSettings) -> None:
-    """3.0 servers predate source kinds, so each one is a cctray feed."""
+def add_server_keys(qsettings: QSettings, version: int) -> None:
+    """Give each server the keys added since its schema version: 3.0 servers are cctray feeds, and none is muted."""
+    added = {key: value for since, keys in SERVER_KEYS_ADDED.items() if since > version for key, value in keys.items()}
     size = qsettings.beginReadArray(SERVERS)
     qsettings.endArray()
     qsettings.beginWriteArray(SERVERS, size)
     for index in range(size):
         qsettings.setArrayIndex(index)
-        if not qsettings.contains("kind"):
-            qsettings.setValue("kind", SourceKind.CCTRAY.value)
+        for key, value in added.items():
+            if not qsettings.contains(key):
+                qsettings.setValue(key, value)
     qsettings.endArray()
 
 
@@ -168,6 +177,14 @@ def write_servers(qsettings: QSettings, servers: list[ServerSettings]) -> None:
 
 def keyring_entries(servers: list[ServerSettings]) -> dict[tuple[str, str], str]:
     return {(server.url, server.username): server.password for server in servers if server.uses_keyring()}
+
+
+def paused_until(value: Any) -> datetime | None:
+    try:
+        until = datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+    return until if until.tzinfo is not None else None
 
 
 def sort_key(value: Any) -> SortKey:

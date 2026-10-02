@@ -171,3 +171,32 @@ def test_should_write_the_kind_of_each_3_0_server(v30):
     assert int(qsettings.value("schema_version")) == SCHEMA_VERSION
     assert [qsettings.value(f"servers/{i}/kind") for i in (1, 2)] == ["cctray", "cctray"]
     assert int(qsettings.value("servers/size")) == 2
+
+
+def test_should_write_unmuted_3_0_servers(v30):
+    migrate(open_ini(v30))
+
+    qsettings = open_ini(v30)
+    assert [str(qsettings.value(f"servers/{i}/muted")).lower() for i in (1, 2)] == ["false", "false"]
+
+
+@pytest.fixture
+def v4(tmp_path):
+    return str(shutil.copy(FIXTURES / "buildnotify-4.conf", tmp_path / "BuildNotify.conf"))
+
+
+def test_should_unmute_every_server_from_before_mutes(v4):
+    migrate(open_ini(v4))
+
+    qsettings = open_ini(v4)
+    assert int(qsettings.value("schema_version")) == SCHEMA_VERSION
+    assert [str(qsettings.value(f"servers/{i}/muted")).lower() for i in (1, 2)] == ["false", "false"]
+    assert [qsettings.value(f"servers/{i}/kind") for i in (1, 2)] == ["cctray", "github"]
+    assert int(qsettings.value("servers/size")) == 2
+
+
+def test_should_load_servers_from_before_mutes_with_nothing_muted(v4):
+    settings = SettingsStore(open_ini(v4), Keystore()).settings
+
+    assert [(s.muted, s.muted_projects) for s in settings.servers] == [(False, []), (False, [])]
+    assert settings.paused_until is None
