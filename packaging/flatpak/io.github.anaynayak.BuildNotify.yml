@@ -4,6 +4,11 @@ runtime-version: '6.11'
 sdk: org.kde.Sdk
 base: io.qt.PySide.BaseApp
 base-version: '6.11'
+build-options:
+  env:
+    # BuildNotify uses neither, so the BaseApp cleanup drops them from the bundle.
+    BASEAPP_REMOVE_WEBENGINE: '1'
+    BASEAPP_DISABLE_NUMPY: '1'
 command: buildnotify
 finish-args:
   - --share=network
