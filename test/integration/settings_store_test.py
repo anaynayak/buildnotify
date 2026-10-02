@@ -54,7 +54,7 @@ def test_should_load_defaults_from_an_empty_file(ini):
 def test_should_not_write_defaults_on_load(qsettings):
     SettingsStore(qsettings)
 
-    assert [key for key in qsettings.allKeys() if key != "schema_version"] == []
+    assert sorted(qsettings.allKeys()) == ["schema_version", "servers/size"]
 
 
 def test_should_round_trip_every_value(ini):

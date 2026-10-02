@@ -3,7 +3,13 @@ from typing import Any
 from PyQt5.QtCore import QSettings
 
 from buildnotifylib.core.keystore import Keystore
-from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, AppSettings, ServerSettings, SortKey
+from buildnotifylib.core.settings import (
+    DEFAULT_NOTIFICATIONS,
+    SCHEMA_VERSION,
+    AppSettings,
+    ServerSettings,
+    SortKey,
+)
 
 DEFAULTS = AppSettings()
 SERVERS = "servers"
@@ -26,11 +32,16 @@ SERVER_KEYS = {
     "authentication_type": "authorization_type",
 }
 
+VERSION = "schema_version"
+LEGACY_URLS = "connection/urls"
+LEGACY_SERVER_GROUPS = [key for key in SERVER_KEYS.values() if key != "url"]
+
 
 class SettingsStore:
     def __init__(self, qsettings: QSettings, keystore: Keystore | None = None):
         self.qsettings = qsettings
         self.keystore = keystore or Keystore()
+        migrate(qsettings)
         self.settings = self.load()
 
     def load(self) -> AppSettings:
@@ -81,6 +92,28 @@ class SettingsStore:
         for (url, username), password in new_entries.items():
             if old_entries.get((url, username)) != password:
                 self.keystore.save(url, username, password)
+
+
+def migrate(qsettings: QSettings):
+    """Move 2.x per-URL keys into the servers array; the old keys go only once the new ones are on disk."""
+    if as_int(qsettings.value(VERSION), 2) < SCHEMA_VERSION:
+        urls = coerce(qsettings.value(LEGACY_URLS), [])
+        write_servers(qsettings, [read_server(legacy_value(qsettings, url)) for url in urls])
+        qsettings.setValue(VERSION, SCHEMA_VERSION)
+        qsettings.sync()
+    if qsettings.status() == QSettings.NoError and qsettings.contains(LEGACY_URLS):
+        remove_legacy_keys(qsettings)
+
+
+def legacy_value(qsettings: QSettings, url: str):
+    return lambda key: url if key == "url" else qsettings.value(f"{key}/{url}")
+
+
+def remove_legacy_keys(qsettings: QSettings):
+    for group in LEGACY_SERVER_GROUPS:
+        qsettings.remove(group)
+    qsettings.remove(LEGACY_URLS)
+    qsettings.sync()
 
 
 def read_server(value) -> ServerSettings:
