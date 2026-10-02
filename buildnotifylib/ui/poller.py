@@ -8,6 +8,7 @@ from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Signal, Slot
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.github import RateLimits
 from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectLoader
@@ -109,6 +110,7 @@ class Poller(QObject):
         self.in_flight: Counter[str] = Counter()
         self.cycle: Cycle | None = None
         self.reload_pending = False
+        self.rate_limits = RateLimits()
 
     def start(self, first_poll_ms: int = FIRST_POLL_MS):
         self.timer.start(first_poll_ms)
@@ -145,7 +147,7 @@ class Poller(QObject):
             return
         self.in_flight[config.url] += 1
         self.pool.setMaxThreadCount(max(self.pool.maxThreadCount(), self.in_flight.total()))
-        loader = ProjectLoader(config, timeout, self.connection)
+        loader = ProjectLoader(config, timeout, self.connection, rate_limits=self.rate_limits)
         self.pool.start(Fetch(loader, self, "fetched", generation, index, config.url))
 
     @Slot(int, int, str, ServerSnapshot)

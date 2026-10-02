@@ -1,0 +1,5 @@
+{
+  "message": "Resource not accessible by personal access token",
+  "documentation_url": "https://docs.github.com/rest/actions/workflow-runs#list-workflow-runs-for-a-repository",
+  "status": "403"
+}

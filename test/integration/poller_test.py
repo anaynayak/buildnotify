@@ -11,8 +11,9 @@ from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.diff import Change, diff, labels
 from buildnotifylib.core.model import ServerSnapshot
+from buildnotifylib.core.ports import Response
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.core.settings import AppSettings, ServerSettings
+from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind
 from buildnotifylib.ui.poller import Deadline, Fetch, Poller
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, GatedConnection, fake_content
@@ -328,3 +329,28 @@ def test_deadline_should_retire_older_generations(qtbot, mocker):
     deadline.invalidate()
     assert not deadline.is_current(second)
     qtbot.waitUntil(lambda: on_expire.call_count == 1)
+
+
+class RateLimitedApi(FakeConnection):
+    def __init__(self):
+        super().__init__("")
+        self.calls = 0
+
+    def request(self, url, timeout, headers, verify=True):
+        self.calls += 1
+        return Response(429, {"retry-after": "3600"}, b'{"message": "You have exceeded a secondary rate limit."}')
+
+
+@pytest.mark.functional
+def test_should_not_call_a_rate_limited_github_server_again_until_it_may(qtbot, make_poller):
+    api = RateLimitedApi()
+    store = ConfigBuilder().server("", kind=SourceKind.GITHUB, repository="octo-org/hello-world").build()
+    poller = make_poller(store, api)
+
+    for _ in range(2):
+        with qtbot.waitSignal(poller.updated, timeout=1000) as blocker:
+            poller.reload()
+        poller.wait(1000)
+
+    assert api.calls == 1
+    assert "rate limit" in str(blocker.args[0].unavailable_servers()[0].error)
