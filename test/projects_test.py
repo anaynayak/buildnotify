@@ -29,11 +29,30 @@ class OverallIntegrationStatusTest(unittest.TestCase):
         ])
         self.assertEqual('Failure.Sleeping', status.get_build_status())
 
+    def test_any_failure_should_outrank_any_success(self):
+        for failure in ['Sleeping', 'Building', 'CheckingModifications']:
+            for success in ['Sleeping', 'Building', 'CheckingModifications']:
+                with self.subTest(failure=failure, success=success):
+                    status = overall_status(('Success', success), ('Failure', failure))
+                    self.assertEqual('Failure.' + failure, status.get_build_status())
+
+    def test_should_rank_building_above_idle_within_a_status(self):
+        self.assertEqual('Failure.Building', overall_status(
+            ('Failure', 'CheckingModifications'), ('Failure', 'Building'), ('Failure', 'Sleeping')).get_build_status())
+        self.assertEqual('Success.Building', overall_status(
+            ('Success', 'CheckingModifications'), ('Success', 'Building'), ('Success', 'Sleeping')).get_build_status())
+
     def test_should_identify_failing_builds(self):
         project1 = ProjectBuilder({'name': 'a', 'lastBuildStatus': 'Success', 'activity': 'Sleeping'}).build()
         project2 = ProjectBuilder({'name': 'a', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping'}).build()
         status = OverallIntegrationStatus([ContinuousIntegrationServer("someurl", [project1, project2])])
         self.assertEqual([project2], status.get_failing_builds())
+
+
+def overall_status(*statuses):
+    projects = [ProjectBuilder({'name': 'p%d' % i, 'lastBuildStatus': status, 'activity': activity}).build()
+                for i, (status, activity) in enumerate(statuses)]
+    return OverallIntegrationStatus([ContinuousIntegrationServer("someurl", projects)])
 
 
 class MockConnection(object):

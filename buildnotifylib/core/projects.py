@@ -12,6 +12,9 @@ from buildnotifylib.core.project import Project
 from buildnotifylib.core.response import Response
 from buildnotifylib.serverconfig import ServerConfig
 
+STATUS_PRIORITY = ['Failure.Building', 'Failure.Sleeping', 'Failure.CheckingModifications',
+                   'Success.Building', 'Success.Sleeping', 'Success.CheckingModifications']
+
 
 class OverallIntegrationStatus(object):
     def __init__(self, servers: List[FilteredContinuousIntegrationServer]):
@@ -19,9 +22,7 @@ class OverallIntegrationStatus(object):
 
     def get_build_status(self) -> Optional[str]:
         build_status_mapping = self.to_map()
-        seq = ['Failure.Building', 'Failure.Sleeping', 'Success.Building', 'Success.Sleeping',
-               'Failure.CheckingModifications', 'Success.CheckingModifications']
-        for status in seq:
+        for status in STATUS_PRIORITY:
             if build_status_mapping[status]:
                 return status
         return None
