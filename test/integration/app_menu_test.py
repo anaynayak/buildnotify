@@ -41,6 +41,7 @@ def test_should_set_menu_items_for_projects(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (1)",
         "Project 1",
         "",
         "Pause notifications for 1 hour",
@@ -76,6 +77,7 @@ def test_should_suffix_build_time(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (1)",
         "Project 1, 1y",
         "",
         "Pause notifications for 1 hour",
@@ -104,7 +106,7 @@ def test_should_show_future_build_time_as_in(qtbot):
 
     app_menu.update([project1])
 
-    assert str(app_menu.menu.actions()[0].text()) == "Project 1, in 5h"
+    assert str(app_menu.menu.actions()[1].text()) == "Project 1, in 5h"
 
 
 @pytest.mark.functional
@@ -140,6 +142,7 @@ def test_should_sort_by_name(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (2)",
         "AProject",
         "BProject",
         "",
@@ -196,6 +199,7 @@ def test_should_add_display_prefix(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (2)",
         "AProject",
         "[R1] BProject",
         "",
@@ -268,6 +272,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (3)",
         "[R1] BProject",
         "[R2] AProject",
         "[R2] CProject",
@@ -314,6 +319,7 @@ def test_should_show_recent_build_first(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (2)",
         "AProject",
         "BProject",
         "",
@@ -375,6 +381,7 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
     app_menu.update([broken, recent])
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
+        "Passing (2)",
         "Recent, now",
         "Broken",
         "",
@@ -464,7 +471,7 @@ def test_should_show_an_enabled_row_with_a_short_error_and_its_time_for_an_unava
     actions = app_menu.menu.actions()
     assert [a.text() for a in actions] == [
         "ci.example.com: HTTP 503 (09:05)",
-        "",
+        "Passing (1)",
         "Project 1",
         "",
         "Pause notifications for 1 hour",
@@ -609,7 +616,8 @@ def test_should_mark_muted_projects_but_keep_them_in_the_menu(mute_menu):
 
     app_menu.update([built("api"), built("web"), built("docs", OTHER)])
 
-    assert sorted(texts(app_menu.menu)[:3]) == ["api (muted)", "docs (muted)", "web"]
+    assert texts(app_menu.menu)[0] == "Passing (3)"
+    assert sorted(texts(app_menu.menu)[1:4]) == ["api (muted)", "docs (muted)", "web"]
 
 
 @pytest.mark.functional
@@ -701,7 +709,7 @@ def test_should_mute_a_server_from_the_menu_and_persist_it(mute_menu):
 
     assert app_menu.store.settings.servers[0].muted
     assert reopened(app_menu).servers[0].muted
-    assert texts(app_menu.menu)[0] == "api (muted)"
+    assert texts(app_menu.menu)[1] == "api (muted)"
     assert action(submenu(app_menu), "ci/cc.xml").isChecked()
 
 
@@ -713,7 +721,7 @@ def test_should_unmute_a_project_from_the_menu_and_persist_it(mute_menu):
     action(submenu(app_menu), "api").trigger()
 
     assert reopened(app_menu).servers[0].muted_projects == []
-    assert texts(app_menu.menu)[0] == "api"
+    assert texts(app_menu.menu)[1] == "api"
 
 
 @pytest.mark.functional
@@ -787,3 +795,47 @@ def test_should_keep_mutes_toggled_while_preferences_is_open(mute_menu, mocker):
     servers = reopened(app_menu).servers
     assert [(s.muted, s.muted_projects) for s in servers] == [(False, ["web"]), (True, [])]
     assert reopened(app_menu).interval_seconds == 30
+
+
+def project_with(name, status, activity="Sleeping"):
+    return ProjectBuilder({"name": name, "lastBuildStatus": status, "activity": activity}).server(CI).build()
+
+
+@pytest.mark.functional
+def test_should_group_projects_under_status_headers_with_counts(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), sort_key=SortKey.NAME)
+    projects = [
+        project_with("web", "Success"),
+        project_with("api", "Failure", "Building"),
+        project_with("new", "Unknown"),
+        project_with("deploy", "Success", "Building"),
+        project_with("docs", "Success"),
+        project_with("e2e", "Failure"),
+    ]
+
+    app_menu.update(projects)
+
+    assert texts(app_menu.menu)[:11] == [
+        "Failing (2)",
+        "api",
+        "e2e",
+        "Building (1)",
+        "deploy",
+        "Passing (2)",
+        "docs",
+        "web",
+        "Unknown (1)",
+        "new",
+        "",
+    ]
+    headers = [a for a in app_menu.menu.actions() if a.isSeparator() and a.text()]
+    assert [a.text() for a in headers] == ["Failing (2)", "Building (1)", "Passing (2)", "Unknown (1)"]
+
+
+@pytest.mark.functional
+def test_should_omit_empty_sections(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI))
+
+    app_menu.update([project_with("api", "Success")])
+
+    assert texts(app_menu.menu)[:3] == ["Passing (1)", "api", ""]

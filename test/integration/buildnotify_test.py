@@ -35,7 +35,7 @@ def test_should_consolidate_build_status(qtbot, mocker):
         qtbot.waitUntil(lambda: hasattr(b, "app_ui"))
 
         def projects_loaded():
-            assert len([str(a.text()) for a in b.app_ui.app_menu.menu.actions()]) == 13
+            assert len([str(a.text()) for a in b.app_ui.app_menu.menu.actions()]) == 15
 
         qtbot.waitUntil(lambda: re.compile("Last checked.*").search(b.app_ui.tray.toolTip()) is not None, timeout=5000)
         qtbot.waitUntil(projects_loaded)

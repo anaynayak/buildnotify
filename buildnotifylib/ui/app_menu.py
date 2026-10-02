@@ -25,6 +25,7 @@ from buildnotifylib.core.mute import (
     with_server,
 )
 from buildnotifylib.core.ports import Connection
+from buildnotifylib.core.sections import grouped
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
@@ -58,11 +59,13 @@ class AppMenu(QtCore.QObject):
     def update(self, projects: list[Project], unavailable: Sequence[ServerSnapshot] = ()):
         self.projects, self.unavailable = projects, unavailable
         self.menu.clear()
-        self.create_error_items(unavailable)
+        self.create_error_items(unavailable, separate=not projects)
         mutes = Mutes.from_settings(self.store.settings)
-        for project in self.sorted_projects(projects):
-            icon = self.build_icons.for_status(project.get_build_status())
-            self.create_menu_item(project, icon, mutes.mutes(project))
+        for section, members in grouped(self.sorted_projects(projects)):
+            self.menu.addSection(f"{section} ({len(members)})")
+            for project in members:
+                icon = self.build_icons.for_status(project.get_build_status())
+                self.create_menu_item(project, icon, mutes.mutes(project))
         self.create_default_menu_items()
 
     def sorted_projects(self, projects: list[Project]) -> list[Project]:
@@ -77,11 +80,11 @@ class AppMenu(QtCore.QObject):
             return False, 0.0
         return True, build_time.timestamp()
 
-    def create_error_items(self, servers: Sequence[ServerSnapshot]):
+    def create_error_items(self, servers: Sequence[ServerSnapshot], separate: bool):
         for menu in self.error_menus:
             menu.deleteLater()
         self.error_menus = [self.create_error_menu(server) for server in servers]
-        if servers:
+        if servers and separate:
             self.menu.addSeparator()
 
     def create_error_menu(self, snapshot: ServerSnapshot) -> QMenu:
