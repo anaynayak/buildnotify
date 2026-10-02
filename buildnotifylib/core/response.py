@@ -11,7 +11,4 @@ class Response(object):
         return self.error is not None
 
     def ssl_error(self) -> bool:
-        try:
-            return self.failed() and type(self.error) is SSLError
-        except AttributeError:
-            return False
+        return isinstance(self.error, SSLError)
