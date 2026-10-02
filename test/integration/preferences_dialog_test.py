@@ -67,7 +67,6 @@ def test_should_prefill_server_config(qtbot, mocker):
     index = dialog.ui.cctrayPathList.model().index(0, 0)
     dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
-    dialog.item_selection_changed(True)
 
     m = mocker.patch.object(ServerConfigurationDialog, "open")
 
@@ -88,7 +87,6 @@ def test_should_remove_configured_servers(qtbot):
     index = dialog.ui.cctrayPathList.model().index(0, 0)
     dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
-    dialog.item_selection_changed(True)
 
     qtbot.mouseClick(dialog.ui.removeButton, Qt.MouseButton.LeftButton)
 
@@ -347,3 +345,44 @@ def test_should_clamp_a_stored_polling_interval_above_an_hour(qtbot):
     qtbot.addWidget(dialog)
 
     assert dialog.edited_settings().interval_seconds == 3600
+
+
+@pytest.mark.functional
+def test_should_enable_configure_when_a_server_is_selected_without_a_click(qtbot):
+    conf = ConfigBuilder().server("http://one/cctray.xml").server("http://two/cctray.xml").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    assert not dialog.ui.configureProjectButton.isEnabled()
+
+    select_row(dialog, 1)
+
+    assert dialog.ui.configureProjectButton.isEnabled()
+
+
+@pytest.mark.functional
+def test_should_disable_configure_once_the_selected_server_is_removed(qtbot):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    select_row(dialog, 0)
+
+    dialog.remove_element()
+
+    assert not dialog.ui.configureProjectButton.isEnabled()
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("key", [Qt.Key.Key_Return, Qt.Key.Key_Enter])
+def test_should_configure_the_selected_server_on_enter(qtbot, mocker, key):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    dialog.show()
+    select_row(dialog, 0)
+    dialog.ui.cctrayPathList.setFocus()
+    edit = mocker.patch.object(ServerConfigurationDialog, "open", return_value=None)
+
+    qtbot.keyClick(dialog.ui.cctrayPathList, key)
+
+    edit.assert_called_once()
+    assert dialog.isVisible()

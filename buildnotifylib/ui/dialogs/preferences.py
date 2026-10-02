@@ -1,12 +1,15 @@
 from dataclasses import replace
 
-from PySide6.QtCore import QStringListModel
+from PySide6.QtCore import QEvent, QModelIndex, QObject, QPersistentModelIndex, QStringListModel, Qt
+from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QDialog, QWidget
 
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
+
+ENTER_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter)
 
 
 class PreferencesDialog(QDialog):
@@ -41,11 +44,9 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.clicked.connect(self.configure_projects)
 
     def set_values_from_config(self):
-        self.ui.cctrayPathList.setModel(QStringListModel(list(self.servers)))
-
-        self.ui.cctrayPathList.clicked.connect(lambda _: self.item_selection_changed(True))
+        self.set_urls(list(self.servers))
         self.ui.cctrayPathList.doubleClicked.connect(self.configure_projects)
-        self.ui.removeButton.clicked.connect(lambda _: self.item_selection_changed(False))
+        self.ui.cctrayPathList.installEventFilter(self)
 
         for key, checkbox in self.checkboxes.items():
             checkbox.setChecked(self.settings.notify(key))
@@ -58,8 +59,19 @@ class PreferencesDialog(QDialog):
         self.ui.showLastBuildLabelCheckbox.setChecked(self.settings.show_last_build_label)
         self.ui.symbolicIconsCheckbox.setChecked(self.settings.symbolic_icons)
 
-    def item_selection_changed(self, status):
-        self.ui.configureProjectButton.setEnabled(status)
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if watched is self.ui.cctrayPathList and is_enter(event):
+            self.configure_projects()
+            return True
+        return super().eventFilter(watched, event)
+
+    def set_urls(self, urls: list[str]):
+        self.ui.cctrayPathList.setModel(QStringListModel(urls))
+        self.ui.cctrayPathList.selectionModel().currentChanged.connect(self.current_changed)
+        self.current_changed(QModelIndex())
+
+    def current_changed(self, current: QModelIndex | QPersistentModelIndex, _previous=None):
+        self.ui.configureProjectButton.setEnabled(current.isValid())
 
     def add_server(self):
         server = self.open_server_dialog(None)
@@ -68,7 +80,7 @@ class PreferencesDialog(QDialog):
         self.servers[server.url] = server
         urls = self.ui.cctrayPathList.model().stringList()
         urls.append(server.url)
-        self.ui.cctrayPathList.setModel(QStringListModel(urls))
+        self.set_urls(urls)
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
@@ -76,7 +88,7 @@ class PreferencesDialog(QDialog):
             return
         urls = self.ui.cctrayPathList.model().stringList()
         urls.pop(index.row())
-        self.ui.cctrayPathList.setModel(QStringListModel(urls))
+        self.set_urls(urls)
 
     def configure_projects(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
@@ -126,3 +138,7 @@ class PreferencesDialog(QDialog):
         if self.exec() == QDialog.DialogCode.Accepted:
             return self.edited_settings()
         return None
+
+
+def is_enter(event: QEvent) -> bool:
+    return isinstance(event, QKeyEvent) and event.type() == QEvent.Type.KeyPress and event.key() in ENTER_KEYS
