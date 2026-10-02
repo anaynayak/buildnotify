@@ -1,32 +1,21 @@
 name: package
 on:
   push:
-    branches: [master]
+    tags: ["*"]
 
-env:
-  BUILD_LABEL: ${{ github.run_id }}
 jobs:
   pypi:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
       - name: Build dist
         run: |
-          pip3 install paver
-          export BUILD_VERSION=`python3 buildnotifylib/version.py`
-          paver dist_pypi
-      - name: Publish to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
+          BUILD_VERSION=$(uv run --python 3.12 python buildnotifylib/version.py)
+          export BUILD_VERSION
+          uv build --sdist
       - name: Publish to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
