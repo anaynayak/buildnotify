@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QSystemTrayIcon, QWidget
+from PyQt5.QtWidgets import QSystemTrayIcon
 
 
 class Notification:
-    def __init__(self, widget: QWidget):
+    def __init__(self, widget: QSystemTrayIcon):
         self.widget = widget
 
     def show_message(self, title: str, text: str):

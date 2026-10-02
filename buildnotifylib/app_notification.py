@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QSystemTrayIcon
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.projects import OverallIntegrationStatus
@@ -7,7 +7,7 @@ from buildnotifylib.project_status_notification import ProjectStatusNotification
 
 
 class AppNotification:
-    def __init__(self, config: Config, widget: QWidget):
+    def __init__(self, config: Config, widget: QSystemTrayIcon):
         self.config = config
         self.notification = Notification(widget)
         self.integration_status: OverallIntegrationStatus | None = None
