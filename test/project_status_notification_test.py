@@ -1,9 +1,9 @@
 from dataclasses import replace
 
-from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
-from buildnotifylib.project_status_notification import ProjectStatusNotification
+from buildnotifylib.ui.app_notification import AppNotification
+from buildnotifylib.ui.project_status_notification import ProjectStatusNotification
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 

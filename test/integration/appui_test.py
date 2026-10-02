@@ -3,10 +3,10 @@ import re
 import pytest
 from PyQt5 import QtWidgets
 
-from buildnotifylib.app_ui import AppUi
-from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
+from buildnotifylib.ui.app_ui import AppUi
+from buildnotifylib.ui.build_icons import BuildIcons
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 from test.utils import FakeConnection, fake_content

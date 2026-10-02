@@ -12,7 +12,7 @@ from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.hooks import ShellScriptHook
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
-from buildnotifylib.buildnotify import BuildNotify
+from buildnotifylib.ui.buildnotify import BuildNotify
 
 LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 

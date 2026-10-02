@@ -3,7 +3,7 @@ from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.core.diff import Change, Event, diff, labels
 from buildnotifylib.core.ports import Hook
 from buildnotifylib.core.settings import AppSettings
-from buildnotifylib.notifications import Notification
+from buildnotifylib.ui.notifications import Notification
 
 
 class ProjectStatusNotification:

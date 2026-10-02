@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 import pytest
 from PyQt5.QtWidgets import QWidget
 
-from buildnotifylib.app_menu import AppMenu
-from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.settings import AppSettings, SortKey
-from buildnotifylib.preferences import PreferencesDialog
+from buildnotifylib.ui.app_menu import AppMenu
+from buildnotifylib.ui.build_icons import BuildIcons
+from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 from test.utils import FakeConnection, fake_content
@@ -355,7 +355,7 @@ def test_should_quit_the_application_on_exit(qtbot, mocker):
     parent = QWidget()
     app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
-    quit_app = mocker.patch("buildnotifylib.app_menu.QApplication.quit")
+    quit_app = mocker.patch("buildnotifylib.ui.app_menu.QApplication.quit")
     sys_exit = mocker.patch("sys.exit")
 
     app_menu.exit(None)
@@ -383,7 +383,7 @@ def test_should_pass_the_injected_connection_to_preferences(qtbot, mocker):
     qtbot.addWidget(parent)
     connection = FakeConnection(fake_content())
     app_menu = AppMenu(parent, conf, BuildIcons(), connection)
-    preferences = mocker.patch("buildnotifylib.app_menu.PreferencesDialog")
+    preferences = mocker.patch("buildnotifylib.ui.app_menu.PreferencesDialog")
     preferences.return_value.open.return_value = None
 
     app_menu.preferences_clicked(None)

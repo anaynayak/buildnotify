@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QSystemTrayIcon
 
-from buildnotifylib.notifications import Notification
+from buildnotifylib.ui.notifications import Notification
 
 
 def test_should_show_message_on_tray(mocker):

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMessageBox
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.settings import ServerSettings
-from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
 from test.utils import FakeConnection, GatedConnection, fake_content
 
 TIMEOUT = 10

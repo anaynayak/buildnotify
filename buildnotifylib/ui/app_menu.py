@@ -7,12 +7,12 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
-from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core import humanize
 from buildnotifylib.core.model import Project
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import SortKey
-from buildnotifylib.preferences import PreferencesDialog
+from buildnotifylib.ui.build_icons import BuildIcons
+from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
 
 

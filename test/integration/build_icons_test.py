@@ -1,6 +1,6 @@
 import pytest
 
-from buildnotifylib.build_icons import BuildIcons
+from buildnotifylib.ui.build_icons import BuildIcons
 
 
 @pytest.mark.functional

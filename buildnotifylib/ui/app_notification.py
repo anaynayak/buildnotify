@@ -4,8 +4,8 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.core.ports import Hook
-from buildnotifylib.notifications import Notification
-from buildnotifylib.project_status_notification import ProjectStatusNotification
+from buildnotifylib.ui.notifications import Notification
+from buildnotifylib.ui.project_status_notification import ProjectStatusNotification
 
 
 class AppNotification:

@@ -48,8 +48,8 @@ def test_adapters_should_not_import_ui(path):
 
 def test_should_flag_an_adapter_importing_the_ui(tmp_path):
     module = tmp_path / "bad.py"
-    module.write_text("from buildnotifylib.app_menu import AppMenu\nimport buildnotifylib.ui.poller\n")
-    assert outside_layer(module, ADAPTERS_MAY_IMPORT) == ["buildnotifylib.ui.poller", "buildnotifylib.app_menu"]
+    module.write_text("from buildnotifylib.ui.app_menu import AppMenu\nimport buildnotifylib.ui.poller\n")
+    assert outside_layer(module, ADAPTERS_MAY_IMPORT) == ["buildnotifylib.ui.poller", "buildnotifylib.ui.app_menu"]
 
 
 def test_importing_all_of_core_should_load_no_qt_requests_or_keyring():

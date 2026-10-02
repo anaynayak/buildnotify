@@ -2,11 +2,11 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from buildnotifylib.adapters.settings_store import SettingsStore
-from buildnotifylib.app_notification import AppNotification
-from buildnotifylib.app_ui import AppUi
-from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.ports import Connection, Hook
+from buildnotifylib.ui.app_notification import AppNotification
+from buildnotifylib.ui.app_ui import AppUi
+from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.poller import Poller
 
 

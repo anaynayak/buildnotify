@@ -6,10 +6,10 @@ from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
-from buildnotifylib.app_menu import AppMenu
-from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.ports import Connection
+from buildnotifylib.ui.app_menu import AppMenu
+from buildnotifylib.ui.build_icons import BuildIcons
 
 
 class AppUi(QtCore.QObject):

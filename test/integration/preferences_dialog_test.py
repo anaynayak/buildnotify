@@ -6,8 +6,8 @@ from PyQt5.QtCore import QItemSelectionModel, Qt
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
 from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, ServerSettings, SortKey
-from buildnotifylib.preferences import PreferencesDialog
-from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
+from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, fake_content
 
@@ -274,7 +274,7 @@ def test_should_open_the_server_dialog_with_the_injected_connection(qtbot, mocke
     connection = FakeConnection(fake_content())
     dialog = PreferencesDialog(conf.settings, connection)
     qtbot.addWidget(dialog)
-    server_dialog = mocker.patch("buildnotifylib.preferences.ServerConfigurationDialog")
+    server_dialog = mocker.patch("buildnotifylib.ui.dialogs.preferences.ServerConfigurationDialog")
     server_dialog.return_value.open.return_value = None
 
     dialog.add_server()

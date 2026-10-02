@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QDialog, QWidget
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
-from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):

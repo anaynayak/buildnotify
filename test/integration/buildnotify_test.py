@@ -5,7 +5,7 @@ import requests_mock
 from PyQt5.QtWidgets import QWidget
 
 from buildnotifylib.adapters.http import HttpConnection
-from buildnotifylib.buildnotify import BuildNotify
+from buildnotifylib.ui.buildnotify import BuildNotify
 from buildnotifylib.ui.poller import Poller
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, GatedConnection, fake_content
@@ -22,7 +22,7 @@ def idle_connection():
 
 @pytest.mark.functional
 def test_should_consolidate_build_status(qtbot, mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
     with requests_mock.Mocker() as m:
         url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
@@ -42,8 +42,8 @@ def test_should_consolidate_build_status(qtbot, mocker):
 
 
 def no_tray_app(mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    critical = mocker.patch("buildnotifylib.buildnotify.QMessageBox.critical")
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    critical = mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.critical")
     app = mocker.MagicMock()
     b = BuildNotify(app, ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
     run_app = mocker.patch.object(b, "run_app")
@@ -74,8 +74,8 @@ def test_should_show_no_tray_message_and_exit_after_last_retry(mocker):
 
 @pytest.mark.functional
 def test_should_retry_the_tray_on_a_timer_then_show_the_no_tray_message(qtbot, mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    critical = mocker.patch("buildnotifylib.buildnotify.QMessageBox.critical")
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    critical = mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.critical")
     app = mocker.MagicMock()
 
     b = BuildNotify(app, ConfigBuilder().build(), idle_connection(), NoHook(), 10)
@@ -87,7 +87,7 @@ def test_should_retry_the_tray_on_a_timer_then_show_the_no_tray_message(qtbot, m
 
 
 def test_should_run_app_once_when_tray_is_available(mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=True)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
     run_app = mocker.patch.object(b, "run_app")
 
@@ -98,7 +98,7 @@ def test_should_run_app_once_when_tray_is_available(mocker):
 
 
 def test_should_wait_for_the_poller(mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
     b.wait_for_workers()
     b.poller = mocker.MagicMock()
@@ -109,7 +109,7 @@ def test_should_wait_for_the_poller(mocker):
 
 
 def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     mocker.patch.object(BuildNotify, "EXIT_WAIT_MS", 50)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
     url = "http://localhost:8080/cc.xml"
@@ -125,9 +125,9 @@ def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
 
 
 def test_should_poll_through_the_injected_connection(qapp, mocker):
-    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    app_ui = mocker.patch("buildnotifylib.buildnotify.AppUi")
-    app_notification = mocker.patch("buildnotifylib.buildnotify.AppNotification")
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    app_ui = mocker.patch("buildnotifylib.ui.buildnotify.AppUi")
+    app_notification = mocker.patch("buildnotifylib.ui.buildnotify.AppNotification")
     connection = FakeConnection(fake_content())
     hook = NoHook()
     b = BuildNotify(qapp, ConfigBuilder().build(), connection, hook, 60000)
