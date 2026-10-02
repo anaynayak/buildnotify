@@ -1,5 +1,6 @@
 import webbrowser
 from collections.abc import Callable, Sequence
+from dataclasses import replace
 from datetime import datetime
 from functools import partial
 
@@ -140,7 +141,8 @@ class AppMenu(QtCore.QObject):
         settings = dialog.open()
         dialog.deleteLater()
         if settings is not None:
-            self.store.save(settings)
+            # Preferences doesn't edit the pause, and the tray may have changed it while the dialog was open.
+            self.store.save(replace(settings, paused_until=self.store.settings.paused_until))
             self.reload_data.emit()
 
     def exit(self, widget: QWidget):

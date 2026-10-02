@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -606,3 +607,21 @@ def test_should_offer_to_pause_again_once_the_pause_expired(mute_menu):
     app_menu.update([])
 
     assert "Pause notifications for 1 hour" in texts(app_menu.menu)
+
+
+@pytest.mark.functional
+def test_should_keep_a_pause_set_while_preferences_is_open(mute_menu, mocker):
+    app_menu = mute_menu(ServerSettings(CI))
+    app_menu.update([])
+    snapshot = app_menu.store.settings
+
+    def pause_from_the_tray():
+        action(app_menu.menu, "Pause notifications for 1 hour").trigger()
+        return replace(snapshot, interval_seconds=30)
+
+    mocker.patch.object(PreferencesDialog, "open", side_effect=pause_from_the_tray)
+
+    app_menu.preferences_clicked(None)
+
+    assert reopened(app_menu).paused_until == NOW + timedelta(hours=1)
+    assert reopened(app_menu).interval_seconds == 30
