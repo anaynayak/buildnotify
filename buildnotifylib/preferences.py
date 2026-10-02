@@ -50,7 +50,7 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
-        server_config = ServerConfigurationDialog(None, self.conf, self).open()
+        server_config = self.open_server_dialog(None)
         if server_config is None or server_config.url in self.get_urls():
             return
         self.added_servers[server_config.url] = server_config
@@ -76,10 +76,16 @@ class PreferencesDialog(QDialog):
         url = index.data()
         if not url:
             return
-        server_config = ServerConfigurationDialog(url, self.conf, self).open()
+        server_config = self.open_server_dialog(url)
         if server_config is not None:
             self.store_edited_server(url, server_config)
             self.ui.cctrayPathList.model().setData(index, server_config.url)
+
+    def open_server_dialog(self, url: Optional[str]) -> Optional[ServerConfig]:
+        dialog = ServerConfigurationDialog(url, self.conf, self)
+        server_config = dialog.open()
+        dialog.deleteLater()
+        return server_config
 
     def store_edited_server(self, url: str, server_config: ServerConfig):
         if self.added_servers.pop(url, None) is not None:

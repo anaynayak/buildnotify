@@ -57,7 +57,9 @@ class AppMenu(QtCore.QObject):
                           "please visit <a href=\"https://git.io/buildnotify\">https://git.io/buildnotify</a> and provide your feedback.")
 
     def preferences_clicked(self, widget: QWidget):
-        preferences = PreferencesDialog(self.conf, self.menu).open()
+        dialog = PreferencesDialog(self.conf, self.menu)
+        preferences = dialog.open()
+        dialog.deleteLater()
         if preferences is not None:
             self.conf.update_preferences(preferences)
             self.reload_data.emit()

@@ -204,3 +204,18 @@ def test_should_keep_edits_to_an_added_server(qtbot, mocker):
     dialog.open()
 
     assert conf.get_display_prefix("http://new/cctray.xml") == 'edited'
+
+
+@pytest.mark.functional
+def test_should_delete_server_dialogs_after_use(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    mocker.patch.object(ServerConfigurationDialog, 'open', return_value=None)
+    delete_later = mocker.patch.object(ServerConfigurationDialog, 'deleteLater')
+
+    dialog.add_server()
+    select_row(dialog, 0)
+    dialog.configure_projects()
+
+    assert delete_later.call_count == 2

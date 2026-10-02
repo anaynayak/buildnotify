@@ -251,3 +251,16 @@ def test_should_quit_the_application_on_exit(qtbot, mocker):
 
     quit_app.assert_called_once()
     sys_exit.assert_not_called()
+
+
+@pytest.mark.functional
+def test_should_delete_preferences_dialog_after_use(qtbot, mocker):
+    parent = QWidget()
+    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
+    qtbot.addWidget(parent)
+    mocker.patch.object(PreferencesDialog, 'open', return_value=None)
+    delete_later = mocker.patch.object(PreferencesDialog, 'deleteLater')
+
+    app_menu.preferences_clicked(None)
+
+    delete_later.assert_called_once()
