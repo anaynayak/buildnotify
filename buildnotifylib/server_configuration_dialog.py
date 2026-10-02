@@ -11,8 +11,8 @@ from buildnotifylib.core.http_connection import is_ssl_error
 from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
-from buildnotifylib.serverconfig import ServerConfig
 
 
 class ServerConfigurationDialog(QDialog):
@@ -38,7 +38,7 @@ class ServerConfigurationDialog(QDialog):
             self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
             self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
         else:
-            self.server = ServerConfig("", [], "", "", "", "")
+            self.server = ServerSettings("", [], "", "", "", "")
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
 
@@ -55,13 +55,13 @@ class ServerConfigurationDialog(QDialog):
     def set_authentication_type(self, index: int):
         self.ui.username.setText("")
         self.ui.password.setText("")
-        if ServerConfig.AUTH_USERNAME_PASSWORD == index:
+        if ServerSettings.AUTH_USERNAME_PASSWORD == index:
             # Username/password selected
             self.ui.username.setVisible(True)
             self.ui.usernameLabel.setVisible(True)
             self.ui.passwordLabel.setText("Password")
             self.ui.password.setPlaceholderText(None)
-        elif ServerConfig.AUTH_BEARER_TOKEN == index:
+        elif ServerSettings.AUTH_BEARER_TOKEN == index:
             # Bearer token selected
             self.ui.username.setVisible(False)
             self.ui.usernameLabel.setVisible(False)
@@ -145,7 +145,7 @@ class ServerConfigurationDialog(QDialog):
     def server_url(self) -> str:
         return str(self.ui.addServerUrl.text())
 
-    def get_server_config(self) -> ServerConfig:
+    def get_server_config(self) -> ServerSettings:
         projects_model = self.ui.projectsList.model()
 
         def project(i, model):
@@ -156,7 +156,7 @@ class ServerConfigurationDialog(QDialog):
             for i in range(self.projects_list.rowCount())
             if project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked
         ]
-        return ServerConfig(
+        return ServerSettings(
             self.server_url(),
             excluded_projects,
             str(self.ui.timezoneList.currentText()),
@@ -167,7 +167,7 @@ class ServerConfigurationDialog(QDialog):
             int(self.ui.authentication_type.currentIndex()),
         )
 
-    def open(self) -> ServerConfig | None:  # type: ignore
+    def open(self) -> ServerSettings | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:
             return self.get_server_config()
         return None

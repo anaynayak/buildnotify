@@ -1,7 +1,7 @@
 import requests
 from requests.exceptions import SSLError
 
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
 
 
@@ -11,7 +11,7 @@ class HttpConnection:
         self.session = requests.Session()
 
     def connect(
-        self, server: ServerConfig, timeout: float | None, additional_headers: dict[str, str] | None = None
+        self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None
     ) -> bytes:
         headers = {"user-agent": self.user_agent}
         headers.update(additional_headers or {})
@@ -24,8 +24,8 @@ class HttpConnection:
         return response.content
 
     @staticmethod
-    def uses_basic_auth(server: ServerConfig) -> bool:
-        return server.authentication_type == ServerConfig.AUTH_USERNAME_PASSWORD and server.has_creds()
+    def uses_basic_auth(server: ServerSettings) -> bool:
+        return server.authentication_type == ServerSettings.AUTH_USERNAME_PASSWORD and server.has_creds()
 
 
 def is_ssl_error(error: Exception | None) -> bool:

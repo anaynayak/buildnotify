@@ -4,7 +4,7 @@ import keyring
 import pytest
 
 from buildnotifylib.config import Config, Preferences
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 from test.fake_keyring import InMemoryKeyring
 
 
@@ -49,7 +49,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_should_store_server_preferences(self):
         self.config.save_server_config(
-            ServerConfig(
+            ServerSettings(
                 "https://github.com/anaynayak/buildnotify/cctray.xml",
                 ["excludedproject"],
                 "EDT",
@@ -73,19 +73,19 @@ class ConfigTest(unittest.TestCase):
 
     def test_should_not_touch_keyring_without_credentials(self):
         keyring.set_keyring(UntouchableKeyring())
-        self.config.save_server_config(ServerConfig("url1", [], "EDT", "prefix", "", ""))
+        self.config.save_server_config(ServerSettings("url1", [], "EDT", "prefix", "", ""))
         server = self.config.get_server_config("url1")
         self.assertEqual("", server.password)
 
     def test_should_store_bearer_token_without_username(self):
         self.config.save_server_config(
-            ServerConfig("url1", [], "EDT", "prefix", "", "token", False, ServerConfig.AUTH_BEARER_TOKEN)
+            ServerSettings("url1", [], "EDT", "prefix", "", "token", False, ServerSettings.AUTH_BEARER_TOKEN)
         )
         self.assertEqual("token", self.config.get_server_config("http://url1").password)
 
     def test_should_return_all_servers(self):
-        self.config.save_server_config(ServerConfig("url1", [], "EDT", "prefix", "user", "pass"))
-        self.config.save_server_config(ServerConfig("url2", [], "EDT", "prefix", "user", "pass"))
+        self.config.save_server_config(ServerSettings("url1", [], "EDT", "prefix", "user", "pass"))
+        self.config.save_server_config(ServerSettings("url2", [], "EDT", "prefix", "user", "pass"))
         servers = self.config.get_server_configs()
         self.assertEqual(2, len(servers))
         self.assertEqual("http://url1", servers[0].url)
@@ -109,8 +109,8 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual([], Config(self.q_settings).get_urls())
 
     def test_should_clean_up_a_removed_server(self):
-        self.config.save_server_config(ServerConfig("url1", ["p"], "EDT", "prefix", "user", "pass", True))
-        self.config.save_server_config(ServerConfig("url2", [], "EDT", "prefix", "user", "pass"))
+        self.config.save_server_config(ServerSettings("url1", ["p"], "EDT", "prefix", "user", "pass", True))
+        self.config.save_server_config(ServerSettings("url2", [], "EDT", "prefix", "user", "pass"))
 
         self.config.update_urls(["http://url2"])
 
@@ -120,7 +120,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_should_clean_up_a_removed_bearer_token(self):
         self.config.save_server_config(
-            ServerConfig("url1", [], "EDT", "prefix", "", "token", False, ServerConfig.AUTH_BEARER_TOKEN)
+            ServerSettings("url1", [], "EDT", "prefix", "", "token", False, ServerSettings.AUTH_BEARER_TOKEN)
         )
 
         self.config.update_urls([])
@@ -128,8 +128,8 @@ class ConfigTest(unittest.TestCase):
         self.assertIsNone(keyring.get_password("http://url1", ""))
 
     def test_should_keep_settings_of_a_server_nested_under_a_removed_one(self):
-        self.config.save_server_config(ServerConfig("host", [], "EDT", "outer", "", ""))
-        self.config.save_server_config(ServerConfig("host/cctray.xml", [], "EDT", "inner", "", ""))
+        self.config.save_server_config(ServerSettings("host", [], "EDT", "outer", "", ""))
+        self.config.save_server_config(ServerSettings("host/cctray.xml", [], "EDT", "inner", "", ""))
 
         self.config.update_urls(["http://host/cctray.xml"])
 

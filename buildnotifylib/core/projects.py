@@ -6,7 +6,7 @@ from buildnotifylib.core import cctray
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.http_connection import HttpConnection
 from buildnotifylib.core.model import Project, ServerSnapshot
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 
 
 class ProjectsPopulator(QThread):
@@ -15,7 +15,7 @@ class ProjectsPopulator(QThread):
     def __init__(self, config: Config, parent: QObject | None = None):
         QThread.__init__(self, parent)
         self.config = config
-        self.server_configs: list[ServerConfig] = []
+        self.server_configs: list[ServerSettings] = []
         self.timeout: float | None = None
         self.last_known: dict[str, tuple[Project, ...]] = {}
         self.reload_pending = False
@@ -37,7 +37,7 @@ class ProjectsPopulator(QThread):
             self.reload_pending = False
             self.load_from_server()
 
-    def process(self, server_configs: list[ServerConfig]):
+    def process(self, server_configs: list[ServerSettings]):
         overall_status = []
         for server_config in server_configs:
             overall_status.append(self.check_nodes(server_config))
@@ -46,7 +46,7 @@ class ProjectsPopulator(QThread):
     def run(self):
         self.process(self.server_configs)
 
-    def check_nodes(self, server_config: ServerConfig) -> ServerSnapshot:
+    def check_nodes(self, server_config: ServerSettings) -> ServerSnapshot:
         snapshot = ProjectLoader(server_config, self.timeout).get_data()
         return self.with_last_known(snapshot, server_config.excluded_projects)
 
@@ -61,7 +61,7 @@ class ProjectsPopulator(QThread):
 class ProjectLoader:
     def __init__(
         self,
-        server_config: ServerConfig,
+        server_config: ServerSettings,
         timeout: float | None,
         connection=HttpConnection(),
         apply_excludes: bool = True,
@@ -75,7 +75,7 @@ class ProjectLoader:
         print(f"checking {self.server_config.url}")
         try:
             headers = {}
-            if self.server_config.authentication_type == ServerConfig.AUTH_BEARER_TOKEN:
+            if self.server_config.authentication_type == ServerSettings.AUTH_BEARER_TOKEN:
                 headers["Authorization"] = f"Bearer {self.server_config.password}"
 
             data = self.connection.connect(self.server_config, self.timeout, headers)

@@ -5,9 +5,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QItemSelectionModel, Qt
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
-from buildnotifylib.serverconfig import ServerConfig
 from test.fake_conf import ConfigBuilder
 
 
@@ -117,7 +117,7 @@ def test_should_replace_the_row_when_a_server_url_is_edited(qtbot, mocker):
     qtbot.addWidget(dialog)
     select_row(dialog, 0)
     mocker.patch.object(
-        ServerConfigurationDialog, "open", return_value=ServerConfig("http://new/cctray.xml", [], "None", "", "", "")
+        ServerConfigurationDialog, "open", return_value=ServerSettings("http://new/cctray.xml", [], "None", "", "", "")
     )
 
     dialog.configure_projects()
@@ -126,7 +126,7 @@ def test_should_replace_the_row_when_a_server_url_is_edited(qtbot, mocker):
 
 
 def stub_server_dialog(mocker, url):
-    mocker.patch.object(ServerConfigurationDialog, "open", return_value=ServerConfig(url, [], "None", "prefix", "", ""))
+    mocker.patch.object(ServerConfigurationDialog, "open", return_value=ServerSettings(url, prefix="prefix"))
 
 
 @pytest.mark.functional
@@ -200,7 +200,7 @@ def test_should_keep_edits_to_an_added_server(qtbot, mocker):
     mocker.patch.object(
         ServerConfigurationDialog,
         "open",
-        return_value=ServerConfig("http://new/cctray.xml", [], "None", "edited", "", ""),
+        return_value=ServerSettings("http://new/cctray.xml", [], "None", "edited", "", ""),
     )
 
     dialog.configure_projects()

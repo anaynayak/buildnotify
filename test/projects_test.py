@@ -1,7 +1,7 @@
 import unittest
 
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 
 from .utils import fake_content
 
@@ -24,7 +24,7 @@ class ProjectLoaderTest(unittest.TestCase):
                                         lastBuildTime="2009-06-12T06:54:35"
                                         webUrl="http://local/url"/>
                                 </Projects>""")
-        response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, connection).get_data()
+        response = ProjectLoader(ServerSettings("url", [], "", "", "", ""), 10, connection).get_data()
         projects = response.projects
         self.assertEqual(1, len(projects))
         self.assertEqual("project", projects[0].name)
@@ -39,7 +39,7 @@ class ProjectLoaderTest(unittest.TestCase):
             def connect(self, server, timeout, additional_headers=None):
                 raise error
 
-        response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, FailingConnection()).get_data()
+        response = ProjectLoader(ServerSettings("url", [], "", "", "", ""), 10, FailingConnection()).get_data()
         projects = response.projects
         self.assertEqual(0, len(projects))
         self.assertEqual(True, response.unavailable)
@@ -66,19 +66,19 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertIn("feed", str(response.error))
 
     def assert_unavailable(self, body):
-        response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, MockConnection(body)).get_data()
+        response = ProjectLoader(ServerSettings("url", [], "", "", "", ""), 10, MockConnection(body)).get_data()
         self.assertEqual((), response.projects)
         self.assertEqual(True, response.unavailable)
         return response
 
     def test_should_drop_excluded_projects(self):
-        config = ServerConfig("url", ["orbit-M"], "", "", "", "")
+        config = ServerSettings("url", ["orbit-M"], "", "", "", "")
         projects = ProjectLoader(config, 10, MockConnection(fake_content())).get_data().projects
         self.assertEqual(6, len(projects))
         self.assertNotIn("orbit-M", [p.name for p in projects])
 
     def test_should_keep_excluded_projects_on_request(self):
-        config = ServerConfig("url", ["orbit-M"], "", "", "", "")
+        config = ServerSettings("url", ["orbit-M"], "", "", "", "")
         loader = ProjectLoader(config, 10, MockConnection(fake_content()), apply_excludes=False)
         self.assertEqual(7, len(loader.get_data().projects))
 
@@ -91,7 +91,7 @@ class ProjectLoaderTest(unittest.TestCase):
                                                 lastBuildTime="2009-06-12T06:54:35"
                                                 webUrl="http://local/url"/>
                                         </Projects>""")
-        response = ProjectLoader(ServerConfig("url", [], "", "RELEASE", "", ""), 10, connection).get_data()
+        response = ProjectLoader(ServerSettings("url", [], "", "RELEASE", "", ""), 10, connection).get_data()
         projects = response.projects
         self.assertEqual(1, len(projects))
         self.assertEqual("[RELEASE] project", projects[0].label())

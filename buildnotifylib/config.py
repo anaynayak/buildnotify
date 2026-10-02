@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 
 from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.core.model import NONE_TIMEZONE
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 
 
 class Preferences:
@@ -182,9 +182,9 @@ class Config:
         self.settings.setValue(self.AUTHORIZATION_TYPE % url, authorization_type)
 
     def get_authorization_type(self, url: str) -> int:
-        return self.settings.value(self.AUTHORIZATION_TYPE % url, ServerConfig.AUTH_USERNAME_PASSWORD, int)
+        return self.settings.value(self.AUTHORIZATION_TYPE % url, ServerSettings.AUTH_USERNAME_PASSWORD, int)
 
-    def save_server_config(self, server_config: ServerConfig):
+    def save_server_config(self, server_config: ServerSettings):
         self.add_server_url(server_config.url)
         self.set_project_excludes(server_config.url, server_config.excluded_projects)
         self.set_timezone(server_config.url, server_config.timezone)
@@ -197,13 +197,13 @@ class Config:
 
     @staticmethod
     def uses_keyring(username: str, authentication_type: int) -> bool:
-        return bool(username) or authentication_type == ServerConfig.AUTH_BEARER_TOKEN
+        return bool(username) or authentication_type == ServerSettings.AUTH_BEARER_TOKEN
 
-    def get_server_config(self, url: str) -> ServerConfig:
+    def get_server_config(self, url: str) -> ServerSettings:
         username = self.get_username(url)
         authentication_type = self.get_authorization_type(url)
         password = self.get_password(url, username) if self.uses_keyring(username, authentication_type) else ""
-        return ServerConfig(
+        return ServerSettings(
             url,
             self.get_project_excludes(url),
             self.get_timezone(url),
@@ -214,7 +214,7 @@ class Config:
             authentication_type,
         )
 
-    def get_server_configs(self) -> list[ServerConfig]:
+    def get_server_configs(self) -> list[ServerSettings]:
         return [self.get_server_config(url) for url in self.get_urls()]
 
     def update_preferences(self, preferences: Preferences):

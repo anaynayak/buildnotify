@@ -7,14 +7,15 @@ import requests_mock
 
 from buildnotifylib.core.http_connection import HttpConnection, is_ssl_error
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.serverconfig import ServerConfig
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
 
 
 def test_should_pass_auth_if_provided():
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="content")
-        response = HttpConnection().connect(ServerConfig("http://localhost:8080/cc.xml", [], "", "", "user", "pass"), 3)
+        server = ServerSettings("http://localhost:8080/cc.xml", username="user", password="pass")
+        response = HttpConnection().connect(server, 3)
         assert response == b"content"
         assert m.last_request.headers.get("Authorization")
 
@@ -22,7 +23,7 @@ def test_should_pass_auth_if_provided():
 def test_should_fetch_data_without_auth():
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="content")
-        response = HttpConnection().connect(ServerConfig("localhost:8080/cc.xml", [], "", "", None, None), 3)
+        response = HttpConnection().connect(ServerSettings("localhost:8080/cc.xml", [], "", "", None, None), 3)
         assert response == b"content"
         assert not m.last_request.headers.get("Authorization")
 
@@ -30,19 +31,19 @@ def test_should_fetch_data_without_auth():
 def test_should_send_user_agent_without_platform_details():
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="content")
-        HttpConnection().connect(ServerConfig("localhost:8080/cc.xml", [], "", "", None, None), 3)
+        HttpConnection().connect(ServerSettings("localhost:8080/cc.xml", [], "", "", None, None), 3)
         assert m.last_request.headers["User-Agent"] == f"BuildNotify/{VERSION}"
 
 
 def bearer_config(username):
-    return ServerConfig(
+    return ServerSettings(
         "http://localhost:8080/cc.xml",
         [],
         "",
         "",
         username,
         "token",
-        authentication_type=ServerConfig.AUTH_BEARER_TOKEN,
+        authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
     )
 
 
@@ -59,7 +60,7 @@ def test_should_send_basic_auth_for_username_password():
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="<Projects/>")
         ProjectLoader(
-            ServerConfig("http://localhost:8080/cc.xml", [], "", "", "user", "pass"), 3, HttpConnection()
+            ServerSettings("http://localhost:8080/cc.xml", [], "", "", "user", "pass"), 3, HttpConnection()
         ).get_data()
         expected = "Basic " + base64.b64encode(b"user:pass").decode()
         assert m.last_request.headers["Authorization"] == expected
@@ -68,7 +69,7 @@ def test_should_send_basic_auth_for_username_password():
 def test_should_report_ssl_error():
     with requests_mock.Mocker() as m:
         m.get("https://localhost:8080/cc.xml", exc=requests.exceptions.SSLError("bad certificate"))
-        config = ServerConfig("https://localhost:8080/cc.xml", [], "", "", None, None)
+        config = ServerSettings("https://localhost:8080/cc.xml", [], "", "", None, None)
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
         assert is_ssl_error(response.error)
         assert response.unavailable
@@ -79,7 +80,7 @@ def test_should_reuse_one_session_across_polls(mocker):
     new_session = mocker.spy(requests.sessions.Session, "__init__")
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="content")
-        config = ServerConfig("localhost:8080/cc.xml", [], "", "", None, None)
+        config = ServerSettings("localhost:8080/cc.xml", [], "", "", None, None)
         connection.connect(config, 3)
         connection.connect(config, 3)
         assert m.call_count == 2
@@ -93,7 +94,7 @@ def test_should_honour_encoding_declared_in_the_feed():
     )
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", content=body.encode("iso-8859-1"))
-        config = ServerConfig("localhost:8080/cc.xml", [], "", "", None, None)
+        config = ServerSettings("localhost:8080/cc.xml", [], "", "", None, None)
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
         assert [p.name for p in response.projects] == ["café"]
 

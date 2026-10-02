@@ -2,16 +2,16 @@ from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
 
 from buildnotifylib.config import Config, Preferences
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
-from buildnotifylib.serverconfig import ServerConfig
 
 
 class PreferencesDialog(QDialog):
     def __init__(self, conf: Config, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.conf = conf
-        self.pending_servers: dict[str, ServerConfig] = {}
+        self.pending_servers: dict[str, ServerSettings] = {}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
         self.checkboxes = dict(
@@ -82,13 +82,13 @@ class PreferencesDialog(QDialog):
             self.store_edited_server(url, server_config)
             self.ui.cctrayPathList.model().setData(index, server_config.url)
 
-    def open_server_dialog(self, url: str | None) -> ServerConfig | None:
+    def open_server_dialog(self, url: str | None) -> ServerSettings | None:
         dialog = ServerConfigurationDialog(url, self.conf, self)
         server_config = dialog.open()
         dialog.deleteLater()
         return server_config
 
-    def store_edited_server(self, url: str, server_config: ServerConfig):
+    def store_edited_server(self, url: str, server_config: ServerSettings):
         self.pending_servers.pop(url, None)
         self.pending_servers[server_config.url] = server_config
 
