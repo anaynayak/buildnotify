@@ -36,9 +36,8 @@ def fixture(name: str, status: int = 200, **headers: str) -> Response:
 
 def github(**fields) -> ServerSettings:
     fields.setdefault("password", "ghp_token")
-    return ServerSettings(
-        "", kind=SourceKind.GITHUB, repository=REPO, authentication_type=ServerSettings.AUTH_BEARER_TOKEN, **fields
-    )
+    fields.setdefault("repository", REPO)
+    return ServerSettings("", kind=SourceKind.GITHUB, authentication_type=ServerSettings.AUTH_BEARER_TOKEN, **fields)
 
 
 def source(api, server=None, limits=None, **kwargs) -> GitHubSource:
@@ -193,3 +192,26 @@ def test_should_back_off_a_minute_on_a_rate_limit_without_headers(response):
     now[0] = NOW + timedelta(seconds=61)
 
     assert len(source(api, limits=limits).fetch()) == 7
+
+
+def test_should_share_a_rate_limit_between_repositories_on_one_token():
+    limited = fixture("rate-limited.json", 403, x_ratelimit_remaining="0", x_ratelimit_reset=str(RESET))
+    api, limits = FakeApi(limited, fixture("runs.json")), RateLimits(clock=lambda: NOW)
+
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, limits=limits).fetch()
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, github(repository="octo-org/other"), limits=limits).fetch()
+
+    assert len(source(api, github(password="ghp_other"), limits=limits).fetch()) == 7
+    assert len(api.requests) == 2
+
+
+def test_should_keep_tokens_out_of_the_rate_limit_keys():
+    limited = fixture("rate-limited.json", 403, x_ratelimit_remaining="0", x_ratelimit_reset=str(RESET))
+    limits = RateLimits(clock=lambda: NOW)
+
+    with pytest.raises(FetchError):
+        source(FakeApi(limited), limits=limits).fetch()
+
+    assert not any("ghp_token" in key for key in limits.until)

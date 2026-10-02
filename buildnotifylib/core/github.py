@@ -1,5 +1,6 @@
 """GitHub Actions as a Source: the latest workflow run per workflow and branch becomes a Project."""
 
+import hashlib
 import json
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime, timedelta
@@ -42,7 +43,7 @@ class RateLimited(FetchError):
 
 
 class RateLimits:
-    """Remembers, per server, when GitHub said to call again, so polls before then make no request."""
+    """Remembers, per token, when GitHub said to call again, so polls before then make no request."""
 
     def __init__(self, clock: Clock = lambda: datetime.now(UTC)):
         self.clock = clock
@@ -90,7 +91,7 @@ class GitHubSource:
         self.apply_excludes = apply_excludes
 
     def fetch(self) -> list[Project]:
-        self.rate_limits.check(self.server.url)
+        self.rate_limits.check(self.rate_key())
         response = self.connection.request(self.runs_url(), self.timeout, self.headers(), self.verify())
         self.raise_for_status(response)
         projects = [self.to_project(runs) for runs in group(self.filtered(read_runs(response.body)))]
@@ -106,11 +107,16 @@ class GitHubSource:
         token = self.server.password
         return HEADERS | ({"Authorization": f"Bearer {token}"} if token else {})
 
+    def rate_key(self) -> str:
+        """GitHub meters by token, or by address without one. The key holds a digest, never the token."""
+        token = self.server.password
+        return f"{API} " + (hashlib.sha256(token.encode()).hexdigest() if token else "anonymous")
+
     def verify(self) -> bool:
         return not self.server.skip_ssl_verification
 
     def raise_for_status(self, response: Response) -> None:
-        until = self.rate_limits.record(self.server.url, response)
+        until = self.rate_limits.record(self.rate_key(), response)
         if response.status == 200:
             return
         if until is not None and response.status in LIMITED:

@@ -2,7 +2,7 @@
 
 ### Added
 - Unavailable servers get a menu row with their last error and when it happened
-- GitHub Actions servers: pick "GitHub Actions" in the server dialog and enter a repository, with optional workflow and branch filters. The latest run of each workflow and branch shows as a project. The token stays in the system keyring, and BuildNotify waits out GitHub's rate limits
+- GitHub Actions servers: pick "GitHub Actions" in the server dialog and enter a repository, with optional workflow and branch filters. The latest run of each workflow and branch shows as a project. The token stays in the system keyring, and BuildNotify waits out GitHub's rate limits on every server that uses the same token
 - Settings move to schema version 4, which gives each server a source type. Existing servers become cctray feeds
 - Mute a server or a project from the tray menu's `Mute` submenu, or pause all notifications for an hour. Muted projects stay in the menu and the tray count, marked `(muted)`, but get no notifications and don't run the custom script. Mutes and the pause survive a restart
 - Settings move to schema version 5, which adds a muted flag to each server. Existing servers start unmuted
