@@ -1,16 +1,23 @@
 import unittest
 
-from PyQt5 import QtCore
+import pytest
 
 from buildnotifylib.config import Config, Preferences
 from buildnotifylib.serverconfig import ServerConfig
 
 
 class ConfigTest(unittest.TestCase):
-    def setUp(self):
-        q_settings = QtCore.QSettings("BuildNotifyTest", "BuildNotifyTest")
-        q_settings.clear()
-        self.config = Config(q_settings)
+    @pytest.fixture(autouse=True)
+    def _config(self, qsettings, tmp_path):
+        self.q_settings = qsettings
+        self.tmp_path = tmp_path
+        self.config = Config(qsettings)
+
+    def test_should_keep_settings_under_tmp_path(self):
+        self.config.set_interval_in_seconds(300)
+        self.q_settings.sync()
+        self.assertEqual(str(self.tmp_path / 'settings.ini'), self.q_settings.fileName())
+        self.assertTrue((self.tmp_path / 'settings.ini').exists())
 
     def test_should_persist_user_project_excludes(self):
         self.config.set_project_excludes('https://github.com/anaynayak/buildnotify/cctray.xml',
