@@ -9,7 +9,6 @@ from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.project_status_notification import (
     ProjectStatusNotification,
-    TimedProjectFilter,
     substitute_placeholders,
 )
 from test.fake_conf import ConfigBuilder
@@ -198,30 +197,6 @@ def test_should_leave_escaped_placeholder_alone():
 
 if __name__ == "__main__":
     unittest.main()
-
-
-def test_should_back_off_repeated_connectivity_notifications():
-    timed_filter = TimedProjectFilter()
-
-    shown = [timed_filter.filter(["url"]) == ["url"] for _ in range(8)]
-
-    assert shown == [True, True, True, False, True, False, False, True]
-
-
-def test_should_not_share_back_off_state_between_filters():
-    TimedProjectFilter().filter(["url"])
-
-    assert TimedProjectFilter().map == {}
-
-
-def test_should_reset_back_off_when_server_recovers():
-    timed_filter = TimedProjectFilter()
-    for _ in range(3):
-        timed_filter.filter(["url"])
-
-    timed_filter.filter([])
-
-    assert timed_filter.filter(["url"]) == ["url"]
 
 
 def _unavailable_status():

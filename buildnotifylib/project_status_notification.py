@@ -2,11 +2,10 @@ import os
 import re
 import shlex
 import subprocess
-from datetime import datetime
-from typing import Optional
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.core.diff import Change, Event, diff, labels
 from buildnotifylib.notifications import Notification
 
@@ -18,13 +17,13 @@ class ProjectStatusNotification:
         old_integration_status: OverallIntegrationStatus,
         current_integration_status: OverallIntegrationStatus,
         notification: Notification,
-        timed_project_filter: Optional["TimedProjectFilter"] = None,
+        backoff: Backoff | None = None,
     ):
         self.config = config
         self.old_integration_status = old_integration_status
         self.current_integration_status = current_integration_status
         self.notification = notification
-        self.timed_project_filter = timed_project_filter or TimedProjectFilter()
+        self.backoff = backoff or Backoff()
 
     def show_notifications(self):
         events = diff(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
@@ -41,7 +40,8 @@ class ProjectStatusNotification:
 
     def unavailable_server_urls(self) -> list[str]:
         urls = [server.url for server in self.current_integration_status.unavailable_servers()]
-        return self.timed_project_filter.filter(urls)
+        self.backoff, shown = self.backoff.advance(urls)
+        return shown
 
     def show_notification_msg(self, show_notification: bool, builds: list[str], message: str):
         if show_notification is False or builds == []:
@@ -76,25 +76,3 @@ def next_shell_state(token: str, quote: str, escaped: bool) -> tuple[str, bool]:
     if token in ('"', "'") and quote in ("", token):
         return ("" if quote else token), False
     return quote, False
-
-
-class TimedProjectFilter:
-    fact = [1, 2, 3, 5, 8, 13, 21]
-
-    def __init__(self):
-        self.map: dict[str, tuple[datetime, int]] = {}
-
-    def filter(self, urls: list[str]) -> list[str]:
-        self.map = {url: state for url, state in self.map.items() if url in urls}
-        return [url for url in urls if self.is_new(url)]
-
-    def is_new(self, url: str) -> bool:
-        if url not in self.map:
-            self.map[url] = (datetime.now(), 1)
-            return True
-        connection_time, fail_count = self.map[url]
-        fail_count += 1
-        if self.fact[len(self.fact) - 1] <= fail_count:
-            fail_count = 1
-        self.map[url] = (connection_time, fail_count)
-        return fail_count in self.fact

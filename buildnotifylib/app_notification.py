@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import QSystemTrayIcon
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.notifications import Notification
-from buildnotifylib.project_status_notification import ProjectStatusNotification, TimedProjectFilter
+from buildnotifylib.project_status_notification import ProjectStatusNotification
 
 
 class AppNotification:
@@ -11,15 +12,13 @@ class AppNotification:
         self.config = config
         self.notification = Notification(widget)
         self.integration_status: OverallIntegrationStatus | None = None
-        self.timed_project_filter = TimedProjectFilter()
+        self.backoff = Backoff()
 
     def update_projects(self, new_integration_status: OverallIntegrationStatus):
         if self.integration_status is not None:
-            ProjectStatusNotification(
-                self.config,
-                self.integration_status,
-                new_integration_status,
-                self.notification,
-                self.timed_project_filter,
-            ).show_notifications()
+            notifier = ProjectStatusNotification(
+                self.config, self.integration_status, new_integration_status, self.notification, self.backoff
+            )
+            notifier.show_notifications()
+            self.backoff = notifier.backoff
         self.integration_status = new_integration_status
