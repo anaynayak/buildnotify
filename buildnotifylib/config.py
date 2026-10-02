@@ -1,4 +1,3 @@
-from typing import List
 
 from PyQt5 import QtCore
 
@@ -6,7 +5,7 @@ from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.serverconfig import ServerConfig
 
 
-class Preferences(object):
+class Preferences:
     def __init__(self, urls, interval, custom_script_text, custom_script_checked,
                  sort_by_build_time, sort_by_name, selections, show_last_build_label):
         self.urls = urls
@@ -19,7 +18,7 @@ class Preferences(object):
         self.show_last_build_label = show_last_build_label
 
 
-class Config(object):
+class Config:
     default_options = dict(successfulBuild=False, brokenBuild=True,
                            fixedBuild=True, stillFailingBuild=True,
                            connectivityIssues=True,
@@ -65,13 +64,13 @@ class Config(object):
         urls.append(url)
         self.update_urls(urls)
 
-    def update_urls(self, urls: List[str]):
+    def update_urls(self, urls: list[str]):
         removed = [url for url in self.get_urls() if url not in urls]
         self.settings.setValue(self.CONNECTION_URLS, urls)
         for url in removed:
             self.remove_server(url, urls)
 
-    def remove_server(self, url: str, remaining_urls: List[str]):
+    def remove_server(self, url: str, remaining_urls: list[str]):
         username = self.get_username(url)
         if self.uses_keyring(username, self.get_authorization_type(url)):
             self.keystore.delete(url, username)
@@ -80,7 +79,7 @@ class Config(object):
         for key in self.SERVER_KEYS:
             self.settings.remove(key % url)
 
-    def get_urls(self) -> List[str]:
+    def get_urls(self) -> list[str]:
         return [str(url) for url in
                 self.settings.value(self.CONNECTION_URLS, [])]
 
@@ -113,10 +112,10 @@ class Config(object):
     def get_display_prefix(self, url: str) -> str:
         return self.settings.value(self.DISPLAY_PREFIX % url, type=str)
 
-    def set_project_excludes(self, url: str, excluded_project_names: List[str]):
+    def set_project_excludes(self, url: str, excluded_project_names: list[str]):
         self.settings.setValue(self.EXCLUDES % url, excluded_project_names)
 
-    def get_project_excludes(self, url: str) -> List[str]:
+    def get_project_excludes(self, url: str) -> list[str]:
         return self.settings.value(self.EXCLUDES % url, [], type=str)
 
     def set_custom_script(self, user_script: str):
@@ -206,7 +205,7 @@ class Config(object):
         return ServerConfig(url, self.get_project_excludes(url), self.get_timezone(url), self.get_display_prefix(url),
                             username, password, self.get_skip_ssl_verification(url), authentication_type)
 
-    def get_server_configs(self) -> List[ServerConfig]:
+    def get_server_configs(self) -> list[ServerConfig]:
         return [self.get_server_config(url) for url in self.get_urls()]
 
     def update_preferences(self, preferences: Preferences):

@@ -1,7 +1,7 @@
 from buildnotifylib.config import Config
 
 
-class FakeSettings(object):
+class FakeSettings:
     def __init__(self, settings=None):
         if settings is None:
             settings = {}
@@ -17,7 +17,7 @@ class FakeSettings(object):
         return self.settings.get(key, fallback)
 
 
-class ConfigBuilder(object):
+class ConfigBuilder:
     def __init__(self, overrides=None):
         if overrides is None:
             overrides = {}

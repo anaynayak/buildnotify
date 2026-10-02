@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Optional
 
 
-class DistanceOfTime(object):
-    def __init__(self, from_date: datetime, now: Optional[datetime] = None):
+class DistanceOfTime:
+    def __init__(self, from_date: datetime, now: datetime | None = None):
         self.from_date = from_date
         self.now = now
 

@@ -1,18 +1,17 @@
-from typing import Optional
 
 from PyQt5.QtWidgets import QWidget
-from buildnotifylib.core.projects import OverallIntegrationStatus
 
 from buildnotifylib.config import Config
+from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.notifications import Notification
 from buildnotifylib.project_status_notification import ProjectStatusNotification, TimedProjectFilter
 
 
-class AppNotification(object):
+class AppNotification:
     def __init__(self, config: Config, widget: QWidget):
         self.config = config
         self.notification = Notification(widget)
-        self.integration_status: Optional[OverallIntegrationStatus] = None
+        self.integration_status: OverallIntegrationStatus | None = None
         self.timed_project_filter = TimedProjectFilter()
 
     def update_projects(self, new_integration_status: OverallIntegrationStatus):

@@ -1,4 +1,5 @@
 import pytest
+
 from buildnotifylib.build_icons import BuildIcons
 
 

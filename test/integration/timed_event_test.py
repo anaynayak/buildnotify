@@ -5,7 +5,7 @@ from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 from buildnotifylib.core.timed_event import TimedEvent
 
 
-class TargetTimedEvent(object):
+class TargetTimedEvent:
     def __init__(self):
         pass
 

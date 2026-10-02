@@ -1,18 +1,18 @@
 import os
 import sys
 
-from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.config import Config
-from buildnotifylib.core.projects import ProjectsPopulator, OverallIntegrationStatus
-from buildnotifylib.core.timed_event import TimedEvent
+from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectsPopulator
 from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
+from buildnotifylib.core.timed_event import TimedEvent
 
 
-class BuildNotify(object):
+class BuildNotify:
     TRAY_RETRIES = 5
     EXIT_WAIT_MS = 2000
 

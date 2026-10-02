@@ -1,4 +1,3 @@
-from typing import Optional
 
 
 class FakeKeyring:
@@ -24,7 +23,7 @@ except ImportError:
     keyring = FakeKeyring()
 
 
-class Keystore(object):
+class Keystore:
     @staticmethod
     def is_available() -> bool:
         if isinstance(keyring, FakeKeyring):
@@ -39,7 +38,7 @@ class Keystore(object):
             pass
 
     @staticmethod
-    def load(url: str, username: str) -> Optional[str]:
+    def load(url: str, username: str) -> str | None:
         try:
             return keyring.get_password(url, username)
         except KeyringError:

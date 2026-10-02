@@ -4,10 +4,10 @@ import pytest
 import requests_mock
 from PyQt5.QtCore import QThread
 
+from buildnotifylib.core.projects import ProjectLoader, ProjectsPopulator
+from buildnotifylib.project_status_notification import ProjectStatus
 from test.fake_conf import ConfigBuilder
 from test.utils import fake_content
-from buildnotifylib.core.projects import ProjectsPopulator, ProjectLoader
-from buildnotifylib.project_status_notification import ProjectStatus
 
 URL = 'http://localhost:8080/cc.xml'
 

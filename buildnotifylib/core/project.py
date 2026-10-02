@@ -1,5 +1,4 @@
 from datetime import datetime, tzinfo
-from typing import Dict, Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from buildnotifylib.config import Config
@@ -8,8 +7,8 @@ from buildnotifylib.serverconfig import ServerConfig
 FAILURE_STATUSES = ('Failure', 'Exception')
 
 
-class Project(object):
-    def __init__(self, server_url: str, prefix: str, timezone: str, props: Dict[str, str]):
+class Project:
+    def __init__(self, server_url: str, prefix: str, timezone: str, props: dict[str, str]):
         self.server_url = server_url
         self.prefix = prefix
         self.timezone = timezone
@@ -43,11 +42,11 @@ class Project(object):
     def matches(self, other: 'Project') -> bool:
         return other.name == self.name and other.server_url == self.server_url
 
-    def get_last_build_time(self) -> Optional[datetime]:
+    def get_last_build_time(self) -> datetime | None:
         return self.build_time
 
 
-def server_zone(timezone: str) -> Optional[tzinfo]:
+def server_zone(timezone: str) -> tzinfo | None:
     if timezone == Config.NONE_TIMEZONE:
         return None
     try:
@@ -56,7 +55,7 @@ def server_zone(timezone: str) -> Optional[tzinfo]:
         return None
 
 
-def parse_build_time(value: str, timezone: str) -> Optional[datetime]:
+def parse_build_time(value: str, timezone: str) -> datetime | None:
     try:
         date = datetime.fromisoformat(value)
     except (TypeError, ValueError):

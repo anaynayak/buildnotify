@@ -1,10 +1,10 @@
-from typing import Callable
+from collections.abc import Callable
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject
 
 
-class TimedEvent(object):
+class TimedEvent:
     def __init__(self, parent: QObject, event_target: Callable, interval=2000):
         self.event_target = event_target
         self.parent = parent

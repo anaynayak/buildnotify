@@ -1,4 +1,3 @@
-from typing import Optional
 from zoneinfo import available_timezones
 
 from PyQt5 import QtGui
@@ -16,7 +15,7 @@ from buildnotifylib.serverconfig import ServerConfig
 
 
 class ServerConfigurationDialog(QDialog):
-    def __init__(self, url: Optional[str], conf: Config, parent: QWidget = None):
+    def __init__(self, url: str | None, conf: Config, parent: QWidget = None):
         QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
@@ -83,7 +82,7 @@ class ServerConfigurationDialog(QDialog):
         self.event.completed.connect(self.load_data)
         self.event.start()
 
-    def url_error(self) -> Optional[str]:
+    def url_error(self) -> str | None:
         url = self.ui.addServerUrl.text()
         if '' == url:
             return "Path field cannot be empty."
@@ -155,7 +154,7 @@ class ServerConfigurationDialog(QDialog):
                             str(self.ui.username.text()), str(self.ui.password.text()), self.skip_ssl_verification,
                             int(self.ui.authentication_type.currentIndex()))
 
-    def open(self) -> Optional[ServerConfig]:  # type: ignore
+    def open(self) -> ServerConfig | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:
             return self.get_server_config()
         return None

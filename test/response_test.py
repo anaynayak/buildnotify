@@ -1,6 +1,8 @@
 import unittest
-from buildnotifylib.core.response import Response
+
 from requests.exceptions import SSLError
+
+from buildnotifylib.core.response import Response
 
 
 class ResponseTest(unittest.TestCase):

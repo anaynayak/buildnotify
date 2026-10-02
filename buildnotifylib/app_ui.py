@@ -3,7 +3,7 @@ from time import strftime
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QWidget, QSystemTrayIcon, QApplication
+from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 
 from buildnotifylib.app_menu import AppMenu
 from buildnotifylib.build_icons import BuildIcons
@@ -15,7 +15,7 @@ class AppUi(QtCore.QObject):
     reload_data = QtCore.pyqtSignal()
 
     def __init__(self, parent: QApplication, conf: Config, build_icons: BuildIcons):
-        super(AppUi, self).__init__(parent)
+        super().__init__(parent)
         self.widget = QWidget()
         self.build_icons = build_icons
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None), self.widget)

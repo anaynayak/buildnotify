@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QSystemTrayIcon, QWidget
 
 
-class Notification(object):
+class Notification:
     def __init__(self, widget: QWidget):
         self.widget = widget
 

@@ -1,7 +1,7 @@
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui
 
 
-class BuildIcons(object):
+class BuildIcons:
     success_sleeping = 'buildnotify-success'
     success_building = 'buildnotify-success-building'
     failure_sleeping = 'buildnotify-failure'

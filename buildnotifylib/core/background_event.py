@@ -1,6 +1,7 @@
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 
 class BackgroundEvent(QThread):

@@ -10,4 +10,4 @@ def version(key='BUILD_LABEL') -> str:
 
 
 if __name__ == '__main__':
-    print((version()))
+    print(version())

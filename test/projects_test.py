@@ -3,6 +3,7 @@ import unittest
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
+
 from .project_builder import ProjectBuilder
 
 
@@ -73,7 +74,7 @@ def overall_status(*statuses):
     return OverallIntegrationStatus([ContinuousIntegrationServer("someurl", projects)])
 
 
-class MockConnection(object):
+class MockConnection:
     def __init__(self, data):
         self.data = data
 
@@ -102,7 +103,7 @@ class ProjectLoaderTest(unittest.TestCase):
     def test_should_respond_even_if_things_fail(self):
         error = Exception("something went wrong")
 
-        class FailingConnection(object):
+        class FailingConnection:
             def connect(self, server, timeout, additional_headers=None):
                 raise error
 

@@ -1,10 +1,9 @@
-from typing import Optional, List, Dict
+
 from defusedxml import minidom
-
 from PyQt5 import QtCore
-from PyQt5.QtCore import QThread, QObject
-from buildnotifylib.config import Config
+from PyQt5.QtCore import QObject, QThread
 
+from buildnotifylib.config import Config
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.filtered_continuous_integration_server import FilteredContinuousIntegrationServer
 from buildnotifylib.core.http_connection import HttpConnection
@@ -17,22 +16,22 @@ STATUS_PRIORITY = ['Failure.Building', 'Failure.Sleeping', 'Failure.CheckingModi
                    'Unknown.Building', 'Unknown.Sleeping', 'Unknown.CheckingModifications', 'Unknown.Unknown']
 
 
-class OverallIntegrationStatus(object):
-    def __init__(self, servers: List[FilteredContinuousIntegrationServer]):
+class OverallIntegrationStatus:
+    def __init__(self, servers: list[FilteredContinuousIntegrationServer]):
         self.servers = servers
 
-    def get_build_status(self) -> Optional[str]:
+    def get_build_status(self) -> str | None:
         build_status_mapping = self.to_map()
         for status in STATUS_PRIORITY:
             if build_status_mapping[status]:
                 return status
         return None
 
-    def get_failing_builds(self) -> List[Project]:
+    def get_failing_builds(self) -> list[Project]:
         return [p for p in self.get_projects() if p.effective_status() == 'Failure']
 
-    def to_map(self) -> Dict[str, List[Project]]:
-        status: Dict[str, List[Project]] = {key: [] for key in STATUS_PRIORITY}
+    def to_map(self) -> dict[str, list[Project]]:
+        status: dict[str, list[Project]] = {key: [] for key in STATUS_PRIORITY}
         for project in self.get_projects():
             if project.get_build_status() in status:
                 status[project.get_build_status()].append(project)
@@ -40,14 +39,14 @@ class OverallIntegrationStatus(object):
                 status['Unknown.Unknown'].append(project)
         return status
 
-    def get_projects(self) -> List[Project]:
+    def get_projects(self) -> list[Project]:
         all_projects = []
         for server in self.servers:
             if server.get_projects() is not None:
                 all_projects.extend(server.get_projects())
         return all_projects
 
-    def unavailable_servers(self) -> List[FilteredContinuousIntegrationServer]:
+    def unavailable_servers(self) -> list[FilteredContinuousIntegrationServer]:
         return [server for server in self.servers if server.unavailable]
 
 
@@ -57,9 +56,9 @@ class ProjectsPopulator(QThread):
     def __init__(self, config: Config, parent: QObject = None):
         QThread.__init__(self, parent)
         self.config = config
-        self.server_configs: List[ServerConfig] = []
-        self.timeout: Optional[float] = None
-        self.last_known: Dict[str, List[Project]] = {}
+        self.server_configs: list[ServerConfig] = []
+        self.timeout: float | None = None
+        self.last_known: dict[str, list[Project]] = {}
         self.reload_pending = False
         self.finished.connect(self.on_finished)
 
@@ -79,7 +78,7 @@ class ProjectsPopulator(QThread):
             self.reload_pending = False
             self.load_from_server()
 
-    def process(self, server_configs: List[ServerConfig]):
+    def process(self, server_configs: list[ServerConfig]):
         overall_status = []
         for server_config in server_configs:
             overall_status.append(self.check_nodes(server_config))
@@ -99,8 +98,8 @@ class ProjectsPopulator(QThread):
         return server
 
 
-class ProjectLoader(object):
-    def __init__(self, server_config: ServerConfig, timeout: Optional[float], connection=HttpConnection()):
+class ProjectLoader:
+    def __init__(self, server_config: ServerConfig, timeout: float | None, connection=HttpConnection()):
         self.server_config = server_config
         self.timeout = timeout
         self.connection = connection
@@ -120,7 +119,7 @@ class ProjectLoader(object):
         print("processed %s" % self.server_config.url)
         return Response(ContinuousIntegrationServer(self.server_config.url, projects))
 
-    def parse(self, data) -> List[Project]:
+    def parse(self, data) -> list[Project]:
         dom = minidom.parseString(data)
         root = dom.documentElement.tagName
         if root != 'Projects':

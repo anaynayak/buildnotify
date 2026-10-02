@@ -1,17 +1,14 @@
 import webbrowser
 from functools import partial
-from typing import List, Callable, Tuple
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox, QAction, QMenu, QWidget, QApplication
-from buildnotifylib.core.project import Project
+from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.build_icons import BuildIcons
-
 from buildnotifylib.config import Config
-
 from buildnotifylib.core.distance_of_time import DistanceOfTime
+from buildnotifylib.core.project import Project
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
 
@@ -20,26 +17,26 @@ class AppMenu(QtCore.QObject):
     reload_data = QtCore.pyqtSignal()
 
     def __init__(self, widget: QWidget, conf: Config, build_icons: BuildIcons):
-        super(AppMenu, self).__init__(widget)
+        super().__init__(widget)
         self.menu = QMenu(widget)
         self.conf = conf
         self.build_icons = build_icons
         self.create_default_menu_items()
 
-    def update(self, projects: List[Project]):
+    def update(self, projects: list[Project]):
         self.menu.clear()
         for project in self.sorted_projects(projects):
             icon = self.build_icons.for_status(project.get_build_status())
             self.create_menu_item(project, icon)
         self.create_default_menu_items()
 
-    def sorted_projects(self, projects: List[Project]) -> List[Project]:
+    def sorted_projects(self, projects: list[Project]) -> list[Project]:
         if self.conf.get_sort_by_name():
             return sorted(projects, key=lambda p: p.label())
         return sorted(projects, key=self.build_time_key, reverse=True)
 
     @staticmethod
-    def build_time_key(project: Project) -> Tuple[bool, float]:
+    def build_time_key(project: Project) -> tuple[bool, float]:
         build_time = project.get_last_build_time()
         if build_time is None:
             return False, 0.0

@@ -4,10 +4,15 @@ import unittest
 
 import pytest
 
+from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus
-from buildnotifylib.app_notification import AppNotification
-from buildnotifylib.project_status_notification import substitute_placeholders, ProjectStatus, ProjectStatusNotification, TimedProjectFilter
+from buildnotifylib.project_status_notification import (
+    ProjectStatus,
+    ProjectStatusNotification,
+    TimedProjectFilter,
+    substitute_placeholders,
+)
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 
@@ -184,7 +189,7 @@ def test_should_return_notifications(mocker):
     old = OverallIntegrationStatus([ContinuousIntegrationServer('url', old_projects)])
     new = OverallIntegrationStatus([ContinuousIntegrationServer('url', new_projects)])
 
-    class NotificationFake(object):
+    class NotificationFake:
         def __init__(self):
             pass
 
@@ -201,7 +206,7 @@ def test_should_return_notifications(mocker):
 
 
 
-class _SilentNotification(object):
+class _SilentNotification:
     def show_message(self, title, message):
         pass
 
@@ -247,7 +252,7 @@ def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
     mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen',
                  side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)))
 
-    script = 'printf %s #projects# > {out}; printf %s "$BUILDNOTIFY_PROJECTS" >> {out}'.format(out=output)
+    script = f'printf %s #projects# > {output}; printf %s "$BUILDNOTIFY_PROJECTS" >> {output}'
     _broken_build_notification(script, name).show_notifications()
     for process in processes:
         process.wait(timeout=10)
@@ -267,7 +272,7 @@ def test_should_not_execute_malicious_project_name_in_quoted_placeholder(mocker,
     mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen',
                  side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)))
 
-    _broken_build_notification('printf %s {t} > {out}'.format(t=template, out=output), name).show_notifications()
+    _broken_build_notification(f'printf %s {template} > {output}', name).show_notifications()
     for process in processes:
         process.wait(timeout=10)
 

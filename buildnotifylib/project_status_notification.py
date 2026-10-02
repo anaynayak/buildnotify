@@ -2,8 +2,9 @@ import os
 import re
 import shlex
 import subprocess
+from collections.abc import Callable
 from datetime import datetime
-from typing import Optional, Callable, List, Dict, Tuple
+from typing import Optional
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.project import Project
@@ -11,7 +12,7 @@ from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.notifications import Notification
 
 
-class ProjectStatusNotification(object):
+class ProjectStatusNotification:
     def __init__(self, config: Config, old_integration_status: OverallIntegrationStatus,
                  current_integration_status: OverallIntegrationStatus, notification: Notification,
                  timed_project_filter: Optional['TimedProjectFilter'] = None):
@@ -36,11 +37,11 @@ class ProjectStatusNotification(object):
         self.show_notification_msg(self.config.get_value("successfulBuild"),
                                    project_status.still_successful_builds(), "Yet another successful build")
 
-    def unavailable_server_urls(self) -> List[str]:
+    def unavailable_server_urls(self) -> list[str]:
         urls = [server.url for server in self.current_integration_status.unavailable_servers()]
         return self.timed_project_filter.filter(urls)
 
-    def show_notification_msg(self, show_notification: bool, builds: List[str], message: str):
+    def show_notification_msg(self, show_notification: bool, builds: list[str], message: str):
         if show_notification is False or builds == []:
             return
         self.notification.show_message(message, "\n".join(builds))
@@ -57,7 +58,7 @@ class ProjectStatusNotification(object):
 PLACEHOLDER_TOKENS = re.compile(r"#status#|#projects#|.", re.DOTALL)
 
 
-def substitute_placeholders(script: str, values: Dict[str, str]) -> str:
+def substitute_placeholders(script: str, values: dict[str, str]) -> str:
     parts, quote, escaped = [], '', False
     for token in PLACEHOLDER_TOKENS.findall(script):
         replace = token in values and not escaped
@@ -66,7 +67,7 @@ def substitute_placeholders(script: str, values: Dict[str, str]) -> str:
     return ''.join(parts)
 
 
-def next_shell_state(token: str, quote: str, escaped: bool) -> Tuple[str, bool]:
+def next_shell_state(token: str, quote: str, escaped: bool) -> tuple[str, bool]:
     if escaped or len(token) > 1:
         return quote, False
     if token == '\\' and quote != "'":
@@ -76,13 +77,13 @@ def next_shell_state(token: str, quote: str, escaped: bool) -> Tuple[str, bool]:
     return quote, False
 
 
-class TimedProjectFilter(object):
+class TimedProjectFilter:
     fact = [1, 2, 3, 5, 8, 13, 21]
 
     def __init__(self):
-        self.map: Dict[str, Tuple[datetime, int]] = {}
+        self.map: dict[str, tuple[datetime, int]] = {}
 
-    def filter(self, urls: List[str]) -> List[str]:
+    def filter(self, urls: list[str]) -> list[str]:
         self.map = {url: state for url, state in self.map.items() if url in urls}
         return [url for url in urls if self.is_new(url)]
 
@@ -98,8 +99,8 @@ class TimedProjectFilter(object):
         return fail_count in self.fact
 
 
-class ProjectTuple(object):
-    def __init__(self, current_project: Project, old_project: Optional[Project]):
+class ProjectTuple:
+    def __init__(self, current_project: Project, old_project: Project | None):
         self.current_project = current_project
         self.old_project = old_project
 
@@ -122,21 +123,21 @@ class ProjectTuple(object):
             self.old_project.effective_status() == old_status
 
 
-class ProjectStatus(object):
-    def __init__(self, old_projects: List[Project], current_projects: List[Project]):
+class ProjectStatus:
+    def __init__(self, old_projects: list[Project], current_projects: list[Project]):
         self.old_projects = old_projects
         self.current_projects = current_projects
 
-    def failing_builds(self) -> List[str]:
+    def failing_builds(self) -> list[str]:
         return self.filter_all(lambda project_tuple: project_tuple.has_failed())
 
-    def successful_builds(self) -> List[str]:
+    def successful_builds(self) -> list[str]:
         return self.filter_all(lambda project_tuple: project_tuple.has_succeeded())
 
-    def still_failing_builds(self) -> List[str]:
+    def still_failing_builds(self) -> list[str]:
         return self.filter_all(lambda project_tuple: project_tuple.has_been_failing())
 
-    def still_successful_builds(self) -> List[str]:
+    def still_successful_builds(self) -> list[str]:
         return self.filter_all(lambda project_tuple: project_tuple.has_been_successful())
 
     def filter_all(self, filter_fn: Callable[[ProjectTuple], bool]):

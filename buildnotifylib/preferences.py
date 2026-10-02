@@ -1,4 +1,3 @@
-from typing import Dict, Optional, List, Tuple
 
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
@@ -13,7 +12,7 @@ class PreferencesDialog(QDialog):
     def __init__(self, conf: Config, parent: QWidget = None):
         QDialog.__init__(self, parent)
         self.conf = conf
-        self.added_servers: Dict[str, ServerConfig] = {}
+        self.added_servers: dict[str, ServerConfig] = {}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
         self.checkboxes = dict(successfulBuild=self.ui.successfulBuildsCheckbox,
@@ -81,7 +80,7 @@ class PreferencesDialog(QDialog):
             self.store_edited_server(url, server_config)
             self.ui.cctrayPathList.model().setData(index, server_config.url)
 
-    def open_server_dialog(self, url: Optional[str]) -> Optional[ServerConfig]:
+    def open_server_dialog(self, url: str | None) -> ServerConfig | None:
         dialog = ServerConfigurationDialog(url, self.conf, self)
         server_config = dialog.open()
         dialog.deleteLater()
@@ -93,16 +92,16 @@ class PreferencesDialog(QDialog):
         else:
             self.conf.save_server_config(server_config)
 
-    def get_urls(self) -> List[str]:
+    def get_urls(self) -> list[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
 
     def get_interval_in_seconds(self) -> int:
         return self.ui.pollingIntervalSpinBox.value()
 
-    def get_selections(self) -> List[Tuple[str, bool]]:
+    def get_selections(self) -> list[tuple[str, bool]]:
         return [(key, checkbox.isChecked()) for (key, checkbox) in list(self.checkboxes.items())]
 
-    def open(self) -> Optional[Preferences]:  # type: ignore
+    def open(self) -> Preferences | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:
             self.save_added_servers()
             return Preferences(

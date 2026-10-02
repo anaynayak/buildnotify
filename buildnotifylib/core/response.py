@@ -1,8 +1,9 @@
-from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from requests.exceptions import SSLError
 
+from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 
-class Response(object):
+
+class Response:
     def __init__(self, server: ContinuousIntegrationServer, error: Exception = None):
         self.server = server
         self.error = error
