@@ -11,7 +11,7 @@ class PreferencesDialog(QDialog):
     def __init__(self, conf: Config, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.conf = conf
-        self.added_servers: dict[str, ServerConfig] = {}
+        self.pending_servers: dict[str, ServerConfig] = {}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
         self.checkboxes = dict(
@@ -54,13 +54,13 @@ class PreferencesDialog(QDialog):
         server_config = self.open_server_dialog(None)
         if server_config is None or server_config.url in self.get_urls():
             return
-        self.added_servers[server_config.url] = server_config
+        self.pending_servers[server_config.url] = server_config
         urls = self.ui.cctrayPathList.model().stringList()
         urls.append(server_config.url)
         self.ui.cctrayPathList.setModel(QStringListModel(urls))
 
-    def save_added_servers(self):
-        for url, server_config in self.added_servers.items():
+    def save_pending_servers(self):
+        for url, server_config in self.pending_servers.items():
             if url in self.get_urls():
                 self.conf.save_server_config(server_config)
 
@@ -89,10 +89,8 @@ class PreferencesDialog(QDialog):
         return server_config
 
     def store_edited_server(self, url: str, server_config: ServerConfig):
-        if self.added_servers.pop(url, None) is not None:
-            self.added_servers[server_config.url] = server_config
-        else:
-            self.conf.save_server_config(server_config)
+        self.pending_servers.pop(url, None)
+        self.pending_servers[server_config.url] = server_config
 
     def get_urls(self) -> list[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
@@ -105,7 +103,7 @@ class PreferencesDialog(QDialog):
 
     def open(self) -> Preferences | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:
-            self.save_added_servers()
+            self.save_pending_servers()
             return Preferences(
                 urls=self.get_urls(),
                 interval=self.get_interval_in_seconds(),

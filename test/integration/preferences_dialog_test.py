@@ -222,3 +222,33 @@ def test_should_delete_server_dialogs_after_use(qtbot, mocker):
     dialog.configure_projects()
 
     assert delete_later.call_count == 2
+
+
+@pytest.mark.functional
+def test_should_not_save_an_edited_server_until_ok(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    select_row(dialog, 0)
+    stub_server_dialog(mocker, "http://one/cctray.xml")
+    mocker.patch.object(dialog, "exec_", return_value=QDialog.Rejected)
+
+    dialog.configure_projects()
+    dialog.open()
+
+    assert conf.get_display_prefix("http://one/cctray.xml") == ""
+
+
+@pytest.mark.functional
+def test_should_save_an_edited_server_on_ok(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    select_row(dialog, 0)
+    stub_server_dialog(mocker, "http://one/cctray.xml")
+    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+
+    dialog.configure_projects()
+    dialog.open()
+
+    assert conf.get_display_prefix("http://one/cctray.xml") == "prefix"
