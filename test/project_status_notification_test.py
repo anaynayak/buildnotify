@@ -7,7 +7,7 @@ import pytest
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.app_notification import AppNotification
-from buildnotifylib.project_status_notification import ProjectStatus, ProjectStatusNotification, TimedProjectFilter
+from buildnotifylib.project_status_notification import substitute_placeholders, ProjectStatus, ProjectStatusNotification, TimedProjectFilter
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 
@@ -254,6 +254,30 @@ def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
 
     assert not marker.exists()
     assert output.read_text() == name + name
+
+
+@pytest.mark.parametrize('template', ['"#projects#"', "'#projects#'", '"Broken: #projects#"', "'Broken: #projects#'"])
+@pytest.mark.parametrize('payload', ['$(touch {m})', '`touch {m}`', 'x"; touch {m}; "', "x'; touch {m}; '"])
+def test_should_not_execute_malicious_project_name_in_quoted_placeholder(mocker, tmp_path, template, payload):
+    marker = tmp_path / 'injected'
+    output = tmp_path / 'output'
+    name = payload.format(m=marker)
+    processes = []
+    real_popen = subprocess.Popen
+    mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen',
+                 side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)))
+
+    _broken_build_notification('printf %s {t} > {out}'.format(t=template, out=output), name).show_notifications()
+    for process in processes:
+        process.wait(timeout=10)
+
+    assert not marker.exists()
+    assert output.read_text() == template.strip('"\'').replace('#projects#', name)
+
+
+def test_should_leave_escaped_placeholder_alone():
+    assert substitute_placeholders('echo \\#projects# "\\"#projects#"', {'#projects#': 'a b'}) == \
+        'echo \\#projects# "\\""\'a b\'""'
 
 
 if __name__ == '__main__':

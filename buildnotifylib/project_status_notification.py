@@ -1,4 +1,5 @@
 import os
+import re
 import shlex
 import subprocess
 from datetime import datetime
@@ -47,10 +48,32 @@ class ProjectStatusNotification(object):
             self.run_custom_script(message, ",".join(builds))
 
     def run_custom_script(self, status: str, projects: str):
-        command = self.config.get_custom_script().replace('#status#', shlex.quote(status)) \
-            .replace('#projects#', shlex.quote(projects))
+        command = substitute_placeholders(self.config.get_custom_script(),
+                                          {'#status#': status, '#projects#': projects})
         env = dict(os.environ, BUILDNOTIFY_STATUS=status, BUILDNOTIFY_PROJECTS=projects)
         subprocess.Popen(command, shell=True, env=env)
+
+
+PLACEHOLDER_TOKENS = re.compile(r"#status#|#projects#|.", re.DOTALL)
+
+
+def substitute_placeholders(script: str, values: Dict[str, str]) -> str:
+    parts, quote, escaped = [], '', False
+    for token in PLACEHOLDER_TOKENS.findall(script):
+        replace = token in values and not escaped
+        quote, escaped = next_shell_state(token, quote, escaped)
+        parts.append(quote + shlex.quote(values[token]) + quote if replace else token)
+    return ''.join(parts)
+
+
+def next_shell_state(token: str, quote: str, escaped: bool) -> Tuple[str, bool]:
+    if escaped or len(token) > 1:
+        return quote, False
+    if token == '\\' and quote != "'":
+        return quote, True
+    if token in ('"', "'") and quote in ('', token):
+        return ('' if quote else token), False
+    return quote, False
 
 
 class TimedProjectFilter(object):
