@@ -1,5 +1,4 @@
 theme: jekyll-theme-cayman
-google_analytics: UA-106316944-1
 title: BuildNotify
 description: Buildnotify is a system tray build status notification app.
 show_downloads: true
