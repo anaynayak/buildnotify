@@ -5,6 +5,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from buildnotifylib.config import Config
 from buildnotifylib.serverconfig import ServerConfig
 
+FAILURE_STATUSES = ('Failure', 'Exception')
+
 
 class Project(object):
     def __init__(self, server_url: str, prefix: str, timezone: str, props: Dict[str, str]):
@@ -19,8 +21,11 @@ class Project(object):
         self.build_time = parse_build_time(self.last_build_time, timezone)
         self.last_build_label = props.get('lastBuildLabel', None)
 
+    def effective_status(self) -> str:
+        return 'Failure' if self.status in FAILURE_STATUSES else self.status
+
     def get_build_status(self) -> str:
-        return self.status + "." + self.activity
+        return self.effective_status() + "." + self.activity
 
     def label(self, show_last_build_label: bool = False) -> str:
         label = self.name

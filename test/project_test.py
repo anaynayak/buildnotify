@@ -35,6 +35,16 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(datetime.datetime(2009, 5, 29, 13, 54, 7).astimezone(), project.get_last_build_time())
         self.assertEqual("Success.Sleeping", project.get_build_status())
 
+    def test_should_report_exception_as_failure_build_status(self):
+        project = Project('url', None, 'None', {
+            'name': 'proj1',
+            'lastBuildStatus': 'Exception',
+            'activity': 'Building',
+            'url': 'someurl',
+            'lastBuildTime': ''})
+        self.assertEqual('Exception', project.status)
+        self.assertEqual('Failure.Building', project.get_build_status())
+
     def test_should_display_last_build_label_on_demand(self):
         project = Project('url', None, 'None', {
             'name': 'proj1',

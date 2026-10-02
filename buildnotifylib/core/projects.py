@@ -13,7 +13,8 @@ from buildnotifylib.core.response import Response
 from buildnotifylib.serverconfig import ServerConfig
 
 STATUS_PRIORITY = ['Failure.Building', 'Failure.Sleeping', 'Failure.CheckingModifications',
-                   'Success.Building', 'Success.Sleeping', 'Success.CheckingModifications']
+                   'Success.Building', 'Success.Sleeping', 'Success.CheckingModifications',
+                   'Unknown.Building', 'Unknown.Sleeping', 'Unknown.CheckingModifications', 'Unknown.Unknown']
 
 
 class OverallIntegrationStatus(object):
@@ -28,14 +29,10 @@ class OverallIntegrationStatus(object):
         return None
 
     def get_failing_builds(self) -> List[Project]:
-        return [p for p in self.get_projects() if p.status == 'Failure']
+        return [p for p in self.get_projects() if p.effective_status() == 'Failure']
 
     def to_map(self) -> Dict[str, List[Project]]:
-        status: Dict[str, List[Project]] = dict(
-            [('Success.Sleeping', []), ('Success.Building', []), ('Failure.CheckingModifications', []),
-             ('Success.CheckingModifications', []), ('Failure.Sleeping', []), ('Failure.Building', []),
-             ('Unknown.Building', []), ('Unknown.CheckingModifications', []), ('Unknown.Sleeping', []),
-             ('Unknown.Unknown', [])])
+        status: Dict[str, List[Project]] = {key: [] for key in STATUS_PRIORITY}
         for project in self.get_projects():
             if project.get_build_status() in status:
                 status[project.get_build_status()].append(project)

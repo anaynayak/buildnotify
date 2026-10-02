@@ -42,6 +42,19 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertEqual(1, len(successful_builds))
         self.assertEqual("proj1", successful_builds[0])
 
+    def test_should_treat_exception_as_failure(self):
+        def project(status, label):
+            return ProjectBuilder({'name': 'proj1', 'lastBuildStatus': status, 'activity': 'Sleeping',
+                                   'url': 'someurl', 'lastBuildLabel': label,
+                                   'lastBuildTime': '2009-05-29T13:54:07'}).build()
+
+        self.assertEqual(["proj1"], ProjectStatusTest.build([project('Success', '1')],
+                                                            [project('Exception', '2')]).failing_builds())
+        self.assertEqual(["proj1"], ProjectStatusTest.build([project('Exception', '1')],
+                                                            [project('Success', '2')]).successful_builds())
+        self.assertEqual(["proj1"], ProjectStatusTest.build([project('Failure', '1')],
+                                                            [project('Exception', '2')]).still_failing_builds())
+
     def test_should_identify_still_failing_builds(self):
         old_projects = [
             ProjectBuilder(

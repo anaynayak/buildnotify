@@ -42,6 +42,25 @@ class OverallIntegrationStatusTest(unittest.TestCase):
         self.assertEqual('Success.Building', overall_status(
             ('Success', 'CheckingModifications'), ('Success', 'Building'), ('Success', 'Sleeping')).get_build_status())
 
+    def test_exception_should_count_as_failure(self):
+        for activity in ['Sleeping', 'Building', 'CheckingModifications']:
+            with self.subTest(activity=activity):
+                status = overall_status(('Success', 'Building'), ('Exception', activity))
+                self.assertEqual('Failure.' + activity, status.get_build_status())
+                self.assertEqual(1, len(status.get_failing_builds()))
+
+    def test_unknown_should_rank_below_success_and_failure(self):
+        self.assertEqual('Success.Sleeping', overall_status(('Unknown', 'Building'), ('Success', 'Sleeping'))
+                         .get_build_status())
+        self.assertEqual('Failure.Sleeping', overall_status(('Unknown', 'Building'), ('Failure', 'Sleeping'))
+                         .get_build_status())
+
+    def test_unknown_should_have_its_own_status(self):
+        self.assertEqual('Unknown.Building', overall_status(('Unknown', 'Sleeping'), ('Unknown', 'Building'))
+                         .get_build_status())
+        self.assertEqual('Unknown.Unknown', overall_status(('Bogus', 'Sleeping')).get_build_status())
+        self.assertEqual([], overall_status(('Unknown', 'Sleeping')).get_failing_builds())
+
     def test_should_identify_failing_builds(self):
         project1 = ProjectBuilder({'name': 'a', 'lastBuildStatus': 'Success', 'activity': 'Sleeping'}).build()
         project2 = ProjectBuilder({'name': 'a', 'lastBuildStatus': 'Failure', 'activity': 'Sleeping'}).build()

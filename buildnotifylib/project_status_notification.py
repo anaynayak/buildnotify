@@ -94,7 +94,8 @@ class ProjectTuple(object):
             self.old_project)  # type: ignore
 
     def status(self, new_status: str, old_status: str) -> bool:
-        return self.current_project.status == new_status and self.old_project is not None and self.old_project.status == old_status
+        return self.current_project.effective_status() == new_status and self.old_project is not None and \
+            self.old_project.effective_status() == old_status
 
 
 class ProjectStatus(object):
