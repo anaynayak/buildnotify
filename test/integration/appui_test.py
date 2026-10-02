@@ -43,6 +43,18 @@ def test_should_list_failing_projects_in_tooltip(qtbot):
     assert widget.tray.toolTip().splitlines()[0] == "2 failing: api, web"
 
 
+@pytest.mark.functional
+def test_should_list_unavailable_servers_in_the_menu(qtbot):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    down = ServerSnapshot("http://ci/cc.xml", error=TimeoutError("Timed out"))
+
+    widget.update_projects(OverallIntegrationStatus([down, ServerSnapshot("http://up/cc.xml")]))
+
+    assert widget.app_menu.menu.actions()[0].text().startswith("ci/cc.xml: Timed out (")
+
+
 def test_should_hide_tray_when_app_is_quitting(qtbot, qapp):
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)

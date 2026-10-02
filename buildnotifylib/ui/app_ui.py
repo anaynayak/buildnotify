@@ -39,5 +39,5 @@ class AppUi(QtCore.QObject):
         status = integration_status.get_build_status()
         ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
         self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic))
-        self.app_menu.update(integration_status.get_projects())
+        self.app_menu.update(integration_status.get_projects(), integration_status.unavailable_servers())
         self.tray.setToolTip(f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}")

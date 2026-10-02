@@ -1,4 +1,5 @@
 import webbrowser
+from collections.abc import Sequence
 from datetime import datetime
 from functools import partial
 
@@ -8,7 +9,8 @@ from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import humanize
-from buildnotifylib.core.model import Project
+from buildnotifylib.core.errors import server_label, summarize
+from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import SortKey
 from buildnotifylib.ui.build_icons import BuildIcons
@@ -27,8 +29,9 @@ class AppMenu(QtCore.QObject):
         self.build_icons = build_icons
         self.create_default_menu_items()
 
-    def update(self, projects: list[Project]):
+    def update(self, projects: list[Project], unavailable: Sequence[ServerSnapshot] = ()):
         self.menu.clear()
+        self.create_error_items(unavailable)
         for project in self.sorted_projects(projects):
             icon = self.build_icons.for_status(project.get_build_status())
             self.create_menu_item(project, icon)
@@ -45,6 +48,22 @@ class AppMenu(QtCore.QObject):
         if build_time is None:
             return False, 0.0
         return True, build_time.timestamp()
+
+    def create_error_items(self, servers: Sequence[ServerSnapshot]):
+        icon = self.build_icons.for_status(None)
+        for server in servers:
+            action = self.menu.addAction(icon, self.error_label(server))
+            action.setIconVisibleInMenu(True)
+            action.setEnabled(False)
+        if servers:
+            self.menu.addSeparator()
+
+    @staticmethod
+    def error_label(server: ServerSnapshot) -> str:
+        summary = summarize(server.error) if server.error is not None else "Unavailable"
+        at = (server.error_at or datetime.now()).astimezone()
+        when = at.strftime("%H:%M" if at.date() == datetime.now().astimezone().date() else "%Y-%m-%d %H:%M")
+        return f"{server_label(server.url)}: {summary} ({when})"
 
     def create_default_menu_items(self):
         self.menu.addSeparator()

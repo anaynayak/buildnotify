@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 from PySide6.QtWidgets import QWidget
 
+from buildnotifylib.core.model import ServerSnapshot
+from buildnotifylib.core.ports import FetchError
 from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
@@ -403,3 +405,54 @@ def test_should_tell_preferences_the_keystore_is_unavailable(qtbot, mocker):
     app_menu.preferences_clicked(None)
 
     assert preferences.call_args.kwargs == {"keystore_available": False}
+
+
+@pytest.fixture
+def error_menu(qtbot):
+    parent = QWidget()
+    qtbot.addWidget(parent)
+    yield AppMenu(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+
+
+@pytest.mark.functional
+def test_should_show_a_row_with_the_last_error_and_its_time_for_an_unavailable_server(error_menu):
+    app_menu = error_menu
+    at = datetime.now().astimezone().replace(hour=9, minute=5)
+    down = ServerSnapshot(
+        "https://user:hunter2@ci.example.com/cc.xml?token=s3cret", error=FetchError("HTTP 503 Unavailable"), error_at=at
+    )
+    project1 = ProjectBuilder({"name": "Project 1", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
+
+    app_menu.update([project1], [down])
+
+    actions = app_menu.menu.actions()
+    assert [a.text() for a in actions] == [
+        "ci.example.com/cc.xml: HTTP 503 Unavailable (09:05)",
+        "",
+        "Project 1",
+        "",
+        "About",
+        "Preferences",
+        "Exit",
+    ]
+    assert not actions[0].isEnabled()
+
+
+@pytest.mark.functional
+def test_should_date_an_error_row_from_an_earlier_day(error_menu):
+    app_menu = error_menu
+    at = datetime(2026, 1, 2, 3, 4).astimezone()
+
+    app_menu.update([], [ServerSnapshot("http://ci:8080/cc.xml", error=TimeoutError("Timed out"), error_at=at)])
+
+    assert app_menu.menu.actions()[0].text() == "ci:8080/cc.xml: Timed out (2026-01-02 03:04)"
+
+
+@pytest.mark.functional
+def test_should_keep_tracebacks_out_of_the_error_row(error_menu):
+    app_menu = error_menu
+    error = RuntimeError('boom\nTraceback (most recent call last):\n  File "x.py", line 1')
+
+    app_menu.update([], [ServerSnapshot("http://ci/cc.xml", error=error)])
+
+    assert app_menu.menu.actions()[0].text().startswith("ci/cc.xml: boom (")
