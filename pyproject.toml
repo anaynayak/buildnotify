@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "BuildNotify"
+dynamic = ["version"]
+description = "Cruise Control build monitor for Windows/Linux/Mac"
+readme = "README.rst"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [{ name = "Anay Nayak", email = "anayak007@gmail.com" }]
+keywords = ["cctray", "ccmenu", "buildnotify", "ubuntu", "linux", "cruisecontrol", "continuous integration", "ci"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Software Development :: Widget Sets",
+]
+dependencies = [
+    "PyQt5>=5.15.11,<5.16",
+    "requests",
+    "keyring",
+    "defusedxml",
+    "tzdata; platform_system == 'Windows'",
+]
+
+[project.urls]
+Homepage = "https://anaynayak.github.io/buildnotify/"
+Source = "https://github.com/anaynayak/buildnotify"
+
+[project.gui-scripts]
+buildnotify = "buildnotifylib.buildnotify:BuildNotify.start"
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "pytest-qt>=4.5",
+    "pytest-cov>=7",
+    "pytest-mock>=3.15",
+    "requests-mock>=1.12",
+    "flake8==7.0.0",
+    "PyQt5-stubs==5.14.2.2",
+]
+
+[tool.hatch.version]
+path = "buildnotifylib/version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/buildnotifylib",
+    "/data",
+    "/icons",
+    "/test",
+    "/buildnotify.desktop",
+    "/buildnotify.svg",
+    "/CHANGELOG",
+    "/pytest.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["buildnotifylib"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"buildnotify.desktop" = "share/applications/buildnotify.desktop"
+"buildnotify.svg" = "share/pixmaps/buildnotify.svg"
