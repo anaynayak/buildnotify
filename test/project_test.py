@@ -2,8 +2,6 @@ import datetime
 import unittest
 from datetime import timedelta
 
-from dateutil.tz import tzlocal
-
 from buildnotifylib.core.project import Project
 
 
@@ -15,8 +13,7 @@ class ProjectTest(unittest.TestCase):
             'lastBuildStatus': 'n',
             'activity': 'o',
             'url': 'r'})
-        self.assertEqual(datetime.datetime.now().date(), project.get_last_build_time().date())
-        self.assertEqual(tzlocal(), project.get_last_build_time().tzinfo)
+        self.assertIsNone(project.get_last_build_time())
 
     def test_should_correctly_parse_project(self):
         project = Project('url', None, 'None', {
@@ -35,7 +32,7 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual('Sleeping', project.activity)
         self.assertEqual('2009-05-29T13:54:07', project.last_build_time)
         self.assertEqual('120', project.last_build_label)
-        self.assertEqual(datetime.datetime(2009, 5, 29, 13, 54, 7, 0, tzlocal()), project.get_last_build_time())
+        self.assertEqual(datetime.datetime(2009, 5, 29, 13, 54, 7).astimezone(), project.get_last_build_time())
         self.assertEqual("Success.Sleeping", project.get_build_status())
 
     def test_should_display_last_build_label_on_demand(self):
@@ -108,14 +105,38 @@ class ProjectTimezoneTest(unittest.TestCase):
         build_time = project.get_last_build_time()
         self.assertEqual(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))
-        self.assertEqual(build_time.tzinfo, tzlocal())
+        self.assertEqual(build_time, datetime.datetime(2015, 2, 14, 13, 23, 20).astimezone())
 
-    def test_should_override_timezone(self):
+    def test_should_keep_explicit_offset_when_server_timezone_is_set(self):
         project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20+05:30', 'Etc/GMT-5')
         build_time = project.get_last_build_time()
         self.assertEqual(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
                           build_time.replace(tzinfo=None))
-        self.assertEqual(build_time.utcoffset(), timedelta(hours=5, minutes=0))
+        self.assertEqual(build_time.utcoffset(), timedelta(hours=5, minutes=30))
+
+    def test_should_keep_z_suffix_when_server_timezone_is_set(self):
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:25:53Z', 'Asia/Kolkata')
+        self.assertEqual(project.get_last_build_time().utcoffset(), timedelta(0))
+
+    def test_should_apply_server_timezone_to_naive_time(self):
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20', 'Asia/Kolkata')
+        build_time = project.get_last_build_time()
+        self.assertEqual(datetime.datetime(2015, 2, 14, 13, 23, 20, 0, None),
+                          build_time.replace(tzinfo=None))
+        self.assertEqual(build_time.utcoffset(), timedelta(hours=5, minutes=30))
+
+    def test_should_apply_dst_aware_server_timezone(self):
+        project = ProjectTimezoneTest.tzproj('2015-07-14T13:23:20', 'America/New_York')
+        self.assertEqual(project.get_last_build_time().utcoffset(), timedelta(hours=-4))
+
+    def test_should_return_none_for_garbage_time(self):
+        project = ProjectTimezoneTest.tzproj('not a date', 'Asia/Kolkata')
+        self.assertIsNone(project.get_last_build_time())
+
+    def test_should_fall_back_to_local_time_for_unknown_timezone(self):
+        project = ProjectTimezoneTest.tzproj('2015-02-14T13:23:20', 'EDT')
+        build_time = project.get_last_build_time()
+        self.assertEqual(datetime.datetime(2015, 2, 14, 13, 23, 20).astimezone(), build_time)
 
 
 if __name__ == '__main__':

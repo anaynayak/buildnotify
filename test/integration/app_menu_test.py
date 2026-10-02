@@ -1,7 +1,6 @@
 import pytest
 from PyQt5.QtWidgets import QWidget
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
 from buildnotifylib.app_menu import AppMenu
 from buildnotifylib.preferences import PreferencesDialog
@@ -39,7 +38,7 @@ def test_should_suffix_build_time(qtbot):
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    one_year_ago = (datetime.now() - relativedelta(years=1, days=1)).strftime("%Y-%m-%d %H:%M:%S")
+    one_year_ago = (datetime.now() - timedelta(days=367)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'Project 1',
         'url': 'dummyurl',
@@ -64,7 +63,7 @@ def test_should_sort_by_name(qtbot):
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
+    time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'BProject',
         'url': 'dummyurl',
@@ -99,7 +98,7 @@ def test_should_add_display_prefix(qtbot):
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
+    time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'BProject',
         'url': 'dummyurl',
@@ -135,7 +134,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
-    time = (datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S")
+    time = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S")
     project1 = ProjectBuilder({
         'name': 'BProject', 'url': 'dummyurl', 'lastBuildStatus': 'Success',
         'activity': 'Sleeping', 'lastBuildTime': time
@@ -174,7 +173,7 @@ def test_should_show_recent_build_first(qtbot):
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': ((datetime.now() - relativedelta(years=1)).strftime("%Y-%m-%d %H:%M:%S"))
+        'lastBuildTime': ((datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d %H:%M:%S"))
     }).build()
 
     project2 = ProjectBuilder({
@@ -182,7 +181,7 @@ def test_should_show_recent_build_first(qtbot):
         'url': 'dummyurl',
         'lastBuildStatus': 'Success',
         'activity': 'Sleeping',
-        'lastBuildTime': ((datetime.now() - relativedelta(years=0)).strftime("%Y-%m-%d %H:%M:%S"))
+        'lastBuildTime': ((datetime.now() - timedelta(0)).strftime("%Y-%m-%d %H:%M:%S"))
     }).build()
 
     app_menu.update([project1, project2])
@@ -207,3 +206,34 @@ def test_should_show_preferences(qtbot, mocker):
     mocker.patch.object(conf, 'update_preferences')
     with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
         app_menu.preferences_clicked(None)
+
+
+@pytest.mark.functional
+def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
+    conf = ConfigBuilder({'values/lastBuildTimeForProject': True, 'sort_key': 'sort_build_time'}).build()
+    parent = QWidget()
+    app_menu = AppMenu(parent, conf, BuildIcons())
+    qtbot.addWidget(parent)
+    broken = ProjectBuilder({
+        'name': 'Broken',
+        'url': 'dummyurl',
+        'lastBuildStatus': 'Success',
+        'activity': 'Sleeping',
+        'lastBuildTime': 'garbage'
+    }).timezone('No/Such_Zone').build()
+    recent = ProjectBuilder({
+        'name': 'Recent',
+        'url': 'dummyurl',
+        'lastBuildStatus': 'Success',
+        'activity': 'Sleeping',
+        'lastBuildTime': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    }).build()
+
+    app_menu.update([broken, recent])
+
+    assert [str(a.text()) for a in app_menu.menu.actions()] == ['Recent, 1 minute ago',
+                                                                'Broken',
+                                                                "",
+                                                                "About",
+                                                                "Preferences",
+                                                                "Exit"]

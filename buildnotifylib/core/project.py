@@ -1,9 +1,6 @@
-from datetime import datetime
-from typing import Dict
-
-import pytz
-from dateutil.parser import parse
-from dateutil.tz import tzlocal
+from datetime import datetime, tzinfo
+from typing import Dict, Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from buildnotifylib.config import Config
 from buildnotifylib.serverconfig import ServerConfig
@@ -19,6 +16,7 @@ class Project(object):
         self.activity = props['activity']
         self.url = ServerConfig.cleanup(props['url'])
         self.last_build_time = props['lastBuildTime']
+        self.build_time = parse_build_time(self.last_build_time, timezone)
         self.last_build_label = props.get('lastBuildLabel', None)
 
     def get_build_status(self) -> str:
@@ -40,12 +38,27 @@ class Project(object):
     def matches(self, other: 'Project') -> bool:
         return other.name == self.name and other.server_url == self.server_url
 
-    def get_last_build_time(self) -> datetime:
-        if not self.last_build_time:
-            return datetime.now(tzlocal())
-        if self.timezone == Config.NONE_TIMEZONE:
-            date = parse(self.last_build_time)
-            if date.tzinfo is None:
-                return date.replace(tzinfo=tzlocal())
-            return date
-        return parse(self.last_build_time).replace(tzinfo=pytz.timezone(self.timezone))
+    def get_last_build_time(self) -> Optional[datetime]:
+        return self.build_time
+
+
+def server_zone(timezone: str) -> Optional[tzinfo]:
+    if timezone == Config.NONE_TIMEZONE:
+        return None
+    try:
+        return ZoneInfo(timezone)
+    except (ZoneInfoNotFoundError, ValueError):
+        return None
+
+
+def parse_build_time(value: str, timezone: str) -> Optional[datetime]:
+    try:
+        date = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+    if date.tzinfo is not None:
+        return date
+    zone = server_zone(timezone)
+    if zone is None:
+        return date.astimezone()
+    return date.replace(tzinfo=zone)

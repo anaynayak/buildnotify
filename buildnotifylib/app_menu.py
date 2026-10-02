@@ -1,7 +1,7 @@
 import sys
 import webbrowser
 from functools import partial
-from typing import List, Callable
+from typing import List, Callable, Tuple
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
@@ -37,7 +37,14 @@ class AppMenu(QtCore.QObject):
     def sorted_projects(self, projects: List[Project]) -> List[Project]:
         if self.conf.get_sort_by_name():
             return sorted(projects, key=lambda p: p.label())
-        return sorted(projects, key=lambda p: p.get_last_build_time(), reverse=True)
+        return sorted(projects, key=self.build_time_key, reverse=True)
+
+    @staticmethod
+    def build_time_key(project: Project) -> Tuple[bool, float]:
+        build_time = project.get_last_build_time()
+        if build_time is None:
+            return False, 0.0
+        return True, build_time.timestamp()
 
     def create_default_menu_items(self):
         self.menu.addSeparator()
@@ -61,8 +68,9 @@ class AppMenu(QtCore.QObject):
 
     def create_menu_item(self, project: Project, icon: QIcon):
         menu_item_label = project.label(self.conf.get_show_last_build_label())
-        if self.conf.get_value("lastBuildTimeForProject"):
-            menu_item_label = menu_item_label + ", " + DistanceOfTime(project.get_last_build_time()).age() + " ago"
+        build_time = project.get_last_build_time()
+        if self.conf.get_value("lastBuildTimeForProject") and build_time is not None:
+            menu_item_label = menu_item_label + ", " + DistanceOfTime(build_time).age() + " ago"
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)
