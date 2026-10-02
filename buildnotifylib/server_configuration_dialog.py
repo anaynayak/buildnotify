@@ -6,17 +6,25 @@ from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
 from buildnotifylib.adapters.credentials import Keystore
-from buildnotifylib.adapters.http import is_ssl_error
+from buildnotifylib.adapters.http import HttpConnection, is_ssl_error
 from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
+from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 
 
 class ServerConfigurationDialog(QDialog):
-    def __init__(self, server: ServerSettings | None, timeout: int, parent: QWidget | None = None):
+    def __init__(
+        self,
+        server: ServerSettings | None,
+        timeout: int,
+        parent: QWidget | None = None,
+        connection: Connection | None = None,
+    ):
         QDialog.__init__(self, parent)
+        self.connection = connection or HttpConnection()
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
 
@@ -78,7 +86,8 @@ class ServerConfigurationDialog(QDialog):
             return
 
         self.ui.loadUrlButton.setEnabled(False)
-        self.project_loader = ProjectLoader(self.get_server_config(), self.timeout, apply_excludes=False)
+        config = self.get_server_config()
+        self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
         self.event = BackgroundEvent(self.project_loader.get_data, self)
         self.event.completed.connect(self.load_data)
         self.event.start()

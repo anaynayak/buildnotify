@@ -81,11 +81,6 @@ extend-exclude = ["buildnotifylib/generated"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
 
-[tool.ruff.lint.per-file-ignores]
-# ProjectLoader's HttpConnection() default is evaluated once, so all loaders share one
-# requests.Session. Moving it into __init__ changes connection reuse; tracked separately.
-"buildnotifylib/core/projects.py" = ["B008"]
-
 [tool.mypy]
 files = ["buildnotifylib", "test"]
 exclude = ["^buildnotifylib/generated/"]

@@ -1,7 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QThread
 
-from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import cctray
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
@@ -13,9 +12,10 @@ from buildnotifylib.core.settings import ServerSettings
 class ProjectsPopulator(QThread):
     updated_projects = QtCore.pyqtSignal(object)
 
-    def __init__(self, store: SettingsStore, parent: QObject | None = None):
+    def __init__(self, store: SettingsStore, connection: Connection, parent: QObject | None = None):
         QThread.__init__(self, parent)
         self.store = store
+        self.connection = connection
         self.server_configs: list[ServerSettings] = []
         self.timeout: float | None = None
         self.last_known: dict[str, tuple[Project, ...]] = {}
@@ -48,7 +48,7 @@ class ProjectsPopulator(QThread):
         self.process(self.server_configs)
 
     def check_nodes(self, server_config: ServerSettings) -> ServerSnapshot:
-        snapshot = ProjectLoader(server_config, self.timeout).get_data()
+        snapshot = ProjectLoader(server_config, self.timeout, self.connection).get_data()
         return self.with_last_known(snapshot, server_config.excluded_projects)
 
     def with_last_known(self, snapshot: ServerSnapshot, excluded: list[str]) -> ServerSnapshot:
@@ -64,7 +64,7 @@ class ProjectLoader:
         self,
         server_config: ServerSettings,
         timeout: float | None,
-        connection: Connection = HttpConnection(),
+        connection: Connection,
         apply_excludes: bool = True,
     ):
         self.server_config = server_config

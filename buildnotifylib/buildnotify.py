@@ -4,11 +4,13 @@ import sys
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
+from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectsPopulator
 from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 from buildnotifylib.core.timed_event import TimedEvent
@@ -18,8 +20,15 @@ class BuildNotify:
     TRAY_RETRIES = 5
     EXIT_WAIT_MS = 2000
 
-    def __init__(self, app: QApplication, store: SettingsStore | None = None, interval=2000):
+    def __init__(
+        self,
+        app: QApplication,
+        store: SettingsStore | None = None,
+        interval=2000,
+        connection: Connection | None = None,
+    ):
         self.store = store if store is not None else SettingsStore(QSettings("BuildNotify", "BuildNotify"))
+        self.connection = connection or HttpConnection()
         self.build_icons = BuildIcons()
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
@@ -39,7 +48,7 @@ class BuildNotify:
         self.run_app()
 
     def run_app(self):
-        self.projects_populator = ProjectsPopulator(self.store, self.app)
+        self.projects_populator = ProjectsPopulator(self.store, self.connection, self.app)
         self.projects_populator.updated_projects.connect(self.update_projects)
         self.app_ui = AppUi(self.app, self.store, self.build_icons)
         self.app_ui.reload_data.connect(self.reload_project_data)

@@ -5,10 +5,11 @@ import pytest
 import requests_mock
 from PyQt5.QtWidgets import QWidget
 
+from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.buildnotify import BuildNotify
 from buildnotifylib.core.projects import ProjectsPopulator
 from test.fake_conf import ConfigBuilder
-from test.utils import fake_content
+from test.utils import FakeConnection, fake_content
 
 
 @pytest.mark.functional
@@ -108,7 +109,7 @@ def test_should_give_up_waiting_for_a_stuck_fetch(qapp, mocker):
     mocker.patch.object(BuildNotify, "EXIT_WAIT_MS", 50)
     b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
     release = threading.Event()
-    b.projects_populator = ProjectsPopulator(ConfigBuilder().build())
+    b.projects_populator = ProjectsPopulator(ConfigBuilder().build(), HttpConnection())
     b.projects_populator.run = lambda: release.wait() and None
     b.projects_populator.start()
 
@@ -134,3 +135,16 @@ def test_should_exit_without_cleanup_when_a_fetch_is_stuck(mocker):
 
     hard_exit.assert_called_once_with(0)
     sys_exit.assert_not_called()
+
+
+def test_should_poll_through_the_injected_connection(qapp, mocker):
+    mocker.patch("buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    mocker.patch("buildnotifylib.buildnotify.AppUi")
+    mocker.patch("buildnotifylib.buildnotify.AppNotification")
+    connection = FakeConnection(fake_content())
+    b = BuildNotify(qapp, ConfigBuilder().build(), 60000, connection=connection)
+    mocker.patch.object(b, "auto_poll")
+
+    b.run_app()
+
+    assert b.projects_populator.connection is connection

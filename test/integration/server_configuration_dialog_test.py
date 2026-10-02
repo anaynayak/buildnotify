@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMessageBox
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
-from test.utils import fake_content
+from test.utils import FakeConnection, fake_content
 
 TIMEOUT = 10
 
@@ -232,3 +232,16 @@ def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     m.assert_called_once_with(dialog, "Invalid input", "Only http:// and https:// URLs are supported.")
     assert dialog.ui.loadUrlButton.isEnabled()
     assert not hasattr(dialog, "project_loader")
+
+
+@pytest.mark.functional
+def test_should_load_projects_through_the_injected_connection(qtbot):
+    url = "http://localhost:8080/cc.xml"
+    connection = FakeConnection(fake_content())
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, connection=connection)
+    qtbot.addWidget(dialog)
+
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+
+    assert connection.urls == [url]

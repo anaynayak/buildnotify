@@ -4,19 +4,20 @@ import pytest
 import requests_mock
 from PyQt5.QtCore import QThread
 
+from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.diff import Change, diff, labels
 from buildnotifylib.core.projects import ProjectLoader, ProjectsPopulator
 from buildnotifylib.core.settings import AppSettings
 from test.fake_conf import ConfigBuilder
-from test.utils import fake_content
+from test.utils import FakeConnection, fake_content
 
 URL = "http://localhost:8080/cc.xml"
 
 
 @pytest.mark.functional
 def test_should_fetch_projects(qtbot):
-    populator = ProjectsPopulator(ConfigBuilder().build())
+    populator = ProjectsPopulator(ConfigBuilder().build(), HttpConnection())
     with qtbot.waitSignal(populator.updated_projects, timeout=1000):
         populator.process([])
 
@@ -38,7 +39,7 @@ def test_reload_should_fetch_off_the_gui_thread(qtbot, mocker):
     threads = record_fetch_threads(mocker)
     with requests_mock.Mocker() as m:
         m.get(URL, text=fake_content())
-        populator = ProjectsPopulator(ConfigBuilder().server(URL).build())
+        populator = ProjectsPopulator(ConfigBuilder().server(URL).build(), HttpConnection())
         with qtbot.waitSignal(populator.updated_projects, timeout=1000) as blocker:
             populator.reload()
         populator.wait()
@@ -63,7 +64,7 @@ def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
     mocker.patch.object(SettingsStore, "settings", settings_property, create=True)
     with requests_mock.Mocker() as m:
         m.get(URL, text=fake_content())
-        populator = ProjectsPopulator(conf)
+        populator = ProjectsPopulator(conf, HttpConnection())
         with qtbot.waitSignal(populator.updated_projects, timeout=1000):
             getattr(populator, trigger)()
         populator.wait()
@@ -89,7 +90,7 @@ def poll(qtbot, populator, configs, **response):
 @pytest.mark.functional
 def test_should_keep_last_known_projects_while_server_is_down(qtbot):
     conf = ConfigBuilder().server(URL).build()
-    populator = ProjectsPopulator(conf)
+    populator = ProjectsPopulator(conf, HttpConnection())
     configs = conf.settings.servers
 
     poll(qtbot, populator, configs, text=cctray("Failure"))
@@ -103,7 +104,7 @@ def test_should_keep_last_known_projects_while_server_is_down(qtbot):
 @pytest.mark.functional
 def test_should_apply_new_excludes_to_last_known_projects(qtbot):
     conf = ConfigBuilder().server(URL).build()
-    populator = ProjectsPopulator(conf)
+    populator = ProjectsPopulator(conf, HttpConnection())
 
     poll(qtbot, populator, conf.settings.servers, text=cctray("Failure"))
     conf.settings.servers[0].excluded_projects = ["proj1"]
@@ -115,7 +116,7 @@ def test_should_apply_new_excludes_to_last_known_projects(qtbot):
 @pytest.mark.functional
 def test_should_report_broken_build_after_outage(qtbot):
     conf = ConfigBuilder().server(URL).build()
-    populator = ProjectsPopulator(conf)
+    populator = ProjectsPopulator(conf, HttpConnection())
     configs = conf.settings.servers
 
     poll(qtbot, populator, configs, text=cctray("Success"))
@@ -140,7 +141,7 @@ def test_reload_during_a_fetch_should_fetch_again_with_new_config(qtbot, mocker)
     statuses = []
     with requests_mock.Mocker() as m:
         m.get(URL, text=cctray("Success"))
-        populator = ProjectsPopulator(conf)
+        populator = ProjectsPopulator(conf, HttpConnection())
         populator.updated_projects.connect(statuses.append)
         populator.load_from_server()
         conf.save(AppSettings())
@@ -150,3 +151,17 @@ def test_reload_during_a_fetch_should_fetch_again_with_new_config(qtbot, mocker)
         populator.wait()
 
     assert statuses[1].get_projects() == []
+
+
+@pytest.mark.functional
+def test_should_fetch_through_the_injected_connection(qtbot):
+    conf = ConfigBuilder().server(URL).build()
+    connection = FakeConnection(cctray("Success"))
+    populator = ProjectsPopulator(conf, connection)
+
+    with qtbot.waitSignal(populator.updated_projects, timeout=1000) as blocker:
+        populator.process(conf.settings.servers)
+    populator.process(conf.settings.servers)
+
+    assert [p.name for p in blocker.args[0].get_projects()] == ["proj1"]
+    assert connection.urls == [URL, URL]
