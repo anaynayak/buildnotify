@@ -7,7 +7,7 @@ import requests
 import requests_mock
 from PySide6 import QtCore
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QDialog, QMessageBox
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.ports import Response
@@ -32,7 +32,7 @@ def test_should_show_configured_urls(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         model = dialog.projects_view.model()
@@ -73,7 +73,7 @@ def test_should_save_restore_config(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         server_config = dialog.get_server_config()
@@ -91,7 +91,7 @@ def test_should_exclude_projects(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         model = dialog.projects_view.model()
@@ -112,7 +112,7 @@ def test_should_preload_info(qtbot):
         dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         model = dialog.projects_view.model()
@@ -150,22 +150,24 @@ def test_should_disable_authentication_if_keystore_is_unavailable(qtbot):
 
 @pytest.mark.functional
 @pytest.mark.requireshead
-def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker):
+def test_should_show_an_inline_error_and_reenable_test_for_non_xml_response(qtbot, mocker):
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
         r.get(url, text="<html><body>Please log in</body></html")
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
+        m = mocker.patch.object(QMessageBox, "critical")
 
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
-        def alert_shown():
-            m.assert_called_once_with(dialog, ANY, ANY)
-            assert dialog.load_button.isEnabled()
+        def error_shown():
+            assert dialog.test_status.error
+            assert dialog.test_button.isEnabled()
 
-        qtbot.wait_until(alert_shown)
+        qtbot.wait_until(error_shown)
+        m.assert_not_called()
+        assert dialog.cctray.url.text() == url
 
 
 @pytest.mark.functional
@@ -192,7 +194,7 @@ def test_should_read_widgets_and_load_results_on_the_gui_thread(qtbot, mocker):
             return original()
 
         mocker.patch.object(dialog, "get_server_config", get_server_config)
-        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.test_button, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         assert dialog.loads.waitForDone(5000)
@@ -231,7 +233,7 @@ def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     m.assert_not_called()
     assert dialog.cctray.message.error
     assert dialog.cctray.message.text() == "Only http:// and https:// URLs are supported."
-    assert dialog.load_button.isEnabled()
+    assert dialog.test_button.isEnabled()
     assert not hasattr(dialog, "project_loader")
 
 
@@ -249,29 +251,27 @@ def test_should_load_projects_through_the_injected_connection(qtbot):
 
 
 @pytest.mark.functional
-def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
+def test_should_give_up_on_a_test_that_misses_the_deadline(qtbot, mocker):
     url = "http://localhost:8080/cc.xml"
     connection = GatedConnection(fake_content(), slow=[url])
     mocker.patch.object(Deadline, "GRACE_MS", 50)
     dialog = ServerConfigurationDialog(ServerSettings(url), 0, connection)
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
-
     try:
         dialog.fetch_data()
 
-        def alert_shown():
-            m.assert_called_once_with(dialog, "Failed to fetch projects", ANY)
-            assert dialog.load_button.isEnabled()
+        def error_shown():
+            assert dialog.test_status.error
+            assert dialog.test_button.isEnabled()
 
-        qtbot.wait_until(alert_shown, timeout=2000)
+        qtbot.wait_until(error_shown, timeout=2000)
     finally:
         connection.release.set()
     assert dialog.loads.waitForDone(5000)
     qtbot.wait(50)
 
-    assert dialog.pages.currentIndex() == 0
-    assert m.call_count == 1
+    assert dialog.test_status.text() == "no response before the load deadline"
+    assert not dialog.projects_loaded
 
 
 @pytest.mark.functional
@@ -284,7 +284,7 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
         question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
 
         dialog.fetch_data()
-        qtbot.waitUntil(lambda: dialog.pages.currentIndex() == 1)
+        qtbot.waitUntil(lambda: dialog.projects_loaded)
 
     yes, no = QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No
     question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, yes | no, no)
@@ -522,3 +522,113 @@ def test_should_clear_the_url_error_once_the_url_is_valid(qtbot):
     dialog.cctray.url.setText("ci.example.org/cc.xml")
 
     assert dialog.cctray.message.isHidden()
+
+
+@pytest.mark.functional
+def test_should_save_a_new_server_without_testing_it_with_all_projects(qtbot):
+    connection = FakeConnection(fake_content())
+    dialog = ServerConfigurationDialog(None, TIMEOUT, connection)
+    qtbot.addWidget(dialog)
+
+    dialog.cctray.url.setText("ci.example.org/cc.xml")
+    qtbot.mouseClick(dialog.save_button, QtCore.Qt.MouseButton.LeftButton)
+
+    assert dialog.result() == QDialog.DialogCode.Accepted
+    saved = dialog.get_server_config()
+    assert (saved.url, saved.excluded_projects) == ("https://ci.example.org/cc.xml", [])
+    assert connection.urls == []
+
+
+@pytest.mark.functional
+def test_should_keep_the_exclusions_of_an_edited_server_saved_without_testing(qtbot):
+    server = ServerSettings(URL_JENKINS, ["cleanup-artifacts-B"])
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.save_button.click()
+
+    assert dialog.result() == QDialog.DialogCode.Accepted
+    assert dialog.get_server_config().excluded_projects == ["cleanup-artifacts-B"]
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("url", ["", "file:///tmp/cctray.xml"])
+def test_should_disable_save_while_the_url_is_invalid(qtbot, url):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.cctray.url.setText(url)
+    assert not dialog.save_button.isEnabled()
+
+    dialog.cctray.url.setText("http://ci/cc.xml")
+    assert dialog.save_button.isEnabled()
+
+
+@pytest.mark.functional
+def test_should_enable_save_for_a_github_server_with_a_valid_repository(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+    dialog.source_kind.setCurrentIndex(1)
+    assert not dialog.save_button.isEnabled()
+
+    dialog.github.repository.setText("octo-org/hello-world")
+
+    assert dialog.save_button.isEnabled()
+
+
+@pytest.mark.functional
+def test_should_cancel_without_saving(qtbot):
+    dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS), TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.cancel_button.click()
+
+    assert dialog.result() == QDialog.DialogCode.Rejected
+
+
+@pytest.mark.functional
+def test_should_report_the_project_count_after_a_successful_test(qtbot):
+    dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS), TIMEOUT, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.projects_loaded)
+
+    count = dialog.projects_list.rowCount()
+    assert dialog.test_status.text() == f"OK - {count} projects found"
+    assert not dialog.test_status.error
+    assert not dialog.projects_view.isHidden()
+
+
+@pytest.mark.functional
+def test_should_keep_typed_values_after_a_failed_test(qtbot, mocker):
+    connection = FakeConnection("")
+    mocker.patch.object(connection, "connect", side_effect=ConnectionError("Could not connect to ci"))
+    dialog = ServerConfigurationDialog(None, TIMEOUT, connection)
+    qtbot.addWidget(dialog)
+    dialog.cctray.url.setText("https://ci/cc.xml")
+    dialog.prefix.setText("ci")
+
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.test_status.error)
+
+    assert dialog.test_status.text() == "Could not connect to ci"
+    assert (dialog.cctray.url.text(), dialog.prefix.text()) == ("https://ci/cc.xml", "ci")
+    assert dialog.save_button.isEnabled()
+
+
+@pytest.mark.functional
+def test_should_show_a_certificate_error_inline_when_retry_is_declined(qtbot, mocker):
+    url = "https://localhost:8080/cc.xml"
+    with requests_mock.Mocker() as m:
+        m.get(url, exc=requests.exceptions.SSLError("bad-certificate"))
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
+        qtbot.addWidget(dialog)
+        mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No)
+
+        dialog.fetch_data()
+        qtbot.waitUntil(lambda: dialog.test_status.error)
+
+    assert dialog.test_status.text() == "Certificate not trusted"
+    assert dialog.get_server_config().skip_ssl_verification is False
+    assert m.call_count == 1

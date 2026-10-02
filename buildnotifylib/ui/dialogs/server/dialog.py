@@ -9,18 +9,17 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QDialog,
+    QDialogButtonBox,
     QHBoxLayout,
-    QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
-    QStackedWidget,
     QTreeView,
     QVBoxLayout,
     QWidget,
 )
 
-from buildnotifylib.core.errors import host
+from buildnotifylib.core.errors import host, summarize
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import CertificateError, Connection
 from buildnotifylib.core.projects import ProjectLoader
@@ -41,15 +40,6 @@ def server_name(server: ServerSettings) -> str:
     return server.repository if server.kind is SourceKind.GITHUB else host(server.url)
 
 
-def button_row(*buttons: QPushButton) -> QHBoxLayout:
-    row = QHBoxLayout()
-    row.addStretch()
-    for button in buttons:
-        button.setAutoDefault(False)
-        row.addWidget(button)
-    return row
-
-
 class ServerConfigurationDialog(QDialog):
     loaded = Signal(int, ServerSnapshot)
 
@@ -63,13 +53,15 @@ class ServerConfigurationDialog(QDialog):
     ):
         super().__init__(parent)
         self.connection = connection
-        self.pages = QStackedWidget()
-        self.pages.addWidget(self.source_page())
-        self.pages.addWidget(self.projects_page())
-        QVBoxLayout(self).addWidget(self.pages)
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.source_section())
+        layout.addLayout(self.test_row())
+        layout.addWidget(self.projects_section())
+        layout.addWidget(self.buttons())
 
         self.timeout = timeout
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
+        self.projects_loaded = False
         self.timezone.addItems([NONE_TIMEZONE, *sorted(available_timezones())])
 
         if server is not None:
@@ -79,7 +71,7 @@ class ServerConfigurationDialog(QDialog):
             self.server = ServerSettings("", timezone="")
         self.setWindowTitle(self.title(server))
 
-        self.load_button.clicked.connect(self.fetch_data)
+        self.test_button.clicked.connect(self.fetch_data)
         self.loads = QThreadPool.globalInstance()
         self.loaded.connect(self.on_loaded)
         self.deadline = Deadline(self, self.expire)
@@ -91,10 +83,10 @@ class ServerConfigurationDialog(QDialog):
         self.cctray_authentication_type = ServerSettings.AUTH_USERNAME_PASSWORD
         self.source_kind.currentIndexChanged.connect(self.switch_kind)
         self.show_kind(self.source_kind.currentIndex())
-        self.back_button.clicked.connect(lambda: self.pages.setCurrentIndex(0))
+        self.refresh_validity()
         self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
 
-    def source_page(self) -> QWidget:
+    def source_section(self) -> QWidget:
         self.source_kind = QComboBox()
         self.source_kind.addItems([self.tr("cctray feed"), self.tr("GitHub Actions")])
         kind_row = form_layout()
@@ -108,37 +100,48 @@ class ServerConfigurationDialog(QDialog):
         self.misc = form_layout()
         add_row(self.misc, self.tr("Server timezone"), self.timezone)
         add_row(self.misc, self.tr("Display prefix"), self.prefix)
-        self.load_button = QPushButton(self.tr("Load"))
-        self.cctray.url.returnPressed.connect(self.load_button.click)
         for field in (self.cctray.url, self.github.repository):
             field.editingFinished.connect(self.validate)
-            field.textChanged.connect(self.clear_valid_error)
+            field.textChanged.connect(self.refresh_validity)
 
         page = QWidget()
         layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(kind_row)
         for widget in (self.github, self.cctray, self.auth, section(self.tr("Misc"), self.misc)):
             layout.addWidget(widget)
-        layout.addStretch()
-        layout.addLayout(button_row(self.load_button))
         return page
 
-    def projects_page(self) -> QWidget:
+    def test_row(self) -> QHBoxLayout:
+        self.test_button = QPushButton(self.tr("Test connection"))
+        self.test_button.setAutoDefault(False)
+        self.test_status = MessageLabel()
+        row = QHBoxLayout()
+        row.addWidget(self.test_button)
+        row.addWidget(self.test_status, 1)
+        row.addStretch()
+        return row
+
+    def projects_section(self) -> QWidget:
         self.projects_view = QTreeView()
         self.projects_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.projects_view.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        label = QLabel(self.tr("Choose projects"))
-        label.setBuddy(self.projects_view)
-        self.back_button = QPushButton(self.tr("Back"))
-        self.submit_button = QPushButton(self.tr("OK"))
-        self.submit_button.clicked.connect(self.accept)
-
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.addWidget(label)
+        self.projects_view.setHeaderHidden(True)
+        self.projects_view.hide()
+        self.projects_hint = MessageLabel()
+        self.projects_hint.show_hint(self.tr("All projects are included. Test the connection to choose projects."))
+        layout = QVBoxLayout()
+        layout.addWidget(self.projects_hint)
         layout.addWidget(self.projects_view)
-        layout.addLayout(button_row(self.back_button, self.submit_button))
-        return page
+        return section(self.tr("Projects"), layout)
+
+    def buttons(self) -> QDialogButtonBox:
+        box = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Save)
+        self.save_button = box.button(QDialogButtonBox.StandardButton.Save)
+        self.cancel_button = box.button(QDialogButtonBox.StandardButton.Cancel)
+        box.accepted.connect(self.save)
+        box.rejected.connect(self.reject)
+        return box
 
     def set_value(self, server: ServerSettings) -> None:
         self.cctray.set_value(server.url)
@@ -174,12 +177,18 @@ class ServerConfigurationDialog(QDialog):
             self.auth.select_silently(self.cctray_authentication_type)
             self.auth.set_authentication_type(self.cctray_authentication_type)
         self.show_kind(index)
+        self.refresh_validity()
+
+    def save(self) -> None:
+        if self.validate():
+            self.accept()
 
     def fetch_data(self):
         if not self.validate():
             return
 
-        self.load_button.setEnabled(False)
+        self.test_button.setEnabled(False)
+        self.test_status.show_hint(self.tr("Connecting..."))
         config = self.get_server_config()
         self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
         generation = self.deadline.begin(self.timeout)
@@ -204,8 +213,10 @@ class ServerConfigurationDialog(QDialog):
             self.source_message().clear_message()
         return error is None
 
-    def clear_valid_error(self) -> None:
-        if self.url_error() is None:
+    def refresh_validity(self) -> None:
+        valid = self.url_error() is None
+        self.save_button.setEnabled(valid)
+        if valid:
             self.source_message().clear_message()
 
     def source_message(self) -> MessageLabel:
@@ -223,16 +234,21 @@ class ServerConfigurationDialog(QDialog):
         return None
 
     def load_data(self, response: ServerSnapshot):
-        self.load_button.setEnabled(True)
-
+        self.test_button.setEnabled(True)
         if response.unavailable:
             self.handle_errors(response)
             return
+        self.test_status.show_hint(self.found(len(response.projects)))
+        self.show_projects(response)
 
-        self.pages.setCurrentIndex(1)
+    def found(self, count: int) -> str:
+        if count == 1:
+            return self.tr("OK - 1 project found")
+        return self.tr("OK - {} projects found").format(count)
+
+    def show_projects(self, response: ServerSnapshot) -> None:
         projects_model = QtGui.QStandardItemModel()
         projects_model.itemChanged.connect(self.project_checked)
-        projects_model.setHorizontalHeaderLabels([self.tr("Select Projects")])
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
         self.projects_list.setCheckable(True)
         for project in response.projects:
@@ -246,27 +262,30 @@ class ServerConfigurationDialog(QDialog):
         self.projects_view.expandToDepth(1)
         self.projects_view.setItemsExpandable(False)
         self.projects_view.setRootIsDecorated(False)
+        self.projects_loaded = True
+        self.projects_hint.hide()
+        self.projects_view.show()
 
     def qtText(self, txt: str) -> str:
         return QtGui.Qt.convertFromPlainText(txt)
 
     def handle_errors(self, response: ServerSnapshot):
-        title = self.tr("Failed to fetch projects")
-        if isinstance(response.error, CertificateError):
-            reply = QMessageBox.question(
-                self,
-                title,
-                self.tr("<b>SSL error, retry without verification?:</b> {}").format(self.qtText(str(response.error))),
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if reply == QMessageBox.StandardButton.Yes:
-                self.skip_ssl_verification = True
-                self.fetch_data()
-            return
+        error = response.error
+        assert error is not None
+        self.test_status.show_error(summarize(error))
+        if isinstance(error, CertificateError) and self.retry_without_verification(error):
+            self.skip_ssl_verification = True
+            self.fetch_data()
 
-        if response.unavailable:
-            QMessageBox.critical(self, title, self.tr("<b>Error:</b> {}").format(self.qtText(str(response.error))))
+    def retry_without_verification(self, error: Exception) -> bool:
+        reply = QMessageBox.question(
+            self,
+            self.tr("Failed to fetch projects"),
+            self.tr("<b>SSL error, retry without verification?:</b> {}").format(self.qtText(str(error))),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        return reply == QMessageBox.StandardButton.Yes
 
     def project_checked(self, item: QStandardItem):
         if item.hasChildren():
@@ -279,9 +298,14 @@ class ServerConfigurationDialog(QDialog):
     def get_server_config(self) -> ServerSettings:
         return replace(self.source_config(), muted=self.server.muted, muted_projects=list(self.server.muted_projects))
 
-    def source_config(self) -> ServerSettings:
+    def excluded_projects(self) -> list[str]:
+        if not self.projects_loaded:
+            return list(self.server.excluded_projects)
         children = [self.projects_list.child(i) for i in range(self.projects_list.rowCount())]
-        excluded_projects = [child.text() for child in children if child.checkState() == Qt.CheckState.Unchecked]
+        return [child.text() for child in children if child.checkState() == Qt.CheckState.Unchecked]
+
+    def source_config(self) -> ServerSettings:
+        excluded_projects = self.excluded_projects()
         if self.kind() is SourceKind.GITHUB:
             return self.github_config(excluded_projects)
         credentials = self.auth.value()
