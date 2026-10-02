@@ -1,9 +1,10 @@
 import threading
+from urllib.parse import urlsplit
 
 import requests
-from requests.exceptions import SSLError
+from requests.exceptions import HTTPError, RequestException, SSLError, Timeout
 
-from buildnotifylib.core.ports import CertificateError
+from buildnotifylib.core.ports import CertificateError, FetchError
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
 
@@ -32,10 +33,22 @@ class HttpConnection:
             response = self.session.get(
                 server.url, verify=not server.skip_ssl_verification, headers=headers, auth=auth, timeout=timeout
             )
+            response.raise_for_status()
         except SSLError as ex:
             raise CertificateError(str(ex)) from ex
-        response.raise_for_status()
+        except RequestException as ex:
+            raise FetchError(self.describe(ex, server.url)) from ex
         return response.content
+
+    @staticmethod
+    def describe(error: RequestException, url: str) -> str:
+        if isinstance(error, HTTPError) and error.response is not None:
+            return f"HTTP {error.response.status_code} {error.response.reason or ''}".strip()
+        if isinstance(error, Timeout):
+            return "Timed out"
+        if isinstance(error, requests.ConnectionError):
+            return f"Could not connect to {urlsplit(url).hostname}"
+        return f"Request failed ({type(error).__name__})"
 
     @staticmethod
     def uses_basic_auth(server: ServerSettings) -> bool:

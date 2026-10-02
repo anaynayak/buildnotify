@@ -7,7 +7,7 @@ import requests
 import requests_mock
 
 from buildnotifylib.adapters.http import HttpConnection
-from buildnotifylib.core.ports import CertificateError
+from buildnotifylib.core.ports import CertificateError, FetchError
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
@@ -130,3 +130,34 @@ def test_should_recognise_ssl_error_subclasses():
 @pytest.mark.parametrize("error", [ValueError(), ssl.SSLError(), requests.exceptions.ConnectionError()])
 def test_should_not_treat_other_errors_as_ssl_errors(error):
     assert not isinstance(load_failing_with(error), CertificateError)
+
+
+SECRET_URL = "https://user:hunter2@ci.example.com/cc.xml?token=s3cret"
+
+
+def fetch_error(**response) -> Exception:
+    with requests_mock.Mocker() as m:
+        m.get(SECRET_URL, **response)
+        with pytest.raises(FetchError) as raised:
+            HttpConnection().connect(ServerSettings(SECRET_URL), 3)
+    return raised.value
+
+
+@pytest.mark.parametrize(
+    "response, message",
+    [
+        ({"status_code": 503, "reason": "Service Unavailable"}, "HTTP 503 Service Unavailable"),
+        ({"exc": requests.exceptions.ConnectTimeout(f"timed out: {SECRET_URL}")}, "Timed out"),
+        ({"exc": requests.exceptions.ReadTimeout(f"timed out: {SECRET_URL}")}, "Timed out"),
+        ({"exc": requests.exceptions.ConnectionError(f"refused: {SECRET_URL}")}, "Could not connect to ci.example.com"),
+        ({"exc": requests.exceptions.TooManyRedirects(SECRET_URL)}, "Request failed (TooManyRedirects)"),
+    ],
+)
+def test_should_report_request_failures_in_short_messages(response, message):
+    assert str(fetch_error(**response)) == message
+
+
+@pytest.mark.parametrize("status_code", [401, 500])
+def test_should_keep_credentials_out_of_http_error_messages(status_code):
+    message = str(fetch_error(status_code=status_code))
+    assert "hunter2" not in message and "s3cret" not in message

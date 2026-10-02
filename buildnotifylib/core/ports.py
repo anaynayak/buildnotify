@@ -7,6 +7,10 @@ class CertificateError(Exception):
     """Raised by a Connection when the server's TLS certificate can't be verified."""
 
 
+class FetchError(Exception):
+    """Raised by a Connection when a fetch fails, with a short message free of URLs and credentials."""
+
+
 class Connection(Protocol):
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None
