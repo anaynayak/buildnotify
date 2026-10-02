@@ -171,3 +171,25 @@ def test_should_load_github_servers_through_the_github_source():
 
     assert snapshot.url == f"https://github.com/{REPO}"
     assert str(snapshot.error) == "GitHub rejected the token (HTTP 401)"
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        fixture("rate-limited.json", 429),
+        Response(403, {}, b'{"message": "You have exceeded a secondary rate limit."}'),
+    ],
+)
+def test_should_back_off_a_minute_on_a_rate_limit_without_headers(response):
+    now = [NOW]
+    limits = RateLimits(clock=lambda: now[0])
+    api = FakeApi(response, fixture("runs.json"))
+
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, limits=limits).fetch()
+    now[0] = NOW + timedelta(seconds=30)
+    with pytest.raises(FetchError, match="rate limit"):
+        source(api, limits=limits).fetch()
+    now[0] = NOW + timedelta(seconds=61)
+
+    assert len(source(api, limits=limits).fetch()) == 7

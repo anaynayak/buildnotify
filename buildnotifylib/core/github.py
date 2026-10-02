@@ -25,6 +25,7 @@ ERRORS = {
     404: "Repository not found, or the token can't see it (HTTP 404)",
 }
 LIMITED = (403, 429)
+DEFAULT_BACKOFF = timedelta(minutes=1)
 
 Run = Mapping[str, Any]
 Clock = Callable[[], datetime]
@@ -68,6 +69,8 @@ def blocked_until(response: Response, now: datetime) -> datetime | None:
     reset = response.headers.get("x-ratelimit-reset", "")
     if response.headers.get("x-ratelimit-remaining") == "0" and reset.isdigit():
         return datetime.fromtimestamp(int(reset), UTC)
+    if response.status == 429 or (response.status == 403 and b"rate limit" in response.body.lower()):
+        return now + DEFAULT_BACKOFF
     return None
 
 
