@@ -107,3 +107,29 @@ def test_should_report_broken_build_after_outage(qtbot):
 
     assert ProjectStatus(down.get_projects(), up.get_projects()).failing_builds() == ['proj1']
     assert up.unavailable_servers() == []
+
+
+@pytest.mark.functional
+def test_reload_during_a_fetch_should_fetch_again_with_new_config(qtbot, mocker):
+    conf = ConfigBuilder().server(URL).build()
+    release = threading.Event()
+    original = ProjectLoader.get_data
+
+    def get_data(loader):
+        release.wait(5)
+        return original(loader)
+
+    mocker.patch.object(ProjectLoader, 'get_data', get_data)
+    statuses = []
+    with requests_mock.Mocker() as m:
+        m.get(URL, text=cctray('Success'))
+        populator = ProjectsPopulator(conf)
+        populator.updated_projects.connect(statuses.append)
+        populator.load_from_server()
+        mocker.patch.object(conf, 'get_server_configs', return_value=[])
+        populator.reload()
+        release.set()
+        qtbot.waitUntil(lambda: len(statuses) == 2, timeout=2000)
+        populator.wait()
+
+    assert statuses[1].get_projects() == []

@@ -60,6 +60,8 @@ class ProjectsPopulator(QThread):
         self.server_configs: List[ServerConfig] = []
         self.timeout: Optional[float] = None
         self.last_known: Dict[str, List[Project]] = {}
+        self.reload_pending = False
+        self.finished.connect(self.on_finished)
 
     def load_from_server(self):
         if self.isRunning():
@@ -69,7 +71,13 @@ class ProjectsPopulator(QThread):
         self.start()
 
     def reload(self):
+        self.reload_pending = self.isRunning()
         self.load_from_server()
+
+    def on_finished(self):
+        if self.reload_pending:
+            self.reload_pending = False
+            self.load_from_server()
 
     def process(self, server_configs: List[ServerConfig]):
         overall_status = []
