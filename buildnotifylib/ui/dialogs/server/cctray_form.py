@@ -14,9 +14,17 @@ class CctrayForm(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.url_label)
         layout.addWidget(self.url)
+        self.url.editingFinished.connect(self.add_scheme)
 
     def set_value(self, url: str) -> None:
         self.url.setText(url)
 
     def value(self) -> str:
-        return self.url.text()
+        return with_scheme(self.url.text().strip())
+
+    def add_scheme(self) -> None:
+        self.url.setText(self.value())
+
+
+def with_scheme(url: str) -> str:
+    return url if url == "" or "://" in url else "https://" + url

@@ -489,3 +489,27 @@ def test_should_title_the_dialog_for_adding_or_editing(qtbot, server, title):
     qtbot.addWidget(dialog)
 
     assert dialog.windowTitle() == title
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize(
+    ("typed", "url"),
+    [
+        ("ci.example.org/cc.xml", "https://ci.example.org/cc.xml"),
+        (" ci.example.org:8153/go/cctray.xml ", "https://ci.example.org:8153/go/cctray.xml"),
+        ("http://ci.example.org/cc.xml", "http://ci.example.org/cc.xml"),
+    ],
+)
+def test_should_default_a_url_without_a_scheme_to_https(qtbot, typed, url):
+    connection = FakeConnection(fake_content())
+    dialog = ServerConfigurationDialog(None, TIMEOUT, connection)
+    qtbot.addWidget(dialog)
+
+    dialog.cctray.url.setText(typed)
+    dialog.cctray.url.editingFinished.emit()
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: connection.urls != [])
+
+    assert dialog.cctray.url.text() == url
+    assert dialog.get_server_config().url == url
+    assert connection.urls == [url]
