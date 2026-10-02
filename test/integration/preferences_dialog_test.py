@@ -315,10 +315,10 @@ def test_should_reject_editing_a_server_url_to_another_servers_url(qtbot, mocker
 def test_should_return_the_symbolic_icons_choice(qtbot, mocker):
     dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
-    assert not dialog.misc_page.symbolic_icons.isChecked()
+    assert dialog.misc_page.tray_colour.isChecked()
     mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
-    dialog.misc_page.symbolic_icons.setChecked(True)
+    dialog.misc_page.tray_shapes.setChecked(True)
 
     assert dialog.open().symbolic_icons
 

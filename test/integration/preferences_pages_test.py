@@ -54,3 +54,31 @@ def test_misc_page_should_return_the_choices_it_was_given(qtbot, sort_key):
     page.set_value(choices)
 
     assert page.value() == choices
+
+
+@pytest.mark.functional
+def test_notifications_page_should_use_the_event_wording(qtbot):
+    page = NotificationsPage()
+    qtbot.addWidget(page)
+
+    assert [box.text() for box in page.events.values()] == [
+        "Passes",
+        "Fails",
+        "Is fixed",
+        "Fails again",
+        "A server can't be reached",
+    ]
+    assert page.script_enabled.text() == "Run a script on each notification"
+
+
+@pytest.mark.functional
+def test_misc_page_should_use_the_sentence_case_wording(qtbot):
+    page = MiscPage()
+    qtbot.addWidget(page)
+
+    assert page.show_last_build_time.text() == "Show last build time"
+    assert page.show_last_build_label.text() == "Show build label"
+    assert [button.text() for button in page.sort_buttons.values()] == ["Failing first", "Name", "Last build time"]
+    assert (page.tray_colour.text(), page.tray_shapes.text()) == ("Colour", "Shapes")
+    assert page.interval.suffix() == " seconds"
+    assert page.form_labels() == ["Check every:", "Give up after:"]

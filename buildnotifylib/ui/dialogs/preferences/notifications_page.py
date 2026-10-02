@@ -17,11 +17,11 @@ class NotificationsPage(QWidget):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.successful_builds = QCheckBox(self.tr("successful builds"))
-        self.broken_builds = QCheckBox(self.tr("broken builds"))
-        self.fixed_builds = QCheckBox(self.tr("fixed builds"))
-        self.still_failing_builds = QCheckBox(self.tr("still failing builds"))
-        self.connectivity_issues = QCheckBox(self.tr("connectivity issues"))
+        self.successful_builds = QCheckBox(self.tr("Passes"))
+        self.broken_builds = QCheckBox(self.tr("Fails"))
+        self.fixed_builds = QCheckBox(self.tr("Is fixed"))
+        self.still_failing_builds = QCheckBox(self.tr("Fails again"))
+        self.connectivity_issues = QCheckBox(self.tr("A server can't be reached"))
         self.events = dict(
             successfulBuild=self.successful_builds,
             brokenBuild=self.broken_builds,
@@ -29,7 +29,7 @@ class NotificationsPage(QWidget):
             stillFailingBuild=self.still_failing_builds,
             connectivityIssues=self.connectivity_issues,
         )
-        self.script_enabled = QCheckBox(self.tr("Execute script for notifications"))
+        self.script_enabled = QCheckBox(self.tr("Run a script on each notification"))
         self.script = QLineEdit()
         self.script.setPlaceholderText(self.tr('e.g. notify-send "$BUILDNOTIFY_STATUS"'))
         self.script.setEnabled(False)
@@ -43,8 +43,8 @@ class NotificationsPage(QWidget):
         self.script_enabled.toggled.connect(self.script.setEnabled)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(section(self.tr("Notification settings"), self.events_grid()))
-        layout.addWidget(section(self.tr("Custom notifications"), self.script_layout()))
+        layout.addWidget(section(self.tr("Notify me when a build"), self.events_grid()))
+        layout.addWidget(section(self.tr("Custom script"), self.script_layout()))
         layout.addStretch()
 
     def events_grid(self) -> QGridLayout:
