@@ -4,6 +4,10 @@ Once installed, launch BuildNotify with `buildnotify`. You should see a new icon
 
 Right click and configure as per the instructions below. On Linux and Windows a left click opens the same menu.
 
+On the first launch with no servers, the server dialog opens once. Until a server is added, the menu offers `Add a server...`, which opens the same dialog.
+
+![Tray menu with no servers](images/empty-menu.png)
+
 ## Configuration
 
 Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`. A url typed without one, such as `ci.example.org/cc.xml`, gets `https://`.

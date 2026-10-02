@@ -95,6 +95,13 @@ def tray_menu(settings: AppSettings, icons: BuildIcons) -> None:
     save(menu.menu, "projectlist.png")
 
 
+def empty_tray_menu(icons: BuildIcons) -> None:
+    host = QWidget()
+    menu = app_menu.AppMenu(host, Store(AppSettings()), icons, HttpConnection(), clock=lambda: NOW)  # type: ignore[arg-type]
+    menu.update([])
+    save(menu.menu, "empty-menu.png")
+
+
 def preferences(settings: AppSettings) -> None:
     dialog = PreferencesDialog(settings, HttpConnection())
     dialog.resize(560, 420)
@@ -131,6 +138,7 @@ def main() -> None:
     settings = AppSettings(servers=SERVERS, interval_seconds=60)
     icons = BuildIcons()
     tray_menu(settings, icons)
+    empty_tray_menu(icons)
     preferences(settings)
     server_dialog(JENKINS, "server-cctray.png")
     server_dialog(GITHUB, "server-github.png")
