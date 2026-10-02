@@ -2,13 +2,12 @@ import os
 import re
 import shlex
 import subprocess
-from collections.abc import Callable
 from datetime import datetime
 from typing import Optional
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
-from buildnotifylib.core.model import Project, Status
+from buildnotifylib.core.diff import Change, Event, diff, labels
 from buildnotifylib.notifications import Notification
 
 
@@ -28,27 +27,17 @@ class ProjectStatusNotification:
         self.timed_project_filter = timed_project_filter or TimedProjectFilter()
 
     def show_notifications(self):
-        project_status = ProjectStatus(
-            self.old_integration_status.get_projects(), self.current_integration_status.get_projects()
-        )
-
-        self.show_notification_msg(
-            self.config.get_value("fixedBuild"), project_status.successful_builds(), "Fixed builds"
-        )
-        self.show_notification_msg(
-            self.config.get_value("brokenBuild"), project_status.failing_builds(), "Broken builds"
-        )
-        self.show_notification_msg(
-            self.config.get_value("stillFailingBuild"), project_status.still_failing_builds(), "Build is still failing"
-        )
+        events = diff(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
+        self.show_change(events, "fixedBuild", Change.FIXED)
+        self.show_change(events, "brokenBuild", Change.BROKEN)
+        self.show_change(events, "stillFailingBuild", Change.STILL_FAILING)
         self.show_notification_msg(
             self.config.get_value("connectivityIssues"), self.unavailable_server_urls(), "Connectivity issues"
         )
-        self.show_notification_msg(
-            self.config.get_value("successfulBuild"),
-            project_status.still_successful_builds(),
-            "Yet another successful build",
-        )
+        self.show_change(events, "successfulBuild", Change.STILL_SUCCESSFUL)
+
+    def show_change(self, events: list[Event], setting: str, change: Change):
+        self.show_notification_msg(self.config.get_value(setting), labels(events, change), change)
 
     def unavailable_server_urls(self) -> list[str]:
         urls = [server.url for server in self.current_integration_status.unavailable_servers()]
@@ -109,58 +98,3 @@ class TimedProjectFilter:
             fail_count = 1
         self.map[url] = (connection_time, fail_count)
         return fail_count in self.fact
-
-
-class ProjectTuple:
-    def __init__(self, current_project: Project, old_project: Project | None):
-        self.current_project = current_project
-        self.old_project = old_project
-
-    def has_failed(self) -> bool:
-        return self.status(Status.FAILURE, Status.SUCCESS)
-
-    def has_succeeded(self) -> bool:
-        return self.status(Status.SUCCESS, Status.FAILURE)
-
-    def has_been_successful(self) -> bool:
-        return (self.old_project is None) or (
-            self.status(Status.SUCCESS, Status.SUCCESS) and self.current_project.different_builds(self.old_project)
-        )
-
-    def has_been_failing(self) -> bool:
-        return self.status(Status.FAILURE, Status.FAILURE) and self.current_project.different_builds(self.old_project)  # type: ignore
-
-    def status(self, new_status: Status, old_status: Status) -> bool:
-        return (
-            self.current_project.status is new_status
-            and self.old_project is not None
-            and self.old_project.status is old_status
-        )
-
-
-class ProjectStatus:
-    def __init__(self, old_projects: list[Project], current_projects: list[Project]):
-        self.old_projects = old_projects
-        self.current_projects = current_projects
-
-    def failing_builds(self) -> list[str]:
-        return self.filter_all(lambda project_tuple: project_tuple.has_failed())
-
-    def successful_builds(self) -> list[str]:
-        return self.filter_all(lambda project_tuple: project_tuple.has_succeeded())
-
-    def still_failing_builds(self) -> list[str]:
-        return self.filter_all(lambda project_tuple: project_tuple.has_been_failing())
-
-    def still_successful_builds(self) -> list[str]:
-        return self.filter_all(lambda project_tuple: project_tuple.has_been_successful())
-
-    def filter_all(self, filter_fn: Callable[[ProjectTuple], bool]):
-        project_tuples = [self.tuple_for(project) for project in self.current_projects]
-        return [project_tuple.current_project.label() for project_tuple in project_tuples if filter_fn(project_tuple)]
-
-    def tuple_for(self, new_project: Project) -> ProjectTuple:
-        for project in self.old_projects:
-            if new_project.matches(project):
-                return ProjectTuple(new_project, project)
-        return ProjectTuple(new_project, None)

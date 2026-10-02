@@ -4,8 +4,8 @@ import pytest
 import requests_mock
 from PyQt5.QtCore import QThread
 
+from buildnotifylib.core.diff import Change, diff, labels
 from buildnotifylib.core.projects import ProjectLoader, ProjectsPopulator
-from buildnotifylib.project_status_notification import ProjectStatus
 from test.fake_conf import ConfigBuilder
 from test.utils import fake_content
 
@@ -119,7 +119,7 @@ def test_should_report_broken_build_after_outage(qtbot):
     down = poll(qtbot, populator, configs, status_code=500)
     up = poll(qtbot, populator, configs, text=cctray("Failure"))
 
-    assert ProjectStatus(down.get_projects(), up.get_projects()).failing_builds() == ["proj1"]
+    assert labels(diff(down.get_projects(), up.get_projects()), Change.BROKEN) == ["proj1"]
     assert up.unavailable_servers() == []
 
 
