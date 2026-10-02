@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QDialogButtonBox
 
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.serverconfig import ServerConfig
 from test.fake_conf import ConfigBuilder
 
 
@@ -102,3 +103,22 @@ def test_should_not_remove_anything_without_a_selection(qtbot):
     dialog.remove_element()
 
     assert dialog.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml"]
+
+
+def select_row(dialog, row):
+    index = dialog.ui.cctrayPathList.model().index(row, 0)
+    dialog.ui.cctrayPathList.setCurrentIndex(index)
+
+
+@pytest.mark.functional
+def test_should_replace_the_row_when_a_server_url_is_edited(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").server("http://two/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    select_row(dialog, 0)
+    mocker.patch.object(ServerConfigurationDialog, 'open',
+                        return_value=ServerConfig("http://new/cctray.xml", [], 'None', '', '', ''))
+
+    dialog.configure_projects()
+
+    assert dialog.get_urls() == ["http://new/cctray.xml", "http://two/cctray.xml"]

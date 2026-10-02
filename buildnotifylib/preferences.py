@@ -64,12 +64,14 @@ class PreferencesDialog(QDialog):
         self.ui.cctrayPathList.setModel(QStringListModel(urls))
 
     def configure_projects(self):
-        url = self.ui.cctrayPathList.selectionModel().currentIndex().data()
+        index = self.ui.cctrayPathList.selectionModel().currentIndex()
+        url = index.data()
         if not url:
             return
         server_config = ServerConfigurationDialog(url, self.conf, self).open()
         if server_config is not None:
             self.conf.save_server_config(server_config)
+            self.ui.cctrayPathList.model().setData(index, server_config.url)
 
     def get_urls(self) -> List[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
