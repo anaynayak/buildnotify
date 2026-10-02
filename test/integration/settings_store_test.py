@@ -1,3 +1,5 @@
+import shutil
+
 import keyring
 import pytest
 from PySide6 import QtCore
@@ -62,6 +64,16 @@ def test_should_round_trip_every_value(ini):
     reopen(ini).save(full_settings())
 
     assert reopen(ini).settings == full_settings()
+
+
+@pytest.mark.parametrize("fmt", [QtCore.QSettings.Format.IniFormat, QtCore.QSettings.Format.NativeFormat])
+def test_should_round_trip_every_value_through_the_file(tmp_path, fmt):
+    saved, copy = tmp_path / "saved", tmp_path / "copy"
+    SettingsStore(QtCore.QSettings(str(saved), fmt), Keystore()).save(full_settings())
+    # A new path skips QSettings' in-process cache, so the values come back parsed from disk.
+    shutil.copy(saved, copy)
+
+    assert SettingsStore(QtCore.QSettings(str(copy), fmt), Keystore()).settings == full_settings()
 
 
 def test_should_keep_the_saved_settings_current(qsettings):
