@@ -122,6 +122,10 @@ class ProjectLoaderTest(unittest.TestCase):
     def test_should_mark_server_unavailable_for_truncated_xml(self):
         self.assert_unavailable('<?xml version="1.0"?><Projects><Project name="project" activity=')
 
+    def test_should_reject_entity_declarations(self):
+        self.assert_unavailable('<?xml version="1.0"?><!DOCTYPE Projects [<!ENTITY a "aaaaaaaaaa">]>'
+                                '<Projects><Project name="&a;" activity="Sleeping"/></Projects>')
+
     def assert_unavailable(self, body):
         response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection(body)).get_data()
         self.assertEqual([], response.server.get_projects())

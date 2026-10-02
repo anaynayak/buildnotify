@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from xml.dom import minidom
+from defusedxml import minidom
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, QObject
