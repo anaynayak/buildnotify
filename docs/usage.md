@@ -16,19 +16,25 @@ Add a new server by clicking the `+` sign. Each server can use a username and pa
 
 Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want.
 
-![Servers](images/servers.png)
+The Servers tab of Preferences lists the monitored servers.
+
+![Servers tab](images/servers.png)
 
 ![Server dialog for a cctray feed](images/server-cctray.png)
 
-Customize notifications that you'd like to see
+The Menu tab sets how the tray menu looks: show the last build time and label next to each project, pick colour or shape tray icons (single-colour symbolic icons that differ by shape), and choose the sort order.
 
-![Notifications](images/notifications.png)
+![Menu tab](images/menu.png)
 
-Tweak configuration
+The Notifications tab picks which events notify you (passes, fails, is fixed, fails again, a server can't be reached) and can run a custom script on each notification.
 
-![Misc configuration](images/misc.png)
+![Notifications tab](images/notifications.png)
 
-The Misc tab also has an option to show the last build label next to each project, and one to use single-colour symbolic tray icons that differ by shape. The sort order applies within each section of the tray menu. `Failing first`, the default for new installs, puts projects that are building at the top of their section and then shows the newest builds first. Name and last build time sort the whole section that way. An install from an earlier version keeps the sort order it had.
+The Advanced tab sets how often servers are checked and how long to wait before giving up on a request.
+
+![Advanced tab](images/advanced.png)
+
+The sort order applies within each section of the tray menu. `Failing first`, the default for new installs, puts projects that are building at the top of their section and then shows the newest builds first. Name and last build time sort the whole section that way. An install from an earlier version keeps the sort order it had.
 
 ## GitHub Actions
 
