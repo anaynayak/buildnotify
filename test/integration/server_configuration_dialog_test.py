@@ -293,6 +293,37 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
     assert [r.verify for r in m.request_history] == [True, False]
 
 
+@pytest.mark.functional
+def test_should_turn_certificate_checks_back_on_when_the_host_changes(qtbot, mocker):
+    url = "https://localhost:8080/cc.xml"
+    with requests_mock.Mocker() as m:
+        m.get(url, [{"exc": requests.exceptions.SSLError("bad-certificate")}, {"text": fake_content()}])
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
+        qtbot.addWidget(dialog)
+        mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
+        dialog.fetch_data()
+        qtbot.waitUntil(lambda: dialog.projects_loaded)
+
+    dialog.cctray.url.setText("https://ci.example.com/cc.xml")
+    assert dialog.get_server_config().skip_ssl_verification is False
+
+    dialog.cctray.url.setText("https://localhost:8080/other.xml")
+    assert dialog.get_server_config().skip_ssl_verification is True
+
+
+@pytest.mark.functional
+def test_should_keep_a_stored_certificate_skip_only_for_its_host(qtbot):
+    url = "https://localhost:8080/cc.xml"
+    dialog = ServerConfigurationDialog(ServerSettings(url, skip_ssl_verification=True), TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.cctray.url.setText("https://ci.example.com/cc.xml")
+    assert dialog.get_server_config().skip_ssl_verification is False
+
+    dialog.cctray.url.setText("https://localhost:8080/cc.xml")
+    assert dialog.get_server_config().skip_ssl_verification is True
+
+
 URL_JENKINS = "http://jenkins.local:8080/cc.xml"
 GITHUB_RUNS = Path(__file__).parent.parent / "fixtures" / "github" / "runs.json"
 

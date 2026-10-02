@@ -16,6 +16,7 @@
 - Bearer and GitHub tokens are stored in the keyring under the username `token` instead of an empty username, which keyring deprecates. Tokens saved by earlier versions are still read, and move to the new entry the next time settings are saved
 
 ### Fixed
+- Accepting the certificate prompt in the server dialog turns off certificate checks only for that host. Changing the feed URL to another host turns them back on
 - Saving Preferences no longer cancels a pause set from the tray while the dialog was open
 - Saving Preferences no longer reverts servers or projects muted or unmuted from the tray while the dialog was open
 - Saving Preferences no longer lowers the default 120 s polling interval to 60 s. The interval can be set from 10 seconds to an hour

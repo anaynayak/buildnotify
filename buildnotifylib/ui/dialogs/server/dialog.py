@@ -84,7 +84,7 @@ class ServerConfigurationDialog(QDialog):
         self.source_kind.currentIndexChanged.connect(self.switch_kind)
         self.show_kind(self.source_kind.currentIndex())
         self.refresh_validity()
-        self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
+        self.unverified_host = self.source_host() if self.server.skip_ssl_verification else None
 
     def source_section(self) -> QWidget:
         self.source_kind = QComboBox()
@@ -290,7 +290,7 @@ class ServerConfigurationDialog(QDialog):
         assert error is not None
         self.test_status.show_error(summarize(error))
         if isinstance(error, CertificateError) and self.retry_without_verification(error):
-            self.skip_ssl_verification = True
+            self.unverified_host = self.source_host()
             self.fetch_data()
 
     def retry_without_verification(self, error: Exception) -> bool:
@@ -310,6 +310,12 @@ class ServerConfigurationDialog(QDialog):
 
     def server_url(self) -> str:
         return self.cctray.value()
+
+    def source_host(self) -> str:
+        return "" if self.kind() is SourceKind.GITHUB else host(self.server_url())
+
+    def skip_ssl_verification(self) -> bool:
+        return self.unverified_host == self.source_host()
 
     def get_server_config(self) -> ServerSettings:
         return replace(self.source_config(), muted=self.server.muted, muted_projects=list(self.server.muted_projects))
@@ -332,7 +338,7 @@ class ServerConfigurationDialog(QDialog):
             self.prefix.text(),
             credentials.username,
             credentials.password,
-            self.skip_ssl_verification,
+            self.skip_ssl_verification(),
             credentials.authentication_type,
         )
 
@@ -343,7 +349,7 @@ class ServerConfigurationDialog(QDialog):
             excluded_projects,
             prefix=self.prefix.text(),
             password=self.auth.password.text(),
-            skip_ssl_verification=self.skip_ssl_verification,
+            skip_ssl_verification=self.skip_ssl_verification(),
             authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
             kind=SourceKind.GITHUB,
             repository=source.repository,
