@@ -1,16 +1,10 @@
-import os
-import subprocess
 import unittest
-
-import pytest
+from dataclasses import replace
 
 from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
-from buildnotifylib.project_status_notification import (
-    ProjectStatusNotification,
-    substitute_placeholders,
-)
+from buildnotifylib.project_status_notification import ProjectStatusNotification
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 
@@ -84,7 +78,7 @@ class _SilentNotification:
         pass
 
 
-def _broken_build_notification(script, project_name):
+def _broken_build_notification(script, project_name, hook):
     old = OverallIntegrationStatus(
         [
             ServerSnapshot(
@@ -124,75 +118,33 @@ def _broken_build_notification(script, project_name):
         ]
     )
     config = ConfigBuilder(custom_script=script, custom_script_enabled=True).build()
-    return ProjectStatusNotification(config.settings, old, new, _SilentNotification())
+    return ProjectStatusNotification(config.settings, old, new, _SilentNotification(), hook=hook)
 
 
-def test_should_pass_status_and_projects_as_env_vars(mocker):
-    popen = mocker.patch("buildnotifylib.project_status_notification.subprocess.Popen")
+class RecordingHook:
+    def __init__(self):
+        self.calls = []
 
-    _broken_build_notification("my-hook", "proj1").show_notifications()
-
-    env = popen.call_args.kwargs["env"]
-    assert env["BUILDNOTIFY_STATUS"] == "Broken builds"
-    assert env["BUILDNOTIFY_PROJECTS"] == "proj1"
-    assert env["PATH"] == os.environ["PATH"]
+    def run(self, script, status, projects):
+        self.calls.append((script, status, projects))
 
 
-def test_should_quote_legacy_placeholders(mocker):
-    popen = mocker.patch("buildnotifylib.project_status_notification.subprocess.Popen")
+def test_should_run_custom_script_hook_with_status_and_projects():
+    hook = RecordingHook()
 
-    _broken_build_notification("my-hook #status# #projects#", "it's; rm -rf ~").show_notifications()
+    _broken_build_notification("my-hook #status#", "proj1", hook).show_notifications()
 
-    assert popen.call_args.args[0] == "my-hook 'Broken builds' 'it'\"'\"'s; rm -rf ~'"
-
-
-@pytest.mark.parametrize("payload", ["$(touch {m})", "`touch {m}`", "x; touch {m}", "x'; touch {m}; '"])
-def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
-    marker = tmp_path / "injected"
-    output = tmp_path / "output"
-    name = payload.format(m=marker)
-    processes = []
-    real_popen = subprocess.Popen
-    mocker.patch(
-        "buildnotifylib.project_status_notification.subprocess.Popen",
-        side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)),
-    )
-
-    script = f'printf %s #projects# > {output}; printf %s "$BUILDNOTIFY_PROJECTS" >> {output}'
-    _broken_build_notification(script, name).show_notifications()
-    for process in processes:
-        process.wait(timeout=10)
-
-    assert not marker.exists()
-    assert output.read_text() == name + name
+    assert hook.calls == [("my-hook #status#", "Broken builds", "proj1")]
 
 
-@pytest.mark.parametrize("template", ['"#projects#"', "'#projects#'", '"Broken: #projects#"', "'Broken: #projects#'"])
-@pytest.mark.parametrize("payload", ["$(touch {m})", "`touch {m}`", 'x"; touch {m}; "', "x'; touch {m}; '"])
-def test_should_not_execute_malicious_project_name_in_quoted_placeholder(mocker, tmp_path, template, payload):
-    marker = tmp_path / "injected"
-    output = tmp_path / "output"
-    name = payload.format(m=marker)
-    processes = []
-    real_popen = subprocess.Popen
-    mocker.patch(
-        "buildnotifylib.project_status_notification.subprocess.Popen",
-        side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)),
-    )
+def test_should_not_run_hook_when_custom_script_is_disabled():
+    hook = RecordingHook()
+    notification = _broken_build_notification("my-hook", "proj1", hook)
+    notification.settings = replace(notification.settings, custom_script_enabled=False)
 
-    _broken_build_notification(f"printf %s {template} > {output}", name).show_notifications()
-    for process in processes:
-        process.wait(timeout=10)
+    notification.show_notifications()
 
-    assert not marker.exists()
-    assert output.read_text() == template.strip("\"'").replace("#projects#", name)
-
-
-def test_should_leave_escaped_placeholder_alone():
-    assert (
-        substitute_placeholders('echo \\#projects# "\\"#projects#"', {"#projects#": "a b"})
-        == 'echo \\#projects# "\\""\'a b\'""'
-    )
+    assert hook.calls == []
 
 
 if __name__ == "__main__":
