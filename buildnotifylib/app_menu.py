@@ -71,7 +71,7 @@ class AppMenu(QtCore.QObject):
         menu_item_label = project.label(self.conf.get_show_last_build_label())
         build_time = project.get_last_build_time()
         if self.conf.get_value("lastBuildTimeForProject") and build_time is not None:
-            menu_item_label = menu_item_label + ", " + DistanceOfTime(build_time).age() + " ago"
+            menu_item_label = menu_item_label + ", " + DistanceOfTime(build_time).relative()
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)

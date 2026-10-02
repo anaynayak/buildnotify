@@ -58,6 +58,25 @@ def test_should_suffix_build_time(qtbot):
 
 
 @pytest.mark.functional
+def test_should_show_future_build_time_as_in(qtbot):
+    conf = ConfigBuilder({'values/lastBuildTimeForProject': True}).build()
+    parent = QWidget()
+    app_menu = AppMenu(parent, conf, BuildIcons())
+    qtbot.addWidget(parent)
+    project1 = ProjectBuilder({
+        'name': 'Project 1',
+        'url': 'dummyurl',
+        'lastBuildStatus': 'Success',
+        'activity': 'Sleeping',
+        'lastBuildTime': (datetime.now() + timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%S")
+    }).build()
+
+    app_menu.update([project1])
+
+    assert str(app_menu.menu.actions()[0].text()) == 'Project 1, in 5 hours'
+
+
+@pytest.mark.functional
 def test_should_sort_by_name(qtbot):
     conf = ConfigBuilder({'values/lastBuildTimeForProject': False, 'sort_key': 'sort_name'}).build()
     parent = QWidget()

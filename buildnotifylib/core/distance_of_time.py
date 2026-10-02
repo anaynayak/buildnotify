@@ -7,10 +7,16 @@ class DistanceOfTime(object):
         self.from_date = from_date
         self.now = now
 
-    def age(self) -> str:
-        since_date = self.now or datetime.now(tz=self.from_date.tzinfo)
+    def _now(self) -> datetime:
+        return self.now or datetime.now(tz=self.from_date.tzinfo)
 
-        distance_in_time = since_date - self.from_date
+    def relative(self) -> str:
+        if self.from_date > self._now():
+            return "in " + self.age()
+        return self.age() + " ago"
+
+    def age(self) -> str:
+        distance_in_time = self._now() - self.from_date
         distance_in_seconds = int(round(abs(distance_in_time.days * 86400 + distance_in_time.seconds)))
         distance_in_minutes = int(round(distance_in_seconds / 60))
 

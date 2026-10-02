@@ -34,3 +34,11 @@ def test_should_describe_each_bucket():
 
 def test_should_switch_to_months_after_30_days():
     assert _age(43210) == "1 month"
+
+
+def test_should_describe_past_times_as_ago():
+    assert DistanceOfTime(NOW - timedelta(hours=5), now=NOW).relative() == "5 hours ago"
+
+
+def test_should_describe_future_times_as_in():
+    assert DistanceOfTime(NOW + timedelta(hours=5), now=NOW).relative() == "in 5 hours"
