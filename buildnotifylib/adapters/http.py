@@ -8,16 +8,17 @@ from buildnotifylib.version import VERSION
 
 
 class HttpConnection:
-    def __init__(self):
+    def __init__(self) -> None:
         self.user_agent = f"BuildNotify/{VERSION}"
         self.local = threading.local()
 
     @property
     def session(self) -> requests.Session:
         """One Session per thread: the poller fetches servers in parallel and Session is not thread-safe."""
-        if not hasattr(self.local, "session"):
-            self.local.session = requests.Session()
-        return self.local.session
+        session: requests.Session | None = getattr(self.local, "session", None)
+        if session is None:
+            session = self.local.session = requests.Session()
+        return session
 
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None

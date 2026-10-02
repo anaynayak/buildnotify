@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any
 
 from PyQt5.QtCore import QSettings
@@ -36,6 +37,8 @@ VERSION = "schema_version"
 LEGACY_URLS = "connection/urls"
 LEGACY_SERVER_GROUPS = [key for key in SERVER_KEYS.values() if key != "url"]
 
+ValueReader = Callable[[str], Any]
+
 
 class SettingsStore:
     def __init__(self, qsettings: QSettings, keystore: CredentialStore):
@@ -53,7 +56,7 @@ class SettingsStore:
             **values,
         )
 
-    def save(self, settings: AppSettings):
+    def save(self, settings: AppSettings) -> None:
         for field, key in GLOBAL_KEYS.items():
             self.qsettings.setValue(key, getattr(settings, field))
         self.qsettings.setValue(SORT_KEY, settings.sort_key.value)
@@ -85,7 +88,7 @@ class SettingsStore:
             server.password = self.keystore.load(server.url, server.username) or ""
         return server
 
-    def save_passwords(self, old: list[ServerSettings], new: list[ServerSettings]):
+    def save_passwords(self, old: list[ServerSettings], new: list[ServerSettings]) -> None:
         old_entries, new_entries = keyring_entries(old), keyring_entries(new)
         for url, username in old_entries.keys() - new_entries.keys():
             self.keystore.delete(url, username)
@@ -94,7 +97,7 @@ class SettingsStore:
                 self.keystore.save(url, username, password)
 
 
-def migrate(qsettings: QSettings):
+def migrate(qsettings: QSettings) -> None:
     """Move 2.x per-URL keys into the servers array; the old keys go only once the new ones are on disk."""
     if as_int(qsettings.value(VERSION), 2) < SCHEMA_VERSION:
         urls = coerce(qsettings.value(LEGACY_URLS), [])
@@ -105,24 +108,24 @@ def migrate(qsettings: QSettings):
         remove_legacy_keys(qsettings)
 
 
-def legacy_value(qsettings: QSettings, url: str):
+def legacy_value(qsettings: QSettings, url: str) -> ValueReader:
     return lambda key: url if key == "url" else qsettings.value(f"{key}/{url}")
 
 
-def remove_legacy_keys(qsettings: QSettings):
+def remove_legacy_keys(qsettings: QSettings) -> None:
     for group in LEGACY_SERVER_GROUPS:
         qsettings.remove(group)
     qsettings.remove(LEGACY_URLS)
     qsettings.sync()
 
 
-def read_server(value) -> ServerSettings:
+def read_server(value: ValueReader) -> ServerSettings:
     defaults = ServerSettings("")
     fields = {field: coerce(value(key), getattr(defaults, field)) for field, key in SERVER_KEYS.items()}
     return ServerSettings(**fields)
 
 
-def write_servers(qsettings: QSettings, servers: list[ServerSettings]):
+def write_servers(qsettings: QSettings, servers: list[ServerSettings]) -> None:
     qsettings.remove(SERVERS)
     qsettings.beginWriteArray(SERVERS, len(servers))
     for index, server in enumerate(servers):

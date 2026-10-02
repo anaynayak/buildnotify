@@ -19,7 +19,7 @@ class ServerSettings:
     skip_ssl_verification: bool = False
     authentication_type: int = AUTH_USERNAME_PASSWORD
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.url = normalise_url(self.url)
 
     def has_creds(self) -> bool:
