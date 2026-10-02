@@ -13,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10
+        with:
+          # Don't restore caches written by other runs into the publishing build.
+          enable-cache: false
       - name: Build dist
         run: uv build
       - uses: actions/upload-artifact@v7
