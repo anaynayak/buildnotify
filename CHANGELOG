@@ -1,11 +1,20 @@
 ## [Unreleased]
 
 ### Added
-- Unavailable servers get a menu row with their last error and when it happened
+- Unavailable servers get a menu row with their last error and when it happened. The error is one short line with the host but no full URL or credentials
 - GitHub Actions servers: pick "GitHub Actions" in the server dialog and enter a repository, with optional workflow and branch filters. The latest run of each workflow and branch shows as a project. When a workflow filter matches no finished run in the newest 100 runs, BuildNotify reads up to 4 older pages to find one. The token stays in the system keyring, and BuildNotify waits out GitHub's rate limits on every server that uses the same token. A server with no token, for a public repository, writes nothing to the keyring
 - Settings move to schema version 4, which gives each server a source type. Existing servers become cctray feeds
 - Mute a server or a project from the tray menu's `Mute` submenu, or pause all notifications for an hour. Muted projects stay in the menu and the tray count, marked `(muted)`, but get no notifications and don't run the custom script. Mutes and the pause survive a restart
 - Settings move to schema version 5, which adds a muted flag to each server. Existing servers start unmuted
+
+### Changed
+- The failing count on the tray icon is a red badge in the bottom-right corner, so it no longer covers the icon. Counts above 99 show as 99+
+
+### Tech
+- `just demo` runs the app against local fixture feeds with throwaway settings and no keychain
+- `just screenshots` renders the docs images offscreen from fixture data
+- The release workflow fails when the tag doesn't match the version in `buildnotifylib/version.py`
+- The Flatpak bundle drops Qt WebEngine and NumPy
 
 ## [3.0.0] - 2026-10-02
 
