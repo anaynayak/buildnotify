@@ -916,3 +916,23 @@ def test_should_leave_a_short_label_whole(mute_menu):
     app_menu.update([built("api")])
 
     assert app_menu.menu.actions()[1].text() == "api"
+
+
+@pytest.mark.functional
+def test_should_keep_mutes_toggled_while_editing_a_server(mute_menu, mocker):
+    app_menu = mute_menu(ServerSettings(CI))
+    app_menu.update([built("api")], [ServerSnapshot(CI, error=CannotConnect("Could not connect to ci"), error_at=NOW)])
+    edit = action(app_menu.menu.actions()[0].menu(), "Edit server...")
+
+    def mute_from_the_tray():
+        action(submenu(app_menu), "ci/cc.xml").trigger()
+        action(submenu(app_menu), "api").trigger()
+        return ServerSettings(CI, prefix="new")
+
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.side_effect = mute_from_the_tray
+
+    edit.trigger()
+
+    [server] = reopened(app_menu).servers
+    assert (server.prefix, server.muted, server.muted_projects) == ("new", True, ["api"])

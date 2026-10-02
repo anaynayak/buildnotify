@@ -210,7 +210,8 @@ class AppMenu(QtCore.QObject):
         settings = self.store.settings
         if edited is None or (edited.url != server.url and self.configured(edited.url) is not None):
             return
-        self.change(with_server(settings, server.url, lambda _: edited))
+        # The tray may have muted the server or its projects while the dialog was open.
+        self.change(keep_mutes(with_server(settings, server.url, lambda _: edited), settings))
         self.reload_data.emit()
 
     def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
