@@ -63,17 +63,17 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEqual(False, response.server.unavailable)
 
     def test_should_respond_even_if_things_fail(self):
-        class MockConnection(object):
-            def __init__(self):
-                pass
+        error = Exception("something went wrong")
 
-            def connect(self, server, timeout):
-                raise Exception("something went wrong")
+        class FailingConnection(object):
+            def connect(self, server, timeout, additional_headers=None):
+                raise error
 
-        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection()).get_data()
+        response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, FailingConnection()).get_data()
         projects = response.server.get_projects()
         self.assertEqual(0, len(projects))
         self.assertEqual(True, response.server.unavailable)
+        self.assertIs(error, response.error)
 
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
