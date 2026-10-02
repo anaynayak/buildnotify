@@ -114,6 +114,9 @@ class ProjectLoader(object):
 
     def parse(self, data) -> List[Project]:
         dom = minidom.parseString(data)
+        root = dom.documentElement.tagName
+        if root != 'Projects':
+            raise ValueError('Not a cctray feed: expected <Projects> as the root element, got <%s>' % root)
         projects = []
         for node in dom.getElementsByTagName('Project'):
             projects.append(Project(

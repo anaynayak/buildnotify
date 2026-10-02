@@ -126,11 +126,17 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assert_unavailable('<?xml version="1.0"?><!DOCTYPE Projects [<!ENTITY a "aaaaaaaaaa">]>'
                                 '<Projects><Project name="&a;" activity="Sleeping"/></Projects>')
 
+    def test_should_report_error_for_non_cctray_feed(self):
+        body = '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>All builds</title></feed>'
+        response = self.assert_unavailable(body)
+        self.assertIn('feed', str(response.error))
+
     def assert_unavailable(self, body):
         response = ProjectLoader(ServerConfig('url', [], '', '', '', ''), 10, MockConnection(body)).get_data()
         self.assertEqual([], response.server.get_projects())
         self.assertEqual(True, response.server.unavailable)
         self.assertEqual(True, response.failed())
+        return response
 
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
