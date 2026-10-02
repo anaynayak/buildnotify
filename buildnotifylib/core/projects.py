@@ -5,7 +5,6 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, QObject
 from buildnotifylib.config import Config
 
-from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.filtered_continuous_integration_server import FilteredContinuousIntegrationServer
 from buildnotifylib.core.http_connection import HttpConnection
@@ -65,7 +64,7 @@ class ProjectsPopulator(QThread):
         self.start()
 
     def reload(self):
-        BackgroundEvent(self.process, self).run()
+        self.start()
 
     def process(self):
         overall_status = []
