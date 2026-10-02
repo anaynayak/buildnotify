@@ -45,8 +45,8 @@ class Config(object):
     SORT_BY_LAST_BUILD_TIME = "sort_build_time"
     SORT_BY_NAME = "sort_name"
 
-    def __init__(self, settings=QtCore.QSettings("BuildNotify", "BuildNotify")):
-        self.settings = settings
+    def __init__(self, settings=None):
+        self.settings = settings if settings is not None else QtCore.QSettings("BuildNotify", "BuildNotify")
         self.keystore = Keystore()
         self.timeout = self.get_with_default("connection/timeout", 10, int)
         self.interval = self.get_with_default(self.INTERVAL_IN_SECONDS, 2 * 60,

@@ -12,8 +12,8 @@ from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 
 
 class BuildNotify(object):
-    def __init__(self, app: QApplication, conf=Config(), interval=2000):
-        self.conf = conf
+    def __init__(self, app: QApplication, conf=None, interval=2000):
+        self.conf = conf if conf is not None else Config()
         self.build_icons = BuildIcons()
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
