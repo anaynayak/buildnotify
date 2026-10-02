@@ -6,7 +6,7 @@ Right click and configure as per the instructions below. On Linux and Windows a 
 
 ## Configuration
 
-Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`. If the scheme is missing, BuildNotify adds `http://`.
+Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`.
 
 Add a new server by clicking the `+` sign. Each server can use a username and password or a Bearer token. Both are kept in the system keyring.
 
