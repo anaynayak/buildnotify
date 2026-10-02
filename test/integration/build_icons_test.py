@@ -1,6 +1,6 @@
 import pytest
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QImage
 
 from buildnotifylib.ui.build_icons import BuildIcons
 
@@ -19,9 +19,45 @@ def test_should_consolidate_build_status_with_failure_count(qtbot):
 
 @pytest.mark.functional
 @pytest.mark.parametrize("status", [*BuildIcons().all_status, "Unknown.Status"])
-def test_should_load_fallback_icon_from_package_data(qtbot, status):
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_should_load_fallback_icon_from_package_data(qtbot, status, symbolic):
     icons = BuildIcons()
-    assert not icons.fallback(icons.icon_name(status)).isNull()
+    assert not icons.fallback(icons.icon_name(status, symbolic)).isNull()
+
+
+def test_should_name_symbolic_icons_with_the_freedesktop_suffix():
+    icons = BuildIcons()
+
+    assert icons.icon_name("Failure.Building", symbolic=True) == "buildnotify-failure-building-symbolic"
+    assert icons.icon_name("Unknown.Status", symbolic=True) == "buildnotify-inactive-symbolic"
+    assert icons.icon_name("Failure.Building") == "buildnotify-failure-building"
+
+
+def shape(icon: QIcon) -> QImage:
+    return icon.pixmap(QSize(22, 22)).toImage().convertToFormat(QImage.Format.Format_Alpha8)
+
+
+@pytest.mark.functional
+def test_should_tell_symbolic_icons_apart_by_shape_alone(qtbot):
+    icons = BuildIcons()
+    names = sorted(set(icons.all_status.values()))
+    shapes = [shape(icons.fallback(f"{name}-symbolic")) for name in names]
+
+    assert all(a != b for i, a in enumerate(shapes) for b in shapes[i + 1 :])
+
+
+@pytest.mark.functional
+def test_should_keep_symbolic_icons_sharp_on_hidpi(qtbot):
+    icons = BuildIcons()
+
+    assert icons.fallback("buildnotify-failure-symbolic").availableSizes()[0].width() >= 88
+
+
+@pytest.mark.functional
+def test_should_draw_the_count_over_a_symbolic_icon(qtbot):
+    icon = BuildIcons().for_aggregate_status("Failure.Sleeping", 2, 2.0, symbolic=True)
+
+    assert icon.availableSizes() == [QSize(44, 44)]
 
 
 @pytest.fixture
@@ -31,9 +67,10 @@ def theme(tmp_path):
     (theme_dir / "index.theme").write_text(
         "[Icon Theme]\nName=testtheme\nDirectories=scalable\n\n[scalable]\nSize=22\nType=Scalable\n"
     )
-    (theme_dir / "scalable" / "buildnotify-failure.svg").write_text(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><rect width="22" height="22"/></svg>'
-    )
+    for name in ("buildnotify-failure", "buildnotify-success-symbolic"):
+        (theme_dir / "scalable" / f"{name}.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><rect width="22" height="22"/></svg>'
+        )
     paths, name = QIcon.themeSearchPaths(), QIcon.themeName()
     QIcon.setThemeSearchPaths([str(tmp_path)])
     QIcon.setThemeName("testtheme")
@@ -45,6 +82,12 @@ def theme(tmp_path):
 @pytest.mark.functional
 def test_should_prefer_theme_icon_over_fallback(qtbot, theme):
     assert BuildIcons().for_status("Failure.Sleeping").name() == "buildnotify-failure"
+    assert BuildIcons().for_status("Success.Sleeping", symbolic=True).name() == "buildnotify-success-symbolic"
+
+
+@pytest.mark.functional
+def test_should_not_swap_a_missing_symbolic_theme_icon_for_the_coloured_one(qtbot, theme):
+    assert BuildIcons().for_status("Failure.Sleeping", symbolic=True).name() == ""
     assert BuildIcons().for_status("Success.Sleeping").name() == ""
 
 

@@ -64,7 +64,8 @@ jobs:
             from buildnotifylib.ui.build_icons import BuildIcons
             app = QApplication([])
             icons = BuildIcons()
-            assert not any(icons.fallback(name).isNull() for name in icons.all_status.values())
+            names = [icons.icon_name(status, symbolic) for status in icons.all_status for symbolic in (False, True)]
+            assert not any(icons.fallback(name).isNull() for name in names)
         run: |
           uv build
           uv venv --python ${{ matrix.python }} /tmp/install-check
