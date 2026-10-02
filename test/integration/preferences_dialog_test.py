@@ -3,7 +3,7 @@ import os
 import pytest
 from PyQt5 import QtCore
 from PyQt5.QtCore import QItemSelectionModel, Qt
-from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
@@ -122,3 +122,85 @@ def test_should_replace_the_row_when_a_server_url_is_edited(qtbot, mocker):
     dialog.configure_projects()
 
     assert dialog.get_urls() == ["http://new/cctray.xml", "http://two/cctray.xml"]
+
+
+def stub_server_dialog(mocker, url):
+    mocker.patch.object(ServerConfigurationDialog, 'open',
+                        return_value=ServerConfig(url, [], 'None', 'prefix', '', ''))
+
+
+@pytest.mark.functional
+def test_should_not_save_an_added_server_until_ok(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+    mocker.patch.object(dialog, 'exec_', return_value=QDialog.Rejected)
+
+    dialog.add_server()
+    preferences = dialog.open()
+
+    assert preferences is None
+    assert dialog.get_urls() == ["http://new/cctray.xml"]
+    assert conf.get_urls() == []
+
+
+@pytest.mark.functional
+def test_should_save_an_added_server_on_ok(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+    mocker.patch.object(dialog, 'exec_', return_value=QDialog.Accepted)
+
+    dialog.add_server()
+    preferences = dialog.open()
+
+    assert preferences.urls == ["http://new/cctray.xml"]
+    assert conf.get_display_prefix("http://new/cctray.xml") == 'prefix'
+
+
+@pytest.mark.functional
+def test_should_not_save_an_added_server_removed_before_ok(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+    mocker.patch.object(dialog, 'exec_', return_value=QDialog.Accepted)
+
+    dialog.add_server()
+    select_row(dialog, 0)
+    dialog.remove_element()
+    dialog.open()
+
+    assert conf.get_display_prefix("http://new/cctray.xml") is None
+
+
+@pytest.mark.functional
+def test_should_reject_a_duplicate_server(qtbot, mocker):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://one/cctray.xml")
+
+    dialog.add_server()
+
+    assert dialog.get_urls() == ["http://one/cctray.xml"]
+
+
+@pytest.mark.functional
+def test_should_keep_edits_to_an_added_server(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf)
+    qtbot.addWidget(dialog)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+    mocker.patch.object(dialog, 'exec_', return_value=QDialog.Accepted)
+    dialog.add_server()
+    select_row(dialog, 0)
+    mocker.patch.object(ServerConfigurationDialog, 'open',
+                        return_value=ServerConfig("http://new/cctray.xml", [], 'None', 'edited', '', ''))
+
+    dialog.configure_projects()
+    dialog.open()
+
+    assert conf.get_display_prefix("http://new/cctray.xml") == 'edited'

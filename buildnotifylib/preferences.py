@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple
+from typing import Dict, Optional, List, Tuple
 
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
@@ -6,12 +6,14 @@ from PyQt5.QtWidgets import QDialog, QWidget
 from buildnotifylib.config import Config, Preferences
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.serverconfig import ServerConfig
 
 
 class PreferencesDialog(QDialog):
     def __init__(self, conf: Config, parent: QWidget = None):
         QDialog.__init__(self, parent)
         self.conf = conf
+        self.added_servers: Dict[str, ServerConfig] = {}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
         self.checkboxes = dict(successfulBuild=self.ui.successfulBuildsCheckbox,
@@ -49,11 +51,17 @@ class PreferencesDialog(QDialog):
 
     def add_server(self):
         server_config = ServerConfigurationDialog(None, self.conf, self).open()
-        if server_config is not None:
-            self.conf.save_server_config(server_config)
-            urls = self.ui.cctrayPathList.model().stringList()
-            urls.append(server_config.url)
-            self.ui.cctrayPathList.setModel(QStringListModel(urls))
+        if server_config is None or server_config.url in self.get_urls():
+            return
+        self.added_servers[server_config.url] = server_config
+        urls = self.ui.cctrayPathList.model().stringList()
+        urls.append(server_config.url)
+        self.ui.cctrayPathList.setModel(QStringListModel(urls))
+
+    def save_added_servers(self):
+        for url, server_config in self.added_servers.items():
+            if url in self.get_urls():
+                self.conf.save_server_config(server_config)
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
@@ -70,8 +78,14 @@ class PreferencesDialog(QDialog):
             return
         server_config = ServerConfigurationDialog(url, self.conf, self).open()
         if server_config is not None:
-            self.conf.save_server_config(server_config)
+            self.store_edited_server(url, server_config)
             self.ui.cctrayPathList.model().setData(index, server_config.url)
+
+    def store_edited_server(self, url: str, server_config: ServerConfig):
+        if self.added_servers.pop(url, None) is not None:
+            self.added_servers[server_config.url] = server_config
+        else:
+            self.conf.save_server_config(server_config)
 
     def get_urls(self) -> List[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
@@ -84,6 +98,7 @@ class PreferencesDialog(QDialog):
 
     def open(self) -> Optional[Preferences]:  # type: ignore
         if self.exec_() == QDialog.Accepted:
+            self.save_added_servers()
             return Preferences(
                 urls=self.get_urls(),
                 interval=self.get_interval_in_seconds(),
