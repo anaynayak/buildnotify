@@ -269,7 +269,7 @@ class Ui_Preferences(object):
         self.scriptCheckbox.setText(QCoreApplication.translate("Preferences", u"Execute script for notifications", None))
         self.scriptLabel.setText(QCoreApplication.translate("Preferences", u"Script", None))
 #if QT_CONFIG(tooltip)
-        self.scriptLineEdit.setToolTip(QCoreApplication.translate("Preferences", u"#status# and #projects# would be replaced by the build status and projects respectively", None))
+        self.scriptLineEdit.setToolTip(QCoreApplication.translate("Preferences", u"The script gets the build status and projects in the BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS environment variables. #status# and #projects# are also replaced, quoted, except on Windows, where a script using them is not run.", None))
 #endif // QT_CONFIG(tooltip)
         self.scriptLineEdit.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.notificationsTab), QCoreApplication.translate("Preferences", u"Notifications", None))

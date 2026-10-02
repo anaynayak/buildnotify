@@ -215,7 +215,7 @@
                <bool>false</bool>
               </property>
               <property name="toolTip">
-               <string>#status# and #projects# would be replaced by the build status and projects respectively</string>
+               <string>The script gets the build status and projects in the BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS environment variables. #status# and #projects# are also replaced, quoted, except on Windows, where a script using them is not run.</string>
               </property>
               <property name="text">
                <string/>

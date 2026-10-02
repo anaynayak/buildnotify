@@ -1,14 +1,37 @@
+import logging
 import os
 import re
 import shlex
 import subprocess
+import sys
 
+PLACEHOLDERS = ("#status#", "#projects#")
 PLACEHOLDER_TOKENS = re.compile(r"#status#|#projects#|.", re.DOTALL)
+WINDOWS_PLACEHOLDERS = (
+    "Not running the custom script: #status# and #projects# can't be quoted safely for cmd.exe. "
+    "Read the BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS environment variables in the script instead."
+)
+
+log = logging.getLogger(__name__)
 
 
 class ShellScriptHook:
+    """Run the custom script through the platform shell.
+
+    The status and projects always reach the script as BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS.
+    The legacy #status#/#projects# placeholders are POSIX-shell only: cmd.exe has no quoting that
+    neutralises & | ^ % reliably, so on Windows a script that uses them is refused, not run.
+    """
+
+    def __init__(self, windows: bool | None = None):
+        self.windows = sys.platform == "win32" if windows is None else windows
+
     def run(self, script: str, status: str, projects: str) -> None:
-        command = substitute_placeholders(script, {"#status#": status, "#projects#": projects})
+        if self.windows and any(placeholder in script for placeholder in PLACEHOLDERS):
+            log.warning(WINDOWS_PLACEHOLDERS)
+            return
+        values = {"#status#": status, "#projects#": projects}
+        command = script if self.windows else substitute_placeholders(script, values)
         env = dict(os.environ, BUILDNOTIFY_STATUS=status, BUILDNOTIFY_PROJECTS=projects)
         subprocess.Popen(command, shell=True, env=env)
 
