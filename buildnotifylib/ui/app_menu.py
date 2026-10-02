@@ -5,7 +5,7 @@ from datetime import datetime
 from functools import partial
 
 from PySide6 import QtCore
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
@@ -25,12 +25,15 @@ from buildnotifylib.core.mute import (
     with_server,
 )
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.sections import grouped, sort_projects
+from buildnotifylib.core.sections import Section, grouped, sort_projects
 from buildnotifylib.core.settings import AppSettings, ServerSettings
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.version import VERSION
+
+OVERFLOW = 15
+"""Above this many project rows, Passing projects move into a submenu."""
 
 
 class AppMenu(QtCore.QObject):
@@ -54,19 +57,29 @@ class AppMenu(QtCore.QObject):
         self.unavailable: Sequence[ServerSnapshot] = ()
         self.mute_menu: QMenu | None = None
         self.error_menus: list[QMenu] = []
+        self.passing_menu: QMenu | None = None
         self.create_default_menu_items()
 
     def update(self, projects: list[Project], unavailable: Sequence[ServerSnapshot] = ()):
         self.projects, self.unavailable = projects, unavailable
         self.menu.clear()
         self.create_error_items(unavailable, separate=not projects)
+        self.create_project_items(projects)
+        self.create_default_menu_items()
+
+    def create_project_items(self, projects: list[Project]) -> None:
+        if self.passing_menu is not None:
+            self.passing_menu.deleteLater()
+            self.passing_menu = None
         mutes = Mutes.from_settings(self.store.settings)
         for section, members in grouped(self.sorted_projects(projects)):
-            self.menu.addSection(f"{section} ({len(members)})")
+            title = f"{section} ({len(members)})"
+            self.menu.addSection(title)
+            target = self.menu
+            if section is Section.PASSING and len(projects) > OVERFLOW:
+                target = self.passing_menu = self.menu.addMenu(title)
             for project in members:
-                icon = self.build_icons.for_status(project.get_build_status())
-                self.create_menu_item(project, icon, mutes.mutes(project))
-        self.create_default_menu_items()
+                self.create_menu_item(target, project, mutes.mutes(project))
 
     def sorted_projects(self, projects: list[Project]) -> list[Project]:
         return sort_projects(projects, self.store.settings.sort_key)
@@ -211,7 +224,7 @@ class AppMenu(QtCore.QObject):
     def exit(self, widget: QWidget):
         QApplication.quit()
 
-    def create_menu_item(self, project: Project, icon: QIcon, muted: bool = False):
+    def create_menu_item(self, menu: QMenu, project: Project, muted: bool = False):
         menu_item_label = project.label(self.store.settings.show_last_build_label)
         build_time = project.build_time
         if self.store.settings.notify("lastBuildTimeForProject") and build_time is not None:
@@ -219,7 +232,8 @@ class AppMenu(QtCore.QObject):
         if muted:
             menu_item_label += " (muted)"
 
-        action = self.menu.addAction(icon, menu_item_label)
+        icon = self.build_icons.for_status(project.get_build_status())
+        action = menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)
         action.triggered.connect(partial(self.open_url, url=project.url))
 

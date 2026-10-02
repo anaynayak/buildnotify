@@ -798,7 +798,8 @@ def test_should_keep_mutes_toggled_while_preferences_is_open(mute_menu, mocker):
 
 
 def project_with(name, status, activity="Sleeping"):
-    return ProjectBuilder({"name": name, "lastBuildStatus": status, "activity": activity}).server(CI).build()
+    attrs = {"name": name, "lastBuildStatus": status, "activity": activity, "url": f"http://ci/{name}"}
+    return ProjectBuilder(attrs).server(CI).build()
 
 
 @pytest.mark.functional
@@ -839,3 +840,48 @@ def test_should_omit_empty_sections(mute_menu):
     app_menu.update([project_with("api", "Success")])
 
     assert texts(app_menu.menu)[:3] == ["Passing (1)", "api", ""]
+
+
+def many(count, status, activity="Sleeping"):
+    return [project_with(f"{status.lower()}-{n:02}", status, activity) for n in range(count)]
+
+
+@pytest.mark.functional
+def test_should_keep_passing_projects_top_level_at_the_threshold(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), sort_key=SortKey.NAME)
+
+    app_menu.update(many(2, "Failure") + many(13, "Success"))
+
+    assert "success-12" in texts(app_menu.menu)
+    assert not any(a.menu() for a in app_menu.menu.actions() if a.text().startswith("Passing"))
+
+
+@pytest.mark.functional
+def test_should_collapse_passing_projects_into_a_submenu_above_the_threshold(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), sort_key=SortKey.NAME)
+
+    app_menu.update(many(2, "Failure") + many(1, "Success", "Building") + many(13, "Success"))
+
+    assert texts(app_menu.menu)[:8] == [
+        "Failing (2)",
+        "failure-00",
+        "failure-01",
+        "Building (1)",
+        "success-00",
+        "Passing (13)",
+        "Passing (13)",
+        "",
+    ]
+    passing = app_menu.menu.actions()[6].menu()
+    assert texts(passing) == [f"success-{n:02}" for n in range(13)]
+
+
+@pytest.mark.functional
+def test_should_open_a_project_from_the_passing_submenu(mute_menu, mocker):
+    app_menu = mute_menu(ServerSettings(CI))
+    browser = mocker.patch("buildnotifylib.ui.app_menu.webbrowser.open")
+    app_menu.update(many(16, "Success"))
+
+    action(app_menu.menu.actions()[1].menu(), "success-03").trigger()
+
+    browser.assert_called_once_with("http://ci/success-03")
