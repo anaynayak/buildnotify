@@ -113,7 +113,7 @@ def test_should_open_an_ini_settings_file_when_given_a_path(qapp, tmp_path):
     buildnotify = entry.build(qapp, path)
     buildnotify.tray_timer.stop()
 
-    assert buildnotify.store.qsettings.fileName() == path
+    assert Path(buildnotify.store.qsettings.fileName()) == Path(path)
     assert buildnotify.store.qsettings.format() == QSettings.Format.IniFormat
 
 
