@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
 from typing import ClassVar
 
@@ -36,6 +37,8 @@ class ServerSettings:
     repository: str = ""
     workflow: str = ""
     branch: str = ""
+    muted: bool = False
+    muted_projects: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.kind = SourceKind.parse(self.kind)
@@ -78,6 +81,7 @@ class AppSettings:
     show_last_build_label: bool = False
     symbolic_icons: bool = False
     notifications: dict[str, bool] = field(default_factory=dict)
+    paused_until: datetime | None = None
 
     def notify(self, event: str) -> bool:
         return self.notifications.get(event, DEFAULT_NOTIFICATIONS[event])
