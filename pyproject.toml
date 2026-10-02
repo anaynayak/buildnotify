@@ -57,7 +57,6 @@ path = "buildnotifylib/version.py"
 include = [
     "/buildnotifylib",
     "/data",
-    "/icons",
     "/test",
     "/buildnotify.desktop",
     "/buildnotify.svg",

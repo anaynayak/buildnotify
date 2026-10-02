@@ -9,14 +9,10 @@
 ## Editing the UI
 
 To edit the dialog windows, you should use [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html).
-Once you're done, invoke the following command to regenerate its Python implementation:
+Once you're done, regenerate its Python implementation in `buildnotifylib/generated` with:
 
 ```shell
-uv run pyside6-uic --from-imports -o buildnotifylib/generated/<file>_ui.py data/<file>.ui
+just ui
 ```
 
-Regenerate the icon resources after changing `icons/` with:
-
-```shell
-uv run pyside6-rcc icons/icons.qrc -o buildnotifylib/generated/icons_rc.py
-```
+The status icons are plain SVG files in `buildnotifylib/resources/icons` and ship as package data.

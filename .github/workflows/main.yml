@@ -53,9 +53,17 @@ jobs:
         run: uv run --locked pytest -q
       - name: Test install
         if: runner.os == 'Linux'
+        env:
+          ICON_CHECK: |
+            from PySide6.QtWidgets import QApplication
+            from buildnotifylib.ui.build_icons import BuildIcons
+            app = QApplication([])
+            icons = BuildIcons()
+            assert not any(icons.fallback(name).isNull() for name in icons.all_status.values())
         run: |
           uv build
           uv venv --python ${{ matrix.python }} /tmp/install-check
           uv pip install --python /tmp/install-check dist/*.whl
           /tmp/install-check/bin/python -c "import buildnotifylib"
+          /tmp/install-check/bin/python -c "$ICON_CHECK"
           test -x /tmp/install-check/bin/buildnotify

@@ -20,7 +20,6 @@ from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication,
     QHBoxLayout, QLabel, QLineEdit, QListView,
     QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
     QSpinBox, QTabWidget, QVBoxLayout, QWidget)
-from . import icons_rc
 
 class Ui_Preferences(object):
     def setupUi(self, Preferences):

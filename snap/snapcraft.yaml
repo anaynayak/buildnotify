@@ -6,7 +6,7 @@ description: |
 grade: devel
 confinement: devmode
 base: core18
-icon: icons/buildnotify.svg
+icon: buildnotify.svg
 architectures: [amd64]
 apps:
   buildnotify:

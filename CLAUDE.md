@@ -16,7 +16,7 @@ just lint          # ruff check + ruff format --check
 just fmt           # ruff fixes + formatting
 just types         # mypy (config in pyproject.toml; skips buildnotifylib/generated)
 just build         # sdist + wheel into dist/
-just ui            # regenerate buildnotifylib/generated from data/*.ui and icons/icons.qrc
+just ui            # regenerate buildnotifylib/generated from data/*.ui
 ```
 
 Run Qt tests outside `just` with `QT_QPA_PLATFORM=offscreen`. `pre-commit install` enables

@@ -1,4 +1,8 @@
+from importlib.resources import files
+
 from PySide6 import QtCore, QtGui
+
+ICONS = files("buildnotifylib") / "resources" / "icons"
 
 
 class BuildIcons:
@@ -7,8 +11,6 @@ class BuildIcons:
     failure_sleeping = "buildnotify-failure"
     failure_building = "buildnotify-failure-building"
     unavailable = "buildnotify-inactive"
-    resource_path = ":/status/icons/%s.svg"
-    theme_resource_path = "%s"
 
     def __init__(self):
         self.all_status = {
@@ -22,10 +24,13 @@ class BuildIcons:
         }
 
     def for_status(self, status) -> QtGui.QIcon:
-        return QtGui.QIcon.fromTheme(
-            self.get_path(self.theme_resource_path, status),
-            QtGui.QIcon(QtGui.QPixmap(self.get_path(self.resource_path, status))),
-        )
+        name = self.icon_name(status)
+        return QtGui.QIcon.fromTheme(name, self.fallback(name))
+
+    def fallback(self, name: str) -> QtGui.QIcon:
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData((ICONS / f"{name}.svg").read_bytes())
+        return QtGui.QIcon(pixmap)
 
     def for_aggregate_status(self, status, count) -> QtGui.QIcon:
         if count == 0:
@@ -38,7 +43,5 @@ class BuildIcons:
         painter.end()
         return QtGui.QIcon(pixmap)
 
-    def get_path(self, resource_path: str, status: str) -> str:
-        if status in self.all_status:
-            return resource_path % self.all_status[status]
-        return resource_path % self.all_status["unavailable"]
+    def icon_name(self, status: str) -> str:
+        return self.all_status.get(status, self.unavailable)
