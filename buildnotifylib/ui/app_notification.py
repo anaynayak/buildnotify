@@ -4,6 +4,7 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.core.diff import Change, Event, diff, labels
+from buildnotifylib.core.mute import Clock, Mutes, audible, audible_servers, system_clock
 from buildnotifylib.core.ports import Hook
 from buildnotifylib.core.settings import AppSettings
 from buildnotifylib.ui.notifications import Notification
@@ -12,9 +13,10 @@ from buildnotifylib.ui.notifications import Notification
 class AppNotification:
     """Owns the notification state across polls: the previous status and the connectivity back-off."""
 
-    def __init__(self, store: SettingsStore, widget: QSystemTrayIcon, hook: Hook):
+    def __init__(self, store: SettingsStore, widget: QSystemTrayIcon, hook: Hook, clock: Clock = system_clock):
         self.store = store
         self.hook = hook
+        self.clock = clock
         self.notification = Notification(widget)
         self.integration_status: OverallIntegrationStatus | None = None
         self.backoff = Backoff()
@@ -25,11 +27,12 @@ class AppNotification:
         self.integration_status = new_integration_status
 
     def show_notifications(self, settings: AppSettings, old: OverallIntegrationStatus, new: OverallIntegrationStatus):
-        events = diff(old.get_projects(), new.get_projects())
+        mutes, now = Mutes.from_settings(settings), self.clock()
+        events = audible(diff(old.get_projects(), new.get_projects()), mutes, now)
         self.show_change(settings, events, "fixedBuild", Change.FIXED)
         self.show_change(settings, events, "brokenBuild", Change.BROKEN)
         self.show_change(settings, events, "stillFailingBuild", Change.STILL_FAILING)
-        urls = self.unavailable_server_urls(new)
+        urls = audible_servers(self.unavailable_server_urls(new), mutes, now)
         self.show_notification_msg(settings, settings.notify("connectivityIssues"), urls, "Connectivity issues")
         self.show_change(settings, events, "successfulBuild", Change.STILL_SUCCESSFUL)
 

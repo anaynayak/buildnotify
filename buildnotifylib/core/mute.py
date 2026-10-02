@@ -2,13 +2,18 @@
 
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from buildnotifylib.core.diff import Event, Key, key
 from buildnotifylib.core.model import Project
 from buildnotifylib.core.settings import AppSettings, ServerSettings
 
 PAUSE = timedelta(hours=1)
+Clock = Callable[[], datetime]
+
+
+def system_clock() -> datetime:
+    return datetime.now(UTC)
 
 
 @dataclass(frozen=True)
