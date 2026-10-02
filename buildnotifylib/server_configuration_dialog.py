@@ -1,7 +1,7 @@
 from zoneinfo import available_timezones
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
+from PyQt5.QtCore import Qt, QThreadPool, QTimer, pyqtSignal
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
@@ -16,7 +16,9 @@ from buildnotifylib.ui.poller import Fetch
 
 
 class ServerConfigurationDialog(QDialog):
-    loaded = pyqtSignal(ServerSnapshot)
+    DEADLINE_GRACE_MS = 2000
+
+    loaded = pyqtSignal(int, ServerSnapshot)
 
     def __init__(
         self,
@@ -51,7 +53,11 @@ class ServerConfigurationDialog(QDialog):
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
         self.loads = QThreadPool.globalInstance()
-        self.loaded.connect(self.load_data)
+        self.loaded.connect(self.on_loaded)
+        self.generation = 0
+        self.deadline = QTimer(self)
+        self.deadline.setSingleShot(True)
+        self.deadline.timeout.connect(self.expire)
 
         if not Keystore.is_available():
             self.ui.authenticationSettings.setTitle("Authentication (keyring dependency missing)")
@@ -92,7 +98,20 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.setEnabled(False)
         config = self.get_server_config()
         self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
-        self.loads.start(Fetch(self.project_loader, self, "loaded"))
+        self.generation += 1
+        self.loads.start(Fetch(self.project_loader, self, "loaded", self.generation))
+        self.deadline.start(self.timeout * 1000 + self.DEADLINE_GRACE_MS)
+
+    def on_loaded(self, generation: int, response: ServerSnapshot):
+        if generation != self.generation:
+            return
+        self.deadline.stop()
+        self.load_data(response)
+
+    def expire(self):
+        self.generation += 1
+        error = TimeoutError("no response before the load deadline")
+        self.load_data(ServerSnapshot(self.project_loader.server_config.url, error=error))
 
     def url_error(self) -> str | None:
         url = self.ui.addServerUrl.text()

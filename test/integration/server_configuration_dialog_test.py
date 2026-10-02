@@ -11,7 +11,7 @@ from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
-from test.utils import FakeConnection, fake_content
+from test.utils import FakeConnection, GatedConnection, fake_content
 
 TIMEOUT = 10
 
@@ -255,3 +255,29 @@ def test_should_load_projects_through_the_injected_connection(qtbot):
     qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
 
     assert connection.urls == [url]
+
+
+@pytest.mark.functional
+def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
+    url = "http://localhost:8080/cc.xml"
+    connection = GatedConnection(fake_content(), slow=[url])
+    mocker.patch.object(ServerConfigurationDialog, "DEADLINE_GRACE_MS", 50)
+    dialog = ServerConfigurationDialog(ServerSettings(url), 0, connection)
+    qtbot.addWidget(dialog)
+    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
+
+    try:
+        dialog.fetch_data()
+
+        def alert_shown():
+            m.assert_called_once_with(dialog, "Failed to fetch projects", ANY)
+            assert dialog.ui.loadUrlButton.isEnabled()
+
+        qtbot.wait_until(alert_shown, timeout=2000)
+    finally:
+        connection.release.set()
+    assert dialog.loads.waitForDone(5000)
+    qtbot.wait(50)
+
+    assert dialog.ui.stackedWidget.currentIndex() == 0
+    assert m.call_count == 1
