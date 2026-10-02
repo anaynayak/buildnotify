@@ -16,6 +16,15 @@ jobs:
         with:
           # Don't restore caches written by other runs into the publishing build.
           enable-cache: false
+      - name: Check the tag matches the version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(python3 -c 'import runpy; print(runpy.run_path("buildnotifylib/version.py")["VERSION"])')
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Tag $TAG does not match version $version in buildnotifylib/version.py"
+            exit 1
+          fi
       - name: Build dist
         run: uv build
       - uses: actions/upload-artifact@v7
