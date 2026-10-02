@@ -25,7 +25,7 @@ class ServerConfigurationDialog(QDialog):
         connection: Connection,
         parent: QWidget | None = None,
     ):
-        QDialog.__init__(self, parent)
+        super().__init__(parent)
         self.connection = connection
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
@@ -153,7 +153,7 @@ class ServerConfigurationDialog(QDialog):
                 item.child(index, 0).setCheckState(item.checkState())
 
     def server_url(self) -> str:
-        return str(self.ui.addServerUrl.text())
+        return self.ui.addServerUrl.text()
 
     def get_server_config(self) -> ServerSettings:
         projects_model = self.ui.projectsList.model()
@@ -169,12 +169,12 @@ class ServerConfigurationDialog(QDialog):
         return ServerSettings(
             self.server_url(),
             excluded_projects,
-            str(self.ui.timezoneList.currentText()),
-            str(self.ui.displayPrefix.text()),
-            str(self.ui.username.text()),
-            str(self.ui.password.text()),
+            self.ui.timezoneList.currentText(),
+            self.ui.displayPrefix.text(),
+            self.ui.username.text(),
+            self.ui.password.text(),
             self.skip_ssl_verification,
-            int(self.ui.authentication_type.currentIndex()),
+            self.ui.authentication_type.currentIndex(),
         )
 
     def open(self) -> ServerSettings | None:  # type: ignore

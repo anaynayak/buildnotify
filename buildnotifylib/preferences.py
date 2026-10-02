@@ -11,7 +11,7 @@ from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 class PreferencesDialog(QDialog):
     def __init__(self, settings: AppSettings, connection: Connection, parent: QWidget | None = None):
-        QDialog.__init__(self, parent)
+        super().__init__(parent)
         self.settings = settings
         self.connection = connection
         self.servers = {server.url: server for server in settings.servers}
@@ -87,7 +87,7 @@ class PreferencesDialog(QDialog):
         return edited
 
     def get_urls(self) -> list[str]:
-        return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
+        return self.ui.cctrayPathList.model().stringList()
 
     def get_selections(self) -> dict[str, bool]:
         return {key: checkbox.isChecked() for key, checkbox in self.checkboxes.items()}

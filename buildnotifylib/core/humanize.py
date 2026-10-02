@@ -14,7 +14,7 @@ def age(then: datetime, now: datetime) -> str:
         (1, "1 minute"),
         (45, f"{minutes} minutes"),
         (90, "1 hour"),
-        (1440, f"{round(minutes / 60.0)} hours"),
+        (1440, f"{round(minutes / 60)} hours"),
         (2880, "1 day"),
         (43200, f"{round(minutes / 1440)} days"),
         (86400, "1 month"),
