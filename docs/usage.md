@@ -71,7 +71,7 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 3. All projects in the configured CI servers contribute to the overall build status which is displayed in the tray.
 4. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time.
 5. Clicking on any project in the tray menu would take you to the project page on the CI server.
-6. A server that can't be reached gets a greyed-out row at the top of the menu with its last error and the time it happened, such as `ci.example.org/cctray.xml: Could not connect (10:00)`. Its projects from the last successful fetch stay in the list.
+6. A server that can't be reached gets a row at the top of the menu with its menu prefix (or its host), a short reason and the time it happened, such as `jenkins: can't connect (10:00)` or `ci.example.org: sign-in failed (10:00)`. The row opens a submenu with the full error, a hint when there is one, `Retry now`, which checks every server again, and `Edit server...`, which opens the server dialog. Its projects from the last successful fetch stay in the list.
 
 ![Tray menu](images/projectlist.png)
 

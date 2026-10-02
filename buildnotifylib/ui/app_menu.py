@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import humanize
 from buildnotifylib.core.diff import key
-from buildnotifylib.core.errors import server_label, summarize
+from buildnotifylib.core.errors import details, host, phrase, server_label
 from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.mute import (
     Clock,
@@ -22,6 +22,7 @@ from buildnotifylib.core.mute import (
     system_clock,
     toggle_project,
     toggle_server,
+    with_server,
 )
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
@@ -51,6 +52,7 @@ class AppMenu(QtCore.QObject):
         self.projects: list[Project] = []
         self.unavailable: Sequence[ServerSnapshot] = ()
         self.mute_menu: QMenu | None = None
+        self.error_menus: list[QMenu] = []
         self.create_default_menu_items()
 
     def update(self, projects: list[Project], unavailable: Sequence[ServerSnapshot] = ()):
@@ -76,20 +78,35 @@ class AppMenu(QtCore.QObject):
         return True, build_time.timestamp()
 
     def create_error_items(self, servers: Sequence[ServerSnapshot]):
-        icon = self.build_icons.for_status(None)
-        for server in servers:
-            action = self.menu.addAction(icon, self.error_label(server))
-            action.setIconVisibleInMenu(True)
-            action.setEnabled(False)
+        for menu in self.error_menus:
+            menu.deleteLater()
+        self.error_menus = [self.create_error_menu(server) for server in servers]
         if servers:
             self.menu.addSeparator()
 
+    def create_error_menu(self, snapshot: ServerSnapshot) -> QMenu:
+        server = self.configured(snapshot.url)
+        menu = QMenu(self.error_label(snapshot, server), self.menu)
+        menu.setIcon(self.build_icons.for_status(None))
+        for line in details(snapshot.error) if snapshot.error is not None else ["Unavailable"]:
+            menu.addAction(line).setEnabled(False)
+        menu.addSeparator()
+        menu.addAction("Retry now").triggered.connect(self.reload_data)
+        if server is not None:
+            menu.addAction("Edit server...").triggered.connect(partial(self.edit_server_clicked, server))
+        self.menu.addMenu(menu).setIconVisibleInMenu(True)
+        return menu
+
+    def configured(self, url: str) -> ServerSettings | None:
+        return next((server for server in self.store.settings.servers if server.url == url), None)
+
     @staticmethod
-    def error_label(server: ServerSnapshot) -> str:
-        summary = summarize(server.error) if server.error is not None else "Unavailable"
-        at = (server.error_at or datetime.now()).astimezone()
+    def error_label(snapshot: ServerSnapshot, server: ServerSettings | None) -> str:
+        name = (server.prefix if server is not None else "") or host(snapshot.url) or "server"
+        summary = phrase(snapshot.error) if snapshot.error is not None else "unavailable"
+        at = (snapshot.error_at or datetime.now()).astimezone()
         when = at.strftime("%H:%M" if at.date() == datetime.now().astimezone().date() else "%Y-%m-%d %H:%M")
-        return f"{server_label(server.url)}: {summary} ({when})"
+        return f"{name}: {summary} ({when})"
 
     def create_default_menu_items(self):
         if self.store.settings.servers:
@@ -170,16 +187,24 @@ class AppMenu(QtCore.QObject):
         self.add_server_clicked()
 
     def add_server_clicked(self) -> None:
-        server = self.open_server_dialog()
+        server = self.open_server_dialog(None)
         settings = self.store.settings
         if server is None or server.url in [s.url for s in settings.servers]:
             return
         self.change(replace(settings, servers=[*settings.servers, server]))
         self.reload_data.emit()
 
-    def open_server_dialog(self) -> ServerSettings | None:
+    def edit_server_clicked(self, server: ServerSettings) -> None:
+        edited = self.open_server_dialog(server)
+        settings = self.store.settings
+        if edited is None or (edited.url != server.url and self.configured(edited.url) is not None):
+            return
+        self.change(with_server(settings, server.url, lambda _: edited))
+        self.reload_data.emit()
+
+    def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
         dialog = ServerConfigurationDialog(
-            None,
+            server,
             self.store.settings.timeout_seconds,
             self.connection,
             self.menu,

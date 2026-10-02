@@ -22,6 +22,7 @@ from buildnotifylib.adapters.http import HttpConnection  # noqa: E402
 from buildnotifylib.core import cctray  # noqa: E402
 from buildnotifylib.core.aggregate import OverallIntegrationStatus  # noqa: E402
 from buildnotifylib.core.model import ServerSnapshot  # noqa: E402
+from buildnotifylib.core.ports import CannotConnect  # noqa: E402
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind  # noqa: E402
 from buildnotifylib.ui import app_menu  # noqa: E402
 from buildnotifylib.ui.build_icons import TRAY_SIZE, BuildIcons  # noqa: E402
@@ -76,7 +77,7 @@ def snapshot(server: ServerSettings, feed: str) -> ServerSnapshot:
 
 
 def status() -> OverallIntegrationStatus:
-    offline = ServerSnapshot(OFFLINE.url, error=ConnectionError("Could not connect"), error_at=NOW)
+    offline = ServerSnapshot(OFFLINE.url, error=CannotConnect("Could not connect to ci.example.org"), error_at=NOW)
     return OverallIntegrationStatus([snapshot(JENKINS, "jenkins.xml"), snapshot(GOCD, "gocd.xml"), offline])
 
 

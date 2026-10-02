@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.model import ServerSnapshot
-from buildnotifylib.core.ports import FetchError
+from buildnotifylib.core.ports import CannotConnect, FetchError
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
@@ -449,11 +449,13 @@ def error_menu(qtbot):
 
 
 @pytest.mark.functional
-def test_should_show_a_row_with_the_last_error_and_its_time_for_an_unavailable_server(error_menu):
+def test_should_show_an_enabled_row_with_a_short_error_and_its_time_for_an_unavailable_server(error_menu):
     app_menu = error_menu
     at = datetime.now().astimezone().replace(hour=9, minute=5)
     down = ServerSnapshot(
-        "https://user:hunter2@ci.example.com/cc.xml?token=s3cret", error=FetchError("HTTP 503 Unavailable"), error_at=at
+        "https://user:hunter2@ci.example.com/cc.xml?token=s3cret",
+        error=FetchError("HTTP 503 Unavailable", 503),
+        error_at=at,
     )
     project1 = ProjectBuilder({"name": "Project 1", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
 
@@ -461,7 +463,7 @@ def test_should_show_a_row_with_the_last_error_and_its_time_for_an_unavailable_s
 
     actions = app_menu.menu.actions()
     assert [a.text() for a in actions] == [
-        "ci.example.com/cc.xml: HTTP 503 Unavailable (09:05)",
+        "ci.example.com: HTTP 503 (09:05)",
         "",
         "Project 1",
         "",
@@ -471,7 +473,16 @@ def test_should_show_a_row_with_the_last_error_and_its_time_for_an_unavailable_s
         "Preferences",
         "Exit",
     ]
-    assert not actions[0].isEnabled()
+    assert actions[0].isEnabled()
+
+
+@pytest.mark.functional
+def test_should_name_an_error_row_after_the_server_prefix(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI, prefix="jenkins"))
+
+    app_menu.update([], [ServerSnapshot(CI, error=CannotConnect("Could not connect to ci"), error_at=NOW)])
+
+    assert app_menu.menu.actions()[0].text().startswith("jenkins: can't connect (")
 
 
 @pytest.mark.functional
@@ -481,17 +492,74 @@ def test_should_date_an_error_row_from_an_earlier_day(error_menu):
 
     app_menu.update([], [ServerSnapshot("http://ci:8080/cc.xml", error=TimeoutError("Timed out"), error_at=at)])
 
-    assert app_menu.menu.actions()[0].text() == "ci:8080/cc.xml: Timed out (2026-01-02 03:04)"
+    assert app_menu.menu.actions()[0].text() == "ci:8080: timed out (2026-01-02 03:04)"
 
 
 @pytest.mark.functional
-def test_should_keep_tracebacks_out_of_the_error_row(error_menu):
+def test_should_keep_tracebacks_out_of_the_error_row_and_its_details(error_menu):
     app_menu = error_menu
     error = RuntimeError('boom\nTraceback (most recent call last):\n  File "x.py", line 1')
 
     app_menu.update([], [ServerSnapshot("http://ci/cc.xml", error=error)])
 
-    assert app_menu.menu.actions()[0].text().startswith("ci/cc.xml: boom (")
+    row = app_menu.menu.actions()[0]
+    assert row.text().startswith("ci: request failed (")
+    assert texts(row.menu())[0] == "boom"
+
+
+@pytest.mark.functional
+def test_should_list_the_full_message_a_hint_and_actions_under_an_error_row(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI))
+    error = FetchError("HTTP 401 for https://user:hunter2@ci/cc.xml?token=s3cret", 401)
+
+    app_menu.update([], [ServerSnapshot(CI, error=error, error_at=NOW)])
+
+    details = app_menu.menu.actions()[0].menu()
+    assert texts(details) == [
+        "HTTP 401 for ci",
+        "Sign-in failed - check the username and token",
+        "",
+        "Retry now",
+        "Edit server...",
+    ]
+    assert not any("hunter2" in text or "s3cret" in text for text in texts(details))
+
+
+@pytest.mark.functional
+def test_should_poll_again_on_retry_now(mute_menu, qtbot):
+    app_menu = mute_menu(ServerSettings(CI))
+    app_menu.update([], [ServerSnapshot(CI, error=CannotConnect("Could not connect to ci"), error_at=NOW)])
+
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
+        action(app_menu.menu.actions()[0].menu(), "Retry now").trigger()
+
+
+@pytest.mark.functional
+def test_should_edit_the_unavailable_server_and_poll_again(mute_menu, qtbot, mocker):
+    app_menu = mute_menu(ServerSettings(CI, prefix="old"), ServerSettings(OTHER))
+    app_menu.update([], [ServerSnapshot(CI, error=CannotConnect("Could not connect to ci"), error_at=NOW)])
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.return_value = ServerSettings(CI, prefix="new")
+
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
+        action(app_menu.menu.actions()[0].menu(), "Edit server...").trigger()
+
+    edited = dialog.call_args.args[0]
+    assert (edited.url, edited.prefix) == (CI, "old")
+    assert [(s.url, s.prefix) for s in reopened(app_menu).servers] == [(CI, "new"), (OTHER, "")]
+
+
+@pytest.mark.functional
+def test_should_not_let_an_edit_duplicate_another_server(mute_menu, qtbot, mocker):
+    app_menu = mute_menu(ServerSettings(CI), ServerSettings(OTHER))
+    app_menu.update([], [ServerSnapshot(CI, error=CannotConnect("Could not connect to ci"), error_at=NOW)])
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.return_value = ServerSettings(OTHER)
+
+    with qtbot.assertNotEmitted(app_menu.reload_data):
+        action(app_menu.menu.actions()[0].menu(), "Edit server...").trigger()
+
+    assert [s.url for s in reopened(app_menu).servers] == [CI, OTHER]
 
 
 CI = "http://ci/cc.xml"

@@ -52,7 +52,7 @@ def test_should_list_unavailable_servers_in_the_menu(qtbot):
 
     widget.update_projects(OverallIntegrationStatus([down, ServerSnapshot("http://up/cc.xml")]))
 
-    assert widget.app_menu.menu.actions()[0].text().startswith("ci/cc.xml: Timed out (")
+    assert widget.app_menu.menu.actions()[0].text().startswith("ci: timed out (")
 
 
 def test_should_hide_tray_when_app_is_quitting(qtbot, qapp):
