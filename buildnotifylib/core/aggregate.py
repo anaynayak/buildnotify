@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 
 from buildnotifylib.core.model import Activity, Project, ServerSnapshot, Status
 
@@ -9,27 +9,19 @@ def rank(project: Project) -> tuple[Status, Activity]:
     return project.status, project.activity
 
 
-def overall_status(projects: Iterable[Project]) -> str | None:
-    ranks = [rank(project) for project in projects]
-    if not ranks:
-        return None
-    status, activity = min(ranks, key=lambda pair: (pair[0].priority, pair[1].priority))
-    return f"{status}.{activity}"
-
-
-def failing(projects: Iterable[Project]) -> list[Project]:
-    return [project for project in projects if project.status is Status.FAILURE]
-
-
 class OverallIntegrationStatus:
     def __init__(self, servers: Sequence[ServerSnapshot]):
         self.servers = list(servers)
 
     def get_build_status(self) -> str | None:
-        return overall_status(self.get_projects())
+        ranks = [rank(project) for project in self.get_projects()]
+        if not ranks:
+            return None
+        status, activity = min(ranks, key=lambda pair: (pair[0].priority, pair[1].priority))
+        return f"{status}.{activity}"
 
     def get_failing_builds(self) -> list[Project]:
-        return failing(self.get_projects())
+        return [project for project in self.get_projects() if project.status is Status.FAILURE]
 
     def get_projects(self) -> list[Project]:
         return [project for server in self.servers for project in server.projects]

@@ -4,7 +4,6 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
-from buildnotifylib.core.aggregate import overall_status as aggregate_status
 from buildnotifylib.core.model import Activity, ServerSnapshot, Status
 from test.project_builder import ProjectBuilder
 from test.strategies import project_lists
@@ -86,6 +85,10 @@ def overall_status(*statuses):
         for i, (status, activity) in enumerate(statuses)
     ]
     return OverallIntegrationStatus([ServerSnapshot("someurl", tuple(projects))])
+
+
+def aggregate_status(projects):
+    return OverallIntegrationStatus([ServerSnapshot("someurl", tuple(projects))]).get_build_status()
 
 
 KNOWN_ACTIVITIES = [Activity.BUILDING, Activity.SLEEPING, Activity.CHECKING_MODIFICATIONS]
