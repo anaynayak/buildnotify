@@ -43,6 +43,9 @@ SERVER_KEYS = {
     "muted_projects": "muted_projects",
 }
 
+TOKEN_USERNAME = "token"
+LEGACY_TOKEN_USERNAME = ""
+
 VERSION = "schema_version"
 LEGACY_URLS = "connection/urls"
 LEGACY_SERVER_GROUPS = [
@@ -63,6 +66,7 @@ class SettingsStore:
     def __init__(self, qsettings: QSettings, keystore: CredentialStore):
         self.qsettings = qsettings
         self.keystore = keystore
+        self.legacy_tokens: set[str] = set()
         migrate(qsettings)
         self.settings = self.load()
 
@@ -106,16 +110,33 @@ class SettingsStore:
 
     def with_password(self, server: ServerSettings) -> ServerSettings:
         if server.uses_keyring():
-            server.password = self.keystore.load(server.url, server.username) or ""
+            server.password = self.load_password(server.url, keyring_username(server))
         return server
+
+    def load_password(self, url: str, username: str) -> str:
+        password = self.keystore.load(url, username)
+        if password is None and username == TOKEN_USERNAME:
+            password = self.keystore.load(url, LEGACY_TOKEN_USERNAME)
+            if password is not None:
+                self.legacy_tokens.add(url)
+        return password or ""
 
     def save_passwords(self, old: list[ServerSettings], new: list[ServerSettings]) -> None:
         old_entries, new_entries = keyring_entries(old), keyring_entries(new)
         for url, username in old_entries.keys() - new_entries.keys():
             self.keystore.delete(url, username)
         for (url, username), password in new_entries.items():
-            if old_entries.get((url, username)) != password:
+            if old_entries.get((url, username)) != password or url in self.legacy_tokens:
                 self.keystore.save(url, username, password)
+        self.drop_legacy_tokens(new_entries)
+
+    def drop_legacy_tokens(self, entries: dict[tuple[str, str], str]) -> None:
+        """Delete each legacy empty-username token once its replacement reads back, or once it is unused."""
+        for url in list(self.legacy_tokens):
+            password = entries.get((url, TOKEN_USERNAME))
+            if password is None or self.keystore.load(url, TOKEN_USERNAME) == password:
+                self.keystore.delete(url, LEGACY_TOKEN_USERNAME)
+                self.legacy_tokens.discard(url)
 
 
 def migrate(qsettings: QSettings) -> None:
@@ -178,10 +199,14 @@ def write_servers(qsettings: QSettings, servers: list[ServerSettings]) -> None:
 def keyring_entries(servers: list[ServerSettings]) -> dict[tuple[str, str], str]:
     """Keyring entries by (url, username). A token server with no token has none, so no empty entry is written."""
     return {
-        (server.url, server.username): server.password
+        (server.url, keyring_username(server)): server.password
         for server in servers
         if server.uses_keyring() and (server.username or server.password)
     }
+
+
+def keyring_username(server: ServerSettings) -> str:
+    return server.username or TOKEN_USERNAME
 
 
 def paused_until(value: Any) -> datetime | None:

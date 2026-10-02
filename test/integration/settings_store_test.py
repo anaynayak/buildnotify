@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 
 import keyring
 import pytest
+from keyring.errors import KeyringLocked
 from PySide6 import QtCore
 
 from buildnotifylib.adapters.credentials import Keystore
@@ -121,8 +122,8 @@ def test_should_keep_passwords_out_of_the_settings_file(ini):
 
     assert "pw" not in open(ini).read()
     assert keyring.get_password("https://ci.example.com/go/cctray.xml", "alice") == "pw"
-    assert keyring.get_password("http://host:8080/cc.xml", "") == "token"
-    assert keyring.get_password("https://github.com/octo-org/hello-world", "") == "ghp_token"
+    assert keyring.get_password("http://host:8080/cc.xml", "token") == "token"
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "token") == "ghp_token"
     assert "ghp_token" not in open(ini).read()
 
 
@@ -147,7 +148,7 @@ def test_should_forget_the_password_of_a_removed_server(ini):
     reopen(ini).save(AppSettings())
 
     assert keyring.get_password("https://ci.example.com/go/cctray.xml", "alice") is None
-    assert keyring.get_password("http://host:8080/cc.xml", "") is None
+    assert keyring.get_password("http://host:8080/cc.xml", "token") is None
 
 
 def test_should_forget_the_password_of_a_renamed_user(ini):
@@ -177,7 +178,7 @@ def test_should_not_store_an_empty_token_for_a_github_server(ini):
 
     reopen(ini).save(AppSettings(servers=[github]))
 
-    assert keyring.get_password("https://github.com/octo-org/hello-world", "") is None
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "token") is None
     assert reopen(ini).settings.servers[0].password == ""
 
 
@@ -187,7 +188,58 @@ def test_should_forget_a_github_token_once_it_is_cleared(ini):
 
     reopen(ini).save(AppSettings(servers=[replace(github, password="")]))
 
-    assert keyring.get_password("https://github.com/octo-org/hello-world", "") is None
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "token") is None
+
+
+TOKEN_SERVER = ServerSettings("http://ci/cc.xml", authentication_type=ServerSettings.AUTH_BEARER_TOKEN)
+
+
+class UnwritableKeyring(InMemoryKeyring):
+    def set_password(self, servicename, username, password):
+        raise KeyringLocked("locked")
+
+
+def legacy_token_store(ini, backend) -> SettingsStore:
+    reopen(ini).save(AppSettings(servers=[TOKEN_SERVER]))
+    backend.passwords[("http://ci/cc.xml", "")] = "legacy"
+    return reopen(ini)
+
+
+def test_should_read_a_token_stored_under_the_empty_username(ini, in_memory_keyring):
+    assert legacy_token_store(ini, in_memory_keyring).settings.servers[0].password == "legacy"
+
+
+def test_should_move_a_legacy_token_to_the_token_username_on_save(ini, in_memory_keyring):
+    store = legacy_token_store(ini, in_memory_keyring)
+
+    store.save(store.settings)
+
+    assert in_memory_keyring.passwords == {("http://ci/cc.xml", "token"): "legacy"}
+
+
+def test_should_prefer_the_token_username_over_a_legacy_entry(ini, in_memory_keyring):
+    reopen(ini).save(AppSettings(servers=[replace(TOKEN_SERVER, password="new")]))
+    in_memory_keyring.passwords[("http://ci/cc.xml", "")] = "legacy"
+
+    assert reopen(ini).settings.servers[0].password == "new"
+
+
+def test_should_keep_a_legacy_token_when_the_new_entry_cannot_be_written(ini, in_memory_keyring):
+    store = legacy_token_store(ini, in_memory_keyring)
+    keyring.set_keyring(UnwritableKeyring())
+    keyring.get_keyring().passwords = dict(in_memory_keyring.passwords)
+
+    store.save(store.settings)
+
+    assert keyring.get_keyring().passwords == {("http://ci/cc.xml", ""): "legacy"}
+
+
+def test_should_forget_a_legacy_token_of_a_removed_server(ini, in_memory_keyring):
+    store = legacy_token_store(ini, in_memory_keyring)
+
+    store.save(AppSettings())
+
+    assert in_memory_keyring.passwords == {}
 
 
 def test_should_fall_back_to_defaults_for_unreadable_values(qsettings):

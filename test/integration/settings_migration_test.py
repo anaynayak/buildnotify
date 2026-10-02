@@ -71,9 +71,10 @@ class FailingSettings(QtCore.QSettings):
 
 
 @pytest.fixture
-def v21(tmp_path):
+def v21(tmp_path, in_memory_keyring):
     keyring.set_password("https://ci.example.com/go/cctray.xml", "alice", "s3cret")
-    keyring.set_password("http://jenkins.local:8080/cc.xml", "", "tok")
+    # 3.0 and earlier stored tokens under an empty username; keyring warns when one is written.
+    in_memory_keyring.passwords[("http://jenkins.local:8080/cc.xml", "")] = "tok"
     return str(shutil.copy(FIXTURES / "buildnotify-2.1.conf", tmp_path / "BuildNotify.conf"))
 
 

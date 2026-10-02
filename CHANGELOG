@@ -9,6 +9,7 @@
 
 ### Changed
 - The failing count on the tray icon is a red badge in the bottom-right corner, so it no longer covers the icon. Counts above 99 show as 99+
+- Bearer and GitHub tokens are stored in the keyring under the username `token` instead of an empty username, which keyring deprecates. Tokens saved by earlier versions are still read, and move to the new entry the next time settings are saved
 
 ### Tech
 - `just demo` runs the app against local fixture feeds with throwaway settings and no keychain
