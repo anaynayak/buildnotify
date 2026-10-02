@@ -45,14 +45,23 @@ Each workflow and branch pair shows as one project, such as `CI (main)`. Its sta
 
 BuildNotify reads the 100 most recent runs on each poll, so a workflow that has not run within them drops off the list. With a workflow filter, it reads up to 4 older pages of 100 runs when the newest page has no finished run of that workflow. When GitHub reports that the rate limit is used up, every server that uses the same token is skipped until the limit resets, and the menu shows when it will try again. Servers without a token share one limit. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
 
+## Notifications
+
+BuildNotify shows a notification when a build fails, is fixed, fails again or passes, and when a server can't be reached. Each kind can be turned off in Preferences.
+
+1. A notification about one project names it in the title, such as `Build failed: [jenkins] nightly-e2e`, with the build label below. Clicking it opens the project page.
+2. A notification about several projects counts them, such as `3 builds failed`, and lists up to three names followed by `and N more`. Clicking it opens the tray menu.
+3. Failures, and servers that can't be reached, use the warning icon. Fixed and passed builds use the information icon.
+4. A server that can't be reached is named by its menu prefix or host, as in `Can't reach ci.example.org`. While it stays down the notification repeats after 1, 2, 3, 5, 8, 13 and 21 failed checks, then starts over. When it answers again, `ci.example.org is reachable again` follows.
+
 ## Custom script
 
 BuildNotify can run a script each time it shows a notification. Turn on "Execute script for notifications" and enter the command. It runs through the platform shell (`/bin/sh` on Linux and macOS, `cmd.exe` on Windows).
 
 The script gets two environment variables:
 
-1. `BUILDNOTIFY_STATUS`: the notification title, such as `Broken builds`, `Fixed builds`, `Build is still failing`, `Yet another successful build` or `Connectivity issues`.
-2. `BUILDNOTIFY_PROJECTS`: the affected projects (or server urls for connectivity issues), separated by commas.
+1. `BUILDNOTIFY_STATUS`: the kind of notification: `Broken builds`, `Fixed builds`, `Build is still failing`, `Yet another successful build`, `Connectivity issues` or `Connectivity restored`. These are the 2.x notification titles, kept so existing scripts still work, and they differ from the titles BuildNotify now shows.
+2. `BUILDNOTIFY_PROJECTS`: every affected project (or server url for connectivity notifications), separated by commas. Unlike the notification, the list is never shortened.
 
 For example:
 

@@ -64,5 +64,10 @@ def server_label(url: str) -> str:
     return (host(url) + parts.path) or "server"
 
 
+def server_name(url: str, prefix: str = "") -> str:
+    """What the menu and notifications call a server: its menu prefix, else its host."""
+    return prefix or host(url) or "server"
+
+
 def host(url: str) -> str:
     return urlsplit(url).netloc.rpartition("@")[2]

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import humanize
 from buildnotifylib.core.diff import key
-from buildnotifylib.core.errors import details, host, phrase, server_label
+from buildnotifylib.core.errors import details, phrase, server_label, server_name
 from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.mute import (
     Clock,
@@ -113,7 +113,7 @@ class AppMenu(QtCore.QObject):
 
     @staticmethod
     def error_label(snapshot: ServerSnapshot, server: ServerSettings | None) -> str:
-        name = (server.prefix if server is not None else "") or host(snapshot.url) or "server"
+        name = server_name(snapshot.url, server.prefix if server is not None else "")
         summary = phrase(snapshot.error) if snapshot.error is not None else "unavailable"
         at = (snapshot.error_at or datetime.now()).astimezone()
         when = at.strftime("%H:%M" if at.date() == datetime.now().astimezone().date() else "%Y-%m-%d %H:%M")

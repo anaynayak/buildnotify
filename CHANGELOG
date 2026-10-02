@@ -9,12 +9,16 @@
 - Settings move to schema version 5, which adds a muted flag to each server. Existing servers start unmuted
 - With no servers the tray menu says "No servers yet" and offers "Add a server...", which opens the server dialog. Pause and Mute are hidden until a server is configured, and the tooltip says "No servers configured" instead of "No failing builds"
 - On the first launch with no servers, the server dialog opens once. A `first_run/server_prompt_shown` setting stops it opening again
+- Clicking a notification about one project opens its page. Clicking one about several projects or a server opens the tray menu
+- A "<server> is reachable again" notification follows a connectivity notification once the server answers. The custom script runs for it with `BUILDNOTIFY_STATUS` set to `Connectivity restored`
 
 ### Changed
 - The tray menu groups projects under Failing, Building, Passing and Unknown headers with counts, so the status no longer depends on the icon colour alone. Empty sections are left out
 - With more than 15 projects, passing projects collapse into a `Passing (N)` submenu so the tray menu fits on screen. Failing and building projects stay top level
 - Long project names in the tray menu are shortened in the middle to a fixed width, so the job name and build time are no longer cut off. The tooltip shows the whole name
 - Build times in the tray menu are compact, such as `18m`, `11h` or `3d`, instead of `18 minutes ago`
+- Notification titles name the project or count the builds, such as `Build failed: nightly`, `3 builds failed`, `Build fixed: nightly`, `Still failing: nightly`, `Build passed: nightly` and `Can't reach ci.example.org`, instead of `Broken builds` or `Yet another successful build`. A notification lists at most three names, then `and N more`. The custom script still gets the old titles in `BUILDNOTIFY_STATUS` and every name in `BUILDNOTIFY_PROJECTS`
+- Failure and connectivity notifications use the warning icon instead of the information icon
 - When every server is down and nothing is cached, the tray tooltip says "Can't reach any server" instead of "No failing builds"
 - A server error row in the tray menu reads like `jenkins: can't connect (10:00)`: the server's menu prefix or host, then a short reason such as can't connect, server not found, timed out, sign-in failed, not found, not a cctray feed, certificate not trusted or GitHub rate limit reached. The row is no longer greyed out, and opens a submenu with the full error, a hint, `Retry now` and `Edit server...`
 - The server dialog is a single page with Cancel and Save. Save works without loading the server first, so a server that is down can be added, and all of its projects are included. Load is now Test connection, which shows the project count or a short error next to the button and lists the projects below. Editing a server without testing it keeps its excluded projects. Changing the URL, repository or source type clears the test result and its project list

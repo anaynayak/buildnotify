@@ -59,13 +59,12 @@ def test_should_return_notifications(mocker):
     new = OverallIntegrationStatus([ServerSnapshot("url", tuple(new_projects))])
 
     app_notification = AppNotification(ConfigBuilder().build(), None, RecordingHook())
-    m = mocker.patch.object(app_notification.notification, "show_message")
+    m = mocker.patch.object(app_notification.notification, "show")
 
     app_notification.update_projects(old)
     app_notification.update_projects(new)
 
-    m.assert_any_call("Broken builds", "proj1")
-    m.assert_any_call("Fixed builds", "Successbuild")
+    assert titles(m) == ["Build fixed: Successbuild", "Build failed: proj1"]
 
 
 def _notify_broken_build(mocker, script, project_name, hook, enabled=True):
@@ -109,9 +108,13 @@ def _notify_broken_build(mocker, script, project_name, hook, enabled=True):
     )
     store = ConfigBuilder(custom_script=script, custom_script_enabled=enabled).build()
     app_notification = AppNotification(store, None, hook)
-    mocker.patch.object(app_notification.notification, "show_message")
+    mocker.patch.object(app_notification.notification, "show")
     app_notification.update_projects(old)
     app_notification.update_projects(new)
+
+
+def titles(show):
+    return [call.args[0].title for call in show.call_args_list]
 
 
 class RecordingHook:
@@ -144,7 +147,7 @@ def _unavailable_status():
 
 def test_should_keep_back_off_across_polls(mocker):
     app_notification = AppNotification(ConfigBuilder().build(), None, RecordingHook())
-    show = mocker.patch.object(app_notification.notification, "show_message")
+    show = mocker.patch.object(app_notification.notification, "show")
 
     for _ in range(5):
         app_notification.update_projects(_unavailable_status())
@@ -156,7 +159,7 @@ def test_should_run_the_injected_hook_from_the_app_notification(mocker):
     hook = RecordingHook()
     store = ConfigBuilder(custom_script="my-hook", custom_script_enabled=True).build()
     app_notification = AppNotification(store, None, hook)
-    mocker.patch.object(app_notification.notification, "show_message")
+    mocker.patch.object(app_notification.notification, "show")
 
     app_notification.update_projects(_unavailable_status())
     app_notification.update_projects(_unavailable_status())
@@ -183,7 +186,7 @@ def _status(status, label, server_url=CI, name="proj1"):
 def _break_builds(mocker, store, clock=lambda: NOW, names=("proj1",)):
     hook = RecordingHook()
     app_notification = AppNotification(store, None, hook, clock)
-    show = mocker.patch.object(app_notification.notification, "show_message")
+    show = mocker.patch.object(app_notification.notification, "show")
     old = [_status("Success", "1", name=name) for name in names]
     new = [_status("Failure", "2", name=name) for name in names]
     app_notification.update_projects(OverallIntegrationStatus([ServerSnapshot(CI, tuple(old))]))
@@ -207,7 +210,7 @@ def test_should_still_notify_the_projects_that_are_not_muted(mocker):
 
     show, hook = _break_builds(mocker, store, names=("proj1", "proj2"))
 
-    show.assert_called_once_with("Broken builds", "proj2")
+    assert titles(show) == ["Build failed: proj2"]
     assert hook.calls == [("my-hook", "Broken builds", "proj2")]
 
 
@@ -224,16 +227,91 @@ def test_should_notify_once_the_pause_has_expired(mocker):
 
     show, hook = _break_builds(mocker, store, clock=lambda: NOW + timedelta(seconds=1))
 
-    show.assert_called_once_with("Broken builds", "proj1")
+    assert titles(show) == ["Build failed: proj1"]
 
 
 def test_should_not_report_connectivity_issues_for_a_muted_server(mocker):
     store = _scripted(servers=[ServerSettings(CI, muted=True)]).build()
     hook = RecordingHook()
     app_notification = AppNotification(store, None, hook, lambda: NOW)
-    show = mocker.patch.object(app_notification.notification, "show_message")
+    show = mocker.patch.object(app_notification.notification, "show")
 
     for _ in range(2):
         app_notification.update_projects(OverallIntegrationStatus([ServerSnapshot(CI, error=OSError("down"))]))
 
     assert (show.call_count, hook.calls) == (0, [])
+
+
+def _down(url=CI):
+    return OverallIntegrationStatus([ServerSnapshot(url, error=OSError("down"))])
+
+
+def _up(url=CI):
+    return OverallIntegrationStatus([ServerSnapshot(url, (_status("Success", "1", server_url=url),))])
+
+
+def _poll(mocker, store, *statuses):
+    hook = RecordingHook()
+    app_notification = AppNotification(store, None, hook, lambda: NOW)
+    show = mocker.patch.object(app_notification.notification, "show")
+    for status in statuses:
+        app_notification.update_projects(status)
+    return show, hook
+
+
+def test_should_say_a_server_is_reachable_again_after_a_connectivity_toast(mocker):
+    store = _scripted(servers=[ServerSettings(CI, prefix="jenkins")]).build()
+
+    show, hook = _poll(mocker, store, _up(), _down(), _up())
+
+    assert titles(show) == ["Can't reach jenkins", "jenkins is reachable again"]
+    assert hook.calls == [("my-hook", "Connectivity issues", CI), ("my-hook", "Connectivity restored", CI)]
+
+
+def test_should_say_reachable_again_only_once(mocker):
+    show, _ = _poll(mocker, ConfigBuilder(servers=[ServerSettings(CI)]).build(), _up(), _down(), _up(), _up())
+
+    assert titles(show) == ["Can't reach ci", "ci is reachable again"]
+
+
+def test_should_not_say_reachable_again_without_a_connectivity_toast(mocker):
+    show, _ = _poll(mocker, ConfigBuilder(servers=[ServerSettings(CI)]).build(), _up(), _up())
+
+    assert show.call_count == 0
+
+
+def test_should_not_say_reachable_again_when_connectivity_toasts_are_off(mocker):
+    store = ConfigBuilder(servers=[ServerSettings(CI)], notifications={"connectivityIssues": False}).build()
+
+    show, _ = _poll(mocker, store, _up(), _down(), _up())
+
+    assert show.call_count == 0
+
+
+def test_should_not_say_reachable_again_for_a_server_muted_while_it_was_down(mocker):
+    store = ConfigBuilder(servers=[ServerSettings(CI)]).build()
+    hook = RecordingHook()
+    app_notification = AppNotification(store, None, hook, lambda: NOW)
+    show = mocker.patch.object(app_notification.notification, "show")
+    for status in (_up(), _down()):
+        app_notification.update_projects(status)
+    store.save(_scripted(servers=[ServerSettings(CI, muted=True)]).settings)
+
+    app_notification.update_projects(_up())
+
+    assert (titles(show), hook.calls) == (["Can't reach ci"], [])
+
+
+def test_should_not_say_reachable_again_for_a_removed_server(mocker):
+    other = "http://other/cc.xml"
+    store = ConfigBuilder(servers=[ServerSettings(CI), ServerSettings(other)]).build()
+
+    show, _ = _poll(mocker, store, _up(), _down(), _up(other))
+
+    assert titles(show) == ["Can't reach ci"]
+
+
+def test_should_warn_about_broken_builds(mocker):
+    show, _ = _break_builds(mocker, ConfigBuilder(servers=[ServerSettings(CI)]).build())
+
+    assert [call.args[0].warning for call in show.call_args_list] == [True]
