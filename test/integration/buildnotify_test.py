@@ -5,7 +5,7 @@ import pytest
 import requests_mock
 from PyQt5.QtWidgets import QWidget
 
-from buildnotifylib import BuildNotify
+from buildnotifylib.buildnotify import BuildNotify
 from buildnotifylib.core.projects import ProjectsPopulator
 from test.fake_conf import ConfigBuilder
 from test.utils import fake_content
