@@ -213,3 +213,13 @@ def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
         dialog.event.wait()
 
     assert threads == [threading.get_ident()]
+
+
+@pytest.mark.functional
+def test_should_keep_saved_skip_ssl_verification_when_editing(qtbot):
+    url = 'https://localhost:8080/cc.xml'
+    conf = ConfigBuilder().server(url, {"skip_ssl_verification/%s" % url: True}).build()
+    dialog = ServerConfigurationDialog(url, conf)
+    qtbot.addWidget(dialog)
+
+    assert dialog.get_server_config().skip_ssl_verification is True

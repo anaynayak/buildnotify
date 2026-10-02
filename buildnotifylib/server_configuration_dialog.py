@@ -50,7 +50,7 @@ class ServerConfigurationDialog(QDialog):
 
         self.ui.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.skip_ssl_verification = False
+        self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
 
     def set_authentication_type(self, index: int):
         self.ui.username.setText('')
