@@ -65,8 +65,7 @@ class Config(object):
         self.update_urls(urls)
 
     def update_urls(self, urls: List[str]):
-        if urls:
-            self.settings.setValue(self.CONNECTION_URLS, urls)
+        self.settings.setValue(self.CONNECTION_URLS, urls)
 
     def get_urls(self) -> List[str]:
         return [str(url) for url in

@@ -91,6 +91,12 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(self.config.get_show_last_build_label(), False)
 
 
+    def test_should_persist_removing_the_last_server(self):
+        self.config.update_urls(['url1'])
+        self.config.update_urls([])
+
+        self.assertEqual([], Config(self.q_settings).get_urls())
+
     def test_should_keep_custom_script_when_disabled(self):
         self.config.update_preferences(Preferences(['url1'], 300, 'my-hook', False, False, True, [], False))
 
