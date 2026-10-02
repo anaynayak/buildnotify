@@ -45,8 +45,9 @@ dev = [
     "pytest-cov>=7",
     "pytest-mock>=3.15",
     "requests-mock>=1.12",
-    "PyQt5-stubs==5.14.2.2",
+    "PyQt5-stubs==5.15.6.0",
     "ruff>=0.16.10",
+    "mypy>=1.18",
 ]
 
 [tool.hatch.version]
@@ -83,3 +84,13 @@ select = ["E", "F", "W", "I", "UP", "B"]
 # ProjectLoader's HttpConnection() default is evaluated once, so all loaders share one
 # requests.Session. Moving it into __init__ changes connection reuse; tracked separately.
 "buildnotifylib/core/projects.py" = ["B008"]
+
+[tool.mypy]
+files = ["buildnotifylib", "test"]
+exclude = ["^buildnotifylib/generated/"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "buildnotifylib.generated.*"
+ignore_errors = true
