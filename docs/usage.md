@@ -37,7 +37,7 @@ BuildNotify can also watch GitHub Actions without a cctray feed. In the server d
 
 Each workflow and branch pair shows as one project, such as `CI (main)`. Its status comes from the last finished run: success is green, a failure, time-out or startup failure is red, and a cancelled or skipped run is unknown. While a run is queued or in progress the project shows as building, with the status of the run before it. Clicking a project opens the latest run on GitHub.
 
-BuildNotify reads the 100 most recent runs on each poll, so a workflow that has not run within them drops off the list. When GitHub reports that the rate limit is used up, the server is skipped until the limit resets, and the menu shows when it will try again. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
+BuildNotify reads the 100 most recent runs on each poll, so a workflow that has not run within them drops off the list. With a workflow filter, it reads up to 4 older pages of 100 runs when the newest page has no finished run of that workflow. When GitHub reports that the rate limit is used up, every server that uses the same token is skipped until the limit resets, and the menu shows when it will try again. Servers without a token share one limit. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
 
 ## Custom script
 
@@ -65,6 +65,7 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 3. All projects in the configured CI servers contribute to the overall build status which is displayed in the tray.
 4. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time.
 5. Clicking on any project in the tray menu would take you to the project page on the CI server.
+6. A server that can't be reached gets a greyed-out row at the top of the menu with its last error and the time it happened, such as `ci.example.org/cctray.xml: Could not connect (10:00)`. Its projects from the last successful fetch stay in the list.
 
 ![Tray menu](images/projectlist.png)
 
