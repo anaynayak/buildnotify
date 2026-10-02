@@ -4,6 +4,8 @@ import sys
 import tomllib
 from pathlib import Path
 
+from PyQt5.QtCore import QSettings
+
 from buildnotifylib import __main__ as entry
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.hooks import ShellScriptHook
@@ -51,7 +53,18 @@ def test_should_build_the_app_from_the_application(mocker):
     entry.main(["buildnotify"])
 
     calls.app.setQuitOnLastWindowClosed.assert_called_once_with(False)
-    build.assert_called_once_with(calls.app)
+    build.assert_called_once_with(calls.app, None)
+
+
+def test_should_pass_the_settings_path_to_build(mocker, tmp_path):
+    calls, application, build = fake_run(mocker)
+    mocker.patch("sys.exit")
+    path = str(tmp_path / "settings.ini")
+
+    entry.main(["buildnotify", "--settings", path, "-style", "fusion"])
+
+    build.assert_called_once_with(calls.app, path)
+    application.assert_called_once_with(["buildnotify", "-style", "fusion"])
 
 
 def test_should_log_warnings_by_default(mocker):
@@ -94,11 +107,22 @@ def test_should_inject_the_real_adapters(qapp, qsettings, mocker):
     assert isinstance(buildnotify.hook, ShellScriptHook)
 
 
+def test_should_open_an_ini_settings_file_when_given_a_path(qapp, tmp_path):
+    path = str(tmp_path / "settings.ini")
+
+    buildnotify = entry.build(qapp, path)
+    buildnotify.tray_timer.stop()
+
+    assert buildnotify.store.qsettings.fileName() == path
+    assert buildnotify.store.qsettings.format() == QSettings.IniFormat
+
+
 def test_should_run_as_a_module():
     result = subprocess.run(
         [sys.executable, "-m", "buildnotifylib", "--help"], capture_output=True, text=True, check=True
     )
     assert "--debug" in result.stdout
+    assert "--settings" in result.stdout
 
 
 def test_should_point_the_gui_script_at_main():

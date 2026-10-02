@@ -21,11 +21,18 @@ def parse_args(args: list[str]) -> tuple[argparse.Namespace, list[str]]:
     """Return our options and the arguments left over for Qt."""
     parser = argparse.ArgumentParser(prog="buildnotify", allow_abbrev=False)
     parser.add_argument("--debug", action="store_true", help="log every fetch")
+    parser.add_argument("--settings", metavar="PATH", help="read and write settings in this INI file")
     return parser.parse_known_args(args)
 
 
-def build(app: QApplication) -> BuildNotify:
-    store = SettingsStore(QSettings("BuildNotify", "BuildNotify"), Keystore())
+def open_settings(path: str | None) -> QSettings:
+    if path is None:
+        return QSettings("BuildNotify", "BuildNotify")
+    return QSettings(path, QSettings.IniFormat)
+
+
+def build(app: QApplication, settings_path: str | None = None) -> BuildNotify:
+    store = SettingsStore(open_settings(settings_path), Keystore())
     return BuildNotify(app, store, HttpConnection(), ShellScriptHook())
 
 
@@ -35,7 +42,7 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=logging.DEBUG if options.debug else logging.WARNING, format=LOG_FORMAT)
     app = QApplication([argv[0], *qt_args])
     app.setQuitOnLastWindowClosed(False)
-    buildnotify = build(app)
+    buildnotify = build(app, options.settings)
     exit_code = app.exec_()
     if not buildnotify.wait_for_workers():
         logging.shutdown()
