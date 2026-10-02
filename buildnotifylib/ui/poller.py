@@ -130,7 +130,8 @@ class Poller(QObject):
         if self.in_flight[url] <= 0:
             del self.in_flight[url]
         if self.cycle is None or self.cycle.generation != generation:
-            log.info("Ignoring a late response from %s", url)
+            log.info("Keeping a late response from %s for the next poll", url)
+            self.with_last_known(snapshot, [])
             return
         self.record(index, snapshot)
         self.finish_if_complete()

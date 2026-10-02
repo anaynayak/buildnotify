@@ -287,3 +287,19 @@ def test_fetch_should_drop_the_result_when_the_receiver_is_gone(qtbot):
     sip.delete(receiver)
 
     fetch.run()
+
+
+@pytest.mark.functional
+def test_should_keep_a_late_response_as_the_last_known_projects(qtbot, mocker, make_poller):
+    mocker.patch.object(Poller, "DEADLINE_GRACE_MS", 0)
+    conf = ConfigBuilder(timeout_seconds=0).server(SLOW).build()
+    connection = GatedConnection(cctray("Failure"), slow=[SLOW])
+    poller = make_poller(conf, connection)
+
+    with qtbot.waitSignal(poller.updated, timeout=1000) as blocker:
+        poller.reload()
+    connection.release.set()
+    qtbot.waitUntil(lambda: SLOW not in poller.in_flight, timeout=2000)
+
+    assert blocker.args[0].get_projects() == []
+    assert [p.name for p in poller.last_known[SLOW]] == ["proj1"]
