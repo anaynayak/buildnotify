@@ -632,3 +632,64 @@ def test_should_show_a_certificate_error_inline_when_retry_is_declined(qtbot, mo
     assert dialog.test_status.text() == "Certificate not trusted"
     assert dialog.get_server_config().skip_ssl_verification is False
     assert m.call_count == 1
+
+
+def loaded_dialog(qtbot, server):
+    dialog = ServerConfigurationDialog(server, TIMEOUT, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.projects_loaded)
+    dialog.projects_list.child(1).setCheckState(Qt.CheckState.Unchecked)
+    return dialog
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda dialog: dialog.cctray.url.setText("https://other.example.org/cc.xml"),
+        lambda dialog: dialog.source_kind.setCurrentIndex(1),
+    ],
+)
+def test_should_forget_a_test_once_the_source_changes(qtbot, change):
+    dialog = loaded_dialog(qtbot, ServerSettings(URL_JENKINS, ["cleanup-artifacts-B"]))
+
+    change(dialog)
+
+    assert dialog.test_status.isHidden()
+    assert dialog.projects_view.isHidden()
+    assert not dialog.projects_hint.isHidden()
+    assert dialog.get_server_config().excluded_projects == ["cleanup-artifacts-B"]
+
+
+@pytest.mark.functional
+def test_should_drop_a_running_test_once_the_url_changes(qtbot):
+    url = "http://localhost:8080/cc.xml"
+    connection = GatedConnection(fake_content(), slow=[url])
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, connection)
+    qtbot.addWidget(dialog)
+
+    dialog.fetch_data()
+    dialog.cctray.url.setText("http://other/cc.xml")
+    connection.release.set()
+    assert dialog.loads.waitForDone(5000)
+    qtbot.wait(50)
+
+    assert not dialog.projects_loaded
+    assert dialog.test_button.isEnabled()
+
+
+@pytest.mark.functional
+def test_should_drop_a_running_test_once_the_dialog_closes(qtbot):
+    url = "http://localhost:8080/cc.xml"
+    connection = GatedConnection(fake_content(), slow=[url])
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, connection)
+    qtbot.addWidget(dialog)
+
+    dialog.fetch_data()
+    dialog.cancel_button.click()
+    connection.release.set()
+    assert dialog.loads.waitForDone(5000)
+    qtbot.wait(50)
+
+    assert not dialog.projects_loaded

@@ -62,6 +62,8 @@ class ServerConfigurationDialog(QDialog):
         self.timeout = timeout
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
         self.projects_loaded = False
+        self.loads = QThreadPool.globalInstance()
+        self.deadline = Deadline(self, self.expire)
         self.timezone.addItems([NONE_TIMEZONE, *sorted(available_timezones())])
 
         if server is not None:
@@ -72,9 +74,7 @@ class ServerConfigurationDialog(QDialog):
         self.setWindowTitle(self.title(server))
 
         self.test_button.clicked.connect(self.fetch_data)
-        self.loads = QThreadPool.globalInstance()
         self.loaded.connect(self.on_loaded)
-        self.deadline = Deadline(self, self.expire)
 
         if not keystore_available:
             self.auth.disable_keyring()
@@ -103,6 +103,7 @@ class ServerConfigurationDialog(QDialog):
         for field in (self.cctray.url, self.github.repository):
             field.editingFinished.connect(self.validate)
             field.textChanged.connect(self.refresh_validity)
+            field.textChanged.connect(self.forget_test)
 
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -178,6 +179,21 @@ class ServerConfigurationDialog(QDialog):
             self.auth.set_authentication_type(self.cctray_authentication_type)
         self.show_kind(index)
         self.refresh_validity()
+        self.forget_test()
+
+    def forget_test(self) -> None:
+        self.deadline.invalidate()
+        self.deadline.stop()
+        self.test_button.setEnabled(True)
+        self.test_status.clear_message()
+        self.projects_loaded = False
+        self.projects_view.hide()
+        self.projects_hint.show()
+
+    def done(self, result: int) -> None:
+        self.deadline.invalidate()
+        self.deadline.stop()
+        super().done(result)
 
     def save(self) -> None:
         if self.validate():
