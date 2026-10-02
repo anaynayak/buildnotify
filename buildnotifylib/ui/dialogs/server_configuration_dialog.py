@@ -1,3 +1,4 @@
+import re
 from zoneinfo import available_timezones
 
 from PySide6 import QtGui
@@ -8,9 +9,13 @@ from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import CertificateError, Connection
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.core.settings import ServerSettings
+from buildnotifylib.core.settings import ServerSettings, SourceKind
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from buildnotifylib.ui.poller import Deadline, Fetch
+
+KINDS = [SourceKind.CCTRAY, SourceKind.GITHUB]
+REPOSITORY = re.compile(r"[\w.-]+/[\w.-]+")
+TOKEN_HINT = "Optional for public repositories"
 
 
 class ServerConfigurationDialog(QDialog):
@@ -45,6 +50,10 @@ class ServerConfigurationDialog(QDialog):
             self.ui.authentication_type.setCurrentIndex(self.server.authentication_type)
             self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
             self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
+            self.ui.sourceKind.setCurrentIndex(KINDS.index(self.server.kind))
+            self.ui.repository.setText(self.server.repository)
+            self.ui.workflow.setText(self.server.workflow)
+            self.ui.branch.setText(self.server.branch)
         else:
             self.server = ServerSettings("", timezone="")
 
@@ -60,8 +69,27 @@ class ServerConfigurationDialog(QDialog):
             self.ui.password.setEnabled(False)
 
         self.ui.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
+        self.ui.sourceKind.currentIndexChanged.connect(self.show_kind)
+        self.show_kind(self.ui.sourceKind.currentIndex())
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
+
+    def kind(self) -> SourceKind:
+        return KINDS[self.ui.sourceKind.currentIndex()]
+
+    def show_kind(self, index: int):
+        github = KINDS[index] is SourceKind.GITHUB
+        if github:
+            self.ui.authentication_type.setCurrentIndex(ServerSettings.AUTH_BEARER_TOKEN)
+            self.ui.passwordLabel.setText("Token")
+            self.ui.password.setPlaceholderText(TOKEN_HINT)
+        elif self.ui.passwordLabel.text() == "Token":
+            self.set_authentication_type(self.ui.authentication_type.currentIndex())
+        self.ui.githubSettings.setVisible(github)
+        for widget in (self.ui.cctrayUrlLabel, self.ui.addServerUrl, self.ui.timezoneLabel, self.ui.timezoneList):
+            widget.setVisible(not github)
+        self.ui.authentication_type_label.setVisible(not github)
+        self.ui.authentication_type.setVisible(not github)
 
     def set_authentication_type(self, index: int):
         self.ui.username.setText("")
@@ -107,6 +135,9 @@ class ServerConfigurationDialog(QDialog):
         self.load_data(ServerSnapshot(self.project_loader.server_config.url, error=error))
 
     def url_error(self) -> str | None:
+        if self.kind() is SourceKind.GITHUB:
+            valid = REPOSITORY.fullmatch(self.ui.repository.text().strip())
+            return None if valid else "Enter the repository as owner/name."
         url = self.ui.addServerUrl.text()
         if "" == url:
             return "Path field cannot be empty."
@@ -170,6 +201,8 @@ class ServerConfigurationDialog(QDialog):
     def get_server_config(self) -> ServerSettings:
         children = [self.projects_list.child(i) for i in range(self.projects_list.rowCount())]
         excluded_projects = [child.text() for child in children if child.checkState() == Qt.CheckState.Unchecked]
+        if self.kind() is SourceKind.GITHUB:
+            return self.github_config(excluded_projects)
         return ServerSettings(
             self.server_url(),
             excluded_projects,
@@ -179,6 +212,20 @@ class ServerConfigurationDialog(QDialog):
             self.ui.password.text(),
             self.skip_ssl_verification,
             self.ui.authentication_type.currentIndex(),
+        )
+
+    def github_config(self, excluded_projects: list[str]) -> ServerSettings:
+        return ServerSettings(
+            "",
+            excluded_projects,
+            prefix=self.ui.displayPrefix.text(),
+            password=self.ui.password.text(),
+            skip_ssl_verification=self.skip_ssl_verification,
+            authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
+            kind=SourceKind.GITHUB,
+            repository=self.ui.repository.text().strip(),
+            workflow=self.ui.workflow.text().strip(),
+            branch=self.ui.branch.text().strip(),
         )
 
     def open(self) -> ServerSettings | None:  # type: ignore

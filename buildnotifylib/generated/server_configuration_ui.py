@@ -25,13 +25,13 @@ class Ui_serverConfigurationDialog(object):
     def setupUi(self, serverConfigurationDialog):
         if not serverConfigurationDialog.objectName():
             serverConfigurationDialog.setObjectName(u"serverConfigurationDialog")
-        serverConfigurationDialog.resize(458, 384)
+        serverConfigurationDialog.resize(458, 480)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(serverConfigurationDialog.sizePolicy().hasHeightForWidth())
         serverConfigurationDialog.setSizePolicy(sizePolicy)
-        serverConfigurationDialog.setMaximumSize(QSize(458, 384))
+        serverConfigurationDialog.setMaximumSize(QSize(458, 480))
         self.verticalLayout = QVBoxLayout(serverConfigurationDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.stackedWidget = QStackedWidget(serverConfigurationDialog)
@@ -40,6 +40,65 @@ class Ui_serverConfigurationDialog(object):
         self.page.setObjectName(u"page")
         self.verticalLayout_2 = QVBoxLayout(self.page)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.sourceKindLayout = QFormLayout()
+        self.sourceKindLayout.setObjectName(u"sourceKindLayout")
+        self.sourceKindLabel = QLabel(self.page)
+        self.sourceKindLabel.setObjectName(u"sourceKindLabel")
+
+        self.sourceKindLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.sourceKindLabel)
+
+        self.sourceKind = QComboBox(self.page)
+        self.sourceKind.addItem("")
+        self.sourceKind.addItem("")
+        self.sourceKind.setObjectName(u"sourceKind")
+
+        self.sourceKindLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.sourceKind)
+
+
+        self.verticalLayout_2.addLayout(self.sourceKindLayout)
+
+        self.githubSettings = QGroupBox(self.page)
+        self.githubSettings.setObjectName(u"githubSettings")
+        self.githubLayout = QVBoxLayout(self.githubSettings)
+        self.githubLayout.setObjectName(u"githubLayout")
+        self.githubForm = QFormLayout()
+        self.githubForm.setObjectName(u"githubForm")
+        self.repositoryLabel = QLabel(self.githubSettings)
+        self.repositoryLabel.setObjectName(u"repositoryLabel")
+
+        self.githubForm.setWidget(0, QFormLayout.ItemRole.LabelRole, self.repositoryLabel)
+
+        self.repository = QLineEdit(self.githubSettings)
+        self.repository.setObjectName(u"repository")
+
+        self.githubForm.setWidget(0, QFormLayout.ItemRole.FieldRole, self.repository)
+
+        self.workflowLabel = QLabel(self.githubSettings)
+        self.workflowLabel.setObjectName(u"workflowLabel")
+
+        self.githubForm.setWidget(1, QFormLayout.ItemRole.LabelRole, self.workflowLabel)
+
+        self.workflow = QLineEdit(self.githubSettings)
+        self.workflow.setObjectName(u"workflow")
+
+        self.githubForm.setWidget(1, QFormLayout.ItemRole.FieldRole, self.workflow)
+
+        self.branchLabel = QLabel(self.githubSettings)
+        self.branchLabel.setObjectName(u"branchLabel")
+
+        self.githubForm.setWidget(2, QFormLayout.ItemRole.LabelRole, self.branchLabel)
+
+        self.branch = QLineEdit(self.githubSettings)
+        self.branch.setObjectName(u"branch")
+
+        self.githubForm.setWidget(2, QFormLayout.ItemRole.FieldRole, self.branch)
+
+
+        self.githubLayout.addLayout(self.githubForm)
+
+
+        self.verticalLayout_2.addWidget(self.githubSettings)
+
         self.cctrayUrlLabel = QLabel(self.page)
         self.cctrayUrlLabel.setObjectName(u"cctrayUrlLabel")
 
@@ -210,11 +269,19 @@ class Ui_serverConfigurationDialog(object):
         self.verticalLayout.addWidget(self.stackedWidget)
 
 #if QT_CONFIG(shortcut)
+        self.sourceKindLabel.setBuddy(self.sourceKind)
+        self.repositoryLabel.setBuddy(self.repository)
+        self.workflowLabel.setBuddy(self.workflow)
+        self.branchLabel.setBuddy(self.branch)
         self.cctrayUrlLabel.setBuddy(self.addServerUrl)
         self.timezoneLabel.setBuddy(self.timezoneList)
         self.displayPrefixLabel.setBuddy(self.timezoneList)
         self.chooseProjectsLabel.setBuddy(self.addServerUrl)
 #endif // QT_CONFIG(shortcut)
+        QWidget.setTabOrder(self.sourceKind, self.repository)
+        QWidget.setTabOrder(self.repository, self.workflow)
+        QWidget.setTabOrder(self.workflow, self.branch)
+        QWidget.setTabOrder(self.branch, self.addServerUrl)
         QWidget.setTabOrder(self.addServerUrl, self.projectsList)
 
         self.retranslateUi(serverConfigurationDialog)
@@ -229,6 +296,17 @@ class Ui_serverConfigurationDialog(object):
 
     def retranslateUi(self, serverConfigurationDialog):
         serverConfigurationDialog.setWindowTitle(QCoreApplication.translate("serverConfigurationDialog", u"Add Server", None))
+        self.sourceKindLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Source", None))
+        self.sourceKind.setItemText(0, QCoreApplication.translate("serverConfigurationDialog", u"cctray feed", None))
+        self.sourceKind.setItemText(1, QCoreApplication.translate("serverConfigurationDialog", u"GitHub Actions", None))
+
+        self.githubSettings.setTitle(QCoreApplication.translate("serverConfigurationDialog", u"GitHub repository", None))
+        self.repositoryLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Repository", None))
+        self.repository.setPlaceholderText(QCoreApplication.translate("serverConfigurationDialog", u"owner/name", None))
+        self.workflowLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Workflow", None))
+        self.workflow.setPlaceholderText(QCoreApplication.translate("serverConfigurationDialog", u"All workflows, or a file such as ci.yml", None))
+        self.branchLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Branch", None))
+        self.branch.setPlaceholderText(QCoreApplication.translate("serverConfigurationDialog", u"All branches", None))
         self.cctrayUrlLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Path to cctray.xml", None))
         self.authenticationSettings.setTitle(QCoreApplication.translate("serverConfigurationDialog", u"Authentication", None))
         self.usernameLabel.setText(QCoreApplication.translate("serverConfigurationDialog", u"Username", None))

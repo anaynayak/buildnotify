@@ -1,4 +1,5 @@
 import threading
+from pathlib import Path
 from unittest.mock import ANY
 
 import pytest
@@ -9,7 +10,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox
 
 from buildnotifylib.adapters.http import HttpConnection
-from buildnotifylib.core.settings import ServerSettings
+from buildnotifylib.core.ports import Response
+from buildnotifylib.core.settings import ServerSettings, SourceKind
 from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
 from buildnotifylib.ui.poller import Deadline
 from test.utils import FakeConnection, GatedConnection, fake_content
@@ -300,3 +302,97 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
     assert "bad-certificate" in question.call_args.args[2]
     assert dialog.get_server_config().skip_ssl_verification is True
     assert [r.verify for r in m.request_history] == [True, False]
+
+
+GITHUB_RUNS = Path(__file__).parent.parent / "fixtures" / "github" / "runs.json"
+
+
+class FakeApi(FakeConnection):
+    def __init__(self):
+        super().__init__("")
+        self.requested: list[str] = []
+
+    def request(self, url, timeout, headers, verify=True):
+        self.requested.append(url)
+        return Response(200, {}, GITHUB_RUNS.read_bytes())
+
+
+def github_server(**fields):
+    return ServerSettings(
+        "",
+        kind=SourceKind.GITHUB,
+        repository="octo-org/hello-world",
+        password="ghp_token",
+        authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
+        **fields,
+    )
+
+
+@pytest.mark.functional
+def test_should_show_cctray_fields_for_a_new_server(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.ui.sourceKind.currentText() == "cctray feed"
+    assert dialog.ui.githubSettings.isHidden()
+    assert not dialog.ui.addServerUrl.isHidden()
+    assert not dialog.ui.authentication_type.isHidden()
+
+
+@pytest.mark.functional
+def test_should_show_github_fields_when_github_is_selected(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.ui.sourceKind.setCurrentIndex(1)
+
+    assert not dialog.ui.githubSettings.isHidden()
+    assert dialog.ui.addServerUrl.isHidden()
+    assert dialog.ui.authentication_type.isHidden()
+    assert dialog.ui.username.isHidden()
+    assert dialog.ui.timezoneList.isHidden()
+    assert dialog.ui.passwordLabel.text() == "Token"
+
+    dialog.ui.sourceKind.setCurrentIndex(0)
+
+    assert dialog.ui.githubSettings.isHidden()
+    assert not dialog.ui.authentication_type.isHidden()
+
+
+@pytest.mark.functional
+def test_should_round_trip_a_github_server(qtbot):
+    server = github_server(workflow="ci.yml", branch="main", prefix="gh")
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.ui.sourceKind.currentText() == "GitHub Actions"
+    assert dialog.ui.repository.text() == "octo-org/hello-world"
+    assert dialog.get_server_config() == server
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("repository", ["", "hello-world", "octo-org/hello/world", "https://github.com/a/b"])
+def test_should_ask_for_an_owner_and_name(qtbot, mocker, repository):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, FakeApi())
+    qtbot.addWidget(dialog)
+    dialog.ui.sourceKind.setCurrentIndex(1)
+    dialog.ui.repository.setText(repository)
+    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
+
+    dialog.fetch_data()
+
+    m.assert_called_once_with(dialog, "Invalid input", "Enter the repository as owner/name.")
+
+
+@pytest.mark.functional
+def test_should_load_github_workflows_to_choose_from(qtbot):
+    api = FakeApi()
+    dialog = ServerConfigurationDialog(github_server(branch="main"), TIMEOUT, api)
+    qtbot.addWidget(dialog)
+
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+
+    names = [dialog.projects_list.child(i).text() for i in range(dialog.projects_list.rowCount())]
+    assert names[0] == "CI (main)"
+    assert api.requested == ["https://api.github.com/repos/octo-org/hello-world/actions/runs?per_page=100&branch=main"]

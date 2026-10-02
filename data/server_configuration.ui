@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>384</height>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>458</width>
-    <height>384</height>
+    <height>480</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -33,6 +33,98 @@
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QFormLayout" name="sourceKindLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="sourceKindLabel">
+           <property name="text">
+            <string>Source</string>
+           </property>
+           <property name="buddy">
+            <cstring>sourceKind</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="sourceKind">
+           <item>
+            <property name="text">
+             <string>cctray feed</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>GitHub Actions</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="githubSettings">
+         <property name="title">
+          <string>GitHub repository</string>
+         </property>
+         <layout class="QVBoxLayout" name="githubLayout">
+          <item>
+           <layout class="QFormLayout" name="githubForm">
+            <item row="0" column="0">
+             <widget class="QLabel" name="repositoryLabel">
+              <property name="text">
+               <string>Repository</string>
+              </property>
+              <property name="buddy">
+               <cstring>repository</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="repository">
+              <property name="placeholderText">
+               <string>owner/name</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="workflowLabel">
+              <property name="text">
+               <string>Workflow</string>
+              </property>
+              <property name="buddy">
+               <cstring>workflow</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="workflow">
+              <property name="placeholderText">
+               <string>All workflows, or a file such as ci.yml</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="branchLabel">
+              <property name="text">
+               <string>Branch</string>
+              </property>
+              <property name="buddy">
+               <cstring>branch</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="branch">
+              <property name="placeholderText">
+               <string>All branches</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QLabel" name="cctrayUrlLabel">
          <property name="text">
@@ -323,6 +415,10 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>sourceKind</tabstop>
+  <tabstop>repository</tabstop>
+  <tabstop>workflow</tabstop>
+  <tabstop>branch</tabstop>
   <tabstop>addServerUrl</tabstop>
   <tabstop>projectsList</tabstop>
  </tabstops>
