@@ -22,6 +22,19 @@ Tweak configuration
 
 The Misc tab also has an option to show the last build label next to each project, and one to use single-colour symbolic tray icons that differ by shape.
 
+## GitHub Actions
+
+BuildNotify can also watch GitHub Actions without a cctray feed. In the server dialog, set Source to `GitHub Actions` and fill in:
+
+1. Repository: `owner/name`, such as `octo-org/hello-world`.
+2. Workflow (optional): a workflow file such as `ci.yml`, or its name. Leave it empty for all workflows.
+3. Branch (optional): leave it empty for all branches.
+4. Token: a personal access token that can read Actions on the repository. A fine-grained token needs the "Actions: read" permission. Public repositories work without a token, but GitHub then allows only 60 requests an hour. The token is kept in the system keyring.
+
+Each workflow and branch pair shows as one project, such as `CI (main)`. Its status comes from the last finished run: success is green, a failure, time-out or startup failure is red, and a cancelled or skipped run is unknown. While a run is queued or in progress the project shows as building, with the status of the run before it. Clicking a project opens the latest run on GitHub.
+
+BuildNotify reads the 100 most recent runs on each poll. When GitHub reports that the rate limit is used up, the server is skipped until the limit resets, and the menu shows when it will try again. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
+
 ## Custom script
 
 BuildNotify can run a script each time it shows a notification. Turn on "Execute script for notifications" and enter the command. It runs through the platform shell (`/bin/sh` on Linux and macOS, `cmd.exe` on Windows).
