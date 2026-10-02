@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "BuildNotify"
 dynamic = ["version"]
-description = "Cruise Control build monitor for Windows/Linux/Mac"
+description = "System tray build monitor for cctray.xml feeds and GitHub Actions, on Linux, macOS and Windows"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [{ name = "Anay Nayak", email = "anayak007@gmail.com" }]
-keywords = ["cctray", "ccmenu", "buildnotify", "ubuntu", "linux", "cruisecontrol", "continuous integration", "ci"]
+keywords = ["cctray", "ccmenu", "buildnotify", "ubuntu", "linux", "cruisecontrol", "continuous integration", "ci", "github actions"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: X11 Applications :: Qt",
