@@ -69,7 +69,8 @@ class ServerConfigurationDialog(QDialog):
             self.ui.password.setEnabled(False)
 
         self.ui.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
-        self.ui.sourceKind.currentIndexChanged.connect(self.show_kind)
+        self.cctray_authentication_type = ServerSettings.AUTH_USERNAME_PASSWORD
+        self.ui.sourceKind.currentIndexChanged.connect(self.switch_kind)
         self.show_kind(self.ui.sourceKind.currentIndex())
         self.ui.backButton.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.skip_ssl_verification = bool(self.server.skip_ssl_verification)
@@ -79,17 +80,34 @@ class ServerConfigurationDialog(QDialog):
 
     def show_kind(self, index: int):
         github = KINDS[index] is SourceKind.GITHUB
-        if github:
-            self.ui.authentication_type.setCurrentIndex(ServerSettings.AUTH_BEARER_TOKEN)
-            self.ui.passwordLabel.setText("Token")
-            self.ui.password.setPlaceholderText(TOKEN_HINT)
-        elif self.ui.passwordLabel.text() == "Token":
-            self.set_authentication_type(self.ui.authentication_type.currentIndex())
         self.ui.githubSettings.setVisible(github)
         for widget in (self.ui.cctrayUrlLabel, self.ui.addServerUrl, self.ui.timezoneLabel, self.ui.timezoneList):
             widget.setVisible(not github)
         self.ui.authentication_type_label.setVisible(not github)
         self.ui.authentication_type.setVisible(not github)
+        if github:
+            self.show_token_field()
+
+    def switch_kind(self, index: int):
+        if KINDS[index] is SourceKind.GITHUB:
+            self.cctray_authentication_type = self.ui.authentication_type.currentIndex()
+            self.ui.authentication_type.blockSignals(True)
+            self.ui.authentication_type.setCurrentIndex(ServerSettings.AUTH_BEARER_TOKEN)
+            self.ui.authentication_type.blockSignals(False)
+            self.ui.password.setText("")
+        else:
+            self.ui.authentication_type.blockSignals(True)
+            self.ui.authentication_type.setCurrentIndex(self.cctray_authentication_type)
+            self.ui.authentication_type.blockSignals(False)
+            self.set_authentication_type(self.cctray_authentication_type)
+        self.show_kind(index)
+
+    def show_token_field(self):
+        self.ui.username.setText("")
+        self.ui.username.setVisible(False)
+        self.ui.usernameLabel.setVisible(False)
+        self.ui.passwordLabel.setText("Token")
+        self.ui.password.setPlaceholderText(TOKEN_HINT)
 
     def set_authentication_type(self, index: int):
         self.ui.username.setText("")

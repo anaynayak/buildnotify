@@ -304,6 +304,7 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
     assert [r.verify for r in m.request_history] == [True, False]
 
 
+URL_JENKINS = "http://jenkins.local:8080/cc.xml"
 GITHUB_RUNS = Path(__file__).parent.parent / "fixtures" / "github" / "runs.json"
 
 
@@ -396,3 +397,27 @@ def test_should_load_github_workflows_to_choose_from(qtbot):
     names = [dialog.projects_list.child(i).text() for i in range(dialog.projects_list.rowCount())]
     assert names[0] == "CI (main)"
     assert api.requested == ["https://api.github.com/repos/octo-org/hello-world/actions/runs?per_page=100&branch=main"]
+
+
+@pytest.mark.functional
+def test_should_not_carry_a_cctray_token_over_to_github(qtbot):
+    server = ServerSettings(URL_JENKINS, password="jenkins-token", authentication_type=ServerSettings.AUTH_BEARER_TOKEN)
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.ui.sourceKind.setCurrentIndex(1)
+
+    assert dialog.ui.password.text() == ""
+
+
+@pytest.mark.functional
+def test_should_restore_the_cctray_authentication_type_after_switching_back(qtbot):
+    dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS, username="alice"), TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.ui.sourceKind.setCurrentIndex(1)
+    dialog.ui.sourceKind.setCurrentIndex(0)
+
+    assert dialog.ui.authentication_type.currentIndex() == ServerSettings.AUTH_USERNAME_PASSWORD
+    assert not dialog.ui.username.isHidden()
+    assert dialog.ui.passwordLabel.text() == "Password"
