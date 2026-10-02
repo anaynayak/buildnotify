@@ -1,4 +1,5 @@
 import shutil
+import sys
 
 import keyring
 import pytest
@@ -67,7 +68,13 @@ def test_should_round_trip_every_value(ini):
     assert reopen(ini).settings == full_settings()
 
 
-@pytest.mark.parametrize("fmt", [QtCore.QSettings.Format.IniFormat, QtCore.QSettings.Format.NativeFormat])
+registry = pytest.mark.skipif(sys.platform == "win32", reason="NativeFormat is the registry on Windows")
+
+
+@pytest.mark.parametrize(
+    "fmt",
+    [QtCore.QSettings.Format.IniFormat, pytest.param(QtCore.QSettings.Format.NativeFormat, marks=registry)],
+)
 def test_should_round_trip_every_value_through_the_file(tmp_path, fmt):
     saved, copy = tmp_path / "saved", tmp_path / "copy"
     SettingsStore(QtCore.QSettings(str(saved), fmt), Keystore()).save(full_settings())
