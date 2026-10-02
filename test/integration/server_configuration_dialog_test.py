@@ -232,3 +232,17 @@ def test_should_raise_not_implemented_error_for_unknown_authentication_type(qtbo
 
     with pytest.raises(NotImplementedError):
         dialog.set_authentication_type(99)
+
+
+@pytest.mark.functional
+def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
+    url = 'file:///tmp/cctray.xml'
+    dialog = ServerConfigurationDialog(url, ConfigBuilder().server(url).build())
+    qtbot.addWidget(dialog)
+    m = mocker.patch.object(QMessageBox, 'critical', return_value=QMessageBox.Ok)
+
+    dialog.fetch_data()
+
+    m.assert_called_once_with(dialog, "Invalid input", "Only http:// and https:// URLs are supported.")
+    assert dialog.ui.loadUrlButton.isEnabled()
+    assert not hasattr(dialog, 'project_loader')

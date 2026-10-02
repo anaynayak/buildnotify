@@ -72,8 +72,9 @@ class ServerConfigurationDialog(QDialog):
                                       % self.ui.authentication_type.currentText())
 
     def fetch_data(self):
-        if '' == self.ui.addServerUrl.text():
-            QMessageBox.critical(self, "Invalid input", "Path field cannot be empty.")
+        error = self.url_error()
+        if error:
+            QMessageBox.critical(self, "Invalid input", error)
             return
 
         self.ui.loadUrlButton.setEnabled(False)
@@ -81,6 +82,14 @@ class ServerConfigurationDialog(QDialog):
         self.event = BackgroundEvent(self.project_loader.get_data, self)
         self.event.completed.connect(self.load_data)
         self.event.start()
+
+    def url_error(self) -> Optional[str]:
+        url = self.ui.addServerUrl.text()
+        if '' == url:
+            return "Path field cannot be empty."
+        if not url.lower().startswith(('http://', 'https://')):
+            return "Only http:// and https:// URLs are supported."
+        return None
 
     def load_data(self, response: Response):
         self.ui.loadUrlButton.setEnabled(True)
