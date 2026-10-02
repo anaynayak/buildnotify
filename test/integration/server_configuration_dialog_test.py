@@ -180,10 +180,18 @@ def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker)
 
 @pytest.mark.functional
 @pytest.mark.requireshead
-def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
+def test_should_read_widgets_and_load_results_on_the_gui_thread(qtbot, mocker):
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
         r.get(url, text=fake_content())
+        loaded = []
+        original_load = ServerConfigurationDialog.load_data
+
+        def load_data(dialog, response):
+            loaded.append(threading.get_ident())
+            original_load(dialog, response)
+
+        mocker.patch.object(ServerConfigurationDialog, "load_data", load_data)
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         qtbot.addWidget(dialog)
         threads = []
@@ -197,9 +205,10 @@ def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
         qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
-        dialog.event.wait()
+        assert dialog.loads.waitForDone(5000)
 
     assert threads == [threading.get_ident()]
+    assert loaded == [threading.get_ident()]
 
 
 @pytest.mark.functional

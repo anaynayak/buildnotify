@@ -1,21 +1,23 @@
 from zoneinfo import available_timezones
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import HttpConnection, is_ssl_error
-from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
+from buildnotifylib.ui.poller import Fetch
 
 
 class ServerConfigurationDialog(QDialog):
+    loaded = pyqtSignal(ServerSnapshot)
+
     def __init__(
         self,
         server: ServerSettings | None,
@@ -48,6 +50,8 @@ class ServerConfigurationDialog(QDialog):
             self.server = ServerSettings("", timezone="")
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
+        self.loads = QThreadPool(self)
+        self.loaded.connect(self.load_data)
 
         if not Keystore.is_available():
             self.ui.authenticationSettings.setTitle("Authentication (keyring dependency missing)")
@@ -88,9 +92,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.setEnabled(False)
         config = self.get_server_config()
         self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
-        self.event = BackgroundEvent(self.project_loader.get_data, self)
-        self.event.completed.connect(self.load_data)
-        self.event.start()
+        self.loads.start(Fetch(self.project_loader.get_data, self.loaded))
 
     def url_error(self) -> str | None:
         url = self.ui.addServerUrl.text()
