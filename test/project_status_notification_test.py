@@ -1,9 +1,6 @@
-from dataclasses import replace
-
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.ui.app_notification import AppNotification
-from buildnotifylib.ui.project_status_notification import ProjectStatusNotification
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 
@@ -56,29 +53,17 @@ def test_should_return_notifications(mocker):
     old = OverallIntegrationStatus([ServerSnapshot("url", tuple(old_projects))])
     new = OverallIntegrationStatus([ServerSnapshot("url", tuple(new_projects))])
 
-    class NotificationFake:
-        def __init__(self):
-            pass
+    app_notification = AppNotification(ConfigBuilder().build(), None, RecordingHook())
+    m = mocker.patch.object(app_notification.notification, "show_message")
 
-        def show_message(self, **kwargs):
-            print(kwargs)
-
-    m = mocker.patch.object(NotificationFake, "show_message")
-
-    settings = ConfigBuilder().build().settings
-    notification = ProjectStatusNotification(settings, old, new, NotificationFake(), RecordingHook())
-    notification.show_notifications()
+    app_notification.update_projects(old)
+    app_notification.update_projects(new)
 
     m.assert_any_call("Broken builds", "proj1")
     m.assert_any_call("Fixed builds", "Successbuild")
 
 
-class _SilentNotification:
-    def show_message(self, title, message):
-        pass
-
-
-def _broken_build_notification(script, project_name, hook):
+def _notify_broken_build(mocker, script, project_name, hook, enabled=True):
     old = OverallIntegrationStatus(
         [
             ServerSnapshot(
@@ -117,8 +102,11 @@ def _broken_build_notification(script, project_name, hook):
             )
         ]
     )
-    config = ConfigBuilder(custom_script=script, custom_script_enabled=True).build()
-    return ProjectStatusNotification(config.settings, old, new, _SilentNotification(), hook)
+    store = ConfigBuilder(custom_script=script, custom_script_enabled=enabled).build()
+    app_notification = AppNotification(store, None, hook)
+    mocker.patch.object(app_notification.notification, "show_message")
+    app_notification.update_projects(old)
+    app_notification.update_projects(new)
 
 
 class RecordingHook:
@@ -129,20 +117,18 @@ class RecordingHook:
         self.calls.append((script, status, projects))
 
 
-def test_should_run_custom_script_hook_with_status_and_projects():
+def test_should_run_custom_script_hook_with_status_and_projects(mocker):
     hook = RecordingHook()
 
-    _broken_build_notification("my-hook #status#", "proj1", hook).show_notifications()
+    _notify_broken_build(mocker, "my-hook #status#", "proj1", hook)
 
     assert hook.calls == [("my-hook #status#", "Broken builds", "proj1")]
 
 
-def test_should_not_run_hook_when_custom_script_is_disabled():
+def test_should_not_run_hook_when_custom_script_is_disabled(mocker):
     hook = RecordingHook()
-    notification = _broken_build_notification("my-hook", "proj1", hook)
-    notification.settings = replace(notification.settings, custom_script_enabled=False)
 
-    notification.show_notifications()
+    _notify_broken_build(mocker, "my-hook", "proj1", hook, enabled=False)
 
     assert hook.calls == []
 
