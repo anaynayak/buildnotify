@@ -1,11 +1,12 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QThread
 
+from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import cctray
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
-from buildnotifylib.core.http_connection import HttpConnection
 from buildnotifylib.core.model import Project, ServerSnapshot
+from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import ServerSettings
 
 
@@ -63,7 +64,7 @@ class ProjectLoader:
         self,
         server_config: ServerSettings,
         timeout: float | None,
-        connection=HttpConnection(),
+        connection: Connection = HttpConnection(),
         apply_excludes: bool = True,
     ):
         self.server_config = server_config

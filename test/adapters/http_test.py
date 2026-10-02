@@ -5,7 +5,7 @@ import pytest
 import requests
 import requests_mock
 
-from buildnotifylib.core.http_connection import HttpConnection, is_ssl_error
+from buildnotifylib.adapters.http import HttpConnection, is_ssl_error
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.version import VERSION
