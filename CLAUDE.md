@@ -10,13 +10,17 @@ The work is tracked in Backlog.md (`backlog/`, local only and gitignored). The f
 ## Commands
 
 ```sh
-uv sync --locked                                    # app + dev group from uv.lock
-QT_QPA_PLATFORM=offscreen uv run --locked pytest -q # full suite
-uv build                                            # sdist + wheel into dist/
+uv sync --locked   # app + dev group from uv.lock
+just test          # full suite (sets QT_QPA_PLATFORM=offscreen); pass pytest args, e.g. just test -k config
+just lint          # ruff check + ruff format --check
+just fmt           # ruff fixes + formatting
+just types         # mypy (config in pyproject.toml; skips buildnotifylib/generated)
+just build         # sdist + wheel into dist/
+just ui            # regenerate buildnotifylib/generated from data/*.ui and icons/icons.qrc
 ```
 
-Once TASK-19 adds the justfile, use `just test`, `just lint`, `just types` and `just build`.
-Always run Qt tests with `QT_QPA_PLATFORM=offscreen`.
+Run Qt tests outside `just` with `QT_QPA_PLATFORM=offscreen`. `pre-commit install` enables
+the ruff, ruff-format and uv-lock hooks.
 
 ## Backlog workflow
 
