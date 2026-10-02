@@ -8,6 +8,7 @@
 - On Windows a custom script that uses `#status#` or `#projects#` is not run. Use the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables instead
 - Settings move to a versioned layout on first start. 2.x can't read them afterwards
 - Install with `uv tool install buildnotify` or `pipx install buildnotify`. The setuptools, paver, tox and Vagrant files are gone
+- The snap is retired. Flatpak replaces it
 
 ### Added
 - Option to show last build label by @Deuchnord
@@ -19,6 +20,7 @@
 - The tray count overlay is sharp on HiDPI screens
 - All servers are polled in parallel
 - User-Agent is `BuildNotify/<version>`, without the OS and kernel version
+- Flatpak manifest (`packaging/flatpak`) and AppStream metadata under the `io.github.anaynayak.BuildNotify` app id. The desktop file and icon are renamed to match
 
 ### Fixed
 - Shell injection through project names in the custom script
