@@ -14,9 +14,8 @@ uv sync --locked   # app + dev group from uv.lock
 just test          # full suite (sets QT_QPA_PLATFORM=offscreen); pass pytest args, e.g. just test -k config
 just lint          # ruff check + ruff format --check
 just fmt           # ruff fixes + formatting
-just types         # mypy (config in pyproject.toml; skips buildnotifylib/generated)
+just types         # mypy (config in pyproject.toml)
 just build         # sdist + wheel into dist/
-just ui            # regenerate buildnotifylib/generated from data/*.ui
 just demo          # run the app against local fixture feeds, throwaway settings, null keyring
 just screenshots   # render docs/images offscreen from fixture data
 ```
@@ -64,13 +63,12 @@ the ruff, ruff-format and uv-lock hooks.
 3. Build with hatchling, manage environments and the lockfile with uv. ruff for lint and
    format, mypy for types.
 4. Qt binding: PySide6. Widgets are built in Python code, with `buildnotifylib/ui/widgets/forms.py`
-   for labelled rows and sections, and the Qt Designer `.ui` files are being removed. The code
-   had stopped matching the `.ui` files (the server dialog rewrote labels and visibility at
-   runtime). Diffs of generated code were hard to review, and the fixed sizes in the files clipped
-   with large fonts. Code also gives tests typed attributes instead of `dialog.ui.*`. Don't
-   use fixed widget sizes. The server dialog is done (`ui/dialogs/server/`). Preferences
-   still uses `data/preferences.ui`, generated with `pyside6-uic` through `just ui` and
-   committed, until it moves too. Icons are package data loaded with `importlib.resources`.
+   for labelled rows and sections. There are no Qt Designer `.ui` files: the code had stopped
+   matching them (the server dialog rewrote labels and visibility at runtime), diffs of generated
+   code were hard to review, and their fixed sizes clipped with large fonts. Code also gives tests
+   typed attributes instead of `dialog.ui.*`. Each dialog is a package of page or form widgets
+   with `set_value()` and `value()` (`ui/dialogs/server/`, `ui/dialogs/preferences/`). Don't
+   use fixed widget sizes. Icons are package data loaded with `importlib.resources`.
 5. Custom script: provide the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` env vars. The
    legacy `#status#`/`#projects#` substitution stays, but with `shlex.quote`.
 6. Distribution: PyPI (trusted publishing) and Flathub. Retire the snap, PPA, OBS, stdeb and

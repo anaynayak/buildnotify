@@ -17,14 +17,12 @@ PACKAGE = Path(buildnotifylib.__file__).parent
 UI = Path(buildnotifylib.ui.__file__).parent
 UI_MODULES = sorted(UI.rglob("*.py"))
 NON_UI_MODULES = sorted(
-    path
-    for path in PACKAGE.rglob("*.py")
-    if not path.is_relative_to(UI) and path.parent.name != "generated" and path.name != "__main__.py"
+    path for path in PACKAGE.rglob("*.py") if not path.is_relative_to(UI) and path.name != "__main__.py"
 )
 FORBIDDEN = ("buildnotifylib.adapters", "buildnotifylib.ui", "PyQt5", "PySide6", "requests", "keyring")
 CORE_MAY_IMPORT = ("buildnotifylib.core",)
 ADAPTERS_MAY_IMPORT = ("buildnotifylib.core", "buildnotifylib.adapters", "buildnotifylib.version")
-UI_MAY_IMPORT = ADAPTERS_MAY_IMPORT + ("buildnotifylib.ui", "buildnotifylib.generated")
+UI_MAY_IMPORT = ADAPTERS_MAY_IMPORT + ("buildnotifylib.ui",)
 
 
 def imported_modules(path: Path) -> list[str]:

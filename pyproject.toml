@@ -76,20 +76,14 @@ packages = ["buildnotifylib"]
 [tool.ruff]
 target-version = "py311"
 line-length = 120
-extend-exclude = ["buildnotifylib/generated"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
 
 [tool.mypy]
 files = ["buildnotifylib", "scripts", "test"]
-exclude = ["^buildnotifylib/generated/"]
 ignore_missing_imports = true
 warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-module = "buildnotifylib.generated.*"
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 # Every per-module flag that `--strict` turns on; `strict` itself is global-only.

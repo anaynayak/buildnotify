@@ -12,7 +12,6 @@ just lint          # ruff check + ruff format --check
 just fmt           # ruff fixes + formatting
 just types         # mypy
 just build         # sdist + wheel into dist/
-just ui            # regenerate buildnotifylib/generated from data/*.ui
 just demo          # run the app against local fixture feeds; pass app args, e.g. just demo --debug
 just screenshots   # render docs/images offscreen from fixture data
 ```
@@ -31,20 +30,13 @@ Run the tests outside `just` with `QT_QPA_PLATFORM=offscreen uv run pytest -q`.
 
 ## Editing the UI
 
-To edit the dialog windows, you should use [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html) (`uv run pyside6-designer`) on `data/*.ui`.
-Once you're done, regenerate its Python implementation in `buildnotifylib/generated` with:
-
-```shell
-just ui
-```
-
-Commit the regenerated modules with the `.ui` change. CI runs `just ui` and fails if the output differs.
+The dialogs are built in Python code, not Qt Designer files. Each one is a package under `buildnotifylib/ui/dialogs` made of page or form widgets with `set_value()` and `value()`, and `buildnotifylib/ui/widgets/forms.py` has helpers for labelled rows, titled sections and inline messages. Don't give widgets fixed sizes, so the dialogs grow with large fonts. Rerun `just screenshots` after a change.
 
 The status icons are plain SVG files in `buildnotifylib/resources/icons` and ship as package data.
 
 ## CI and releases
 
-CI runs lint, format, mypy and the generated UI check, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
+CI runs lint, format and mypy, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
 
 Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing. The tag must match `VERSION` in `buildnotifylib/version.py`, so `VERSION = "3.0.0"` is released by the tag `v3.0.0`. A mismatch fails the release before anything is built.
 

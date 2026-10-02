@@ -22,6 +22,7 @@
 - `just screenshots` renders the docs images offscreen from fixture data
 - The release workflow fails when the tag doesn't match the version in `buildnotifylib/version.py`
 - The Flatpak bundle drops Qt WebEngine and NumPy
+- The Preferences and server dialogs are built in Python code. The Qt Designer `.ui` files, the generated modules and `just ui` are gone
 
 ## [3.0.0] - 2026-10-02
 

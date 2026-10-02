@@ -26,10 +26,6 @@ types:
 build:
     uv build
 
-# Regenerate the Qt UI modules from data/*.ui
-ui:
-    uv run --locked pyside6-uic --from-imports -o buildnotifylib/generated/preferences_ui.py data/preferences.ui
-
 # Run the app against local fixture feeds with throwaway settings and no keychain
 demo *args:
     uv run --locked python scripts/demo.py {{args}}
