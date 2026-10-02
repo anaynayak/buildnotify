@@ -1,4 +1,8 @@
+import os
+import subprocess
 import unittest
+
+import pytest
 
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.projects import OverallIntegrationStatus
@@ -180,6 +184,62 @@ def test_should_return_notifications(mocker):
 
     m.assert_any_call('Broken builds', 'proj1')
     m.assert_any_call('Fixed builds', 'Successbuild')
+
+
+
+class _SilentNotification(object):
+    def show_message(self, title, message):
+        pass
+
+
+def _broken_build_notification(script, project_name):
+    old = OverallIntegrationStatus([ContinuousIntegrationServer('url', [ProjectBuilder(
+        {'name': project_name, 'lastBuildStatus': 'Success', 'activity': 'Sleeping', 'url': 'someurl',
+         'lastBuildLabel': '1', 'lastBuildTime': '2009-05-29T13:54:07'}).build()])])
+    new = OverallIntegrationStatus([ContinuousIntegrationServer('url', [ProjectBuilder(
+        {'name': project_name, 'lastBuildStatus': 'Failure', 'activity': 'Sleeping', 'url': 'someurl',
+         'lastBuildLabel': '2', 'lastBuildTime': '2009-05-29T13:54:07'}).build()])])
+    config = ConfigBuilder({'notifications/custom_script': script,
+                            'notifications/custom_script_enabled': True}).build()
+    return ProjectStatusNotification(config, old, new, _SilentNotification())
+
+
+def test_should_pass_status_and_projects_as_env_vars(mocker):
+    popen = mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen')
+
+    _broken_build_notification('my-hook', 'proj1').show_notifications()
+
+    env = popen.call_args.kwargs['env']
+    assert env['BUILDNOTIFY_STATUS'] == 'Broken builds'
+    assert env['BUILDNOTIFY_PROJECTS'] == 'proj1'
+    assert env['PATH'] == os.environ['PATH']
+
+
+def test_should_quote_legacy_placeholders(mocker):
+    popen = mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen')
+
+    _broken_build_notification('my-hook #status# #projects#', "it's; rm -rf ~").show_notifications()
+
+    assert popen.call_args.args[0] == "my-hook 'Broken builds' 'it'\"'\"'s; rm -rf ~'"
+
+
+@pytest.mark.parametrize('payload', ['$(touch {m})', '`touch {m}`', 'x; touch {m}', "x'; touch {m}; '"])
+def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
+    marker = tmp_path / 'injected'
+    output = tmp_path / 'output'
+    name = payload.format(m=marker)
+    processes = []
+    real_popen = subprocess.Popen
+    mocker.patch('buildnotifylib.project_status_notification.subprocess.Popen',
+                 side_effect=lambda *a, **kw: processes.append(real_popen(*a, **kw)))
+
+    script = 'printf %s #projects# > {out}; printf %s "$BUILDNOTIFY_PROJECTS" >> {out}'.format(out=output)
+    _broken_build_notification(script, name).show_notifications()
+    for process in processes:
+        process.wait(timeout=10)
+
+    assert not marker.exists()
+    assert output.read_text() == name + name
 
 
 if __name__ == '__main__':

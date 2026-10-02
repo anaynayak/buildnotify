@@ -1,3 +1,5 @@
+import os
+import shlex
 import subprocess
 from datetime import datetime
 from typing import Optional, Callable, List, Dict, Tuple
@@ -41,9 +43,13 @@ class ProjectStatusNotification(object):
             return
         self.notification.show_message(message, "\n".join(builds))
         if self.config.get_custom_script_enabled():
-            command = self.config.get_custom_script().replace('#status#', message).replace('#projects#',
-                                                                                           ",".join(builds))
-            subprocess.Popen(command, shell=True)
+            self.run_custom_script(message, ",".join(builds))
+
+    def run_custom_script(self, status: str, projects: str):
+        command = self.config.get_custom_script().replace('#status#', shlex.quote(status)) \
+            .replace('#projects#', shlex.quote(projects))
+        env = dict(os.environ, BUILDNOTIFY_STATUS=status, BUILDNOTIFY_PROJECTS=projects)
+        subprocess.Popen(command, shell=True, env=env)
 
 
 class TimedProjectFilter(object):
