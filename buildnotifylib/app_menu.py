@@ -1,4 +1,5 @@
 import webbrowser
+from datetime import datetime
 from functools import partial
 
 from PyQt5 import QtCore
@@ -7,7 +8,7 @@ from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.config import Config
-from buildnotifylib.core.distance_of_time import DistanceOfTime
+from buildnotifylib.core import humanize
 from buildnotifylib.core.model import Project
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
@@ -73,7 +74,7 @@ class AppMenu(QtCore.QObject):
         menu_item_label = project.label(self.conf.get_show_last_build_label())
         build_time = project.build_time
         if self.conf.get_value("lastBuildTimeForProject") and build_time is not None:
-            menu_item_label = menu_item_label + ", " + DistanceOfTime(build_time).relative()
+            menu_item_label = menu_item_label + ", " + humanize.relative(build_time, datetime.now(tz=build_time.tzinfo))
 
         action = self.menu.addAction(icon, menu_item_label)
         action.setIconVisibleInMenu(True)

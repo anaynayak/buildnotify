@@ -21,3 +21,4 @@ reports
 .pytest_cache
 backlog/
 !test/fixtures/**/*.html
+.hypothesis/

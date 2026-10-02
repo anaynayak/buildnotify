@@ -48,6 +48,7 @@ dev = [
     "PyQt5-stubs==5.15.6.0",
     "ruff>=0.16.10",
     "mypy>=1.18",
+    "hypothesis>=6",
 ]
 
 [tool.hatch.version]
