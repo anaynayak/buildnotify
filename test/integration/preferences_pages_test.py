@@ -49,7 +49,7 @@ def test_notifications_page_should_enable_the_script_field_only_while_the_script
 def test_misc_page_should_return_the_choices_it_was_given(qtbot, sort_key):
     page = MiscPage()
     qtbot.addWidget(page)
-    choices = MiscChoices(45, False, True, True, sort_key)
+    choices = MiscChoices(45, False, True, True, sort_key, 25)
 
     page.set_value(choices)
 

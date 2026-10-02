@@ -13,6 +13,7 @@ class MiscChoices:
     show_last_build_label: bool
     symbolic_icons: bool
     sort_key: SortKey
+    timeout_seconds: int
 
 
 class MiscPage(QWidget):
@@ -23,6 +24,9 @@ class MiscPage(QWidget):
         self.interval = QSpinBox()
         self.interval.setSuffix(self.tr(" seconds"))
         self.interval.setRange(10, 3600)
+        self.timeout = QSpinBox()
+        self.timeout.setSuffix(self.tr(" seconds"))
+        self.timeout.setRange(1, 300)
         self.show_last_build_time = QCheckBox(self.tr("show last build time for each project"))
         self.show_last_build_label = QCheckBox(self.tr("show last build label for each project"))
         self.symbolic_icons = QCheckBox(self.tr("use symbolic tray icons (shapes instead of coloured squares)"))
@@ -45,12 +49,14 @@ class MiscPage(QWidget):
         form = QFormLayout()
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
         add_row(form, self.tr("Server polling interval"), self.interval)
+        add_row(form, self.tr("Request timeout"), self.timeout)
         for checkbox in (self.show_last_build_time, self.show_last_build_label, self.symbolic_icons):
             form.addRow("", checkbox)
         return form
 
     def set_value(self, choices: MiscChoices) -> None:
         self.interval.setValue(choices.interval_seconds)
+        self.timeout.setValue(choices.timeout_seconds)
         self.show_last_build_time.setChecked(choices.show_last_build_time)
         self.show_last_build_label.setChecked(choices.show_last_build_label)
         self.symbolic_icons.setChecked(choices.symbolic_icons)
@@ -63,4 +69,5 @@ class MiscPage(QWidget):
             self.show_last_build_label.isChecked(),
             self.symbolic_icons.isChecked(),
             next(key for key, button in self.sort_buttons.items() if button.isChecked()),
+            self.timeout.value(),
         )

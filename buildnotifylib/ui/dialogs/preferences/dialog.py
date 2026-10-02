@@ -53,6 +53,7 @@ class PreferencesDialog(QDialog):
                 settings.show_last_build_label,
                 settings.symbolic_icons,
                 settings.sort_key,
+                settings.timeout_seconds,
             )
         )
 
@@ -63,6 +64,7 @@ class PreferencesDialog(QDialog):
             self.settings,
             servers=self.servers_page.value(),
             interval_seconds=misc.interval_seconds,
+            timeout_seconds=misc.timeout_seconds,
             custom_script=notifications.script,
             custom_script_enabled=notifications.script_enabled,
             sort_key=misc.sort_key,

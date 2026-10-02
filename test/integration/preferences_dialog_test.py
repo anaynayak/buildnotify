@@ -431,3 +431,15 @@ def test_ok_button_saves_and_keeps_pauses_and_mutes(qtbot, mocker):
 
     assert saved is not None
     assert saved.paused_until == paused
+
+
+@pytest.mark.functional
+def test_should_expose_and_return_the_request_timeout(qtbot):
+    conf = ConfigBuilder(timeout_seconds=25).build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    assert dialog.misc_page.timeout.value() == 25
+
+    dialog.misc_page.timeout.setValue(40)
+
+    assert dialog.edited_settings().timeout_seconds == 40
