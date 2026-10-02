@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "BuildNotify"
 dynamic = ["version"]
 description = "Cruise Control build monitor for Windows/Linux/Mac"
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-only"
 license-files = ["LICENSE"]
