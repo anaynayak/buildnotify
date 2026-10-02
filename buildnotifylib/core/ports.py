@@ -1,5 +1,6 @@
 from typing import Protocol
 
+from buildnotifylib.core.model import Project
 from buildnotifylib.core.settings import ServerSettings
 
 
@@ -15,6 +16,12 @@ class Connection(Protocol):
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None
     ) -> bytes: ...
+
+
+class Source(Protocol):
+    """One configured server: fetches its projects, raising on any failure."""
+
+    def fetch(self) -> list[Project]: ...
 
 
 class CredentialStore(Protocol):

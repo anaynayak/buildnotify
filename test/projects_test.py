@@ -1,6 +1,9 @@
 import logging
 import unittest
 
+import pytest
+
+from buildnotifylib.core.cctray import CctraySource, FeedError
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 
@@ -116,3 +119,15 @@ def test_should_log_a_failed_fetch_as_a_warning(caplog, capsys):
         (logging.WARNING, "Failed to fetch http://ci/cc.xml: refused")
     ]
     assert capsys.readouterr().out == ""
+
+
+def test_should_load_a_default_server_through_the_cctray_source():
+    loader = ProjectLoader(ServerSettings("http://ci/cc.xml"), 10, MockConnection(fake_content()))
+    assert isinstance(loader.source(), CctraySource)
+
+
+def test_cctray_source_should_fetch_projects_and_raise_on_a_bad_feed():
+    source = CctraySource(ServerSettings("http://ci/cc.xml"), 10, MockConnection(fake_content()))
+    assert len(source.fetch()) == 7
+    with pytest.raises(FeedError):
+        CctraySource(ServerSettings("http://ci/cc.xml"), 10, MockConnection(b"<feed/>")).fetch()

@@ -6,6 +6,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from defusedxml import minidom
 
 from buildnotifylib.core.model import NONE_TIMEZONE, Activity, Project, Status, normalise_url
+from buildnotifylib.core.ports import Connection
+from buildnotifylib.core.settings import ServerSettings
 
 ATTRIBUTES = ("name", "lastBuildStatus", "lastBuildLabel", "activity", "webUrl", "lastBuildTime")
 
@@ -26,6 +28,23 @@ class FeedSource(Protocol):
 
 class FeedError(ValueError):
     pass
+
+
+class CctraySource:
+    def __init__(
+        self, server: ServerSettings, timeout: float | None, connection: Connection, apply_excludes: bool = True
+    ):
+        self.server = server
+        self.timeout = timeout
+        self.connection = connection
+        self.apply_excludes = apply_excludes
+
+    def fetch(self) -> list[Project]:
+        headers = {}
+        if self.server.authentication_type == ServerSettings.AUTH_BEARER_TOKEN:
+            headers["Authorization"] = f"Bearer {self.server.password}"
+        data = self.connection.connect(self.server, self.timeout, headers)
+        return parse(data, self.server, apply_excludes=self.apply_excludes)
 
 
 def parse(data: bytes, server: FeedSource, *, apply_excludes: bool = True) -> list[Project]:
