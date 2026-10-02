@@ -16,3 +16,8 @@ coverage.xml
 parts
 .vscode
 reports
+*.html
+.venv
+.ruff_cache
+.mypy_cache
+.pytest_cache
