@@ -58,8 +58,8 @@ include = [
     "/buildnotifylib",
     "/data",
     "/test",
-    "/buildnotify.desktop",
-    "/buildnotify.svg",
+    "/io.github.anaynayak.BuildNotify.desktop",
+    "/io.github.anaynayak.BuildNotify.svg",
     "/CHANGELOG",
     "/pytest.ini",
 ]
@@ -68,8 +68,8 @@ include = [
 packages = ["buildnotifylib"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"buildnotify.desktop" = "share/applications/buildnotify.desktop"
-"buildnotify.svg" = "share/pixmaps/buildnotify.svg"
+"io.github.anaynayak.BuildNotify.desktop" = "share/applications/io.github.anaynayak.BuildNotify.desktop"
+"io.github.anaynayak.BuildNotify.svg" = "share/icons/hicolor/scalable/apps/io.github.anaynayak.BuildNotify.svg"
 
 [tool.ruff]
 target-version = "py311"
