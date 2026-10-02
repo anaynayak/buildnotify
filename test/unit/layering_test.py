@@ -5,11 +5,15 @@ from pathlib import Path
 
 import pytest
 
+import buildnotifylib.adapters
 import buildnotifylib.core
 
 CORE = Path(buildnotifylib.core.__file__).parent
 CORE_MODULES = sorted(CORE.glob("*.py"))
+ADAPTER_MODULES = sorted(Path(buildnotifylib.adapters.__file__).parent.glob("*.py"))
 FORBIDDEN = ("buildnotifylib.adapters", "buildnotifylib.ui", "PyQt5", "PySide6", "requests", "keyring")
+CORE_MAY_IMPORT = ("buildnotifylib.core",)
+ADAPTERS_MAY_IMPORT = ("buildnotifylib.core", "buildnotifylib.adapters", "buildnotifylib.version")
 
 
 def imported_modules(path: Path) -> list[str]:
@@ -18,13 +22,34 @@ def imported_modules(path: Path) -> list[str]:
     return modules + [node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
 
 
-def forbidden(module: str) -> bool:
-    return any(module == prefix or module.startswith(prefix + ".") for prefix in FORBIDDEN)
+def within(module: str, prefixes: tuple[str, ...]) -> bool:
+    return any(module == prefix or module.startswith(prefix + ".") for prefix in prefixes)
+
+
+def outside_layer(path: Path, allowed: tuple[str, ...]) -> list[str]:
+    internal = [module for module in imported_modules(path) if within(module, ("buildnotifylib",))]
+    return [module for module in internal if not within(module, allowed)]
 
 
 @pytest.mark.parametrize("path", CORE_MODULES, ids=lambda path: path.name)
 def test_core_should_not_import_qt_adapters_or_ui(path):
-    assert [module for module in imported_modules(path) if forbidden(module)] == []
+    assert [module for module in imported_modules(path) if within(module, FORBIDDEN)] == []
+
+
+@pytest.mark.parametrize("path", CORE_MODULES, ids=lambda path: path.name)
+def test_core_should_import_only_core_from_buildnotifylib(path):
+    assert outside_layer(path, CORE_MAY_IMPORT) == []
+
+
+@pytest.mark.parametrize("path", ADAPTER_MODULES, ids=lambda path: path.name)
+def test_adapters_should_not_import_ui(path):
+    assert outside_layer(path, ADAPTERS_MAY_IMPORT) == []
+
+
+def test_should_flag_an_adapter_importing_the_ui(tmp_path):
+    module = tmp_path / "bad.py"
+    module.write_text("from buildnotifylib.app_menu import AppMenu\nimport buildnotifylib.ui.poller\n")
+    assert outside_layer(module, ADAPTERS_MAY_IMPORT) == ["buildnotifylib.ui.poller", "buildnotifylib.app_menu"]
 
 
 def test_importing_all_of_core_should_load_no_qt_requests_or_keyring():
