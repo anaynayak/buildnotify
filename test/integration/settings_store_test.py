@@ -249,7 +249,7 @@ def test_should_fall_back_to_defaults_for_unreadable_values(qsettings):
 
     settings = SettingsStore(qsettings, Keystore()).settings
 
-    assert (settings.sort_key, settings.interval_seconds) == (SortKey.LAST_BUILD_TIME, 120)
+    assert (settings.sort_key, settings.interval_seconds) == (SortKey.STATUS, 120)
 
 
 class DictKeystore:
@@ -300,3 +300,9 @@ def test_should_ignore_a_pause_without_a_valid_utc_time(qsettings, value):
     qsettings.setValue("notifications/paused_until", value)
 
     assert SettingsStore(qsettings, Keystore()).settings.paused_until is None
+
+
+def test_should_keep_the_sort_an_existing_install_saved(qsettings):
+    qsettings.setValue("sort_key", "sort_build_time")
+
+    assert SettingsStore(qsettings, Keystore()).settings.sort_key is SortKey.LAST_BUILD_TIME

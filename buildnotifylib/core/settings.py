@@ -66,6 +66,7 @@ DEFAULT_NOTIFICATIONS = {
 
 
 class SortKey(StrEnum):
+    STATUS = "sort_status"
     LAST_BUILD_TIME = "sort_build_time"
     NAME = "sort_name"
 
@@ -77,7 +78,7 @@ class AppSettings:
     timeout_seconds: int = 10
     custom_script: str = DEFAULT_SCRIPT
     custom_script_enabled: bool = False
-    sort_key: SortKey = SortKey.LAST_BUILD_TIME
+    sort_key: SortKey = SortKey.STATUS
     show_last_build_label: bool = False
     symbolic_icons: bool = False
     server_prompt_shown: bool = False

@@ -25,8 +25,8 @@ from buildnotifylib.core.mute import (
     with_server,
 )
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.sections import grouped
-from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
+from buildnotifylib.core.sections import grouped, sort_projects
+from buildnotifylib.core.settings import AppSettings, ServerSettings
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
@@ -69,16 +69,7 @@ class AppMenu(QtCore.QObject):
         self.create_default_menu_items()
 
     def sorted_projects(self, projects: list[Project]) -> list[Project]:
-        if self.store.settings.sort_key is SortKey.NAME:
-            return sorted(projects, key=lambda p: p.label())
-        return sorted(projects, key=self.build_time_key, reverse=True)
-
-    @staticmethod
-    def build_time_key(project: Project) -> tuple[bool, float]:
-        build_time = project.build_time
-        if build_time is None:
-            return False, 0.0
-        return True, build_time.timestamp()
+        return sort_projects(projects, self.store.settings.sort_key)
 
     def create_error_items(self, servers: Sequence[ServerSnapshot], separate: bool):
         for menu in self.error_menus:

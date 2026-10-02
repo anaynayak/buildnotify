@@ -28,7 +28,7 @@ Tweak configuration
 
 ![Misc configuration](images/misc.png)
 
-The Misc tab also has an option to show the last build label next to each project, and one to use single-colour symbolic tray icons that differ by shape.
+The Misc tab also has an option to show the last build label next to each project, and one to use single-colour symbolic tray icons that differ by shape. The sort order applies within each section of the tray menu. `Failing first`, the default for new installs, puts projects that are building at the top of their section and then shows the newest builds first. Name and last build time sort the whole section that way. An install from an earlier version keeps the sort order it had.
 
 ## GitHub Actions
 

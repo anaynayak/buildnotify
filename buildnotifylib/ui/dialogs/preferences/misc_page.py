@@ -26,13 +26,16 @@ class MiscPage(QWidget):
         self.show_last_build_time = QCheckBox(self.tr("show last build time for each project"))
         self.show_last_build_label = QCheckBox(self.tr("show last build label for each project"))
         self.symbolic_icons = QCheckBox(self.tr("use symbolic tray icons (shapes instead of coloured squares)"))
-        self.sort_by_name = QRadioButton(self.tr("Sort builds by name"))
-        self.sort_by_last_build_time = QRadioButton(self.tr("Sort builds by last build time"))
-        self.sort_by_last_build_time.setChecked(True)
+        self.sort_buttons = {
+            SortKey.STATUS: QRadioButton(self.tr("Failing first")),
+            SortKey.NAME: QRadioButton(self.tr("Sort builds by name")),
+            SortKey.LAST_BUILD_TIME: QRadioButton(self.tr("Sort builds by last build time")),
+        }
+        self.sort_buttons[SortKey.STATUS].setChecked(True)
 
         sort_order = QVBoxLayout()
-        sort_order.addWidget(self.sort_by_name)
-        sort_order.addWidget(self.sort_by_last_build_time)
+        for button in self.sort_buttons.values():
+            sort_order.addWidget(button)
         layout = QVBoxLayout(self)
         layout.addLayout(self.display_form())
         layout.addWidget(section(self.tr("Build Sort order"), sort_order))
@@ -51,8 +54,7 @@ class MiscPage(QWidget):
         self.show_last_build_time.setChecked(choices.show_last_build_time)
         self.show_last_build_label.setChecked(choices.show_last_build_label)
         self.symbolic_icons.setChecked(choices.symbolic_icons)
-        by_name = choices.sort_key is SortKey.NAME
-        (self.sort_by_name if by_name else self.sort_by_last_build_time).setChecked(True)
+        self.sort_buttons[choices.sort_key].setChecked(True)
 
     def value(self) -> MiscChoices:
         return MiscChoices(
@@ -60,5 +62,5 @@ class MiscPage(QWidget):
             self.show_last_build_time.isChecked(),
             self.show_last_build_label.isChecked(),
             self.symbolic_icons.isChecked(),
-            SortKey.NAME if self.sort_by_name.isChecked() else SortKey.LAST_BUILD_TIME,
+            next(key for key, button in self.sort_buttons.items() if button.isChecked()),
         )

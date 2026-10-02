@@ -38,7 +38,7 @@ def test_should_default_to_the_2x_behaviour():
     assert (settings.interval_seconds, settings.timeout_seconds) == (120, 10)
     assert settings.custom_script == "echo #status# #projects# >> /tmp/buildnotify.log"
     assert not settings.custom_script_enabled
-    assert settings.sort_key is SortKey.LAST_BUILD_TIME
+    assert settings.sort_key is SortKey.STATUS
     assert not settings.show_last_build_label
     assert not settings.symbolic_icons
 
@@ -55,7 +55,8 @@ def test_should_prefer_a_configured_notification():
 
 
 def test_should_store_sort_keys_with_their_2x_names():
-    assert [key.value for key in SortKey] == ["sort_build_time", "sort_name"]
+    assert [SortKey.LAST_BUILD_TIME.value, SortKey.NAME.value] == ["sort_build_time", "sort_name"]
+    assert SortKey.STATUS.value == "sort_status"
 
 
 def test_should_be_on_the_layout_with_mutes():
