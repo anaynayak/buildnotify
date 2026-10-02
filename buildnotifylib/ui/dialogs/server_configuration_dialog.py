@@ -1,7 +1,7 @@
 from zoneinfo import available_timezones
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, QThreadPool, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
@@ -11,12 +11,10 @@ from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
-from buildnotifylib.ui.poller import Fetch
+from buildnotifylib.ui.poller import Deadline, Fetch
 
 
 class ServerConfigurationDialog(QDialog):
-    DEADLINE_GRACE_MS = 2000
-
     loaded = pyqtSignal(int, ServerSnapshot)
 
     def __init__(
@@ -54,10 +52,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
         self.loads = QThreadPool.globalInstance()
         self.loaded.connect(self.on_loaded)
-        self.generation = 0
-        self.deadline = QTimer(self)
-        self.deadline.setSingleShot(True)
-        self.deadline.timeout.connect(self.expire)
+        self.deadline = Deadline(self, self.expire)
 
         if not keystore_available:
             self.ui.authenticationSettings.setTitle("Authentication (keyring dependency missing)")
@@ -98,18 +93,17 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.setEnabled(False)
         config = self.get_server_config()
         self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
-        self.generation += 1
-        self.loads.start(Fetch(self.project_loader, self, "loaded", self.generation))
-        self.deadline.start(self.timeout * 1000 + self.DEADLINE_GRACE_MS)
+        generation = self.deadline.begin(self.timeout)
+        self.loads.start(Fetch(self.project_loader, self, "loaded", generation))
 
     def on_loaded(self, generation: int, response: ServerSnapshot):
-        if generation != self.generation:
+        if not self.deadline.is_current(generation):
             return
         self.deadline.stop()
         self.load_data(response)
 
     def expire(self):
-        self.generation += 1
+        self.deadline.invalidate()
         error = TimeoutError("no response before the load deadline")
         self.load_data(ServerSnapshot(self.project_loader.server_config.url, error=error))
 

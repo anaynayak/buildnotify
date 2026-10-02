@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QMessageBox
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.poller import Deadline
 from test.utils import FakeConnection, GatedConnection, fake_content
 
 TIMEOUT = 10
@@ -259,7 +260,7 @@ def test_should_load_projects_through_the_injected_connection(qtbot):
 def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
     url = "http://localhost:8080/cc.xml"
     connection = GatedConnection(fake_content(), slow=[url])
-    mocker.patch.object(ServerConfigurationDialog, "DEADLINE_GRACE_MS", 50)
+    mocker.patch.object(Deadline, "GRACE_MS", 50)
     dialog = ServerConfigurationDialog(ServerSettings(url), 0, connection)
     qtbot.addWidget(dialog)
     m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)

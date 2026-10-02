@@ -1,6 +1,7 @@
 import copy
 import logging
 from collections import Counter
+from collections.abc import Callable
 from typing import Any
 
 from PyQt5.QtCore import QObject, QRunnable, QThreadPool, QTimer, pyqtSignal, pyqtSlot
@@ -43,9 +44,37 @@ class Fetch(QRunnable):
             return ServerSnapshot(self.loader.server_config.url, error=ex)
 
 
+class Deadline:
+    """Numbers each round of fetches and fires `on_expire` if the round outlives its timeout.
+
+    A result tagged with an older generation belongs to a round that was replaced or expired.
+    """
+
+    GRACE_MS = 2000
+
+    def __init__(self, parent: QObject, on_expire: Callable[[], None]):
+        self.generation = 0
+        self.timer = QTimer(parent)
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(on_expire)
+
+    def begin(self, timeout_seconds: int) -> int:
+        self.generation += 1
+        self.timer.start(timeout_seconds * 1000 + self.GRACE_MS)
+        return self.generation
+
+    def is_current(self, generation: int) -> bool:
+        return generation == self.generation
+
+    def stop(self):
+        self.timer.stop()
+
+    def invalidate(self):
+        self.generation += 1
+
+
 class Cycle:
-    def __init__(self, generation: int, configs: list[ServerSettings]):
-        self.generation = generation
+    def __init__(self, configs: list[ServerSettings]):
         self.configs = configs
         self.results: list[ServerSnapshot | None] = [None] * len(configs)
 
@@ -63,7 +92,6 @@ class Poller(QObject):
     """
 
     FIRST_POLL_MS = 1000
-    DEADLINE_GRACE_MS = 2000
 
     updated = pyqtSignal(OverallIntegrationStatus)
     fetched = pyqtSignal(int, int, str, ServerSnapshot)
@@ -75,14 +103,11 @@ class Poller(QObject):
         self.pool = QThreadPool(self)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.poll)
-        self.deadline = QTimer(self)
-        self.deadline.setSingleShot(True)
-        self.deadline.timeout.connect(self.expire)
+        self.deadline = Deadline(self, self.expire)
         self.fetched.connect(self.on_fetched)
         self.last_known: dict[str, tuple[Project, ...]] = {}
         self.in_flight: Counter[str] = Counter()
         self.cycle: Cycle | None = None
-        self.generation = 0
         self.reload_pending = False
 
     def start(self, first_poll_ms: int = FIRST_POLL_MS):
@@ -106,15 +131,14 @@ class Poller(QObject):
 
     def fetch(self):
         settings = self.store.settings
-        self.generation += 1
-        self.cycle = Cycle(self.generation, copy.deepcopy(settings.servers))
+        generation = self.deadline.begin(settings.timeout_seconds)
+        self.cycle = Cycle(copy.deepcopy(settings.servers))
         busy = set(self.in_flight)
         for index, config in enumerate(self.cycle.configs):
-            self.start_fetch(index, config, settings.timeout_seconds, busy)
-        self.deadline.start(settings.timeout_seconds * 1000 + self.DEADLINE_GRACE_MS)
+            self.start_fetch(generation, index, config, settings.timeout_seconds, busy)
         self.finish_if_complete()
 
-    def start_fetch(self, index: int, config: ServerSettings, timeout: int, busy: set[str]):
+    def start_fetch(self, generation: int, index: int, config: ServerSettings, timeout: int, busy: set[str]):
         if config.url in busy:
             log.info("Skipping %s: its previous fetch is still running", config.url)
             self.record(index, ServerSnapshot(config.url, error=TimeoutError("previous fetch still running")))
@@ -122,14 +146,14 @@ class Poller(QObject):
         self.in_flight[config.url] += 1
         self.pool.setMaxThreadCount(max(self.pool.maxThreadCount(), self.in_flight.total()))
         loader = ProjectLoader(config, timeout, self.connection)
-        self.pool.start(Fetch(loader, self, "fetched", self.generation, index, config.url))
+        self.pool.start(Fetch(loader, self, "fetched", generation, index, config.url))
 
     @pyqtSlot(int, int, str, ServerSnapshot)
     def on_fetched(self, generation: int, index: int, url: str, snapshot: ServerSnapshot):
         self.in_flight[url] -= 1
         if self.in_flight[url] <= 0:
             del self.in_flight[url]
-        if self.cycle is None or self.cycle.generation != generation:
+        if self.cycle is None or not self.deadline.is_current(generation):
             log.info("Keeping a late response from %s for the next poll", url)
             self.with_last_known(snapshot, [])
             return

@@ -13,7 +13,7 @@ from buildnotifylib.core.diff import Change, diff, labels
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import AppSettings, ServerSettings
-from buildnotifylib.ui.poller import Fetch, Poller
+from buildnotifylib.ui.poller import Deadline, Fetch, Poller
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, GatedConnection, fake_content
 
@@ -191,7 +191,7 @@ def test_a_slow_server_should_not_delay_the_others(qtbot, make_poller):
 
 @pytest.mark.functional
 def test_should_report_the_others_when_a_server_misses_the_deadline(qtbot, mocker, make_poller):
-    mocker.patch.object(Poller, "DEADLINE_GRACE_MS", 0)
+    mocker.patch.object(Deadline, "GRACE_MS", 0)
     conf = ConfigBuilder(timeout_seconds=2).server(SLOW).server(FAST).build()
     connection = GatedConnection(cctray("Success"), slow=[SLOW])
     poller = make_poller(conf, connection)
@@ -229,7 +229,7 @@ def test_should_log_a_poll_skipped_while_a_fetch_is_running(qtbot, caplog, make_
 
 @pytest.mark.functional
 def test_should_not_refetch_a_server_still_running_after_the_deadline(qtbot, caplog, mocker, make_poller):
-    mocker.patch.object(Poller, "DEADLINE_GRACE_MS", 0)
+    mocker.patch.object(Deadline, "GRACE_MS", 0)
     conf = ConfigBuilder(timeout_seconds=0).server(SLOW).build()
     connection = GatedConnection(cctray("Success"), slow=[SLOW])
     poller = make_poller(conf, connection)
@@ -291,7 +291,7 @@ def test_fetch_should_drop_the_result_when_the_receiver_is_gone(qtbot):
 
 @pytest.mark.functional
 def test_should_keep_a_late_response_as_the_last_known_projects(qtbot, mocker, make_poller):
-    mocker.patch.object(Poller, "DEADLINE_GRACE_MS", 0)
+    mocker.patch.object(Deadline, "GRACE_MS", 0)
     conf = ConfigBuilder(timeout_seconds=0).server(SLOW).build()
     connection = GatedConnection(cctray("Failure"), slow=[SLOW])
     poller = make_poller(conf, connection)
@@ -303,3 +303,18 @@ def test_should_keep_a_late_response_as_the_last_known_projects(qtbot, mocker, m
 
     assert blocker.args[0].get_projects() == []
     assert [p.name for p in poller.last_known[SLOW]] == ["proj1"]
+
+
+def test_deadline_should_retire_older_generations(qtbot, mocker):
+    mocker.patch.object(Deadline, "GRACE_MS", 0)
+    on_expire = mocker.Mock()
+    owner = QObject()
+    deadline = Deadline(owner, on_expire)
+
+    first = deadline.begin(0)
+    second = deadline.begin(0)
+    assert (deadline.is_current(first), deadline.is_current(second)) == (False, True)
+
+    deadline.invalidate()
+    assert not deadline.is_current(second)
+    qtbot.waitUntil(lambda: on_expire.call_count == 1)
