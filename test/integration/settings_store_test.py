@@ -167,6 +167,29 @@ def test_should_not_touch_the_keyring_without_credentials(ini):
     assert reopen(ini).settings.servers[0].password == ""
 
 
+def test_should_not_store_an_empty_token_for_a_github_server(ini):
+    github = ServerSettings(
+        "",
+        kind=SourceKind.GITHUB,
+        repository="octo-org/hello-world",
+        authentication_type=ServerSettings.AUTH_BEARER_TOKEN,
+    )
+
+    reopen(ini).save(AppSettings(servers=[github]))
+
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "") is None
+    assert reopen(ini).settings.servers[0].password == ""
+
+
+def test_should_forget_a_github_token_once_it_is_cleared(ini):
+    github = full_settings().servers[3]
+    reopen(ini).save(AppSettings(servers=[github]))
+
+    reopen(ini).save(AppSettings(servers=[replace(github, password="")]))
+
+    assert keyring.get_password("https://github.com/octo-org/hello-world", "") is None
+
+
 def test_should_fall_back_to_defaults_for_unreadable_values(qsettings):
     qsettings.setValue("sort_key", "bogus")
     qsettings.setValue("connection/interval_in_seconds", "soon")

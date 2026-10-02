@@ -176,7 +176,12 @@ def write_servers(qsettings: QSettings, servers: list[ServerSettings]) -> None:
 
 
 def keyring_entries(servers: list[ServerSettings]) -> dict[tuple[str, str], str]:
-    return {(server.url, server.username): server.password for server in servers if server.uses_keyring()}
+    """Keyring entries by (url, username). A token server with no token has none, so no empty entry is written."""
+    return {
+        (server.url, server.username): server.password
+        for server in servers
+        if server.uses_keyring() and (server.username or server.password)
+    }
 
 
 def paused_until(value: Any) -> datetime | None:
