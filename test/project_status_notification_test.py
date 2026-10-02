@@ -5,8 +5,8 @@ import unittest
 import pytest
 
 from buildnotifylib.app_notification import AppNotification
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
-from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.project_status_notification import (
     ProjectStatus,
     ProjectStatusNotification,

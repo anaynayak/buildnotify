@@ -5,8 +5,8 @@ from PyQt5 import QtWidgets
 
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
-from buildnotifylib.core.projects import OverallIntegrationStatus
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 

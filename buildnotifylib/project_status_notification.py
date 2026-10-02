@@ -7,8 +7,8 @@ from datetime import datetime
 from typing import Optional
 
 from buildnotifylib.config import Config
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import Project, Status
-from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.notifications import Notification
 
 

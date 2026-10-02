@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 from buildnotifylib.app_menu import AppMenu
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.config import Config
-from buildnotifylib.core.projects import OverallIntegrationStatus
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 
 
 class AppUi(QtCore.QObject):

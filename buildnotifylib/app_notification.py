@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QSystemTrayIcon
 
 from buildnotifylib.config import Config
-from buildnotifylib.core.projects import OverallIntegrationStatus
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.notifications import Notification
 from buildnotifylib.project_status_notification import ProjectStatusNotification, TimedProjectFilter
 

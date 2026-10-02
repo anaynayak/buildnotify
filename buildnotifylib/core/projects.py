@@ -3,52 +3,10 @@ from PyQt5.QtCore import QObject, QThread
 
 from buildnotifylib.config import Config
 from buildnotifylib.core import cctray
+from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.http_connection import HttpConnection
-from buildnotifylib.core.model import Project, ServerSnapshot, Status
+from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.serverconfig import ServerConfig
-
-STATUS_PRIORITY = [
-    "Failure.Building",
-    "Failure.Sleeping",
-    "Failure.CheckingModifications",
-    "Success.Building",
-    "Success.Sleeping",
-    "Success.CheckingModifications",
-    "Unknown.Building",
-    "Unknown.Sleeping",
-    "Unknown.CheckingModifications",
-    "Unknown.Unknown",
-]
-
-
-class OverallIntegrationStatus:
-    def __init__(self, servers: list[ServerSnapshot]):
-        self.servers = servers
-
-    def get_build_status(self) -> str | None:
-        build_status_mapping = self.to_map()
-        for status in STATUS_PRIORITY:
-            if build_status_mapping[status]:
-                return status
-        return None
-
-    def get_failing_builds(self) -> list[Project]:
-        return [p for p in self.get_projects() if p.status is Status.FAILURE]
-
-    def to_map(self) -> dict[str, list[Project]]:
-        status: dict[str, list[Project]] = {key: [] for key in STATUS_PRIORITY}
-        for project in self.get_projects():
-            if project.get_build_status() in status:
-                status[project.get_build_status()].append(project)
-            else:
-                status["Unknown.Unknown"].append(project)
-        return status
-
-    def get_projects(self) -> list[Project]:
-        return [project for server in self.servers for project in server.projects]
-
-    def unavailable_servers(self) -> list[ServerSnapshot]:
-        return [server for server in self.servers if server.unavailable]
 
 
 class ProjectsPopulator(QThread):
