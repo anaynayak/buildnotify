@@ -41,8 +41,11 @@ the ruff, ruff-format and uv-lock hooks.
 1. **Small commits on `main`.** Use short imperative subjects that match the history
    ("Fix ...", "Add ...", "Remove ..."). One behaviour per commit. Tests go in the same commit
    as the fix. Every commit must leave the suite green.
-2. **Never push, tag, publish, or write to GitHub.** That includes PRs, issues, comments and
-   workflow enable/disable. Record these steps in `backlog/docs/user-actions.md` instead.
+2. **Subagents never push, tag, publish, or write to GitHub.** That includes PRs, issues,
+   comments and workflow enable/disable. Record these steps in `backlog/docs/user-actions.md`.
+   Only the main loop session pushes `main`, after each completed task (the user asked for
+   this on 2026-10-02). It then watches the CI run and fixes failures until `main` is green.
+   It never tags or publishes.
 3. **Tests must be hermetic.** They never touch the real keychain or the user's QSettings
    (`test/conftest.py` handles this). Never launch the app for a manual or smoke run against the
    real settings: on macOS, HOME/XDG overrides don't isolate QSettings. Use `--settings <tmp.ini>`
