@@ -54,7 +54,7 @@ class ServerSettings:
 
 
 SCHEMA_VERSION = 5
-DEFAULT_SCRIPT = "echo #status# #projects# >> /tmp/buildnotify.log"
+DEFAULT_SCRIPT = ""
 DEFAULT_NOTIFICATIONS = {
     "successfulBuild": False,
     "brokenBuild": True,

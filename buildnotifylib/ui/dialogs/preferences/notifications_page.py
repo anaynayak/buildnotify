@@ -31,6 +31,7 @@ class NotificationsPage(QWidget):
         )
         self.script_enabled = QCheckBox(self.tr("Execute script for notifications"))
         self.script = QLineEdit()
+        self.script.setPlaceholderText(self.tr('e.g. notify-send "$BUILDNOTIFY_STATUS"'))
         self.script.setEnabled(False)
         self.script.setToolTip(
             self.tr(

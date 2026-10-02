@@ -36,7 +36,7 @@ def test_should_default_to_the_2x_behaviour():
 
     assert settings.servers == []
     assert (settings.interval_seconds, settings.timeout_seconds) == (120, 10)
-    assert settings.custom_script == "echo #status# #projects# >> /tmp/buildnotify.log"
+    assert settings.custom_script == ""
     assert not settings.custom_script_enabled
     assert settings.sort_key is SortKey.STATUS
     assert not settings.show_last_build_label

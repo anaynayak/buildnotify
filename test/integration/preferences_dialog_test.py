@@ -36,7 +36,8 @@ def test_should_show_configure_notifications(qtbot):
     assert dialog.notifications_page.broken_builds.isChecked()
     assert not dialog.notifications_page.successful_builds.isChecked()
     assert not dialog.notifications_page.script_enabled.isChecked()
-    assert dialog.notifications_page.script.text() == "echo #status# #projects# >> /tmp/buildnotify.log"
+    assert dialog.notifications_page.script.text() == ""
+    assert dialog.notifications_page.script.placeholderText().startswith("e.g. ")
 
 
 @pytest.mark.functional
