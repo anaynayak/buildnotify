@@ -111,3 +111,32 @@ def test_should_say_no_servers_are_configured_in_the_tooltip(qtbot):
     widget.update_projects(OverallIntegrationStatus([]))
 
     assert widget.tray.toolTip() == "No servers configured"
+
+
+def down(url):
+    return ServerSnapshot(url, error=TimeoutError("Timed out"))
+
+
+@pytest.mark.functional
+def test_should_say_no_server_can_be_reached_when_all_are_down_with_nothing_cached(qtbot):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    store = ConfigBuilder().server("a").server("b").build()
+    widget = AppUi(parent, store, BuildIcons(), FakeConnection(fake_content()))
+
+    widget.update_projects(OverallIntegrationStatus([down("http://a"), down("http://b")]))
+
+    assert widget.tray.toolTip().splitlines()[0] == "Can't reach any server"
+
+
+@pytest.mark.functional
+def test_should_summarise_cached_projects_when_all_servers_are_down(qtbot):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().server("a").build(), BuildIcons(), FakeConnection(fake_content()))
+    cached = ProjectBuilder({"name": "api", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
+    snapshot = ServerSnapshot("http://a", (cached,), TimeoutError("Timed out"))
+
+    widget.update_projects(OverallIntegrationStatus([snapshot]))
+
+    assert widget.tray.toolTip().splitlines()[0] == "No failing builds"

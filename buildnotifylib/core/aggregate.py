@@ -39,3 +39,7 @@ class OverallIntegrationStatus:
 
     def unavailable_servers(self) -> list[ServerSnapshot]:
         return [server for server in self.servers if server.unavailable]
+
+    def unreachable(self) -> bool:
+        """Every server is down and none has projects cached from an earlier fetch."""
+        return bool(self.servers) and all(server.unavailable and not server.projects for server in self.servers)

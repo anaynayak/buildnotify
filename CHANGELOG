@@ -10,6 +10,7 @@
 - On the first launch with no servers, the server dialog opens once. A `first_run/server_prompt_shown` setting stops it opening again
 
 ### Changed
+- When every server is down and nothing is cached, the tray tooltip says "Can't reach any server" instead of "No failing builds"
 - A server error row in the tray menu reads like `jenkins: can't connect (10:00)`: the server's menu prefix or host, then a short reason such as can't connect, server not found, timed out, sign-in failed, not found, not a cctray feed, certificate not trusted or GitHub rate limit reached. The row is no longer greyed out, and opens a submenu with the full error, a hint, `Retry now` and `Edit server...`
 - The server dialog is a single page with Cancel and Save. Save works without loading the server first, so a server that is down can be added, and all of its projects are included. Load is now Test connection, which shows the project count or a short error next to the button and lists the projects below. Editing a server without testing it keeps its excluded projects. Changing the URL, repository or source type clears the test result and its project list
 - The server dialog is titled "Add server" for a new server and "Edit server - <name>" when editing one

@@ -132,3 +132,13 @@ def test_should_cap_the_names_in_the_summary():
     status = overall_status(*[("Failure", "Sleeping")] * 7)
 
     assert status.failing_summary() == "7 failing: p0, p1, p2, p3, p4 and 2 more"
+
+
+def test_should_be_unreachable_only_when_every_server_is_down_with_nothing_cached():
+    project = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
+    down, up = ServerSnapshot("a", error=TimeoutError()), ServerSnapshot("b", (project,))
+    cached = ServerSnapshot("c", (project,), TimeoutError())
+    assert OverallIntegrationStatus([down, down]).unreachable()
+    assert not OverallIntegrationStatus([down, up]).unreachable()
+    assert not OverallIntegrationStatus([down, cached]).unreachable()
+    assert not OverallIntegrationStatus([]).unreachable()

@@ -12,6 +12,7 @@ from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
 
 NO_SERVERS = "No servers configured"
+UNREACHABLE = "Can't reach any server"
 
 
 class AppUi(QtCore.QObject):
@@ -49,4 +50,5 @@ class AppUi(QtCore.QObject):
     def tooltip(self, integration_status: OverallIntegrationStatus) -> str:
         if not self.store.settings.servers:
             return NO_SERVERS
-        return f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}"
+        summary = UNREACHABLE if integration_status.unreachable() else integration_status.failing_summary()
+        return f"{summary}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}"
