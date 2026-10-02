@@ -33,7 +33,7 @@ BuildNotify can also watch GitHub Actions without a cctray feed. In the server d
 
 Each workflow and branch pair shows as one project, such as `CI (main)`. Its status comes from the last finished run: success is green, a failure, time-out or startup failure is red, and a cancelled or skipped run is unknown. While a run is queued or in progress the project shows as building, with the status of the run before it. Clicking a project opens the latest run on GitHub.
 
-BuildNotify reads the 100 most recent runs on each poll. When GitHub reports that the rate limit is used up, the server is skipped until the limit resets, and the menu shows when it will try again. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
+BuildNotify reads the 100 most recent runs on each poll, so a workflow that has not run within them drops off the list. When GitHub reports that the rate limit is used up, the server is skipped until the limit resets, and the menu shows when it will try again. A rejected token, missing access or an unknown repository shows as a short error on the server's menu row. Signing in through the browser (the OAuth device flow) is not supported yet.
 
 ## Custom script
 
