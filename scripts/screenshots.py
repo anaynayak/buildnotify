@@ -26,7 +26,7 @@ from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind
 from buildnotifylib.ui import app_menu  # noqa: E402
 from buildnotifylib.ui.build_icons import TRAY_SIZE, BuildIcons  # noqa: E402
 from buildnotifylib.ui.dialogs.preferences import PreferencesDialog  # noqa: E402
-from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog  # noqa: E402
+from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FEEDS = ROOT / "test" / "fixtures" / "cctray"

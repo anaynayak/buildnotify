@@ -63,9 +63,14 @@ the ruff, ruff-format and uv-lock hooks.
 2. `requires-python >= 3.11`. CI matrix 3.11-3.14.
 3. Build with hatchling, manage environments and the lockfile with uv. ruff for lint and
    format, mypy for types.
-4. Qt binding: PySide6. The UI modules are generated with `pyside6-uic` through `just ui` and
-   committed. CI checks that they are up to date. Icons are package data loaded with
-   `importlib.resources`.
+4. Qt binding: PySide6. Widgets are built in Python code, with `buildnotifylib/ui/widgets/forms.py`
+   for labelled rows and sections, and the Qt Designer `.ui` files are being removed. The code
+   had stopped matching the `.ui` files (the server dialog rewrote labels and visibility at
+   runtime). Diffs of generated code were hard to review, and the fixed sizes in the files clipped
+   with large fonts. Code also gives tests typed attributes instead of `dialog.ui.*`. Don't
+   use fixed widget sizes. The server dialog is done (`ui/dialogs/server/`). Preferences
+   still uses `data/preferences.ui`, generated with `pyside6-uic` through `just ui` and
+   committed, until it moves too. Icons are package data loaded with `importlib.resources`.
 5. Custom script: provide the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` env vars. The
    legacy `#status#`/`#projects#` substitution stays, but with `shlex.quote`.
 6. Distribution: PyPI (trusted publishing) and Flathub. Retire the snap, PPA, OBS, stdeb and

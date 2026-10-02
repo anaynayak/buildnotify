@@ -12,11 +12,15 @@ from PySide6.QtWidgets import QMessageBox
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.ports import Response
 from buildnotifylib.core.settings import ServerSettings, SourceKind
-from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server.auth_form import AuthForm, Credentials
+from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
+from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
 from buildnotifylib.ui.poller import Deadline
 from test.utils import FakeConnection, GatedConnection, fake_content
 
 TIMEOUT = 10
+QWIDGETSIZE_MAX = 16777215
 
 
 @pytest.mark.functional
@@ -28,16 +32,16 @@ def test_should_show_configured_urls(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
-        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
-        model = dialog.ui.projectsList.model()
+        qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
+        model = dialog.projects_view.model()
         assert model.item(0, 0).hasChildren()
         assert model.item(0, 0).child(0, 0).isCheckable()
         assert model.item(0, 0).child(0, 0).checkState() == Qt.CheckState.Checked
         assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
 
-        assert dialog.ui.timezoneList.currentText() == "None"
+        assert dialog.timezone.currentText() == "None"
 
 
 @pytest.mark.functional
@@ -46,14 +50,14 @@ def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
     dialog = ServerConfigurationDialog(ServerSettings(url, timezone="EDT"), TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    assert dialog.ui.timezoneList.currentText() == "None"
+    assert dialog.timezone.currentText() == "None"
 
 
 @pytest.mark.functional
 def test_should_list_zoneinfo_timezones_sorted(qtbot):
     dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
-    zones = [dialog.ui.timezoneList.itemText(i) for i in range(dialog.ui.timezoneList.count())]
+    zones = [dialog.timezone.itemText(i) for i in range(dialog.timezone.count())]
 
     assert zones[0] == "None"
     assert "Asia/Kolkata" in zones
@@ -69,9 +73,9 @@ def test_should_save_restore_config(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
-        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+        qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         server_config = dialog.get_server_config()
         dialog = ServerConfigurationDialog(server_config, TIMEOUT, HttpConnection())
         dialog.show()
@@ -87,10 +91,10 @@ def test_should_exclude_projects(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
-        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
-        model = dialog.ui.projectsList.model()
+        qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
+        model = dialog.projects_view.model()
 
         model.item(0, 0).child(0, 0).setCheckState(QtCore.Qt.CheckState.Unchecked)
 
@@ -108,10 +112,10 @@ def test_should_preload_info(qtbot):
         dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
-        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
-        model = dialog.ui.projectsList.model()
+        qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
+        model = dialog.projects_view.model()
 
         assert model.item(0, 0).hasChildren()
         assert model.item(0, 0).child(0, 0).isCheckable()
@@ -119,8 +123,8 @@ def test_should_preload_info(qtbot):
         assert model.item(0, 0).child(0, 0).checkState() == Qt.CheckState.Unchecked
 
         def timezone():
-            assert dialog.ui.timezoneList.count() > 100
-            assert dialog.ui.timezoneList.currentText() == "US/Eastern"
+            assert dialog.timezone.count() > 100
+            assert dialog.timezone.currentText() == "US/Eastern"
 
         qtbot.waitUntil(timezone)
 
@@ -134,7 +138,7 @@ def test_should_fail_for_bad_url(qtbot, mocker):
     qtbot.addWidget(dialog)
     m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.No)
 
-    qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+    qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
     def alert_shown():
         m.assert_called_once_with(dialog, ANY, ANY)
@@ -154,9 +158,9 @@ def test_should_disable_authentication_if_keystore_is_unavailable(qtbot):
         qtbot.addWidget(dialog)
 
         def alert_shown():
-            assert not dialog.ui.username.isEnabled()
-            assert not dialog.ui.password.isEnabled()
-            assert dialog.ui.authenticationSettings.title() == "Authentication (keyring dependency missing)"
+            assert not dialog.auth.username.isEnabled()
+            assert not dialog.auth.password.isEnabled()
+            assert dialog.auth.title() == "Authentication (keyring dependency missing)"
 
         qtbot.wait_until(alert_shown)
 
@@ -172,11 +176,11 @@ def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker)
         qtbot.addWidget(dialog)
         m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
 
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
         def alert_shown():
             m.assert_called_once_with(dialog, ANY, ANY)
-            assert dialog.ui.loadUrlButton.isEnabled()
+            assert dialog.load_button.isEnabled()
 
         qtbot.wait_until(alert_shown)
 
@@ -205,9 +209,9 @@ def test_should_read_widgets_and_load_results_on_the_gui_thread(qtbot, mocker):
             return original()
 
         mocker.patch.object(dialog, "get_server_config", get_server_config)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
+        qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
 
-        qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+        qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
         assert dialog.loads.waitForDone(5000)
 
     assert threads == [threading.get_ident()]
@@ -229,7 +233,7 @@ def test_should_raise_not_implemented_error_for_unknown_authentication_type(qtbo
     qtbot.addWidget(dialog)
 
     with pytest.raises(NotImplementedError):
-        dialog.set_authentication_type(99)
+        dialog.auth.set_authentication_type(99)
 
 
 @pytest.mark.functional
@@ -242,7 +246,7 @@ def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     dialog.fetch_data()
 
     m.assert_called_once_with(dialog, "Invalid input", "Only http:// and https:// URLs are supported.")
-    assert dialog.ui.loadUrlButton.isEnabled()
+    assert dialog.load_button.isEnabled()
     assert not hasattr(dialog, "project_loader")
 
 
@@ -254,7 +258,7 @@ def test_should_load_projects_through_the_injected_connection(qtbot):
     qtbot.addWidget(dialog)
 
     dialog.fetch_data()
-    qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+    qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
 
     assert connection.urls == [url]
 
@@ -273,7 +277,7 @@ def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
 
         def alert_shown():
             m.assert_called_once_with(dialog, "Failed to fetch projects", ANY)
-            assert dialog.ui.loadUrlButton.isEnabled()
+            assert dialog.load_button.isEnabled()
 
         qtbot.wait_until(alert_shown, timeout=2000)
     finally:
@@ -281,7 +285,7 @@ def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
     assert dialog.loads.waitForDone(5000)
     qtbot.wait(50)
 
-    assert dialog.ui.stackedWidget.currentIndex() == 0
+    assert dialog.pages.currentIndex() == 0
     assert m.call_count == 1
 
 
@@ -295,7 +299,7 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
         question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
 
         dialog.fetch_data()
-        qtbot.waitUntil(lambda: dialog.ui.stackedWidget.currentIndex() == 1)
+        qtbot.waitUntil(lambda: dialog.pages.currentIndex() == 1)
 
     yes, no = QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No
     question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, yes | no, no)
@@ -334,10 +338,10 @@ def test_should_show_cctray_fields_for_a_new_server(qtbot):
     dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    assert dialog.ui.sourceKind.currentText() == "cctray feed"
-    assert dialog.ui.githubSettings.isHidden()
-    assert not dialog.ui.addServerUrl.isHidden()
-    assert not dialog.ui.authentication_type.isHidden()
+    assert dialog.source_kind.currentText() == "cctray feed"
+    assert dialog.github.isHidden()
+    assert not dialog.cctray.isHidden()
+    assert not dialog.auth.authentication_type.isHidden()
 
 
 @pytest.mark.functional
@@ -345,19 +349,19 @@ def test_should_show_github_fields_when_github_is_selected(qtbot):
     dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    dialog.ui.sourceKind.setCurrentIndex(1)
+    dialog.source_kind.setCurrentIndex(1)
 
-    assert not dialog.ui.githubSettings.isHidden()
-    assert dialog.ui.addServerUrl.isHidden()
-    assert dialog.ui.authentication_type.isHidden()
-    assert dialog.ui.username.isHidden()
-    assert dialog.ui.timezoneList.isHidden()
-    assert dialog.ui.passwordLabel.text() == "Token"
+    assert not dialog.github.isHidden()
+    assert dialog.cctray.isHidden()
+    assert dialog.auth.authentication_type.isHidden()
+    assert dialog.auth.username.isHidden()
+    assert dialog.timezone.isHidden()
+    assert dialog.auth.password_label.text() == "Token"
 
-    dialog.ui.sourceKind.setCurrentIndex(0)
+    dialog.source_kind.setCurrentIndex(0)
 
-    assert dialog.ui.githubSettings.isHidden()
-    assert not dialog.ui.authentication_type.isHidden()
+    assert dialog.github.isHidden()
+    assert not dialog.auth.authentication_type.isHidden()
 
 
 @pytest.mark.functional
@@ -366,8 +370,8 @@ def test_should_round_trip_a_github_server(qtbot):
     dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    assert dialog.ui.sourceKind.currentText() == "GitHub Actions"
-    assert dialog.ui.repository.text() == "octo-org/hello-world"
+    assert dialog.source_kind.currentText() == "GitHub Actions"
+    assert dialog.github.repository.text() == "octo-org/hello-world"
     assert dialog.get_server_config() == server
 
 
@@ -376,8 +380,8 @@ def test_should_round_trip_a_github_server(qtbot):
 def test_should_ask_for_an_owner_and_name(qtbot, mocker, repository):
     dialog = ServerConfigurationDialog(None, TIMEOUT, FakeApi())
     qtbot.addWidget(dialog)
-    dialog.ui.sourceKind.setCurrentIndex(1)
-    dialog.ui.repository.setText(repository)
+    dialog.source_kind.setCurrentIndex(1)
+    dialog.github.repository.setText(repository)
     m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
 
     dialog.fetch_data()
@@ -392,7 +396,7 @@ def test_should_load_github_workflows_to_choose_from(qtbot):
     qtbot.addWidget(dialog)
 
     dialog.fetch_data()
-    qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
+    qtbot.waitUntil(lambda: dialog.projects_view.model() is not None)
 
     names = [dialog.projects_list.child(i).text() for i in range(dialog.projects_list.rowCount())]
     assert names[0] == "CI (main)"
@@ -405,9 +409,9 @@ def test_should_not_carry_a_cctray_token_over_to_github(qtbot):
     dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    dialog.ui.sourceKind.setCurrentIndex(1)
+    dialog.source_kind.setCurrentIndex(1)
 
-    assert dialog.ui.password.text() == ""
+    assert dialog.auth.password.text() == ""
 
 
 @pytest.mark.functional
@@ -415,12 +419,12 @@ def test_should_restore_the_cctray_authentication_type_after_switching_back(qtbo
     dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS, username="alice"), TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    dialog.ui.sourceKind.setCurrentIndex(1)
-    dialog.ui.sourceKind.setCurrentIndex(0)
+    dialog.source_kind.setCurrentIndex(1)
+    dialog.source_kind.setCurrentIndex(0)
 
-    assert dialog.ui.authentication_type.currentIndex() == ServerSettings.AUTH_USERNAME_PASSWORD
-    assert not dialog.ui.username.isHidden()
-    assert dialog.ui.passwordLabel.text() == "Password"
+    assert dialog.auth.authentication_type.currentIndex() == ServerSettings.AUTH_USERNAME_PASSWORD
+    assert not dialog.auth.username.isHidden()
+    assert dialog.auth.password_label.text() == "Password"
 
 
 @pytest.mark.functional
@@ -433,3 +437,38 @@ def test_should_keep_the_mutes_of_an_edited_server(qtbot, kind):
     edited = dialog.get_server_config()
 
     assert (edited.muted, edited.muted_projects) == (True, ["api"])
+
+
+@pytest.mark.functional
+def test_should_round_trip_each_source_form(qtbot):
+    cctray, github, auth = CctrayForm(), GithubForm(), AuthForm()
+    for form in (cctray, github, auth):
+        qtbot.addWidget(form)
+    credentials = Credentials(ServerSettings.AUTH_USERNAME_PASSWORD, "alice", "secret")
+
+    cctray.set_value(URL_JENKINS)
+    github.set_value(GithubSource(" octo-org/hello-world ", "ci.yml", "main"))
+    auth.set_value(credentials)
+
+    assert cctray.value() == URL_JENKINS
+    assert github.value() == GithubSource("octo-org/hello-world", "ci.yml", "main")
+    assert auth.value() == credentials
+
+
+@pytest.mark.functional
+def test_should_hide_the_username_label_with_its_field(qtbot):
+    auth = AuthForm()
+    qtbot.addWidget(auth)
+
+    auth.set_value(Credentials(ServerSettings.AUTH_BEARER_TOKEN, "", "token"))
+
+    assert auth.username.isHidden()
+    assert auth.username_label.isHidden()
+
+
+@pytest.mark.functional
+def test_should_not_cap_the_dialog_size(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.maximumSize() == QtCore.QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX)

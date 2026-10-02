@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
 from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
-from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, fake_content
 

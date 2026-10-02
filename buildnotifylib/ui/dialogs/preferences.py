@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
-from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
+from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 
 ENTER_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter)
 
