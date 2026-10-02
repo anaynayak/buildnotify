@@ -4,13 +4,11 @@ venv
 .eggs
 *~
 .idea
-.vagrant
 *.egg-info
 .cache
 *.diff
 dist
 report.txt
-.tox
 .coverage
 coverage.xml
 parts

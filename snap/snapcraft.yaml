@@ -10,7 +10,7 @@ icon: icons/buildnotify.svg
 architectures: [amd64]
 apps:
   buildnotify:
-    command: desktop-launch $SNAP/bin/buildnotifyapplet.py
+    command: desktop-launch $SNAP/bin/buildnotify
     extensions:
       - kde-neon
     plugs:

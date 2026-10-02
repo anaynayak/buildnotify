@@ -2,7 +2,7 @@
 Categories=Application;Network;
 Comment[en_US]=System tray cruisecontrol build notification application
 Comment=System tray cruisecontrol build notification application
-Exec=buildnotifyapplet.py
+Exec=buildnotify
 GenericName[en_US]=BuildNotify
 GenericName=BuildNotiy
 Icon=/usr/share/pixmaps/buildnotify.svg
