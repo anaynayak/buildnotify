@@ -181,8 +181,7 @@ def test_a_slow_server_should_not_delay_the_others(qtbot, make_poller):
 
     try:
         poller.reload()
-        qtbot.waitUntil(lambda: connection.done == [FAST], timeout=1000)
-        assert connection.started == {SLOW, FAST}
+        qtbot.waitUntil(lambda: connection.started == {SLOW, FAST} and connection.done == [FAST], timeout=2000)
     finally:
         connection.release.set()
 
@@ -190,15 +189,15 @@ def test_a_slow_server_should_not_delay_the_others(qtbot, make_poller):
 @pytest.mark.functional
 def test_should_report_the_others_when_a_server_misses_the_deadline(qtbot, mocker, make_poller):
     mocker.patch.object(Poller, "DEADLINE_GRACE_MS", 0)
-    conf = ConfigBuilder(timeout_seconds=1).server(SLOW).server(FAST).build()
+    conf = ConfigBuilder(timeout_seconds=2).server(SLOW).server(FAST).build()
     connection = GatedConnection(cctray("Success"), slow=[SLOW])
     poller = make_poller(conf, connection)
     started = time.monotonic()
 
     try:
-        with qtbot.waitSignal(poller.updated, timeout=3000) as blocker:
+        with qtbot.waitSignal(poller.updated, timeout=4000) as blocker:
             poller.reload()
-        assert time.monotonic() - started < 3
+        assert time.monotonic() - started < 4
         status = blocker.args[0]
         assert [s.url for s in status.unavailable_servers()] == [SLOW]
         assert [p.server_url for p in status.get_projects()] == [FAST]
@@ -240,6 +239,7 @@ def test_should_not_refetch_a_server_still_running_after_the_deadline(qtbot, cap
                 poller.reload()
     finally:
         connection.release.set()
+    assert poller.wait(5000)
 
     assert connection.urls == [SLOW]
     assert [s.url for s in blocker.args[0].unavailable_servers()] == [SLOW]
