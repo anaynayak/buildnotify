@@ -24,7 +24,9 @@ class AppUi(QtCore.QObject):
         self.app_menu.reload_data.connect(self.reload_data)
         self.tray.setContextMenu(self.app_menu.menu)
         self.tray.activated.connect(self.show_menu)
-        QApplication.instance().aboutToQuit.connect(self.tray.hide)
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self.tray.hide)
 
     def show_menu(self, reason):
         if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.Trigger:
