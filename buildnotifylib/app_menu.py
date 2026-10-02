@@ -6,10 +6,11 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
 
+from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.build_icons import BuildIcons
-from buildnotifylib.config import Config
 from buildnotifylib.core import humanize
 from buildnotifylib.core.model import Project
+from buildnotifylib.core.settings import SortKey
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
 
@@ -17,10 +18,10 @@ from buildnotifylib.version import VERSION
 class AppMenu(QtCore.QObject):
     reload_data = QtCore.pyqtSignal()
 
-    def __init__(self, widget: QWidget, conf: Config, build_icons: BuildIcons):
+    def __init__(self, widget: QWidget, store: SettingsStore, build_icons: BuildIcons):
         super().__init__(widget)
         self.menu = QMenu(widget)
-        self.conf = conf
+        self.store = store
         self.build_icons = build_icons
         self.create_default_menu_items()
 
@@ -32,7 +33,7 @@ class AppMenu(QtCore.QObject):
         self.create_default_menu_items()
 
     def sorted_projects(self, projects: list[Project]) -> list[Project]:
-        if self.conf.get_sort_by_name():
+        if self.store.settings.sort_key is SortKey.NAME:
             return sorted(projects, key=lambda p: p.label())
         return sorted(projects, key=self.build_time_key, reverse=True)
 
@@ -60,20 +61,20 @@ class AppMenu(QtCore.QObject):
         )
 
     def preferences_clicked(self, widget: QWidget):
-        dialog = PreferencesDialog(self.conf, self.menu)
-        preferences = dialog.open()
+        dialog = PreferencesDialog(self.store.settings, self.menu)
+        settings = dialog.open()
         dialog.deleteLater()
-        if preferences is not None:
-            self.conf.update_preferences(preferences)
+        if settings is not None:
+            self.store.save(settings)
             self.reload_data.emit()
 
     def exit(self, widget: QWidget):
         QApplication.quit()
 
     def create_menu_item(self, project: Project, icon: QIcon):
-        menu_item_label = project.label(self.conf.get_show_last_build_label())
+        menu_item_label = project.label(self.store.settings.show_last_build_label)
         build_time = project.build_time
-        if self.conf.get_value("lastBuildTimeForProject") and build_time is not None:
+        if self.store.settings.notify("lastBuildTimeForProject") and build_time is not None:
             menu_item_label = menu_item_label + ", " + humanize.relative(build_time, datetime.now(tz=build_time.tzinfo))
 
         action = self.menu.addAction(icon, menu_item_label)

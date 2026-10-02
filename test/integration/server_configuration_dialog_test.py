@@ -8,9 +8,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
 
 from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
-from test.fake_conf import ConfigBuilder
 from test.utils import fake_content
+
+TIMEOUT = 10
 
 
 @pytest.mark.functional
@@ -19,8 +21,7 @@ def test_should_show_configured_urls(qtbot):
     with requests_mock.Mocker() as m:
         url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
-        conf = ConfigBuilder().server(url).build()
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
         qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
@@ -38,8 +39,7 @@ def test_should_show_configured_urls(qtbot):
 @pytest.mark.functional
 def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
     url = "http://localhost:8080/cc.xml"
-    conf = ConfigBuilder().server(url, {f"timezone/{url}": "EDT"}).build()
-    dialog = ServerConfigurationDialog(url, conf)
+    dialog = ServerConfigurationDialog(ServerSettings(url, timezone="EDT"), TIMEOUT)
     qtbot.addWidget(dialog)
 
     assert dialog.ui.timezoneList.currentText() == "None"
@@ -47,7 +47,7 @@ def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
 
 @pytest.mark.functional
 def test_should_list_zoneinfo_timezones_sorted(qtbot):
-    dialog = ServerConfigurationDialog(None, ConfigBuilder().build())
+    dialog = ServerConfigurationDialog(None, TIMEOUT)
     qtbot.addWidget(dialog)
     zones = [dialog.ui.timezoneList.itemText(i) for i in range(dialog.ui.timezoneList.count())]
 
@@ -62,17 +62,14 @@ def test_should_save_restore_config(qtbot):
     with requests_mock.Mocker() as m:
         url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
-        conf = ConfigBuilder().server(url).build()
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
         qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         server_config = dialog.get_server_config()
-
-        conf.save_server_config(server_config)
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(server_config, TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
 
@@ -83,8 +80,7 @@ def test_should_exclude_projects(qtbot):
     with requests_mock.Mocker() as m:
         url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
-        conf = ConfigBuilder().server(url).build()
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
         qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
@@ -104,19 +100,8 @@ def test_should_preload_info(qtbot):
     with requests_mock.Mocker() as m:
         url = "http://localhost:8080/cc.xml"
         m.get(url, text=fake_content())
-        conf = (
-            ConfigBuilder()
-            .server(
-                url,
-                {
-                    f"excludes/{url}": ["cleanup-artifacts-B"],
-                    f"timezone/{url}": "US/Eastern",
-                },
-            )
-            .build()
-        )
-
-        dialog = ServerConfigurationDialog(url, conf)
+        server = ServerSettings(url, ["cleanup-artifacts-B"], "US/Eastern")
+        dialog = ServerConfigurationDialog(server, TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
         qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
@@ -140,8 +125,7 @@ def test_should_preload_info(qtbot):
 @pytest.mark.requireshead
 def test_should_fail_for_bad_url(qtbot, mocker):
     url = "file:///badpath"
-    conf = ConfigBuilder().server(url).build()
-    dialog = ServerConfigurationDialog(url, conf)
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
     dialog.show()
     qtbot.addWidget(dialog)
     m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.No)
@@ -162,8 +146,7 @@ def test_should_disable_authentication_if_keystore_is_unavailable(qtbot, mocker)
         url = "http://localhost:8080/cc.xml"
         r.get(url, text=fake_content())
 
-        conf = ConfigBuilder().server(url).build()
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
 
@@ -181,8 +164,7 @@ def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker)
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
         r.get(url, text="<html><body>Please log in</body></html")
-        conf = ConfigBuilder().server(url).build()
-        dialog = ServerConfigurationDialog(url, conf)
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         dialog.show()
         qtbot.addWidget(dialog)
         m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
@@ -202,7 +184,7 @@ def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
         r.get(url, text=fake_content())
-        dialog = ServerConfigurationDialog(url, ConfigBuilder().server(url).build())
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
         qtbot.addWidget(dialog)
         threads = []
         original = dialog.get_server_config
@@ -223,8 +205,7 @@ def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
 @pytest.mark.functional
 def test_should_keep_saved_skip_ssl_verification_when_editing(qtbot):
     url = "https://localhost:8080/cc.xml"
-    conf = ConfigBuilder().server(url, {f"skip_ssl_verification/{url}": True}).build()
-    dialog = ServerConfigurationDialog(url, conf)
+    dialog = ServerConfigurationDialog(ServerSettings(url, skip_ssl_verification=True), TIMEOUT)
     qtbot.addWidget(dialog)
 
     assert dialog.get_server_config().skip_ssl_verification is True
@@ -232,7 +213,7 @@ def test_should_keep_saved_skip_ssl_verification_when_editing(qtbot):
 
 @pytest.mark.functional
 def test_should_raise_not_implemented_error_for_unknown_authentication_type(qtbot):
-    dialog = ServerConfigurationDialog(None, ConfigBuilder().build())
+    dialog = ServerConfigurationDialog(None, TIMEOUT)
     qtbot.addWidget(dialog)
 
     with pytest.raises(NotImplementedError):
@@ -242,7 +223,7 @@ def test_should_raise_not_implemented_error_for_unknown_authentication_type(qtbo
 @pytest.mark.functional
 def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     url = "file:///tmp/cctray.xml"
-    dialog = ServerConfigurationDialog(url, ConfigBuilder().server(url).build())
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT)
     qtbot.addWidget(dialog)
     m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
 

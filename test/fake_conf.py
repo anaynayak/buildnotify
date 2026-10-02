@@ -1,41 +1,28 @@
-from buildnotifylib.config import Config
+import itertools
+from dataclasses import replace
+from pathlib import Path
 
+from PyQt5 import QtCore
 
-class FakeSettings:
-    def __init__(self, settings=None):
-        if settings is None:
-            settings = {}
-        self.settings = settings
+from buildnotifylib.adapters.settings_store import SettingsStore
+from buildnotifylib.core.settings import AppSettings, ServerSettings
 
-    def setValue(self, key, val):
-        self.settings[key] = val
-
-    def remove(self, key):
-        self.settings.pop(key, None)
-
-    def value(self, key, fallback=None, type=None):
-        return self.settings.get(key, fallback)
+SETTINGS_DIR: Path | None = None
+counter = itertools.count()
 
 
 class ConfigBuilder:
-    def __init__(self, overrides=None):
-        if overrides is None:
-            overrides = {}
-        self.conf = {"sort_by_name": True, "values/lastBuildTimeForProject": False}
-        self._merge(overrides)
+    def __init__(self, **overrides):
+        defaults = AppSettings(notifications={"lastBuildTimeForProject": False})
+        self.settings = replace(defaults, **overrides)
 
-    def server(self, url, overrides=None):
-        if overrides is None:
-            overrides = {}
-        urls = self.conf.get("connection/urls", [])
-        urls.append(url)
-        self._merge({"connection/urls": urls})
-        self._merge({f"display_prefix/{url}": ""})
-        self._merge(overrides)
+    def server(self, url, **fields):
+        self.settings.servers.append(ServerSettings(url, **fields))
         return self
 
-    def build(self):
-        return Config(FakeSettings(self.conf))
-
-    def _merge(self, overrides):
-        self.conf = dict(self.conf, **overrides)
+    def build(self) -> SettingsStore:
+        assert SETTINGS_DIR is not None, "test/conftest.py sets SETTINGS_DIR to tmp_path"
+        path = SETTINGS_DIR / f"settings-{next(counter)}.ini"
+        store = SettingsStore(QtCore.QSettings(str(path), QtCore.QSettings.IniFormat))
+        store.save(self.settings)
+        return store

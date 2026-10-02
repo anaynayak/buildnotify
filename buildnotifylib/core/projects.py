@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QThread
 
-from buildnotifylib.config import Config
+from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import cctray
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.http_connection import HttpConnection
@@ -12,9 +12,9 @@ from buildnotifylib.core.settings import ServerSettings
 class ProjectsPopulator(QThread):
     updated_projects = QtCore.pyqtSignal(object)
 
-    def __init__(self, config: Config, parent: QObject | None = None):
+    def __init__(self, store: SettingsStore, parent: QObject | None = None):
         QThread.__init__(self, parent)
-        self.config = config
+        self.store = store
         self.server_configs: list[ServerSettings] = []
         self.timeout: float | None = None
         self.last_known: dict[str, tuple[Project, ...]] = {}
@@ -24,8 +24,8 @@ class ProjectsPopulator(QThread):
     def load_from_server(self):
         if self.isRunning():
             return
-        self.server_configs = self.config.get_server_configs()
-        self.timeout = self.config.timeout
+        self.server_configs = list(self.store.settings.servers)
+        self.timeout = self.store.settings.timeout_seconds
         self.start()
 
     def reload(self):

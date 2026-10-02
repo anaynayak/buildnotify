@@ -1,17 +1,18 @@
+from dataclasses import replace
+
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QDialog, QWidget
 
-from buildnotifylib.config import Config, Preferences
-from buildnotifylib.core.settings import ServerSettings
+from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.generated.preferences_ui import Ui_Preferences
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, conf: Config, parent: QWidget | None = None):
+    def __init__(self, settings: AppSettings, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
-        self.conf = conf
-        self.pending_servers: dict[str, ServerSettings] = {}
+        self.settings = settings
+        self.servers = {server.url: server for server in settings.servers}
         self.ui = Ui_Preferences()
         self.ui.setupUi(self)
         self.checkboxes = dict(
@@ -31,38 +32,33 @@ class PreferencesDialog(QDialog):
         self.ui.configureProjectButton.clicked.connect(self.configure_projects)
 
     def set_values_from_config(self):
-        self.ui.cctrayPathList.setModel(QStringListModel(self.conf.get_urls()))
+        self.ui.cctrayPathList.setModel(QStringListModel(list(self.servers)))
 
         self.ui.cctrayPathList.clicked.connect(lambda _: self.item_selection_changed(True))
         self.ui.cctrayPathList.doubleClicked.connect(self.configure_projects)
         self.ui.removeButton.clicked.connect(lambda _: self.item_selection_changed(False))
 
         for key, checkbox in self.checkboxes.items():
-            checkbox.setChecked(self.conf.get_value(str(key)))
+            checkbox.setChecked(self.settings.notify(key))
 
-        self.ui.pollingIntervalSpinBox.setValue(self.conf.get_interval_in_seconds())
-        self.ui.scriptCheckbox.setChecked(self.conf.get_custom_script_enabled())
-        self.ui.scriptLineEdit.setText(self.conf.get_custom_script())
-        self.ui.sortBuildByLastBuildTime.setChecked(self.conf.get_sort_by_last_build_time())
-        self.ui.sortBuildByName.setChecked(self.conf.get_sort_by_name())
-        self.ui.showLastBuildLabelCheckbox.setChecked(self.conf.get_show_last_build_label())
+        self.ui.pollingIntervalSpinBox.setValue(self.settings.interval_seconds)
+        self.ui.scriptCheckbox.setChecked(self.settings.custom_script_enabled)
+        self.ui.scriptLineEdit.setText(self.settings.custom_script)
+        self.ui.sortBuildByLastBuildTime.setChecked(self.settings.sort_key is SortKey.LAST_BUILD_TIME)
+        self.ui.sortBuildByName.setChecked(self.settings.sort_key is SortKey.NAME)
+        self.ui.showLastBuildLabelCheckbox.setChecked(self.settings.show_last_build_label)
 
     def item_selection_changed(self, status):
         self.ui.configureProjectButton.setEnabled(status)
 
     def add_server(self):
-        server_config = self.open_server_dialog(None)
-        if server_config is None or server_config.url in self.get_urls():
+        server = self.open_server_dialog(None)
+        if server is None or server.url in self.get_urls():
             return
-        self.pending_servers[server_config.url] = server_config
+        self.servers[server.url] = server
         urls = self.ui.cctrayPathList.model().stringList()
-        urls.append(server_config.url)
+        urls.append(server.url)
         self.ui.cctrayPathList.setModel(QStringListModel(urls))
-
-    def save_pending_servers(self):
-        for url, server_config in self.pending_servers.items():
-            if url in self.get_urls():
-                self.conf.save_server_config(server_config)
 
     def remove_element(self):
         index = self.ui.cctrayPathList.selectionModel().currentIndex()
@@ -77,41 +73,39 @@ class PreferencesDialog(QDialog):
         url = index.data()
         if not url:
             return
-        server_config = self.open_server_dialog(url)
-        if server_config is not None:
-            self.store_edited_server(url, server_config)
-            self.ui.cctrayPathList.model().setData(index, server_config.url)
+        server = self.open_server_dialog(self.servers.get(url, ServerSettings(url)))
+        if server is not None:
+            self.servers[server.url] = server
+            self.ui.cctrayPathList.model().setData(index, server.url)
 
-    def open_server_dialog(self, url: str | None) -> ServerSettings | None:
-        dialog = ServerConfigurationDialog(url, self.conf, self)
-        server_config = dialog.open()
+    def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
+        dialog = ServerConfigurationDialog(server, self.settings.timeout_seconds, self)
+        edited = dialog.open()
         dialog.deleteLater()
-        return server_config
-
-    def store_edited_server(self, url: str, server_config: ServerSettings):
-        self.pending_servers.pop(url, None)
-        self.pending_servers[server_config.url] = server_config
+        return edited
 
     def get_urls(self) -> list[str]:
         return [str(url) for url in self.ui.cctrayPathList.model().stringList()]
 
-    def get_interval_in_seconds(self) -> int:
-        return self.ui.pollingIntervalSpinBox.value()
+    def get_selections(self) -> dict[str, bool]:
+        return {key: checkbox.isChecked() for key, checkbox in self.checkboxes.items()}
 
-    def get_selections(self) -> list[tuple[str, bool]]:
-        return [(key, checkbox.isChecked()) for (key, checkbox) in list(self.checkboxes.items())]
+    def sort_key(self) -> SortKey:
+        return SortKey.NAME if self.ui.sortBuildByName.isChecked() else SortKey.LAST_BUILD_TIME
 
-    def open(self) -> Preferences | None:  # type: ignore
+    def edited_settings(self) -> AppSettings:
+        return replace(
+            self.settings,
+            servers=[self.servers[url] for url in self.get_urls()],
+            interval_seconds=self.ui.pollingIntervalSpinBox.value(),
+            custom_script=self.ui.scriptLineEdit.text(),
+            custom_script_enabled=self.ui.scriptCheckbox.isChecked(),
+            sort_key=self.sort_key(),
+            show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked(),
+            notifications=self.get_selections(),
+        )
+
+    def open(self) -> AppSettings | None:  # type: ignore
         if self.exec_() == QDialog.Accepted:
-            self.save_pending_servers()
-            return Preferences(
-                urls=self.get_urls(),
-                interval=self.get_interval_in_seconds(),
-                custom_script_text=self.ui.scriptLineEdit.text(),
-                custom_script_checked=self.ui.scriptCheckbox.isChecked(),
-                sort_by_build_time=self.ui.sortBuildByLastBuildTime.isChecked(),
-                sort_by_name=self.ui.sortBuildByName.isChecked(),
-                selections=self.get_selections(),
-                show_last_build_label=self.ui.showLastBuildLabelCheckbox.isChecked(),
-            )
+            return self.edited_settings()
         return None

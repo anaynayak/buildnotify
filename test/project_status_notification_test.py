@@ -72,7 +72,7 @@ def test_should_return_notifications(mocker):
 
     m = mocker.patch.object(NotificationFake, "show_message")
 
-    notification = ProjectStatusNotification(ConfigBuilder().build(), old, new, NotificationFake())
+    notification = ProjectStatusNotification(ConfigBuilder().build().settings, old, new, NotificationFake())
     notification.show_notifications()
 
     m.assert_any_call("Broken builds", "proj1")
@@ -123,8 +123,8 @@ def _broken_build_notification(script, project_name):
             )
         ]
     )
-    config = ConfigBuilder({"notifications/custom_script": script, "notifications/custom_script_enabled": True}).build()
-    return ProjectStatusNotification(config, old, new, _SilentNotification())
+    config = ConfigBuilder(custom_script=script, custom_script_enabled=True).build()
+    return ProjectStatusNotification(config.settings, old, new, _SilentNotification())
 
 
 def test_should_pass_status_and_projects_as_env_vars(mocker):

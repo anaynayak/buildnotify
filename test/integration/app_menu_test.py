@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget
 
 from buildnotifylib.app_menu import AppMenu
 from buildnotifylib.build_icons import BuildIcons
+from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.preferences import PreferencesDialog
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
@@ -37,7 +38,7 @@ def test_should_set_menu_items_for_projects(qtbot):
 
 @pytest.mark.functional
 def test_should_suffix_build_time(qtbot):
-    conf = ConfigBuilder({"values/lastBuildTimeForProject": True}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
@@ -70,7 +71,7 @@ def test_should_suffix_build_time(qtbot):
 
 @pytest.mark.functional
 def test_should_show_future_build_time_as_in(qtbot):
-    conf = ConfigBuilder({"values/lastBuildTimeForProject": True}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
@@ -91,7 +92,7 @@ def test_should_show_future_build_time_as_in(qtbot):
 
 @pytest.mark.functional
 def test_should_sort_by_name(qtbot):
-    conf = ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
@@ -132,7 +133,7 @@ def test_should_sort_by_name(qtbot):
 @pytest.mark.functional
 def test_should_add_display_prefix(qtbot):
     conf = (
-        ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"})
+        ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME)
         .server("Server1")
         .server("Server2")
         .build()
@@ -186,9 +187,9 @@ def test_should_add_display_prefix(qtbot):
 @pytest.mark.functional
 def test_should_consider_prefix_for_sorting(qtbot):
     conf = (
-        ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_name"})
+        ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME)
         .server("Server1")
-        .server("Server2", {"display_prefix/Server2": "R1"})
+        .server("Server2", prefix="R1")
         .build()
     )
     parent = QWidget()
@@ -256,7 +257,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
 
 @pytest.mark.functional
 def test_should_show_recent_build_first(qtbot):
-    conf = ConfigBuilder({"values/lastBuildTimeForProject": False, "sort_key": "sort_build_time"}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.LAST_BUILD_TIME).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
@@ -300,15 +301,16 @@ def test_should_show_preferences(qtbot, mocker):
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)
 
-    mocker.patch.object(PreferencesDialog, "open", return_value="some preferences")
-    mocker.patch.object(conf, "update_preferences")
+    mocker.patch.object(PreferencesDialog, "open", return_value=AppSettings(interval_seconds=30))
     with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
         app_menu.preferences_clicked(None)
+
+    assert conf.settings.interval_seconds == 30
 
 
 @pytest.mark.functional
 def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
-    conf = ConfigBuilder({"values/lastBuildTimeForProject": True, "sort_key": "sort_build_time"}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}, sort_key=SortKey.LAST_BUILD_TIME).build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons())
     qtbot.addWidget(parent)

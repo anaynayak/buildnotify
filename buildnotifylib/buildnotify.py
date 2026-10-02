@@ -1,12 +1,13 @@
 import os
 import sys
 
+from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
+from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
-from buildnotifylib.config import Config
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.projects import ProjectsPopulator
 from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
@@ -17,8 +18,8 @@ class BuildNotify:
     TRAY_RETRIES = 5
     EXIT_WAIT_MS = 2000
 
-    def __init__(self, app: QApplication, conf=None, interval=2000):
-        self.conf = conf if conf is not None else Config()
+    def __init__(self, app: QApplication, store: SettingsStore | None = None, interval=2000):
+        self.store = store if store is not None else SettingsStore(QSettings("BuildNotify", "BuildNotify"))
         self.build_icons = BuildIcons()
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
@@ -38,11 +39,11 @@ class BuildNotify:
         self.run_app()
 
     def run_app(self):
-        self.projects_populator = ProjectsPopulator(self.conf, self.app)
+        self.projects_populator = ProjectsPopulator(self.store, self.app)
         self.projects_populator.updated_projects.connect(self.update_projects)
-        self.app_ui = AppUi(self.app, self.conf, self.build_icons)
+        self.app_ui = AppUi(self.app, self.store, self.build_icons)
         self.app_ui.reload_data.connect(self.reload_project_data)
-        self.app_notification = AppNotification(self.conf, self.app_ui.tray)
+        self.app_notification = AppNotification(self.store, self.app_ui.tray)
         self.auto_poll()
 
     def reload_project_data(self):
@@ -59,7 +60,7 @@ class BuildNotify:
 
     def check_nodes(self):
         self.projects_populator.load_from_server()
-        self.timed_event.set_interval(self.conf.get_interval_in_millis())
+        self.timed_event.set_interval(self.store.settings.interval_seconds * 1000)
         self.timed_event.start()
 
     def wait_for_workers(self) -> bool:

@@ -5,31 +5,30 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
-from buildnotifylib.config import Config
 from buildnotifylib.core.background_event import BackgroundEvent
 from buildnotifylib.core.http_connection import is_ssl_error
 from buildnotifylib.core.keystore import Keystore
-from buildnotifylib.core.model import ServerSnapshot
+from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 
 
 class ServerConfigurationDialog(QDialog):
-    def __init__(self, url: str | None, conf: Config, parent: QWidget | None = None):
+    def __init__(self, server: ServerSettings | None, timeout: int, parent: QWidget | None = None):
         QDialog.__init__(self, parent)
         self.ui = Ui_serverConfigurationDialog()
         self.ui.setupUi(self)
 
-        self.conf = conf
+        self.timeout = timeout
         self.projects_list = QtGui.QStandardItem("All")
-        all_timezones = [Config.NONE_TIMEZONE]
+        all_timezones = [NONE_TIMEZONE]
         all_timezones.extend(sorted(available_timezones()))
         self.ui.timezoneList.addItems(all_timezones)
 
-        if url is not None:
-            self.ui.addServerUrl.setText(url)
-            self.server = conf.get_server_config(url)
+        if server is not None:
+            self.server = server
+            self.ui.addServerUrl.setText(server.url)
             self.ui.timezoneList.setCurrentIndex(max(self.ui.timezoneList.findText(self.server.timezone), 0))
             self.ui.displayPrefix.setText(self.server.prefix)
             self.ui.username.setText(self.server.username)
@@ -38,7 +37,7 @@ class ServerConfigurationDialog(QDialog):
             self.ui.usernameLabel.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
             self.ui.username.setVisible(self.server.authentication_type == self.server.AUTH_USERNAME_PASSWORD)
         else:
-            self.server = ServerSettings("", [], "", "", "", "")
+            self.server = ServerSettings("", timezone="")
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
 
@@ -79,7 +78,7 @@ class ServerConfigurationDialog(QDialog):
             return
 
         self.ui.loadUrlButton.setEnabled(False)
-        self.project_loader = ProjectLoader(self.get_server_config(), self.conf.timeout, apply_excludes=False)
+        self.project_loader = ProjectLoader(self.get_server_config(), self.timeout, apply_excludes=False)
         self.event = BackgroundEvent(self.project_loader.get_data, self)
         self.event.completed.connect(self.load_data)
         self.event.start()
