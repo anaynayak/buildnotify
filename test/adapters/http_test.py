@@ -161,3 +161,34 @@ def test_should_report_request_failures_in_short_messages(response, message):
 def test_should_keep_credentials_out_of_http_error_messages(status_code):
     message = str(fetch_error(status_code=status_code))
     assert "hunter2" not in message and "s3cret" not in message
+
+
+API = "https://api.github.com/repos/octo-org/hello-world/actions/runs"
+
+
+def test_request_should_return_status_lowercased_headers_and_body_without_raising():
+    with requests_mock.Mocker() as m:
+        m.get(API, status_code=404, text='{"message": "Not Found"}', headers={"X-RateLimit-Remaining": "59"})
+        response = HttpConnection().request(API, 3, {"Accept": "application/vnd.github+json"})
+
+    assert (response.status, response.body) == (404, b'{"message": "Not Found"}')
+    assert response.headers["x-ratelimit-remaining"] == "59"
+    assert m.last_request.headers["Accept"] == "application/vnd.github+json"
+    assert m.last_request.headers["User-Agent"] == f"BuildNotify/{VERSION}"
+
+
+def test_request_should_map_transport_failures_to_short_errors():
+    with requests_mock.Mocker() as m:
+        m.get(API, exc=requests.exceptions.ConnectTimeout)
+        with pytest.raises(FetchError, match="^Timed out$"):
+            HttpConnection().request(API, 3, {})
+        m.get(API, exc=requests.exceptions.SSLError("bad-certificate"))
+        with pytest.raises(CertificateError):
+            HttpConnection().request(API, 3, {})
+
+
+def test_request_should_skip_verification_on_request():
+    with requests_mock.Mocker() as m:
+        m.get(API, text="{}")
+        HttpConnection().request(API, 3, {}, verify=False)
+        assert m.last_request.verify is False

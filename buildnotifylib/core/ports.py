@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Protocol
 
 from buildnotifylib.core.model import Project
@@ -12,10 +14,20 @@ class FetchError(Exception):
     """Raised by a Connection when a fetch fails, with a short message free of URLs and credentials."""
 
 
+@dataclass(frozen=True)
+class Response:
+    status: int
+    headers: Mapping[str, str]
+    """Header names are lower case."""
+    body: bytes
+
+
 class Connection(Protocol):
     def connect(
         self, server: ServerSettings, timeout: float | None, additional_headers: dict[str, str] | None = None
     ) -> bytes: ...
+
+    def request(self, url: str, timeout: float | None, headers: dict[str, str], verify: bool = True) -> Response: ...
 
 
 class Source(Protocol):
