@@ -5,15 +5,26 @@ from pathlib import Path
 
 import pytest
 
+import buildnotifylib
 import buildnotifylib.adapters
 import buildnotifylib.core
+import buildnotifylib.ui
 
 CORE = Path(buildnotifylib.core.__file__).parent
 CORE_MODULES = sorted(CORE.glob("*.py"))
 ADAPTER_MODULES = sorted(Path(buildnotifylib.adapters.__file__).parent.glob("*.py"))
+PACKAGE = Path(buildnotifylib.__file__).parent
+UI = Path(buildnotifylib.ui.__file__).parent
+UI_MODULES = sorted(UI.rglob("*.py"))
+NON_UI_MODULES = sorted(
+    path
+    for path in PACKAGE.rglob("*.py")
+    if not path.is_relative_to(UI) and path.parent.name != "generated" and path.name != "__main__.py"
+)
 FORBIDDEN = ("buildnotifylib.adapters", "buildnotifylib.ui", "PyQt5", "PySide6", "requests", "keyring")
 CORE_MAY_IMPORT = ("buildnotifylib.core",)
 ADAPTERS_MAY_IMPORT = ("buildnotifylib.core", "buildnotifylib.adapters", "buildnotifylib.version")
+UI_MAY_IMPORT = ADAPTERS_MAY_IMPORT + ("buildnotifylib.ui", "buildnotifylib.generated")
 
 
 def imported_modules(path: Path) -> list[str]:
@@ -44,6 +55,16 @@ def test_core_should_import_only_core_from_buildnotifylib(path):
 @pytest.mark.parametrize("path", ADAPTER_MODULES, ids=lambda path: path.name)
 def test_adapters_should_not_import_ui(path):
     assert outside_layer(path, ADAPTERS_MAY_IMPORT) == []
+
+
+@pytest.mark.parametrize("path", UI_MODULES, ids=lambda path: str(path.relative_to(UI)))
+def test_ui_should_import_only_core_adapters_and_ui(path):
+    assert outside_layer(path, UI_MAY_IMPORT) == []
+
+
+@pytest.mark.parametrize("path", NON_UI_MODULES, ids=lambda path: str(path.relative_to(PACKAGE)))
+def test_only_the_entry_point_should_import_the_ui(path):
+    assert [module for module in imported_modules(path) if within(module, ("buildnotifylib.ui",))] == []
 
 
 def test_should_flag_an_adapter_importing_the_ui(tmp_path):
