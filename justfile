@@ -30,3 +30,7 @@ build:
 ui:
     uv run --locked pyside6-uic --from-imports -o buildnotifylib/generated/preferences_ui.py data/preferences.ui
     uv run --locked pyside6-uic --from-imports -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui
+
+# Run the app against local fixture feeds with throwaway settings and no keychain
+demo *args:
+    uv run --locked python scripts/demo.py {{args}}

@@ -82,7 +82,7 @@ extend-exclude = ["buildnotifylib/generated"]
 select = ["E", "F", "W", "I", "UP", "B"]
 
 [tool.mypy]
-files = ["buildnotifylib", "test"]
+files = ["buildnotifylib", "scripts", "test"]
 exclude = ["^buildnotifylib/generated/"]
 ignore_missing_imports = true
 warn_unused_ignores = true

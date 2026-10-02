@@ -13,11 +13,14 @@ just fmt           # ruff fixes + formatting
 just types         # mypy
 just build         # sdist + wheel into dist/
 just ui            # regenerate buildnotifylib/generated from data/*.ui
+just demo          # run the app against local fixture feeds; pass app args, e.g. just demo --debug
 ```
 
 Run the tests outside `just` with `QT_QPA_PLATFORM=offscreen uv run pytest -q`.
 
 ## Running the app
+
+`just demo` serves the cctray fixtures in `test/fixtures/cctray` from 127.0.0.1, writes a temp settings file with two feeds and one unreachable server, and starts the app with the null keyring. It never reads or writes your real settings or keychain, and it deletes the temp files when the app exits or you press Ctrl-C.
 
 `uv run buildnotify --settings /tmp/buildnotify.ini --debug` launches the app against a throwaway settings file and logs every fetch. Leave out `--settings` to use your real settings.
 
