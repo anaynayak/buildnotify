@@ -4,13 +4,16 @@ import time
 
 import pytest
 import requests_mock
+from PyQt5 import sip
+from PyQt5.QtCore import QObject, pyqtSignal
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.diff import Change, diff, labels
+from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.core.settings import AppSettings
-from buildnotifylib.ui.poller import Poller
+from buildnotifylib.core.settings import AppSettings, ServerSettings
+from buildnotifylib.ui.poller import Fetch, Poller
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, GatedConnection, fake_content
 
@@ -257,3 +260,30 @@ def test_should_poll_on_the_timer_and_reread_the_interval(qtbot, make_poller):
 
     assert poller.timer.interval() == 60_000
     assert poller.timer.parent() is poller
+
+
+class Receiver(QObject):
+    done = pyqtSignal(ServerSnapshot)
+
+
+class FailingLoader(ProjectLoader):
+    def get_data(self):
+        raise OSError("stdout is gone")
+
+
+def test_fetch_should_report_a_crashing_loader_as_an_unavailable_server(qtbot):
+    receiver = Receiver()
+    results = []
+    receiver.done.connect(results.append)
+
+    Fetch(FailingLoader(ServerSettings(URL), 1, FakeConnection("")), receiver, "done").run()
+
+    assert [(s.url, str(s.error)) for s in results] == [(URL, "stdout is gone")]
+
+
+def test_fetch_should_drop_the_result_when_the_receiver_is_gone(qtbot):
+    receiver = Receiver()
+    fetch = Fetch(ProjectLoader(ServerSettings(URL), 1, FakeConnection(cctray("Success"))), receiver, "done")
+    sip.delete(receiver)
+
+    fetch.run()

@@ -50,7 +50,7 @@ class ServerConfigurationDialog(QDialog):
             self.server = ServerSettings("", timezone="")
 
         self.ui.loadUrlButton.clicked.connect(self.fetch_data)
-        self.loads = QThreadPool(self)
+        self.loads = QThreadPool.globalInstance()
         self.loaded.connect(self.load_data)
 
         if not Keystore.is_available():
@@ -92,7 +92,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.loadUrlButton.setEnabled(False)
         config = self.get_server_config()
         self.project_loader = ProjectLoader(config, self.timeout, self.connection, apply_excludes=False)
-        self.loads.start(Fetch(self.project_loader.get_data, self.loaded))
+        self.loads.start(Fetch(self.project_loader, self, "loaded"))
 
     def url_error(self) -> str | None:
         url = self.ui.addServerUrl.text()

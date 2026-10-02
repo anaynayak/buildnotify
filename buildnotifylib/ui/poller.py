@@ -1,10 +1,9 @@
 import copy
 import logging
 from collections import Counter
-from collections.abc import Callable
 from typing import Any
 
-from PyQt5.QtCore import QObject, QRunnable, QThreadPool, QTimer, pyqtBoundSignal, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QRunnable, QThreadPool, QTimer, pyqtSignal, pyqtSlot
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
@@ -17,16 +16,31 @@ log = logging.getLogger(__name__)
 
 
 class Fetch(QRunnable):
-    """Runs a task on a pool thread and hands its result back only through a signal."""
+    """Runs a loader on a pool thread and hands its snapshot back only through a signal.
 
-    def __init__(self, task: Callable[[], ServerSnapshot], done: pyqtBoundSignal, *args: Any):
+    The signal is looked up on the receiver at emit time, so a receiver deleted mid-fetch
+    raises RuntimeError here instead of crashing on a stale bound signal.
+    """
+
+    def __init__(self, loader: ProjectLoader, receiver: QObject, signal: str, *args: Any):
         super().__init__()
-        self.task = task
-        self.done = done
+        self.loader = loader
+        self.receiver = receiver
+        self.signal = signal
         self.args = args
 
     def run(self):
-        self.done.emit(*self.args, self.task())
+        snapshot = self.load()
+        try:
+            getattr(self.receiver, self.signal).emit(*self.args, snapshot)
+        except RuntimeError:
+            log.info("Dropping the result for %s: its receiver is gone", snapshot.url)
+
+    def load(self) -> ServerSnapshot:
+        try:
+            return self.loader.get_data()
+        except Exception as ex:
+            return ServerSnapshot(self.loader.server_config.url, error=ex)
 
 
 class Cycle:
@@ -108,7 +122,7 @@ class Poller(QObject):
         self.in_flight[config.url] += 1
         self.pool.setMaxThreadCount(max(self.pool.maxThreadCount(), self.in_flight.total()))
         loader = ProjectLoader(config, timeout, self.connection)
-        self.pool.start(Fetch(loader.get_data, self.fetched, self.generation, index, config.url))
+        self.pool.start(Fetch(loader, self, "fetched", self.generation, index, config.url))
 
     @pyqtSlot(int, int, str, ServerSnapshot)
     def on_fetched(self, generation: int, index: int, url: str, snapshot: ServerSnapshot):
