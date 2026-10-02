@@ -10,6 +10,9 @@ class FakeSettings(object):
     def setValue(self, key, val):
         self.settings[key] = val
 
+    def remove(self, key):
+        self.settings.pop(key, None)
+
     def value(self, key, fallback=None, type=None):
         return self.settings.get(key, fallback)
 

@@ -97,6 +97,32 @@ class ConfigTest(unittest.TestCase):
 
         self.assertEqual([], Config(self.q_settings).get_urls())
 
+    def test_should_clean_up_a_removed_server(self):
+        self.config.save_server_config(ServerConfig('url1', ['p'], 'EDT', 'prefix', 'user', 'pass', True))
+        self.config.save_server_config(ServerConfig('url2', [], 'EDT', 'prefix', 'user', 'pass'))
+
+        self.config.update_urls(['http://url2'])
+
+        self.assertEqual([], [key for key in self.q_settings.allKeys() if 'url1' in key])
+        self.assertIsNone(keyring.get_password('http://url1', 'user'))
+        self.assertEqual('pass', keyring.get_password('http://url2', 'user'))
+
+    def test_should_clean_up_a_removed_bearer_token(self):
+        self.config.save_server_config(ServerConfig('url1', [], 'EDT', 'prefix', '', 'token', False,
+                                                    ServerConfig.AUTH_BEARER_TOKEN))
+
+        self.config.update_urls([])
+
+        self.assertIsNone(keyring.get_password('http://url1', ''))
+
+    def test_should_keep_settings_of_a_server_nested_under_a_removed_one(self):
+        self.config.save_server_config(ServerConfig('host', [], 'EDT', 'outer', '', ''))
+        self.config.save_server_config(ServerConfig('host/cctray.xml', [], 'EDT', 'inner', '', ''))
+
+        self.config.update_urls(['http://host/cctray.xml'])
+
+        self.assertEqual('inner', self.config.get_display_prefix('http://host/cctray.xml'))
+
     def test_should_keep_custom_script_when_disabled(self):
         self.config.update_preferences(Preferences(['url1'], 300, 'my-hook', False, False, True, [], False))
 

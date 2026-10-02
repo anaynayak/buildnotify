@@ -39,6 +39,7 @@ class Config(object):
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
     NONE_TIMEZONE = "None"
+    SERVER_KEYS = (EXCLUDES, TIMEZONE, USERNAME, SKIP_SSL_VERIFICATION, AUTHORIZATION_TYPE, DISPLAY_PREFIX)
 
     SHOW_LAST_BUILD_LABEL = "show_last_build_label"
 
@@ -65,7 +66,19 @@ class Config(object):
         self.update_urls(urls)
 
     def update_urls(self, urls: List[str]):
+        removed = [url for url in self.get_urls() if url not in urls]
         self.settings.setValue(self.CONNECTION_URLS, urls)
+        for url in removed:
+            self.remove_server(url, urls)
+
+    def remove_server(self, url: str, remaining_urls: List[str]):
+        username = self.get_username(url)
+        if self.uses_keyring(username, self.get_authorization_type(url)):
+            self.keystore.delete(url, username)
+        if any(other.startswith(url + '/') for other in remaining_urls):
+            return
+        for key in self.SERVER_KEYS:
+            self.settings.remove(key % url)
 
     def get_urls(self) -> List[str]:
         return [str(url) for url in

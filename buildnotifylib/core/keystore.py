@@ -8,6 +8,9 @@ class FakeKeyring:
     def get_password(self, url, username):
         pass
 
+    def delete_password(self, url, username):
+        pass
+
 
 class KeyringError(Exception):
     pass
@@ -41,3 +44,10 @@ class Keystore(object):
             return keyring.get_password(url, username)
         except KeyringError:
             return None
+
+    @staticmethod
+    def delete(url: str, username: str):
+        try:
+            keyring.delete_password(url, username)
+        except KeyringError:
+            pass
