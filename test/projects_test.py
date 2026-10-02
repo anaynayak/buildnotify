@@ -98,10 +98,10 @@ class ProjectLoaderTest(unittest.TestCase):
     def test_should_load_feed(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
                                 <Projects>
-                                    <Project name="project" 
-                                        activity="Sleeping" 
-                                        lastBuildStatus="Success" 
-                                        lastBuildTime="2009-06-12T06:54:35" 
+                                    <Project name="project"
+                                        activity="Sleeping"
+                                        lastBuildStatus="Success"
+                                        lastBuildTime="2009-06-12T06:54:35"
                                         webUrl="http://local/url"/>
                                 </Projects>""")
         response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, connection).get_data()
@@ -155,10 +155,10 @@ class ProjectLoaderTest(unittest.TestCase):
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
                                         <Projects>
-                                            <Project name="project" 
-                                                activity="Sleeping" 
-                                                lastBuildStatus="Success" 
-                                                lastBuildTime="2009-06-12T06:54:35" 
+                                            <Project name="project"
+                                                activity="Sleeping"
+                                                lastBuildStatus="Success"
+                                                lastBuildTime="2009-06-12T06:54:35"
                                                 webUrl="http://local/url"/>
                                         </Projects>""")
         response = ProjectLoader(ServerConfig("url", [], "", "RELEASE", "", ""), 10, connection).get_data()
