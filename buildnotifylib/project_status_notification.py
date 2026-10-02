@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional
 
 from buildnotifylib.config import Config
-from buildnotifylib.core.project import Project
+from buildnotifylib.core.model import Project, Status
 from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.notifications import Notification
 
@@ -117,24 +117,24 @@ class ProjectTuple:
         self.old_project = old_project
 
     def has_failed(self) -> bool:
-        return self.status("Failure", "Success")
+        return self.status(Status.FAILURE, Status.SUCCESS)
 
     def has_succeeded(self) -> bool:
-        return self.status("Success", "Failure")
+        return self.status(Status.SUCCESS, Status.FAILURE)
 
     def has_been_successful(self) -> bool:
         return (self.old_project is None) or (
-            self.status("Success", "Success") and self.current_project.different_builds(self.old_project)
+            self.status(Status.SUCCESS, Status.SUCCESS) and self.current_project.different_builds(self.old_project)
         )
 
     def has_been_failing(self) -> bool:
-        return self.status("Failure", "Failure") and self.current_project.different_builds(self.old_project)  # type: ignore
+        return self.status(Status.FAILURE, Status.FAILURE) and self.current_project.different_builds(self.old_project)  # type: ignore
 
-    def status(self, new_status: str, old_status: str) -> bool:
+    def status(self, new_status: Status, old_status: Status) -> bool:
         return (
-            self.current_project.effective_status() == new_status
+            self.current_project.status is new_status
             and self.old_project is not None
-            and self.old_project.effective_status() == old_status
+            and self.old_project.status is old_status
         )
 
 

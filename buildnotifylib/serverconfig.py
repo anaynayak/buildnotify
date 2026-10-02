@@ -1,8 +1,7 @@
-from urllib.parse import urlparse
+from buildnotifylib.core.model import normalise_url
 
 
 class ServerConfig:
-    VALID_SCHEMES = ("http", "https", "file")
     AUTH_USERNAME_PASSWORD = 0
     AUTH_BEARER_TOKEN = 1
 
@@ -31,7 +30,4 @@ class ServerConfig:
 
     @staticmethod
     def cleanup(url: str) -> str:
-        parsed = urlparse(url)
-        if parsed.scheme not in ServerConfig.VALID_SCHEMES:
-            return "http://" + url
-        return parsed.geturl()
+        return normalise_url(url)

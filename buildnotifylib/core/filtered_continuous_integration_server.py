@@ -1,5 +1,5 @@
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
-from buildnotifylib.core.project import Project
+from buildnotifylib.core.model import Project
 
 
 class FilteredContinuousIntegrationServer:

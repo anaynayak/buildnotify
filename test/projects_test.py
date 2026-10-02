@@ -68,7 +68,8 @@ class OverallIntegrationStatusTest(unittest.TestCase):
         self.assertEqual(
             "Unknown.Building", overall_status(("Unknown", "Sleeping"), ("Unknown", "Building")).get_build_status()
         )
-        self.assertEqual("Unknown.Unknown", overall_status(("Bogus", "Sleeping")).get_build_status())
+        self.assertEqual("Unknown.Sleeping", overall_status(("Bogus", "Sleeping")).get_build_status())
+        self.assertEqual("Unknown.Unknown", overall_status(("Success", "Pending")).get_build_status())
         self.assertEqual([], overall_status(("Unknown", "Sleeping")).get_failing_builds())
 
     def test_should_identify_failing_builds(self):

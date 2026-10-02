@@ -1,6 +1,7 @@
 from PyQt5 import QtCore
 
 from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.core.model import NONE_TIMEZONE
 from buildnotifylib.serverconfig import ServerConfig
 
 
@@ -49,7 +50,7 @@ class Config:
     AUTHORIZATION_TYPE = "authorization_type/%s"
     DISPLAY_PREFIX = "display_prefix/%s"
     VALUES = "values/%s"
-    NONE_TIMEZONE = "None"
+    NONE_TIMEZONE = NONE_TIMEZONE
     SERVER_KEYS = (EXCLUDES, TIMEZONE, USERNAME, SKIP_SSL_VERIFICATION, AUTHORIZATION_TYPE, DISPLAY_PREFIX)
 
     SHOW_LAST_BUILD_LABEL = "show_last_build_label"

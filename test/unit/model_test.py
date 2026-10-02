@@ -73,3 +73,19 @@ def test_snapshot_should_be_unavailable_only_with_an_error():
 )
 def test_should_add_missing_scheme(url, expected):
     assert normalise_url(url) == expected
+
+
+def build(label, build_time):
+    return project(last_build_label=label, last_build_time=build_time)
+
+
+def test_should_treat_same_label_and_time_as_same_build():
+    assert not build("1", "2009-05-29T13:54:07").different_builds(build("1", "2009-05-29T13:54:07"))
+
+
+def test_should_detect_new_label():
+    assert build("2", "2009-05-29T13:54:07").different_builds(build("1", "2009-05-29T13:54:07"))
+
+
+def test_should_detect_new_build_time_with_same_label():
+    assert build("", "2009-05-29T14:00:00").different_builds(build("", "2009-05-29T13:54:07"))

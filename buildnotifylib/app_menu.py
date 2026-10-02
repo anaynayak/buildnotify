@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.config import Config
 from buildnotifylib.core.distance_of_time import DistanceOfTime
-from buildnotifylib.core.project import Project
+from buildnotifylib.core.model import Project
 from buildnotifylib.preferences import PreferencesDialog
 from buildnotifylib.version import VERSION
 
@@ -37,7 +37,7 @@ class AppMenu(QtCore.QObject):
 
     @staticmethod
     def build_time_key(project: Project) -> tuple[bool, float]:
-        build_time = project.get_last_build_time()
+        build_time = project.build_time
         if build_time is None:
             return False, 0.0
         return True, build_time.timestamp()
@@ -71,7 +71,7 @@ class AppMenu(QtCore.QObject):
 
     def create_menu_item(self, project: Project, icon: QIcon):
         menu_item_label = project.label(self.conf.get_show_last_build_label())
-        build_time = project.get_last_build_time()
+        build_time = project.build_time
         if self.conf.get_value("lastBuildTimeForProject") and build_time is not None:
             menu_item_label = menu_item_label + ", " + DistanceOfTime(build_time).relative()
 

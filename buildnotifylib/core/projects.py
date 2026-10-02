@@ -1,12 +1,12 @@
-from defusedxml import minidom
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QThread
 
 from buildnotifylib.config import Config
+from buildnotifylib.core import cctray
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.filtered_continuous_integration_server import FilteredContinuousIntegrationServer
 from buildnotifylib.core.http_connection import HttpConnection
-from buildnotifylib.core.project import Project
+from buildnotifylib.core.model import Project, Status
 from buildnotifylib.core.response import Response
 from buildnotifylib.serverconfig import ServerConfig
 
@@ -36,7 +36,7 @@ class OverallIntegrationStatus:
         return None
 
     def get_failing_builds(self) -> list[Project]:
-        return [p for p in self.get_projects() if p.effective_status() == "Failure"]
+        return [p for p in self.get_projects() if p.status is Status.FAILURE]
 
     def to_map(self) -> dict[str, list[Project]]:
         status: dict[str, list[Project]] = {key: [] for key in STATUS_PRIORITY}
@@ -127,26 +127,5 @@ class ProjectLoader:
         print(f"processed {self.server_config.url}")
         return Response(ContinuousIntegrationServer(self.server_config.url, projects))
 
-    def parse(self, data) -> list[Project]:
-        dom = minidom.parseString(data)
-        root = dom.documentElement.tagName
-        if root != "Projects":
-            raise ValueError(f"Not a cctray feed: expected <Projects> as the root element, got <{root}>")
-        projects = []
-        for node in dom.getElementsByTagName("Project"):
-            projects.append(
-                Project(
-                    self.server_config.url,
-                    self.server_config.prefix,
-                    self.server_config.timezone,
-                    {
-                        "name": node.getAttribute("name"),
-                        "lastBuildStatus": node.getAttribute("lastBuildStatus"),
-                        "lastBuildLabel": node.getAttribute("lastBuildLabel"),
-                        "activity": node.getAttribute("activity"),
-                        "url": node.getAttribute("webUrl"),
-                        "lastBuildTime": node.getAttribute("lastBuildTime"),
-                    },
-                )
-            )
-        return projects
+    def parse(self, data: bytes) -> list[Project]:
+        return cctray.parse(data, self.server_config, apply_excludes=False)
