@@ -1,7 +1,11 @@
+import logging
+
 from buildnotifylib.core import cctray
 from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import ServerSettings
+
+log = logging.getLogger(__name__)
 
 
 class ProjectLoader:
@@ -18,7 +22,7 @@ class ProjectLoader:
         self.apply_excludes = apply_excludes
 
     def get_data(self) -> ServerSnapshot:
-        print(f"checking {self.server_config.url}")
+        log.debug("checking %s", self.server_config.url)
         try:
             headers = {}
             if self.server_config.authentication_type == ServerSettings.AUTH_BEARER_TOKEN:
@@ -27,9 +31,9 @@ class ProjectLoader:
             data = self.connection.connect(self.server_config, self.timeout, headers)
             projects = self.parse(data)
         except Exception as ex:
-            print(ex)
+            log.warning("Failed to fetch %s: %s", self.server_config.url, ex)
             return ServerSnapshot(self.server_config.url, error=ex)
-        print(f"processed {self.server_config.url}")
+        log.debug("processed %s", self.server_config.url)
         return ServerSnapshot(self.server_config.url, tuple(projects))
 
     def parse(self, data: bytes) -> list[Project]:

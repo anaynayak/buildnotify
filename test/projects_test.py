@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from buildnotifylib.core.projects import ProjectLoader
@@ -97,5 +98,21 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEqual("[RELEASE] project", projects[0].label())
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_should_log_each_fetch_at_debug(caplog, capsys):
+    caplog.set_level(logging.DEBUG, logger="buildnotifylib.core.projects")
+    ProjectLoader(ServerSettings("http://ci/cc.xml"), 10, MockConnection(fake_content())).get_data()
+    assert [r.getMessage() for r in caplog.records] == ["checking http://ci/cc.xml", "processed http://ci/cc.xml"]
+    assert capsys.readouterr().out == ""
+
+
+def test_should_log_a_failed_fetch_as_a_warning(caplog, capsys):
+    class FailingConnection:
+        def connect(self, server, timeout, additional_headers=None):
+            raise OSError("refused")
+
+    caplog.set_level(logging.WARNING, logger="buildnotifylib.core.projects")
+    ProjectLoader(ServerSettings("http://ci/cc.xml"), 10, FailingConnection()).get_data()
+    assert [(r.levelno, r.getMessage()) for r in caplog.records] == [
+        (logging.WARNING, "Failed to fetch http://ci/cc.xml: refused")
+    ]
+    assert capsys.readouterr().out == ""
