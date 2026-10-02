@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtCore import QSettings, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
+from buildnotifylib.adapters.hooks import ShellScriptHook
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.app_notification import AppNotification
@@ -60,7 +61,7 @@ class BuildNotify:
         self.poller.updated.connect(self.update_projects)
         self.app_ui = AppUi(self.app, self.store, self.build_icons)
         self.app_ui.reload_data.connect(self.poller.reload)
-        self.app_notification = AppNotification(self.store, self.app_ui.tray)
+        self.app_notification = AppNotification(self.store, self.app_ui.tray, ShellScriptHook())
         self.poller.start()
 
     def update_projects(self, integration_status: OverallIntegrationStatus):

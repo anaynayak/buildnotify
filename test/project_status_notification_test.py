@@ -1,4 +1,3 @@
-import unittest
 from dataclasses import replace
 
 from buildnotifylib.app_notification import AppNotification
@@ -66,7 +65,8 @@ def test_should_return_notifications(mocker):
 
     m = mocker.patch.object(NotificationFake, "show_message")
 
-    notification = ProjectStatusNotification(ConfigBuilder().build().settings, old, new, NotificationFake())
+    settings = ConfigBuilder().build().settings
+    notification = ProjectStatusNotification(settings, old, new, NotificationFake(), RecordingHook())
     notification.show_notifications()
 
     m.assert_any_call("Broken builds", "proj1")
@@ -118,7 +118,7 @@ def _broken_build_notification(script, project_name, hook):
         ]
     )
     config = ConfigBuilder(custom_script=script, custom_script_enabled=True).build()
-    return ProjectStatusNotification(config.settings, old, new, _SilentNotification(), hook=hook)
+    return ProjectStatusNotification(config.settings, old, new, _SilentNotification(), hook)
 
 
 class RecordingHook:
@@ -147,19 +147,27 @@ def test_should_not_run_hook_when_custom_script_is_disabled():
     assert hook.calls == []
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 def _unavailable_status():
     return OverallIntegrationStatus([ServerSnapshot("url", error=OSError("down"))])
 
 
 def test_should_keep_back_off_across_polls(mocker):
-    app_notification = AppNotification(ConfigBuilder().build(), None)
+    app_notification = AppNotification(ConfigBuilder().build(), None, RecordingHook())
     show = mocker.patch.object(app_notification.notification, "show_message")
 
     for _ in range(5):
         app_notification.update_projects(_unavailable_status())
 
     assert show.call_count == 3
+
+
+def test_should_run_the_injected_hook_from_the_app_notification(mocker):
+    hook = RecordingHook()
+    store = ConfigBuilder(custom_script="my-hook", custom_script_enabled=True).build()
+    app_notification = AppNotification(store, None, hook)
+    mocker.patch.object(app_notification.notification, "show_message")
+
+    app_notification.update_projects(_unavailable_status())
+    app_notification.update_projects(_unavailable_status())
+
+    assert hook.calls == [("my-hook", "Connectivity issues", "url")]

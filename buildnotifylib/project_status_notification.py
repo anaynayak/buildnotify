@@ -1,4 +1,3 @@
-from buildnotifylib.adapters.hooks import ShellScriptHook
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.backoff import Backoff
 from buildnotifylib.core.diff import Change, Event, diff, labels
@@ -14,15 +13,15 @@ class ProjectStatusNotification:
         old_integration_status: OverallIntegrationStatus,
         current_integration_status: OverallIntegrationStatus,
         notification: Notification,
+        hook: Hook,
         backoff: Backoff | None = None,
-        hook: Hook | None = None,
     ):
         self.settings = settings
         self.old_integration_status = old_integration_status
         self.current_integration_status = current_integration_status
         self.notification = notification
         self.backoff = backoff or Backoff()
-        self.hook = hook or ShellScriptHook()
+        self.hook = hook
 
     def show_notifications(self):
         events = diff(self.old_integration_status.get_projects(), self.current_integration_status.get_projects())
