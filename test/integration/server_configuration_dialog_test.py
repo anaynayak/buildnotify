@@ -3,7 +3,7 @@ import requests_mock
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
-from mock import ANY
+from unittest.mock import ANY
 
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 from buildnotifylib.core.keystore import Keystore
