@@ -1,7 +1,8 @@
 import pytest
 
 from buildnotifylib.core.settings import ServerSettings, SortKey
-from buildnotifylib.ui.dialogs.preferences.misc_page import MiscChoices, MiscPage
+from buildnotifylib.ui.dialogs.preferences.advanced_page import AdvancedChoices, AdvancedPage
+from buildnotifylib.ui.dialogs.preferences.menu_page import MenuChoices, MenuPage
 from buildnotifylib.ui.dialogs.preferences.notifications_page import NotificationChoices, NotificationsPage
 from buildnotifylib.ui.dialogs.preferences.servers_page import ServersPage
 from test.utils import FakeConnection, fake_content
@@ -46,10 +47,21 @@ def test_notifications_page_should_enable_the_script_field_only_while_the_script
 
 @pytest.mark.functional
 @pytest.mark.parametrize("sort_key", list(SortKey))
-def test_misc_page_should_return_the_choices_it_was_given(qtbot, sort_key):
-    page = MiscPage()
+def test_menu_page_should_return_the_choices_it_was_given(qtbot, sort_key):
+    page = MenuPage()
     qtbot.addWidget(page)
-    choices = MiscChoices(45, False, True, True, sort_key, 25)
+    choices = MenuChoices(False, True, True, sort_key)
+
+    page.set_value(choices)
+
+    assert page.value() == choices
+
+
+@pytest.mark.functional
+def test_advanced_page_should_return_the_choices_it_was_given(qtbot):
+    page = AdvancedPage()
+    qtbot.addWidget(page)
+    choices = AdvancedChoices(45, 25)
 
     page.set_value(choices)
 
@@ -72,13 +84,20 @@ def test_notifications_page_should_use_the_event_wording(qtbot):
 
 
 @pytest.mark.functional
-def test_misc_page_should_use_the_sentence_case_wording(qtbot):
-    page = MiscPage()
+def test_menu_page_should_use_the_sentence_case_wording(qtbot):
+    page = MenuPage()
     qtbot.addWidget(page)
 
     assert page.show_last_build_time.text() == "Show last build time"
     assert page.show_last_build_label.text() == "Show build label"
     assert [button.text() for button in page.sort_buttons.values()] == ["Failing first", "Name", "Last build time"]
     assert (page.tray_colour.text(), page.tray_shapes.text()) == ("Colour", "Shapes")
-    assert page.interval.suffix() == " seconds"
+
+
+@pytest.mark.functional
+def test_advanced_page_should_label_the_interval_and_timeout(qtbot):
+    page = AdvancedPage()
+    qtbot.addWidget(page)
+
     assert page.form_labels() == ["Check every:", "Give up after:"]
+    assert (page.interval.minimum(), page.interval.maximum()) == (10, 3600)

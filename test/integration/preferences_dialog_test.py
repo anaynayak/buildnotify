@@ -30,7 +30,7 @@ def test_should_show_configure_notifications(qtbot):
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     dialog.show()
-    dialog.tabs.setCurrentIndex(1)
+    dialog.tabs.setCurrentIndex(2)
     assert dialog.notifications_page.connectivity_issues.isChecked()
     assert dialog.notifications_page.fixed_builds.isChecked()
     assert dialog.notifications_page.broken_builds.isChecked()
@@ -315,10 +315,10 @@ def test_should_reject_editing_a_server_url_to_another_servers_url(qtbot, mocker
 def test_should_return_the_symbolic_icons_choice(qtbot, mocker):
     dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
-    assert dialog.misc_page.tray_colour.isChecked()
+    assert dialog.menu_page.tray_colour.isChecked()
     mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
-    dialog.misc_page.tray_shapes.setChecked(True)
+    dialog.menu_page.tray_shapes.setChecked(True)
 
     assert dialog.open().symbolic_icons
 
@@ -336,7 +336,7 @@ def test_should_offer_polling_intervals_from_10_seconds_to_an_hour(qtbot):
     dialog = PreferencesDialog(AppSettings(), FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
 
-    spin_box = dialog.misc_page.interval
+    spin_box = dialog.advanced_page.interval
     assert (spin_box.minimum(), spin_box.maximum()) == (10, 3600)
 
 
@@ -439,8 +439,21 @@ def test_should_expose_and_return_the_request_timeout(qtbot):
     conf = ConfigBuilder(timeout_seconds=25).build()
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
-    assert dialog.misc_page.timeout.value() == 25
+    assert dialog.advanced_page.timeout.value() == 25
 
-    dialog.misc_page.timeout.setValue(40)
+    dialog.advanced_page.timeout.setValue(40)
 
     assert dialog.edited_settings().timeout_seconds == 40
+
+
+@pytest.mark.functional
+def test_should_offer_the_servers_menu_notifications_and_advanced_tabs(qtbot):
+    dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    assert [dialog.tabs.tabText(index) for index in range(dialog.tabs.count())] == [
+        "Servers",
+        "Menu",
+        "Notifications",
+        "Advanced",
+    ]
