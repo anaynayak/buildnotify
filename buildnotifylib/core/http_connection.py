@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import SSLError
 
 from buildnotifylib.serverconfig import ServerConfig
 from buildnotifylib.version import VERSION
@@ -25,3 +26,7 @@ class HttpConnection:
     @staticmethod
     def uses_basic_auth(server: ServerConfig) -> bool:
         return server.authentication_type == ServerConfig.AUTH_USERNAME_PASSWORD and server.has_creds()
+
+
+def is_ssl_error(error: Exception | None) -> bool:
+    return isinstance(error, SSLError)

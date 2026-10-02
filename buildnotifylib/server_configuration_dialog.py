@@ -7,9 +7,10 @@ from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
 from buildnotifylib.config import Config
 from buildnotifylib.core.background_event import BackgroundEvent
+from buildnotifylib.core.http_connection import is_ssl_error
 from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
-from buildnotifylib.core.response import Response
 from buildnotifylib.generated.server_configuration_ui import Ui_serverConfigurationDialog
 from buildnotifylib.serverconfig import ServerConfig
 
@@ -91,10 +92,10 @@ class ServerConfigurationDialog(QDialog):
             return "Only http:// and https:// URLs are supported."
         return None
 
-    def load_data(self, response: Response):
+    def load_data(self, response: ServerSnapshot):
         self.ui.loadUrlButton.setEnabled(True)
 
-        if response.failed():
+        if response.unavailable:
             self.handle_errors(response)
             return
 
@@ -104,7 +105,7 @@ class ServerConfigurationDialog(QDialog):
         projects_model.setHorizontalHeaderLabels(["Select Projects"])
         self.projects_list = QtGui.QStandardItem("All")
         self.projects_list.setCheckable(True)
-        for project in response.server.projects:
+        for project in response.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
             check = Qt.Unchecked if project.name in self.server.excluded_projects else Qt.Checked
@@ -119,8 +120,8 @@ class ServerConfigurationDialog(QDialog):
     def qtText(self, txt: str) -> str:
         return Qt.convertFromPlainText(txt)  # type: ignore
 
-    def handle_errors(self, response: Response):
-        if response.ssl_error():
+    def handle_errors(self, response: ServerSnapshot):
+        if is_ssl_error(response.error):
             reply = QMessageBox.question(
                 self,
                 "Failed to fetch projects",
@@ -133,7 +134,7 @@ class ServerConfigurationDialog(QDialog):
                 self.fetch_data()
             return
 
-        if response.failed():
+        if response.unavailable:
             QMessageBox.critical(self, "Failed to fetch projects", f"<b>Error:</b> {self.qtText(str(response.error))}")
 
     def project_checked(self, item: QStandardItem):

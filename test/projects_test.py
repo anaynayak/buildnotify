@@ -1,6 +1,6 @@
 import unittest
 
-from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
+from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
 
@@ -12,21 +12,19 @@ class OverallIntegrationStatusTest(unittest.TestCase):
     def test_should_consolidate_build_status(self):
         project1 = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
         project2 = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
-        status = OverallIntegrationStatus([ContinuousIntegrationServer("someurl", [project1, project2])])
+        status = OverallIntegrationStatus([ServerSnapshot("someurl", (project1, project2))])
         self.assertEqual("Success.Sleeping", status.get_build_status())
 
     def test_should_mark_failed_if_even_one_failed(self):
         project1 = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
         project2 = ProjectBuilder({"name": "a", "lastBuildStatus": "Failure", "activity": "Sleeping"}).build()
-        status = OverallIntegrationStatus([ContinuousIntegrationServer("someurl", [project1, project2])])
+        status = OverallIntegrationStatus([ServerSnapshot("someurl", (project1, project2))])
         self.assertEqual("Failure.Sleeping", status.get_build_status())
 
     def test_should_mark_failed_if_even_one_failed_across_servers(self):
         project1 = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
         project2 = ProjectBuilder({"name": "a", "lastBuildStatus": "Failure", "activity": "Sleeping"}).build()
-        status = OverallIntegrationStatus(
-            [ContinuousIntegrationServer("url1", [project1]), ContinuousIntegrationServer("url2", [project2])]
-        )
+        status = OverallIntegrationStatus([ServerSnapshot("url1", (project1,)), ServerSnapshot("url2", (project2,))])
         self.assertEqual("Failure.Sleeping", status.get_build_status())
 
     def test_any_failure_should_outrank_any_success(self):
@@ -76,7 +74,7 @@ class OverallIntegrationStatusTest(unittest.TestCase):
     def test_should_identify_failing_builds(self):
         project1 = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
         project2 = ProjectBuilder({"name": "a", "lastBuildStatus": "Failure", "activity": "Sleeping"}).build()
-        status = OverallIntegrationStatus([ContinuousIntegrationServer("someurl", [project1, project2])])
+        status = OverallIntegrationStatus([ServerSnapshot("someurl", (project1, project2))])
         self.assertEqual([project2], status.get_failing_builds())
 
 
@@ -85,7 +83,7 @@ def overall_status(*statuses):
         ProjectBuilder({"name": f"p{i}", "lastBuildStatus": status, "activity": activity}).build()
         for i, (status, activity) in enumerate(statuses)
     ]
-    return OverallIntegrationStatus([ContinuousIntegrationServer("someurl", projects)])
+    return OverallIntegrationStatus([ServerSnapshot("someurl", tuple(projects))])
 
 
 class MockConnection:
@@ -107,12 +105,12 @@ class ProjectLoaderTest(unittest.TestCase):
                                         webUrl="http://local/url"/>
                                 </Projects>""")
         response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, connection).get_data()
-        projects = response.server.get_projects()
+        projects = response.projects
         self.assertEqual(1, len(projects))
         self.assertEqual("project", projects[0].name)
         self.assertEqual("Sleeping", projects[0].activity)
         self.assertEqual("Success", projects[0].status)
-        self.assertEqual(False, response.server.unavailable)
+        self.assertEqual(False, response.unavailable)
 
     def test_should_respond_even_if_things_fail(self):
         error = Exception("something went wrong")
@@ -122,9 +120,9 @@ class ProjectLoaderTest(unittest.TestCase):
                 raise error
 
         response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, FailingConnection()).get_data()
-        projects = response.server.get_projects()
+        projects = response.projects
         self.assertEqual(0, len(projects))
-        self.assertEqual(True, response.server.unavailable)
+        self.assertEqual(True, response.unavailable)
         self.assertIs(error, response.error)
 
     def test_should_mark_server_unavailable_for_html_body(self):
@@ -149,21 +147,20 @@ class ProjectLoaderTest(unittest.TestCase):
 
     def assert_unavailable(self, body):
         response = ProjectLoader(ServerConfig("url", [], "", "", "", ""), 10, MockConnection(body)).get_data()
-        self.assertEqual([], response.server.get_projects())
-        self.assertEqual(True, response.server.unavailable)
-        self.assertEqual(True, response.failed())
+        self.assertEqual((), response.projects)
+        self.assertEqual(True, response.unavailable)
         return response
 
     def test_should_drop_excluded_projects(self):
         config = ServerConfig("url", ["orbit-M"], "", "", "", "")
-        projects = ProjectLoader(config, 10, MockConnection(fake_content())).get_data().server.get_projects()
+        projects = ProjectLoader(config, 10, MockConnection(fake_content())).get_data().projects
         self.assertEqual(6, len(projects))
         self.assertNotIn("orbit-M", [p.name for p in projects])
 
     def test_should_keep_excluded_projects_on_request(self):
         config = ServerConfig("url", ["orbit-M"], "", "", "", "")
         loader = ProjectLoader(config, 10, MockConnection(fake_content()), apply_excludes=False)
-        self.assertEqual(7, len(loader.get_data().server.get_projects()))
+        self.assertEqual(7, len(loader.get_data().projects))
 
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
@@ -175,7 +172,7 @@ class ProjectLoaderTest(unittest.TestCase):
                                                 webUrl="http://local/url"/>
                                         </Projects>""")
         response = ProjectLoader(ServerConfig("url", [], "", "RELEASE", "", ""), 10, connection).get_data()
-        projects = response.server.get_projects()
+        projects = response.projects
         self.assertEqual(1, len(projects))
         self.assertEqual("[RELEASE] project", projects[0].label())
 

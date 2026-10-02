@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
-from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
+from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import OverallIntegrationStatus
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
@@ -20,7 +20,7 @@ def test_should_update_tooltip_on_poll(qtbot):
     project1 = ProjectBuilder(
         {"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping", "lastBuildTime": "2016-09-17 11:31:12"}
     ).build()
-    servers = [ContinuousIntegrationServer("someurl", [project1])]
+    servers = [ServerSnapshot("someurl", (project1,))]
 
     widget.update_projects(OverallIntegrationStatus(servers))
 

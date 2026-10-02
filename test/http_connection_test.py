@@ -1,10 +1,11 @@
 import base64
+import ssl
 
 import pytest
 import requests
 import requests_mock
 
-from buildnotifylib.core.http_connection import HttpConnection
+from buildnotifylib.core.http_connection import HttpConnection, is_ssl_error
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
 from buildnotifylib.version import VERSION
@@ -50,7 +51,7 @@ def test_should_send_only_bearer_token_for_bearer_auth(username):
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="<Projects/>")
         response = ProjectLoader(bearer_config(username), 3, HttpConnection()).get_data()
-        assert not response.failed()
+        assert not response.unavailable
         assert m.last_request.headers["Authorization"] == "Bearer token"
 
 
@@ -69,8 +70,8 @@ def test_should_report_ssl_error():
         m.get("https://localhost:8080/cc.xml", exc=requests.exceptions.SSLError("bad certificate"))
         config = ServerConfig("https://localhost:8080/cc.xml", [], "", "", None, None)
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
-        assert response.ssl_error()
-        assert response.server.unavailable
+        assert is_ssl_error(response.error)
+        assert response.unavailable
 
 
 def test_should_reuse_one_session_across_polls(mocker):
@@ -94,4 +95,17 @@ def test_should_honour_encoding_declared_in_the_feed():
         m.get("http://localhost:8080/cc.xml", content=body.encode("iso-8859-1"))
         config = ServerConfig("localhost:8080/cc.xml", [], "", "", None, None)
         response = ProjectLoader(config, 3, HttpConnection()).get_data()
-        assert [p.name for p in response.server.get_projects()] == ["café"]
+        assert [p.name for p in response.projects] == ["café"]
+
+
+def test_should_recognise_ssl_error_subclasses():
+    class CertificateError(requests.exceptions.SSLError):
+        pass
+
+    assert is_ssl_error(requests.exceptions.SSLError())
+    assert is_ssl_error(CertificateError())
+
+
+@pytest.mark.parametrize("error", [None, ValueError(), ssl.SSLError()])
+def test_should_not_treat_other_errors_as_ssl_errors(error):
+    assert not is_ssl_error(error)

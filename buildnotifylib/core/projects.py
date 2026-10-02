@@ -3,10 +3,8 @@ from PyQt5.QtCore import QObject, QThread
 
 from buildnotifylib.config import Config
 from buildnotifylib.core import cctray
-from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
 from buildnotifylib.core.http_connection import HttpConnection
-from buildnotifylib.core.model import Project, Status
-from buildnotifylib.core.response import Response
+from buildnotifylib.core.model import Project, ServerSnapshot, Status
 from buildnotifylib.serverconfig import ServerConfig
 
 STATUS_PRIORITY = [
@@ -24,7 +22,7 @@ STATUS_PRIORITY = [
 
 
 class OverallIntegrationStatus:
-    def __init__(self, servers: list[ContinuousIntegrationServer]):
+    def __init__(self, servers: list[ServerSnapshot]):
         self.servers = servers
 
     def get_build_status(self) -> str | None:
@@ -47,13 +45,9 @@ class OverallIntegrationStatus:
         return status
 
     def get_projects(self) -> list[Project]:
-        all_projects = []
-        for server in self.servers:
-            if server.get_projects() is not None:
-                all_projects.extend(server.get_projects())
-        return all_projects
+        return [project for server in self.servers for project in server.projects]
 
-    def unavailable_servers(self) -> list[ContinuousIntegrationServer]:
+    def unavailable_servers(self) -> list[ServerSnapshot]:
         return [server for server in self.servers if server.unavailable]
 
 
@@ -65,7 +59,7 @@ class ProjectsPopulator(QThread):
         self.config = config
         self.server_configs: list[ServerConfig] = []
         self.timeout: float | None = None
-        self.last_known: dict[str, list[Project]] = {}
+        self.last_known: dict[str, tuple[Project, ...]] = {}
         self.reload_pending = False
         self.finished.connect(self.on_finished)
 
@@ -94,16 +88,16 @@ class ProjectsPopulator(QThread):
     def run(self):
         self.process(self.server_configs)
 
-    def check_nodes(self, server_config: ServerConfig) -> ContinuousIntegrationServer:
-        server = ProjectLoader(server_config, self.timeout).get_data().server
-        return self.with_last_known(server, server_config.excluded_projects)
+    def check_nodes(self, server_config: ServerConfig) -> ServerSnapshot:
+        snapshot = ProjectLoader(server_config, self.timeout).get_data()
+        return self.with_last_known(snapshot, server_config.excluded_projects)
 
-    def with_last_known(self, server: ContinuousIntegrationServer, excluded: list[str]) -> ContinuousIntegrationServer:
-        if server.unavailable:
-            cached = [p for p in self.last_known.get(server.url, []) if p.name not in excluded]
-            return ContinuousIntegrationServer(server.url, cached, True)
-        self.last_known[server.url] = server.get_projects()
-        return server
+    def with_last_known(self, snapshot: ServerSnapshot, excluded: list[str]) -> ServerSnapshot:
+        if snapshot.unavailable:
+            cached = tuple(p for p in self.last_known.get(snapshot.url, ()) if p.name not in excluded)
+            return ServerSnapshot(snapshot.url, cached, snapshot.error)
+        self.last_known[snapshot.url] = snapshot.projects
+        return snapshot
 
 
 class ProjectLoader:
@@ -119,7 +113,7 @@ class ProjectLoader:
         self.connection = connection
         self.apply_excludes = apply_excludes
 
-    def get_data(self) -> Response:
+    def get_data(self) -> ServerSnapshot:
         print(f"checking {self.server_config.url}")
         try:
             headers = {}
@@ -130,9 +124,9 @@ class ProjectLoader:
             projects = self.parse(data)
         except Exception as ex:
             print(ex)
-            return Response(ContinuousIntegrationServer(self.server_config.url, [], True), ex)
+            return ServerSnapshot(self.server_config.url, error=ex)
         print(f"processed {self.server_config.url}")
-        return Response(ContinuousIntegrationServer(self.server_config.url, projects))
+        return ServerSnapshot(self.server_config.url, tuple(projects))
 
     def parse(self, data: bytes) -> list[Project]:
         return cctray.parse(data, self.server_config, apply_excludes=self.apply_excludes)

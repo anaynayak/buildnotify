@@ -5,7 +5,7 @@ import unittest
 import pytest
 
 from buildnotifylib.app_notification import AppNotification
-from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
+from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.projects import OverallIntegrationStatus
 from buildnotifylib.project_status_notification import (
     ProjectStatus,
@@ -392,8 +392,8 @@ def test_should_return_notifications(mocker):
             }
         ).build(),
     ]
-    old = OverallIntegrationStatus([ContinuousIntegrationServer("url", old_projects)])
-    new = OverallIntegrationStatus([ContinuousIntegrationServer("url", new_projects)])
+    old = OverallIntegrationStatus([ServerSnapshot("url", tuple(old_projects))])
+    new = OverallIntegrationStatus([ServerSnapshot("url", tuple(new_projects))])
 
     class NotificationFake:
         def __init__(self):
@@ -419,9 +419,9 @@ class _SilentNotification:
 def _broken_build_notification(script, project_name):
     old = OverallIntegrationStatus(
         [
-            ContinuousIntegrationServer(
+            ServerSnapshot(
                 "url",
-                [
+                (
                     ProjectBuilder(
                         {
                             "name": project_name,
@@ -431,16 +431,16 @@ def _broken_build_notification(script, project_name):
                             "lastBuildLabel": "1",
                             "lastBuildTime": "2009-05-29T13:54:07",
                         }
-                    ).build()
-                ],
+                    ).build(),
+                ),
             )
         ]
     )
     new = OverallIntegrationStatus(
         [
-            ContinuousIntegrationServer(
+            ServerSnapshot(
                 "url",
-                [
+                (
                     ProjectBuilder(
                         {
                             "name": project_name,
@@ -450,8 +450,8 @@ def _broken_build_notification(script, project_name):
                             "lastBuildLabel": "2",
                             "lastBuildTime": "2009-05-29T13:54:07",
                         }
-                    ).build()
-                ],
+                    ).build(),
+                ),
             )
         ]
     )
@@ -556,7 +556,7 @@ def test_should_reset_back_off_when_server_recovers():
 
 
 def _unavailable_status():
-    return OverallIntegrationStatus([ContinuousIntegrationServer("url", [], True)])
+    return OverallIntegrationStatus([ServerSnapshot("url", error=OSError("down"))])
 
 
 def test_should_keep_back_off_across_polls(mocker):
