@@ -9,7 +9,7 @@ class Keystore:
         return not isinstance(keyring.get_keyring(), fail.Keyring)
 
     @staticmethod
-    def save(url: str, username: str, password: str):
+    def save(url: str, username: str, password: str) -> None:
         try:
             keyring.set_password(url, username, password)
         except KeyringError:
@@ -23,7 +23,7 @@ class Keystore:
             return None
 
     @staticmethod
-    def delete(url: str, username: str):
+    def delete(url: str, username: str) -> None:
         try:
             keyring.delete_password(url, username)
         except KeyringError:

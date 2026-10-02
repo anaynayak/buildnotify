@@ -5,9 +5,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
+from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import is_ssl_error
 from buildnotifylib.core.background_event import BackgroundEvent
-from buildnotifylib.core.keystore import Keystore
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings

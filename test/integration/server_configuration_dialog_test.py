@@ -7,7 +7,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
 
-from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.server_configuration_dialog import ServerConfigurationDialog
 from test.utils import fake_content

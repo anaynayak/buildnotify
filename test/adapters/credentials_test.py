@@ -2,7 +2,7 @@ import keyring
 from keyring.backends import fail
 from keyring.errors import KeyringLocked
 
-from buildnotifylib.core.keystore import Keystore
+from buildnotifylib.adapters.credentials import Keystore
 from test.fake_keyring import InMemoryKeyring
 
 
@@ -33,3 +33,16 @@ def test_should_not_raise_when_backend_raises():
     keyring.set_keyring(LockedKeyring())
     Keystore.save("url", "user", "pass")
     assert Keystore.load("url", "user") is None
+
+
+def test_should_round_trip_and_delete_a_password():
+    store = Keystore()
+    store.save("url", "user", "pass")
+    assert store.load("url", "user") == "pass"
+    store.delete("url", "user")
+    assert store.load("url", "user") is None
+
+
+def test_should_not_raise_when_delete_fails():
+    keyring.set_keyring(fail.Keyring())
+    Keystore.delete("url", "user")
