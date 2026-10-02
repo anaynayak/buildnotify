@@ -1,0 +1,49 @@
+"""Composition root: builds the adapters once and injects them into the app."""
+
+import argparse
+import logging
+import os
+import sys
+
+from PyQt5.QtCore import QSettings
+from PyQt5.QtWidgets import QApplication
+
+from buildnotifylib.adapters.credentials import Keystore
+from buildnotifylib.adapters.hooks import ShellScriptHook
+from buildnotifylib.adapters.http import HttpConnection
+from buildnotifylib.adapters.settings_store import SettingsStore
+from buildnotifylib.buildnotify import BuildNotify
+
+LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+
+
+def parse_args(args: list[str]) -> tuple[argparse.Namespace, list[str]]:
+    """Return our options and the arguments left over for Qt."""
+    parser = argparse.ArgumentParser(prog="buildnotify", allow_abbrev=False)
+    parser.add_argument("--debug", action="store_true", help="log every fetch")
+    return parser.parse_known_args(args)
+
+
+def build(app: QApplication) -> BuildNotify:
+    store = SettingsStore(QSettings("BuildNotify", "BuildNotify"), Keystore())
+    return BuildNotify(app, store, HttpConnection(), ShellScriptHook())
+
+
+def main(argv: list[str] | None = None) -> None:
+    argv = sys.argv if argv is None else argv
+    options, qt_args = parse_args(argv[1:])
+    logging.basicConfig(level=logging.DEBUG if options.debug else logging.WARNING, format=LOG_FORMAT)
+    app = QApplication([argv[0], *qt_args])
+    app.setQuitOnLastWindowClosed(False)
+    buildnotify = build(app)
+    exit_code = app.exec_()
+    if not buildnotify.wait_for_workers():
+        logging.shutdown()
+        sys.stdout.flush()
+        os._exit(exit_code)
+    else:
+        sys.exit(exit_code)
+
+
+if __name__ == "__main__":
+    main()

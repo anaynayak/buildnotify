@@ -36,7 +36,7 @@ Homepage = "https://anaynayak.github.io/buildnotify/"
 Source = "https://github.com/anaynayak/buildnotify"
 
 [project.gui-scripts]
-buildnotify = "buildnotifylib.buildnotify:BuildNotify.start"
+buildnotify = "buildnotifylib.__main__:main"
 
 [dependency-groups]
 dev = [

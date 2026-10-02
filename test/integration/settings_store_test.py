@@ -138,7 +138,7 @@ def test_should_fall_back_to_defaults_for_unreadable_values(qsettings):
 
 
 class DictKeystore:
-    def __init__(self):
+    def __init__(self) -> None:
         self.passwords: dict[tuple[str, str], str] = {}
 
     def save(self, url, username, password):

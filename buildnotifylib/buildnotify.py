@@ -1,18 +1,12 @@
-import os
-import sys
-
-from PyQt5.QtCore import QSettings, QTimer
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
-from buildnotifylib.adapters.credentials import Keystore
-from buildnotifylib.adapters.hooks import ShellScriptHook
-from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.app_notification import AppNotification
 from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
-from buildnotifylib.core.ports import Connection
+from buildnotifylib.core.ports import Connection, Hook
 from buildnotifylib.ui.poller import Poller
 
 
@@ -23,12 +17,14 @@ class BuildNotify:
     def __init__(
         self,
         app: QApplication,
-        store: SettingsStore | None = None,
-        interval=2000,
-        connection: Connection | None = None,
+        store: SettingsStore,
+        connection: Connection,
+        hook: Hook,
+        interval: int = 2000,
     ):
-        self.store = store if store is not None else SettingsStore(QSettings("BuildNotify", "BuildNotify"), Keystore())
-        self.connection = connection or HttpConnection()
+        self.store = store
+        self.connection = connection
+        self.hook = hook
         self.build_icons = BuildIcons()
         self.app = app
         self.app.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
@@ -62,7 +58,7 @@ class BuildNotify:
         self.poller.updated.connect(self.update_projects)
         self.app_ui = AppUi(self.app, self.store, self.build_icons, self.connection)
         self.app_ui.reload_data.connect(self.poller.reload)
-        self.app_notification = AppNotification(self.store, self.app_ui.tray, ShellScriptHook())
+        self.app_notification = AppNotification(self.store, self.app_ui.tray, self.hook)
         self.poller.start()
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
@@ -73,19 +69,3 @@ class BuildNotify:
         if not hasattr(self, "poller"):
             return True
         return self.poller.wait(self.EXIT_WAIT_MS)
-
-    @staticmethod
-    def start():
-        app = QApplication(sys.argv)
-        app.setQuitOnLastWindowClosed(False)
-        buildnotify = BuildNotify(app)
-        exit_code = buildnotify.app.exec_()
-        if not buildnotify.wait_for_workers():
-            sys.stdout.flush()
-            os._exit(exit_code)
-        else:
-            sys.exit(exit_code)
-
-
-if __name__ == "__main__":
-    BuildNotify.start()

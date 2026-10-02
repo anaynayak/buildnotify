@@ -28,6 +28,7 @@ def test_should_not_open_real_qsettings_on_import():
         "        super().__init__(*args)\n"
         "QtCore.QSettings = Spy\n"
         "import buildnotifylib.buildnotify\n"
+        "import buildnotifylib.__main__\n"
         "assert not calls, calls\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)
