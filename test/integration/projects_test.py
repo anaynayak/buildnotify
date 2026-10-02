@@ -98,6 +98,18 @@ def test_should_keep_last_known_projects_while_server_is_down(qtbot):
 
 
 @pytest.mark.functional
+def test_should_apply_new_excludes_to_last_known_projects(qtbot):
+    conf = ConfigBuilder().server(URL).build()
+    populator = ProjectsPopulator(conf)
+
+    poll(qtbot, populator, conf.get_server_configs(), text=cctray("Failure"))
+    conf.set_project_excludes(URL, ["proj1"])
+    status = poll(qtbot, populator, conf.get_server_configs(), status_code=500)
+
+    assert status.get_projects() == []
+
+
+@pytest.mark.functional
 def test_should_report_broken_build_after_outage(qtbot):
     conf = ConfigBuilder().server(URL).build()
     populator = ProjectsPopulator(conf)

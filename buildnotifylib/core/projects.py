@@ -4,7 +4,6 @@ from PyQt5.QtCore import QObject, QThread
 from buildnotifylib.config import Config
 from buildnotifylib.core import cctray
 from buildnotifylib.core.continous_integration_server import ContinuousIntegrationServer
-from buildnotifylib.core.filtered_continuous_integration_server import FilteredContinuousIntegrationServer
 from buildnotifylib.core.http_connection import HttpConnection
 from buildnotifylib.core.model import Project, Status
 from buildnotifylib.core.response import Response
@@ -25,7 +24,7 @@ STATUS_PRIORITY = [
 
 
 class OverallIntegrationStatus:
-    def __init__(self, servers: list[FilteredContinuousIntegrationServer]):
+    def __init__(self, servers: list[ContinuousIntegrationServer]):
         self.servers = servers
 
     def get_build_status(self) -> str | None:
@@ -54,7 +53,7 @@ class OverallIntegrationStatus:
                 all_projects.extend(server.get_projects())
         return all_projects
 
-    def unavailable_servers(self) -> list[FilteredContinuousIntegrationServer]:
+    def unavailable_servers(self) -> list[ContinuousIntegrationServer]:
         return [server for server in self.servers if server.unavailable]
 
 
@@ -95,22 +94,30 @@ class ProjectsPopulator(QThread):
     def run(self):
         self.process(self.server_configs)
 
-    def check_nodes(self, server_config: ServerConfig) -> FilteredContinuousIntegrationServer:
-        server = self.with_last_known(ProjectLoader(server_config, self.timeout).get_data().server)
-        return FilteredContinuousIntegrationServer(server, server_config.excluded_projects)
+    def check_nodes(self, server_config: ServerConfig) -> ContinuousIntegrationServer:
+        server = ProjectLoader(server_config, self.timeout).get_data().server
+        return self.with_last_known(server, server_config.excluded_projects)
 
-    def with_last_known(self, server: ContinuousIntegrationServer) -> ContinuousIntegrationServer:
+    def with_last_known(self, server: ContinuousIntegrationServer, excluded: list[str]) -> ContinuousIntegrationServer:
         if server.unavailable:
-            return ContinuousIntegrationServer(server.url, self.last_known.get(server.url, []), True)
+            cached = [p for p in self.last_known.get(server.url, []) if p.name not in excluded]
+            return ContinuousIntegrationServer(server.url, cached, True)
         self.last_known[server.url] = server.get_projects()
         return server
 
 
 class ProjectLoader:
-    def __init__(self, server_config: ServerConfig, timeout: float | None, connection=HttpConnection()):
+    def __init__(
+        self,
+        server_config: ServerConfig,
+        timeout: float | None,
+        connection=HttpConnection(),
+        apply_excludes: bool = True,
+    ):
         self.server_config = server_config
         self.timeout = timeout
         self.connection = connection
+        self.apply_excludes = apply_excludes
 
     def get_data(self) -> Response:
         print(f"checking {self.server_config.url}")
@@ -128,4 +135,4 @@ class ProjectLoader:
         return Response(ContinuousIntegrationServer(self.server_config.url, projects))
 
     def parse(self, data: bytes) -> list[Project]:
-        return cctray.parse(data, self.server_config, apply_excludes=False)
+        return cctray.parse(data, self.server_config, apply_excludes=self.apply_excludes)

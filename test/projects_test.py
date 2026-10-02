@@ -5,6 +5,7 @@ from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
 
 from .project_builder import ProjectBuilder
+from .utils import fake_content
 
 
 class OverallIntegrationStatusTest(unittest.TestCase):
@@ -152,6 +153,17 @@ class ProjectLoaderTest(unittest.TestCase):
         self.assertEqual(True, response.server.unavailable)
         self.assertEqual(True, response.failed())
         return response
+
+    def test_should_drop_excluded_projects(self):
+        config = ServerConfig("url", ["orbit-M"], "", "", "", "")
+        projects = ProjectLoader(config, 10, MockConnection(fake_content())).get_data().server.get_projects()
+        self.assertEqual(6, len(projects))
+        self.assertNotIn("orbit-M", [p.name for p in projects])
+
+    def test_should_keep_excluded_projects_on_request(self):
+        config = ServerConfig("url", ["orbit-M"], "", "", "", "")
+        loader = ProjectLoader(config, 10, MockConnection(fake_content()), apply_excludes=False)
+        self.assertEqual(7, len(loader.get_data().server.get_projects()))
 
     def test_should_set_display_prefix(self):
         connection = MockConnection("""<?xml version="1.0" encoding="UTF-8"?>
