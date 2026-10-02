@@ -23,6 +23,11 @@ jobs:
         run: uv run --locked ruff format --check
       - name: Types
         run: uv run --locked mypy
+      - name: Generated UI is up to date
+        run: |
+          uvx --from rust-just just ui
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
 
   test:
     runs-on: ${{ matrix.os }}
