@@ -13,9 +13,13 @@ class HttpConnection(object):
         headers = {'user-agent': self.user_agent}
         headers.update(additional_headers or {})
 
-        auth = (server.username, server.password) if server.has_creds() else None
+        auth = (server.username, server.password) if self.uses_basic_auth(server) else None
         response = requests.get(server.url, verify=not server.skip_ssl_verification, headers=headers, auth=auth,
                                 timeout=timeout)
         response.encoding = 'utf-8'
         response.raise_for_status()
         return response.text
+
+    @staticmethod
+    def uses_basic_auth(server: ServerConfig) -> bool:
+        return server.authentication_type == ServerConfig.AUTH_USERNAME_PASSWORD and server.has_creds()

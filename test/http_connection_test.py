@@ -1,6 +1,11 @@
+import base64
+
+import pytest
+import requests
 import requests_mock
 
 from buildnotifylib.core.http_connection import HttpConnection
+from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
 from buildnotifylib.version import VERSION
 
@@ -26,3 +31,35 @@ def test_should_send_user_agent_without_platform_details():
         m.get('http://localhost:8080/cc.xml', text='content')
         HttpConnection().connect(ServerConfig('localhost:8080/cc.xml', [], '', '', None, None), 3)
         assert m.last_request.headers['User-Agent'] == 'BuildNotify/%s' % VERSION
+
+
+def bearer_config(username):
+    return ServerConfig('http://localhost:8080/cc.xml', [], '', '', username, 'token',
+                        authentication_type=ServerConfig.AUTH_BEARER_TOKEN)
+
+
+@pytest.mark.parametrize('username', [None, '', 'leftover-user'])
+def test_should_send_only_bearer_token_for_bearer_auth(username):
+    with requests_mock.Mocker() as m:
+        m.get('http://localhost:8080/cc.xml', text='<Projects/>')
+        response = ProjectLoader(bearer_config(username), 3, HttpConnection()).get_data()
+        assert not response.failed()
+        assert m.last_request.headers['Authorization'] == 'Bearer token'
+
+
+def test_should_send_basic_auth_for_username_password():
+    with requests_mock.Mocker() as m:
+        m.get('http://localhost:8080/cc.xml', text='<Projects/>')
+        ProjectLoader(ServerConfig('http://localhost:8080/cc.xml', [], '', '', 'user', 'pass'), 3,
+                      HttpConnection()).get_data()
+        expected = 'Basic ' + base64.b64encode(b'user:pass').decode()
+        assert m.last_request.headers['Authorization'] == expected
+
+
+def test_should_report_ssl_error():
+    with requests_mock.Mocker() as m:
+        m.get('https://localhost:8080/cc.xml', exc=requests.exceptions.SSLError('bad certificate'))
+        config = ServerConfig('https://localhost:8080/cc.xml', [], '', '', None, None)
+        response = ProjectLoader(config, 3, HttpConnection()).get_data()
+        assert response.ssl_error()
+        assert response.server.unavailable
