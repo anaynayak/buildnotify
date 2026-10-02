@@ -1,1 +1,0 @@
-_.encoding  # type: ignore
