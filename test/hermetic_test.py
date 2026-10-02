@@ -20,7 +20,7 @@ def test_should_not_leak_passwords_between_tests_part_two():
 
 def test_should_not_open_real_qsettings_on_import():
     script = (
-        "from PyQt5 import QtCore\n"
+        "from PySide6 import QtCore\n"
         "calls = []\n"
         "class Spy(QtCore.QSettings):\n"
         "    def __init__(self, *args):\n"

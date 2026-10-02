@@ -5,8 +5,8 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QApplication
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.hooks import ShellScriptHook
@@ -28,7 +28,7 @@ def parse_args(args: list[str]) -> tuple[argparse.Namespace, list[str]]:
 def open_settings(path: str | None) -> QSettings:
     if path is None:
         return QSettings("BuildNotify", "BuildNotify")
-    return QSettings(path, QSettings.IniFormat)
+    return QSettings(path, QSettings.Format.IniFormat)
 
 
 def build(app: QApplication, settings_path: str | None = None) -> BuildNotify:
@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> None:
     app = QApplication([argv[0], *qt_args])
     app.setQuitOnLastWindowClosed(False)
     buildnotify = build(app, options.settings)
-    exit_code = app.exec_()
+    exit_code = app.exec()
     if not buildnotify.wait_for_workers():
         logging.shutdown()
         sys.stdout.flush()

@@ -8,15 +8,15 @@
 
 ## Editing the UI
 
-To edit the dialog windows, you should use [Qt Designer](https://doc.qt.io/qt-5/qtdesigner-manual.html).
+To edit the dialog windows, you should use [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html).
 Once you're done, invoke the following command to regenerate its Python implementation:
 
 ```shell
-pyuic5 -o buildnotifylib/generated/<file>_ui.py data/<file>.ui
+uv run pyside6-uic --from-imports -o buildnotifylib/generated/<file>_ui.py data/<file>.ui
 ```
 
 Regenerate the icon resources after changing `icons/` with:
 
 ```shell
-pyrcc5 icons/icons.qrc -o buildnotifylib/generated/icons_rc.py
+uv run pyside6-rcc icons/icons.qrc -o buildnotifylib/generated/icons_rc.py
 ```

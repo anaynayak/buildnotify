@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytest
-from PyQt5.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget
 
 from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.ui.app_menu import AppMenu

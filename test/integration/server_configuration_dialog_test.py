@@ -4,9 +4,9 @@ from unittest.mock import ANY
 import pytest
 import requests
 import requests_mock
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox
+from PySide6 import QtCore
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QMessageBox
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.settings import ServerSettings
@@ -26,13 +26,13 @@ def test_should_show_configured_urls(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         model = dialog.ui.projectsList.model()
         assert model.item(0, 0).hasChildren()
         assert model.item(0, 0).child(0, 0).isCheckable()
-        assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Checked
+        assert model.item(0, 0).child(0, 0).checkState() == Qt.CheckState.Checked
         assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
 
         assert dialog.ui.timezoneList.currentText() == "None"
@@ -67,7 +67,7 @@ def test_should_save_restore_config(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         server_config = dialog.get_server_config()
@@ -85,12 +85,12 @@ def test_should_exclude_projects(qtbot):
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         model = dialog.ui.projectsList.model()
 
-        model.item(0, 0).child(0, 0).setCheckState(QtCore.Qt.Unchecked)
+        model.item(0, 0).child(0, 0).setCheckState(QtCore.Qt.CheckState.Unchecked)
 
         server_config = dialog.get_server_config()
         assert [str(s) for s in server_config.excluded_projects] == ["cleanup-artifacts-B"]
@@ -106,7 +106,7 @@ def test_should_preload_info(qtbot):
         dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         model = dialog.ui.projectsList.model()
@@ -114,7 +114,7 @@ def test_should_preload_info(qtbot):
         assert model.item(0, 0).hasChildren()
         assert model.item(0, 0).child(0, 0).isCheckable()
         assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
-        assert model.item(0, 0).child(0, 0).data(Qt.CheckStateRole) == Qt.Unchecked
+        assert model.item(0, 0).child(0, 0).checkState() == Qt.CheckState.Unchecked
 
         def timezone():
             assert dialog.ui.timezoneList.count() > 100
@@ -130,9 +130,9 @@ def test_should_fail_for_bad_url(qtbot, mocker):
     dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
     dialog.show()
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.No)
+    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.No)
 
-    qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
     def alert_shown():
         m.assert_called_once_with(dialog, ANY, ANY)
@@ -168,9 +168,9 @@ def test_should_show_error_and_reenable_load_for_non_xml_response(qtbot, mocker)
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         dialog.show()
         qtbot.addWidget(dialog)
-        m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
+        m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
 
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         def alert_shown():
             m.assert_called_once_with(dialog, ANY, ANY)
@@ -203,7 +203,7 @@ def test_should_read_widgets_and_load_results_on_the_gui_thread(qtbot, mocker):
             return original()
 
         mocker.patch.object(dialog, "get_server_config", get_server_config)
-        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(dialog.ui.loadUrlButton, QtCore.Qt.MouseButton.LeftButton)
 
         qtbot.waitUntil(lambda: dialog.ui.projectsList.model() is not None)
         assert dialog.loads.waitForDone(5000)
@@ -235,7 +235,7 @@ def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     url = "file:///tmp/cctray.xml"
     dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
+    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
 
     dialog.fetch_data()
 
@@ -264,7 +264,7 @@ def test_should_give_up_on_a_load_that_misses_the_deadline(qtbot, mocker):
     mocker.patch.object(Deadline, "GRACE_MS", 50)
     dialog = ServerConfigurationDialog(ServerSettings(url), 0, connection)
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.Ok)
+    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
 
     try:
         dialog.fetch_data()
@@ -290,12 +290,13 @@ def test_should_offer_to_retry_without_verification_after_an_ssl_error(qtbot, mo
         m.get(url, [{"exc": requests.exceptions.SSLError("bad-certificate")}, {"text": fake_content()}])
         dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
         qtbot.addWidget(dialog)
-        question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.Yes)
+        question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
 
         dialog.fetch_data()
         qtbot.waitUntil(lambda: dialog.ui.stackedWidget.currentIndex() == 1)
 
-    question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, QMessageBox.Yes, QMessageBox.No)
+    yes, no = QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No
+    question.assert_called_once_with(dialog, "Failed to fetch projects", ANY, yes, no)
     assert "bad-certificate" in question.call_args.args[2]
     assert dialog.get_server_config().skip_ssl_verification is True
     assert [r.verify for r in m.request_history] == [True, False]

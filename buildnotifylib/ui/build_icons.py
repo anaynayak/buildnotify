@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 
 class BuildIcons:
@@ -34,7 +34,7 @@ class BuildIcons:
         pixmap = icon.pixmap(22, 22)
         painter = QtGui.QPainter(pixmap)
         painter.setOpacity(1)
-        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str(count))
+        painter.drawText(pixmap.rect(), QtCore.Qt.AlignmentFlag.AlignCenter, str(count))
         painter.end()
         return QtGui.QIcon(pixmap)
 

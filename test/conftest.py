@@ -1,6 +1,6 @@
 import keyring
 import pytest
-from PyQt5 import QtCore
+from PySide6 import QtCore
 
 from test import fake_conf
 from test.fake_keyring import InMemoryKeyring
@@ -17,7 +17,7 @@ def in_memory_keyring():
 
 @pytest.fixture
 def qsettings(tmp_path):
-    return QtCore.QSettings(str(tmp_path / "settings.ini"), QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(str(tmp_path / "settings.ini"), QtCore.QSettings.Format.IniFormat)
 
 
 @pytest.fixture(autouse=True)

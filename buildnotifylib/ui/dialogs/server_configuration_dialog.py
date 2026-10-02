@@ -1,9 +1,9 @@
 from zoneinfo import available_timezones
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
-from PyQt5.QtGui import QStandardItem
-from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
+from PySide6 import QtGui
+from PySide6.QtCore import Qt, QThreadPool, Signal
+from PySide6.QtGui import QStandardItem
+from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import CertificateError, Connection
@@ -14,7 +14,7 @@ from buildnotifylib.ui.poller import Deadline, Fetch
 
 
 class ServerConfigurationDialog(QDialog):
-    loaded = pyqtSignal(int, ServerSnapshot)
+    loaded = Signal(int, ServerSnapshot)
 
     def __init__(
         self,
@@ -130,7 +130,7 @@ class ServerConfigurationDialog(QDialog):
         for project in response.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
-            check = Qt.Unchecked if project.name in self.server.excluded_projects else Qt.Checked
+            check = Qt.CheckState.Unchecked if project.name in self.server.excluded_projects else Qt.CheckState.Checked
             item.setCheckState(check)
             self.projects_list.appendRow(item)
         projects_model.appendRow(self.projects_list)
@@ -140,7 +140,7 @@ class ServerConfigurationDialog(QDialog):
         self.ui.projectsList.setRootIsDecorated(False)
 
     def qtText(self, txt: str) -> str:
-        return Qt.convertFromPlainText(txt)  # type: ignore
+        return QtGui.Qt.convertFromPlainText(txt)
 
     def handle_errors(self, response: ServerSnapshot):
         if isinstance(response.error, CertificateError):
@@ -148,10 +148,10 @@ class ServerConfigurationDialog(QDialog):
                 self,
                 "Failed to fetch projects",
                 f"<b>SSL error, retry without verification?:</b> {self.qtText(str(response.error))}",
-                QMessageBox.Yes,
-                QMessageBox.No,
+                QMessageBox.StandardButton.Yes,
+                QMessageBox.StandardButton.No,
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.skip_ssl_verification = True
                 self.fetch_data()
             return
@@ -168,16 +168,8 @@ class ServerConfigurationDialog(QDialog):
         return self.ui.addServerUrl.text()
 
     def get_server_config(self) -> ServerSettings:
-        projects_model = self.ui.projectsList.model()
-
-        def project(i, model):
-            return model.index(i, 0, self.projects_list.index())
-
-        excluded_projects = [
-            project(i, projects_model).data()
-            for i in range(self.projects_list.rowCount())
-            if project(i, projects_model).data(Qt.CheckStateRole) == Qt.Unchecked
-        ]
+        children = [self.projects_list.child(i) for i in range(self.projects_list.rowCount())]
+        excluded_projects = [child.text() for child in children if child.checkState() == Qt.CheckState.Unchecked]
         return ServerSettings(
             self.server_url(),
             excluded_projects,
@@ -190,6 +182,6 @@ class ServerConfigurationDialog(QDialog):
         )
 
     def open(self) -> ServerSettings | None:  # type: ignore
-        if self.exec_() == QDialog.Accepted:
+        if self.exec() == QDialog.DialogCode.Accepted:
             return self.get_server_config()
         return None

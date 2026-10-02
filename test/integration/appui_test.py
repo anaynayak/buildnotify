@@ -1,7 +1,7 @@
 import re
 
 import pytest
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot

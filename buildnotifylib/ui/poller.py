@@ -4,7 +4,7 @@ from collections import Counter
 from collections.abc import Callable
 from typing import Any
 
-from PyQt5.QtCore import QObject, QRunnable, QThreadPool, QTimer, pyqtSignal, pyqtSlot
+from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Signal, Slot
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
@@ -93,8 +93,8 @@ class Poller(QObject):
 
     FIRST_POLL_MS = 1000
 
-    updated = pyqtSignal(OverallIntegrationStatus)
-    fetched = pyqtSignal(int, int, str, ServerSnapshot)
+    updated = Signal(OverallIntegrationStatus)
+    fetched = Signal(int, int, str, ServerSnapshot)
 
     def __init__(self, store: SettingsStore, connection: Connection, parent: QObject | None = None):
         super().__init__(parent)
@@ -148,7 +148,7 @@ class Poller(QObject):
         loader = ProjectLoader(config, timeout, self.connection)
         self.pool.start(Fetch(loader, self, "fetched", generation, index, config.url))
 
-    @pyqtSlot(int, int, str, ServerSnapshot)
+    @Slot(int, int, str, ServerSnapshot)
     def on_fetched(self, generation: int, index: int, url: str, snapshot: ServerSnapshot):
         self.in_flight[url] -= 1
         if self.in_flight[url] <= 0:

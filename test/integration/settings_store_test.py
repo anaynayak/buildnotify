@@ -1,6 +1,6 @@
 import keyring
 import pytest
-from PyQt5 import QtCore
+from PySide6 import QtCore
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore
@@ -22,7 +22,7 @@ def ini(tmp_path):
 
 
 def reopen(ini) -> SettingsStore:
-    return SettingsStore(QtCore.QSettings(ini, QtCore.QSettings.IniFormat), Keystore())
+    return SettingsStore(QtCore.QSettings(ini, QtCore.QSettings.Format.IniFormat), Keystore())
 
 
 def full_settings() -> AppSettings:

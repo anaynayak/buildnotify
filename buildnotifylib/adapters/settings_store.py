@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Any
 
-from PyQt5.QtCore import QSettings
+from PySide6.QtCore import QSettings
 
 from buildnotifylib.core.ports import CredentialStore
 from buildnotifylib.core.settings import (
@@ -104,7 +104,7 @@ def migrate(qsettings: QSettings) -> None:
         write_servers(qsettings, [read_server(legacy_value(qsettings, url)) for url in urls])
         qsettings.setValue(VERSION, SCHEMA_VERSION)
         qsettings.sync()
-    if qsettings.status() == QSettings.NoError and qsettings.contains(LEGACY_URLS):
+    if qsettings.status() == QSettings.Status.NoError and qsettings.contains(LEGACY_URLS):
         remove_legacy_keys(qsettings)
 
 

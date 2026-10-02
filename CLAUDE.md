@@ -1,6 +1,6 @@
 # BuildNotify
 
-A system tray app (Python 3, PyQt5 today, PySide6 after Phase 4) that polls cctray.xml CI feeds
+A system tray app (Python 3, PySide6) that polls cctray.xml CI feeds
 and shows build status and notifications. Library code lives in `buildnotifylib/`, and tests
 live in `test/`.
 

@@ -1,9 +1,9 @@
 import os
 
 import pytest
-from PyQt5 import QtCore
-from PyQt5.QtCore import QItemSelectionModel, Qt
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox
+from PySide6 import QtCore
+from PySide6.QtCore import QItemSelectionModel, Qt
+from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
 from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, ServerSettings, SortKey
 from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
@@ -47,8 +47,8 @@ def test_should_return_preferences_on_accept(qtbot):
     qtbot.addWidget(dialog)
 
     def close_dialog():
-        button = dialog.ui.buttonBox.button(QDialogButtonBox.Ok)
-        qtbot.mouseClick(button, QtCore.Qt.LeftButton)
+        button = dialog.ui.buttonBox.button(QDialogButtonBox.StandardButton.Ok)
+        qtbot.mouseClick(button, QtCore.Qt.MouseButton.LeftButton)
 
     QtCore.QTimer.singleShot(100, close_dialog)
     preferences = dialog.open()
@@ -65,13 +65,13 @@ def test_should_prefill_server_config(qtbot, mocker):
     dialog.show()
 
     index = dialog.ui.cctrayPathList.model().index(0, 0)
-    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.Select)
+    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
     dialog.item_selection_changed(True)
 
     m = mocker.patch.object(ServerConfigurationDialog, "open")
 
-    qtbot.mouseClick(dialog.ui.configureProjectButton, Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.configureProjectButton, Qt.MouseButton.LeftButton)
 
     qtbot.waitUntil(lambda: m.assert_any_call())
 
@@ -86,11 +86,11 @@ def test_should_remove_configured_servers(qtbot):
     dialog.show()
 
     index = dialog.ui.cctrayPathList.model().index(0, 0)
-    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.Select)
+    dialog.ui.cctrayPathList.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
     dialog.ui.cctrayPathList.setCurrentIndex(index)
     dialog.item_selection_changed(True)
 
-    qtbot.mouseClick(dialog.ui.removeButton, Qt.LeftButton)
+    qtbot.mouseClick(dialog.ui.removeButton, Qt.MouseButton.LeftButton)
 
     assert [str(s) for s in dialog.ui.cctrayPathList.model().stringList()] == []
 
@@ -134,7 +134,7 @@ def test_should_not_save_an_added_server_until_ok(qtbot, mocker):
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     stub_server_dialog(mocker, "http://new/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Rejected)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Rejected)
 
     dialog.add_server()
     preferences = dialog.open()
@@ -150,7 +150,7 @@ def test_should_return_an_added_server_on_ok(qtbot, mocker):
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     stub_server_dialog(mocker, "http://new/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
     dialog.add_server()
     preferences = dialog.open()
@@ -165,7 +165,7 @@ def test_should_not_return_an_added_server_removed_before_ok(qtbot, mocker):
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     stub_server_dialog(mocker, "http://new/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
     dialog.add_server()
     select_row(dialog, 0)
@@ -192,7 +192,7 @@ def test_should_keep_edits_to_an_added_server(qtbot, mocker):
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     stub_server_dialog(mocker, "http://new/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
     dialog.add_server()
     select_row(dialog, 0)
     mocker.patch.object(
@@ -228,7 +228,7 @@ def test_should_not_save_an_edited_server_until_ok(qtbot, mocker):
     qtbot.addWidget(dialog)
     select_row(dialog, 0)
     stub_server_dialog(mocker, "http://one/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Rejected)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Rejected)
 
     dialog.configure_projects()
 
@@ -243,7 +243,7 @@ def test_should_return_an_edited_server_on_ok(qtbot, mocker):
     qtbot.addWidget(dialog)
     select_row(dialog, 0)
     stub_server_dialog(mocker, "http://one/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
     dialog.configure_projects()
 
@@ -264,7 +264,7 @@ def test_should_return_every_unchanged_setting_on_ok(qtbot, mocker):
     conf = builder.server("http://one/cctray.xml", username="alice", password="pw").server("http://two").build()
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
     assert dialog.open() == conf.settings
 
@@ -303,7 +303,7 @@ def test_should_reject_editing_a_server_url_to_another_servers_url(qtbot, mocker
     qtbot.addWidget(dialog)
     select_row(dialog, 0)
     stub_server_dialog(mocker, "http://two/cctray.xml")
-    mocker.patch.object(dialog, "exec_", return_value=QDialog.Accepted)
+    mocker.patch.object(dialog, "exec", return_value=QDialog.DialogCode.Accepted)
 
     dialog.configure_projects()
 

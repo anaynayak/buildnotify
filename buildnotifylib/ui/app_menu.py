@@ -2,9 +2,9 @@ import webbrowser
 from datetime import datetime
 from functools import partial
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QApplication, QMenu, QMessageBox, QWidget
+from PySide6 import QtCore
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import humanize
@@ -17,7 +17,7 @@ from buildnotifylib.version import VERSION
 
 
 class AppMenu(QtCore.QObject):
-    reload_data = QtCore.pyqtSignal()
+    reload_data = QtCore.Signal()
 
     def __init__(self, widget: QWidget, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
         super().__init__(widget)
@@ -56,7 +56,7 @@ class AppMenu(QtCore.QObject):
         QMessageBox.about(
             self.menu,
             f"About BuildNotify {VERSION}",
-            f"<b>BuildNotify {VERSION}</b> has been developed using PyQt5 and serves as a build notification tool "
+            f"<b>BuildNotify {VERSION}</b> has been developed using PySide6 and serves as a build notification tool "
             "for cruise control. In case of any suggestions/bugs,"
             'please visit <a href="https://git.io/buildnotify">https://git.io/buildnotify</a> '
             "and provide your feedback.",

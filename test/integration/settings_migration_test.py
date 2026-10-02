@@ -3,7 +3,7 @@ from pathlib import Path
 
 import keyring
 import pytest
-from PyQt5 import QtCore
+from PySide6 import QtCore
 
 from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.settings_store import SettingsStore, migrate
@@ -61,7 +61,7 @@ SINGLE_SERVER_SETTINGS = AppSettings(
 
 class FailingSettings(QtCore.QSettings):
     def __init__(self, path, failing_key):
-        super().__init__(path, QtCore.QSettings.IniFormat)
+        super().__init__(path, QtCore.QSettings.Format.IniFormat)
         self.failing_key = failing_key
 
     def setValue(self, key, value):
@@ -84,7 +84,7 @@ def single_server(tmp_path):
 
 
 def open_ini(path) -> QtCore.QSettings:
-    return QtCore.QSettings(path, QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(path, QtCore.QSettings.Format.IniFormat)
 
 
 def legacy_keys(qsettings: QtCore.QSettings) -> list[str]:

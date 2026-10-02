@@ -28,6 +28,6 @@ build:
 
 # Regenerate the Qt UI modules and icon resources
 ui:
-    uv run --locked pyuic5 --from-imports -o buildnotifylib/generated/preferences_ui.py data/preferences.ui
-    uv run --locked pyuic5 --from-imports -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui
-    uv run --locked pyrcc5 icons/icons.qrc -o buildnotifylib/generated/icons_rc.py
+    uv run --locked pyside6-uic --from-imports -o buildnotifylib/generated/preferences_ui.py data/preferences.ui
+    uv run --locked pyside6-uic --from-imports -o buildnotifylib/generated/server_configuration_ui.py data/server_configuration.ui
+    uv run --locked pyside6-rcc icons/icons.qrc -o buildnotifylib/generated/icons_rc.py

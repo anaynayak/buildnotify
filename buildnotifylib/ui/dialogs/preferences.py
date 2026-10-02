@@ -1,7 +1,7 @@
 from dataclasses import replace
 
-from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QDialog, QWidget
+from PySide6.QtCore import QStringListModel
+from PySide6.QtWidgets import QDialog, QWidget
 
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
@@ -121,6 +121,6 @@ class PreferencesDialog(QDialog):
         )
 
     def open(self) -> AppSettings | None:  # type: ignore
-        if self.exec_() == QDialog.Accepted:
+        if self.exec() == QDialog.DialogCode.Accepted:
             return self.edited_settings()
         return None

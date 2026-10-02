@@ -4,7 +4,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-from PyQt5.QtCore import QSettings
+from PySide6.QtCore import QSettings
 
 from buildnotifylib import __main__ as entry
 from buildnotifylib.adapters.credentials import Keystore
@@ -16,7 +16,7 @@ PYPROJECT = Path(__file__).parents[2] / "pyproject.toml"
 
 def fake_run(mocker, exit_code=0, workers_done=True):
     calls = mocker.MagicMock()
-    calls.app.exec_.return_value = exit_code
+    calls.app.exec.return_value = exit_code
     calls.wait_for_workers.return_value = workers_done
     application = mocker.patch("buildnotifylib.__main__.QApplication", return_value=calls.app)
     buildnotify = mocker.MagicMock(wait_for_workers=calls.wait_for_workers)
@@ -31,7 +31,7 @@ def test_should_wait_for_workers_after_the_event_loop_ends(mocker):
 
     entry.main(["buildnotify"])
 
-    assert calls.mock_calls[-2:] == [mocker.call.app.exec_(), mocker.call.wait_for_workers()]
+    assert calls.mock_calls[-2:] == [mocker.call.app.exec(), mocker.call.wait_for_workers()]
     sys_exit.assert_called_once_with(3)
 
 
@@ -114,7 +114,7 @@ def test_should_open_an_ini_settings_file_when_given_a_path(qapp, tmp_path):
     buildnotify.tray_timer.stop()
 
     assert buildnotify.store.qsettings.fileName() == path
-    assert buildnotify.store.qsettings.format() == QSettings.IniFormat
+    assert buildnotify.store.qsettings.format() == QSettings.Format.IniFormat
 
 
 def test_should_run_as_a_module():

@@ -4,8 +4,8 @@ import time
 
 import pytest
 import requests_mock
-from PyQt5 import sip
-from PyQt5.QtCore import QObject, pyqtSignal
+import shiboken6
+from PySide6.QtCore import QObject, Signal
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
@@ -263,7 +263,7 @@ def test_should_poll_on_the_timer_and_reread_the_interval(qtbot, make_poller):
 
 
 class Receiver(QObject):
-    done = pyqtSignal(ServerSnapshot)
+    done = Signal(ServerSnapshot)
 
 
 class FailingLoader(ProjectLoader):
@@ -284,7 +284,7 @@ def test_fetch_should_report_a_crashing_loader_as_an_unavailable_server(qtbot):
 def test_fetch_should_drop_the_result_when_the_receiver_is_gone(qtbot):
     receiver = Receiver()
     fetch = Fetch(ProjectLoader(ServerSettings(URL), 1, FakeConnection(cctray("Success"))), receiver, "done")
-    sip.delete(receiver)
+    shiboken6.delete(receiver)
 
     fetch.run()
 

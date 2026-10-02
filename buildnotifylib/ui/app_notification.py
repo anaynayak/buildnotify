@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QSystemTrayIcon
+from PySide6.QtWidgets import QSystemTrayIcon
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus

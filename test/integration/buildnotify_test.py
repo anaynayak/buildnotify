@@ -2,7 +2,7 @@ import re
 
 import pytest
 import requests_mock
-from PyQt5.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.ui.buildnotify import BuildNotify

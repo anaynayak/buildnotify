@@ -1,9 +1,9 @@
 import sys
 from time import strftime
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QWidget
+from PySide6 import QtCore
+from PySide6.QtGui import QCursor
+from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
@@ -13,7 +13,7 @@ from buildnotifylib.ui.build_icons import BuildIcons
 
 
 class AppUi(QtCore.QObject):
-    reload_data = QtCore.pyqtSignal()
+    reload_data = QtCore.Signal()
 
     def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
         super().__init__(parent)
@@ -30,7 +30,7 @@ class AppUi(QtCore.QObject):
             app.aboutToQuit.connect(self.tray.hide)
 
     def show_menu(self, reason):
-        if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.Trigger:
+        if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.app_menu.menu.popup(QCursor.pos())
 
     def update_projects(self, integration_status: OverallIntegrationStatus):

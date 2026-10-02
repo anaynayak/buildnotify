@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus

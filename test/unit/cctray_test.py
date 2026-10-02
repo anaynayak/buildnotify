@@ -199,7 +199,7 @@ def test_should_fall_back_to_local_time(tz):
 def test_core_model_and_parser_should_not_import_qt_requests_or_keyring():
     code = (
         "import sys, buildnotifylib.core.model, buildnotifylib.core.cctray; "
-        "print(sorted(m for m in ('PyQt5', 'requests', 'keyring') if m in sys.modules))"
+        "print(sorted(m for m in ('PySide6', 'requests', 'keyring') if m in sys.modules))"
     )
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
     assert result.stdout.strip() == "[]"
