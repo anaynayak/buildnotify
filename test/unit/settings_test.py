@@ -53,13 +53,6 @@ def test_should_prefer_a_configured_notification():
     assert AppSettings(notifications={"successfulBuild": True}).notify("successfulBuild")
 
 
-def test_should_find_a_server_by_url():
-    server = ServerSettings("http://ci/cc.xml")
-
-    assert AppSettings(servers=[server]).server("http://ci/cc.xml") is server
-    assert AppSettings().server("http://ci/cc.xml") is None
-
-
 def test_should_store_sort_keys_with_their_2x_names():
     assert [key.value for key in SortKey] == ["sort_build_time", "sort_name"]
 

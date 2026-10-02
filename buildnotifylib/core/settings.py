@@ -59,6 +59,3 @@ class AppSettings:
 
     def notify(self, event: str) -> bool:
         return self.notifications.get(event, DEFAULT_NOTIFICATIONS[event])
-
-    def server(self, url: str) -> ServerSettings | None:
-        return next((server for server in self.servers if server.url == url), None)

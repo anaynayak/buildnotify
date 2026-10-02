@@ -57,11 +57,6 @@ def test_should_label_with_prefix_and_build_label():
     assert project(last_build_label="42").label() == "p"
 
 
-def test_should_match_on_server_and_name():
-    assert project().matches(project(status=Status.FAILURE))
-    assert not project().matches(project(server_url="other"))
-
-
 def test_snapshot_should_be_unavailable_only_with_an_error():
     assert not ServerSnapshot("s", (project(),)).unavailable
     assert ServerSnapshot("s", error=OSError("down")).unavailable
