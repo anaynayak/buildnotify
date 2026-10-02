@@ -421,3 +421,15 @@ def test_should_restore_the_cctray_authentication_type_after_switching_back(qtbo
     assert dialog.ui.authentication_type.currentIndex() == ServerSettings.AUTH_USERNAME_PASSWORD
     assert not dialog.ui.username.isHidden()
     assert dialog.ui.passwordLabel.text() == "Password"
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("kind", [SourceKind.CCTRAY, SourceKind.GITHUB])
+def test_should_keep_the_mutes_of_an_edited_server(qtbot, kind):
+    server = ServerSettings("http://ci/cc.xml", kind=kind, repository="o/r", muted=True, muted_projects=["api"])
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    edited = dialog.get_server_config()
+
+    assert (edited.muted, edited.muted_projects) == (True, ["api"])

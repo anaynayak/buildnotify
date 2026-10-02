@@ -1,4 +1,5 @@
 import re
+from dataclasses import replace
 from zoneinfo import available_timezones
 
 from PySide6 import QtGui
@@ -217,6 +218,9 @@ class ServerConfigurationDialog(QDialog):
         return self.ui.addServerUrl.text()
 
     def get_server_config(self) -> ServerSettings:
+        return replace(self.source_config(), muted=self.server.muted, muted_projects=list(self.server.muted_projects))
+
+    def source_config(self) -> ServerSettings:
         children = [self.projects_list.child(i) for i in range(self.projects_list.rowCount())]
         excluded_projects = [child.text() for child in children if child.checkState() == Qt.CheckState.Unchecked]
         if self.kind() is SourceKind.GITHUB:
