@@ -1,0 +1,31 @@
+id: io.github.anaynayak.BuildNotify
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+base: io.qt.PySide.BaseApp
+base-version: '6.11'
+command: buildnotify
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Tray icon (StatusNotifierItem), build notifications and the keyring for server passwords.
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.secrets
+cleanup-commands:
+  - /app/cleanup-BaseApp.sh
+modules:
+  # Generated from uv.lock by generate-requirements.py.
+  - python3-requirements.json
+  - name: buildnotify
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-deps --no-index --no-build-isolation --prefix=${FLATPAK_DEST} .
+    sources:
+      # Flathub builds from a release tag: replace with a git source (url, tag, commit).
+      - type: dir
+        path: ../..
+        skip: [.git, .venv, backlog, dist]
