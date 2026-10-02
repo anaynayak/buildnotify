@@ -10,7 +10,7 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.ports import CannotConnect, FetchError
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
-from buildnotifylib.ui.app_menu import AppMenu
+from buildnotifylib.ui.app_menu import MAX_LABEL_CHARS, AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from test.fake_conf import ConfigBuilder
@@ -885,3 +885,34 @@ def test_should_open_a_project_from_the_passing_submenu(mute_menu, mocker):
     action(app_menu.menu.actions()[1].menu(), "success-03").trigger()
 
     browser.assert_called_once_with("http://ci/success-03")
+
+
+LONG = "platform-team >> " + "very-long-folder-name >> " * 6 + "nightly-e2e"
+
+
+@pytest.mark.functional
+def test_should_elide_a_long_label_in_the_middle_and_keep_the_build_time(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI, muted_projects=[LONG]), notifications={"lastBuildTimeForProject": True})
+    built_at = (datetime.now() - timedelta(minutes=18)).strftime("%Y-%m-%dT%H:%M:%S")
+    attrs = {"name": LONG, "lastBuildStatus": "Success", "activity": "Sleeping", "lastBuildTime": built_at}
+
+    app_menu.update([ProjectBuilder(attrs).server(CI).build()])
+
+    row = app_menu.menu.actions()[1]
+    assert row.text().startswith("platform-team >> ")
+    assert row.text().endswith("nightly-e2e, 18m (muted)")
+    assert "\N{HORIZONTAL ELLIPSIS}" in row.text() and len(row.text()) < len(LONG)
+    metrics = app_menu.menu.fontMetrics()
+    label = row.text().removesuffix(", 18m (muted)")
+    assert metrics.horizontalAdvance(label) <= metrics.averageCharWidth() * MAX_LABEL_CHARS
+    assert row.toolTip() == LONG
+    assert app_menu.menu.toolTipsVisible()
+
+
+@pytest.mark.functional
+def test_should_leave_a_short_label_whole(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI))
+
+    app_menu.update([built("api")])
+
+    assert app_menu.menu.actions()[1].text() == "api"

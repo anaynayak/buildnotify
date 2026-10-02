@@ -67,7 +67,7 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 ## Tray Menu
 
 1. Projects are grouped under `Failing`, `Building`, `Passing` and `Unknown` headers, each with a count, such as `Failing (2)`. A section with no projects is left out. A failing project that is building again stays under `Failing`. With more than 15 projects, the passing ones move into a `Passing (N)` submenu, while failing and building projects stay in the menu itself.
-2. Each project is represented with an icon indicating the last build status, followed by how long ago it last built, such as `18m`, `11h` or `3d`.
+2. Each project is represented with an icon indicating the last build status, followed by how long ago it last built, such as `18m`, `11h` or `3d`. A long name loses its middle, as in `platform >> very-lo...nightly-e2e, 11h`, so the job name and the time stay visible. Hover over it to see the whole name.
 3. If the build is still in progress, an activity indicator icon is used to indicate the server activity.
 4. All projects in the configured CI servers contribute to the overall build status which is displayed in the tray.
 5. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time. When every server is down and none has projects from an earlier fetch, it says `Can't reach any server` instead.

@@ -34,6 +34,8 @@ from buildnotifylib.version import VERSION
 
 OVERFLOW = 15
 """Above this many project rows, Passing projects move into a submenu."""
+MAX_LABEL_CHARS = 45
+"""Project labels wider than this many average characters lose their middle, so the job name and time survive."""
 
 
 class AppMenu(QtCore.QObject):
@@ -49,6 +51,7 @@ class AppMenu(QtCore.QObject):
     ):
         super().__init__(widget)
         self.menu = QMenu(widget)
+        self.menu.setToolTipsVisible(True)
         self.store = store
         self.connection = connection
         self.build_icons = build_icons
@@ -78,6 +81,7 @@ class AppMenu(QtCore.QObject):
             target = self.menu
             if section is Section.PASSING and len(projects) > OVERFLOW:
                 target = self.passing_menu = self.menu.addMenu(title)
+                target.setToolTipsVisible(True)
             for project in members:
                 self.create_menu_item(target, project, mutes.mutes(project))
 
@@ -225,17 +229,26 @@ class AppMenu(QtCore.QObject):
         QApplication.quit()
 
     def create_menu_item(self, menu: QMenu, project: Project, muted: bool = False):
-        menu_item_label = project.label(self.store.settings.show_last_build_label)
+        full_label = project.label(self.store.settings.show_last_build_label)
+        shown = elided(menu, full_label)
         build_time = project.build_time
+        suffix = ""
         if self.store.settings.notify("lastBuildTimeForProject") and build_time is not None:
-            menu_item_label = menu_item_label + ", " + humanize.compact(build_time, datetime.now(tz=build_time.tzinfo))
+            suffix = ", " + humanize.compact(build_time, datetime.now(tz=build_time.tzinfo))
         if muted:
-            menu_item_label += " (muted)"
+            suffix += " (muted)"
 
         icon = self.build_icons.for_status(project.get_build_status())
-        action = menu.addAction(icon, menu_item_label)
+        action = menu.addAction(icon, shown + suffix)
         action.setIconVisibleInMenu(True)
         action.triggered.connect(partial(self.open_url, url=project.url))
+        if shown != full_label:
+            action.setToolTip(full_label)
 
     def open_url(self, url: str):
         webbrowser.open(url)
+
+
+def elided(menu: QMenu, label: str) -> str:
+    metrics = menu.fontMetrics()
+    return metrics.elidedText(label, QtCore.Qt.TextElideMode.ElideMiddle, metrics.averageCharWidth() * MAX_LABEL_CHARS)

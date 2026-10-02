@@ -13,6 +13,7 @@
 ### Changed
 - The tray menu groups projects under Failing, Building, Passing and Unknown headers with counts, so the status no longer depends on the icon colour alone. Empty sections are left out
 - With more than 15 projects, passing projects collapse into a `Passing (N)` submenu so the tray menu fits on screen. Failing and building projects stay top level
+- Long project names in the tray menu are shortened in the middle to a fixed width, so the job name and build time are no longer cut off. The tooltip shows the whole name
 - Build times in the tray menu are compact, such as `18m`, `11h` or `3d`, instead of `18 minutes ago`
 - When every server is down and nothing is cached, the tray tooltip says "Can't reach any server" instead of "No failing builds"
 - A server error row in the tray menu reads like `jenkins: can't connect (10:00)`: the server's menu prefix or host, then a short reason such as can't connect, server not found, timed out, sign-in failed, not found, not a cctray feed, certificate not trusted or GitHub rate limit reached. The row is no longer greyed out, and opens a submenu with the full error, a hint, `Retry now` and `Edit server...`
