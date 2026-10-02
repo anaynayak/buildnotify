@@ -11,6 +11,8 @@ from buildnotifylib.core.ports import Connection
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
 
+NO_SERVERS = "No servers configured"
+
 
 class AppUi(QtCore.QObject):
     reload_data = QtCore.Signal()
@@ -22,6 +24,8 @@ class AppUi(QtCore.QObject):
         self.build_icons = build_icons
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None, store.settings.symbolic_icons), self.widget)
         self.tray.show()
+        if not store.settings.servers:
+            self.tray.setToolTip(NO_SERVERS)
         self.app_menu = AppMenu(self.widget, store, self.build_icons, connection)
         self.app_menu.reload_data.connect(self.reload_data)
         self.tray.setContextMenu(self.app_menu.menu)
@@ -40,4 +44,9 @@ class AppUi(QtCore.QObject):
         ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
         self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic))
         self.app_menu.update(integration_status.get_projects(), integration_status.unavailable_servers())
-        self.tray.setToolTip(f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}")
+        self.tray.setToolTip(self.tooltip(integration_status))
+
+    def tooltip(self, integration_status: OverallIntegrationStatus) -> str:
+        if not self.store.settings.servers:
+            return NO_SERVERS
+        return f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}"

@@ -53,7 +53,7 @@ def test_should_set_menu_items_for_projects(qtbot):
 
 @pytest.mark.functional
 def test_should_suffix_build_time(qtbot):
-    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).build()
+    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}).server("someurl").build()
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
@@ -109,7 +109,9 @@ def test_should_show_future_build_time_as_in(qtbot):
 
 @pytest.mark.functional
 def test_should_sort_by_name(qtbot):
-    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME).build()
+    conf = (
+        ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.NAME).server("someurl").build()
+    )
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
@@ -280,7 +282,11 @@ def test_should_consider_prefix_for_sorting(qtbot):
 
 @pytest.mark.functional
 def test_should_show_recent_build_first(qtbot):
-    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.LAST_BUILD_TIME).build()
+    conf = (
+        ConfigBuilder(notifications={"lastBuildTimeForProject": False}, sort_key=SortKey.LAST_BUILD_TIME)
+        .server("someurl")
+        .build()
+    )
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
@@ -335,7 +341,11 @@ def test_should_show_preferences(qtbot, mocker):
 
 @pytest.mark.functional
 def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
-    conf = ConfigBuilder(notifications={"lastBuildTimeForProject": True}, sort_key=SortKey.LAST_BUILD_TIME).build()
+    conf = (
+        ConfigBuilder(notifications={"lastBuildTimeForProject": True}, sort_key=SortKey.LAST_BUILD_TIME)
+        .server("someurl")
+        .build()
+    )
     parent = QWidget()
     app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
     qtbot.addWidget(parent)
@@ -435,7 +445,7 @@ def test_should_tell_preferences_the_keystore_is_unavailable(qtbot, mocker):
 def error_menu(qtbot):
     parent = QWidget()
     qtbot.addWidget(parent)
-    yield AppMenu(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    yield AppMenu(parent, ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
 
 
 @pytest.mark.functional
@@ -547,8 +557,40 @@ def test_should_list_servers_and_projects_to_mute(mute_menu):
 
 
 @pytest.mark.functional
-def test_should_disable_mute_without_servers(mute_menu):
-    assert not submenu(mute_menu()).isEnabled()
+def test_should_show_an_empty_state_without_servers(mute_menu):
+    app_menu = mute_menu()
+
+    app_menu.update([])
+
+    assert texts(app_menu.menu) == ["No servers yet", "Add a server...", "", "About", "Preferences", "Exit"]
+    assert not action(app_menu.menu, "No servers yet").isEnabled()
+
+
+@pytest.mark.functional
+def test_should_add_a_server_from_the_empty_menu(mute_menu, qtbot, mocker):
+    app_menu = mute_menu()
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.return_value = ServerSettings(CI)
+
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
+        action(app_menu.menu, "Add a server...").trigger()
+
+    dialog.assert_called_once_with(None, 10, app_menu.connection, app_menu.menu, keystore_available=True)
+    assert [server.url for server in reopened(app_menu).servers] == [CI]
+    assert "Pause notifications for 1 hour" in texts(app_menu.menu)
+    assert "Add a server..." not in texts(app_menu.menu)
+
+
+@pytest.mark.functional
+def test_should_save_nothing_when_adding_a_server_is_cancelled(mute_menu, qtbot, mocker):
+    app_menu = mute_menu()
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.return_value = None
+
+    with qtbot.assertNotEmitted(app_menu.reload_data):
+        action(app_menu.menu, "Add a server...").trigger()
+
+    assert reopened(app_menu).servers == []
 
 
 @pytest.mark.functional

@@ -14,7 +14,7 @@ from test.utils import FakeConnection, fake_content
 
 @pytest.mark.functional
 def test_should_update_tooltip_on_poll(qtbot):
-    conf = ConfigBuilder().build()
+    conf = ConfigBuilder().server("someurl").build()
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)
     widget = AppUi(parent, conf, BuildIcons(), FakeConnection(fake_content()))
@@ -32,7 +32,7 @@ def test_should_update_tooltip_on_poll(qtbot):
 def test_should_list_failing_projects_in_tooltip(qtbot):
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)
-    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    widget = AppUi(parent, ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
     projects = tuple(
         ProjectBuilder({"name": name, "lastBuildStatus": status, "activity": "Sleeping"}).build()
         for name, status in [("api", "Failure"), ("docs", "Success"), ("web", "Failure")]
@@ -99,3 +99,15 @@ def test_should_pick_tray_icons_from_the_symbolic_icons_setting(qtbot, mocker, s
     widget.update_projects(OverallIntegrationStatus([]))
 
     assert icon.call_args.kwargs["symbolic"] is symbolic
+
+
+@pytest.mark.functional
+def test_should_say_no_servers_are_configured_in_the_tooltip(qtbot):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    assert widget.tray.toolTip() == "No servers configured"
+
+    widget.update_projects(OverallIntegrationStatus([]))
+
+    assert widget.tray.toolTip() == "No servers configured"

@@ -1,5 +1,6 @@
 import webbrowser
 from collections.abc import Callable, Sequence
+from dataclasses import replace
 from datetime import datetime
 from functools import partial
 
@@ -23,9 +24,10 @@ from buildnotifylib.core.mute import (
     toggle_server,
 )
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.settings import AppSettings, SortKey
+from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
+from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.version import VERSION
 
 
@@ -90,12 +92,20 @@ class AppMenu(QtCore.QObject):
         return f"{server_label(server.url)}: {summary} ({when})"
 
     def create_default_menu_items(self):
-        self.menu.addSeparator()
-        self.add_pause_action()
-        self.menu.addMenu(self.create_mute_menu())
+        if self.store.settings.servers:
+            self.menu.addSeparator()
+            self.add_pause_action()
+            self.menu.addMenu(self.create_mute_menu())
+        else:
+            self.add_empty_state()
         self.menu.addAction(QAction("About", self.menu, triggered=self.about_clicked))
         self.menu.addAction(QAction("Preferences", self.menu, triggered=self.preferences_clicked))
         self.menu.addAction(QAction("Exit", self.menu, triggered=self.exit))
+
+    def add_empty_state(self) -> None:
+        self.menu.addAction("No servers yet").setEnabled(False)
+        self.menu.addAction("Add a server...").triggered.connect(self.add_server_clicked)
+        self.menu.addSeparator()
 
     def add_pause_action(self) -> None:
         until = self.store.settings.paused_until
@@ -119,7 +129,6 @@ class AppMenu(QtCore.QObject):
         for project in self.sorted_projects(self.projects):
             muted = key(project) in mutes.projects
             self.add_toggle(menu, project.label(), muted, partial(toggle_project, project=project))
-        menu.setEnabled(bool(settings.servers))
         return menu
 
     def add_toggle(self, menu: QMenu, label: str, checked: bool, toggle: Callable[[AppSettings], AppSettings]):
@@ -152,6 +161,26 @@ class AppMenu(QtCore.QObject):
             # Preferences doesn't edit mutes or the pause, and the tray may have changed them while the dialog was open.
             self.store.save(keep_mutes(settings, self.store.settings))
             self.reload_data.emit()
+
+    def add_server_clicked(self) -> None:
+        server = self.open_server_dialog()
+        settings = self.store.settings
+        if server is None or server.url in [s.url for s in settings.servers]:
+            return
+        self.change(replace(settings, servers=[*settings.servers, server]))
+        self.reload_data.emit()
+
+    def open_server_dialog(self) -> ServerSettings | None:
+        dialog = ServerConfigurationDialog(
+            None,
+            self.store.settings.timeout_seconds,
+            self.connection,
+            self.menu,
+            keystore_available=self.store.keystore.is_available(),
+        )
+        server = dialog.open()
+        dialog.deleteLater()
+        return server
 
     def exit(self, widget: QWidget):
         QApplication.quit()
