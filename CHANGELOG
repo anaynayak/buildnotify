@@ -13,6 +13,7 @@
 
 ### Fixed
 - Saving Preferences no longer cancels a pause set from the tray while the dialog was open
+- Saving Preferences no longer reverts servers or projects muted or unmuted from the tray while the dialog was open
 
 ### Tech
 - `just demo` runs the app against local fixture feeds with throwaway settings and no keychain

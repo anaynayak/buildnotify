@@ -1,6 +1,5 @@
 import webbrowser
 from collections.abc import Callable, Sequence
-from dataclasses import replace
 from datetime import datetime
 from functools import partial
 
@@ -13,7 +12,16 @@ from buildnotifylib.core import humanize
 from buildnotifylib.core.diff import key
 from buildnotifylib.core.errors import server_label, summarize
 from buildnotifylib.core.model import Project, ServerSnapshot
-from buildnotifylib.core.mute import Clock, Mutes, pause, resume, system_clock, toggle_project, toggle_server
+from buildnotifylib.core.mute import (
+    Clock,
+    Mutes,
+    keep_mutes,
+    pause,
+    resume,
+    system_clock,
+    toggle_project,
+    toggle_server,
+)
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.ui.build_icons import BuildIcons
@@ -141,8 +149,8 @@ class AppMenu(QtCore.QObject):
         settings = dialog.open()
         dialog.deleteLater()
         if settings is not None:
-            # Preferences doesn't edit the pause, and the tray may have changed it while the dialog was open.
-            self.store.save(replace(settings, paused_until=self.store.settings.paused_until))
+            # Preferences doesn't edit mutes or the pause, and the tray may have changed them while the dialog was open.
+            self.store.save(keep_mutes(settings, self.store.settings))
             self.reload_data.emit()
 
     def exit(self, widget: QWidget):

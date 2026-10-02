@@ -625,3 +625,24 @@ def test_should_keep_a_pause_set_while_preferences_is_open(mute_menu, mocker):
 
     assert reopened(app_menu).paused_until == NOW + timedelta(hours=1)
     assert reopened(app_menu).interval_seconds == 30
+
+
+@pytest.mark.functional
+def test_should_keep_mutes_toggled_while_preferences_is_open(mute_menu, mocker):
+    app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER))
+    app_menu.update([built("api"), built("web")])
+    snapshot = app_menu.store.settings
+
+    def mute_from_the_tray():
+        action(submenu(app_menu), "other/cc.xml").trigger()
+        action(submenu(app_menu), "api").trigger()
+        action(submenu(app_menu), "web").trigger()
+        return replace(snapshot, interval_seconds=30)
+
+    mocker.patch.object(PreferencesDialog, "open", side_effect=mute_from_the_tray)
+
+    app_menu.preferences_clicked(None)
+
+    servers = reopened(app_menu).servers
+    assert [(s.muted, s.muted_projects) for s in servers] == [(False, ["web"]), (True, [])]
+    assert reopened(app_menu).interval_seconds == 30

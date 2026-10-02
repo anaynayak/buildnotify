@@ -71,3 +71,15 @@ def toggle_project(settings: AppSettings, project: Project) -> AppSettings:
 def with_server(settings: AppSettings, url: str, change: Callable[[ServerSettings], ServerSettings]) -> AppSettings:
     servers = [change(server) if server.url == url else server for server in settings.servers]
     return replace(settings, servers=servers)
+
+
+def keep_mutes(edited: AppSettings, current: AppSettings) -> AppSettings:
+    """Carry the pause and the per-server mutes in `current` over to `edited`, which was built from an older copy."""
+    live = {server.url: server for server in current.servers}
+
+    def keep(server: ServerSettings) -> ServerSettings:
+        if server.url not in live:
+            return server
+        return replace(server, muted=live[server.url].muted, muted_projects=list(live[server.url].muted_projects))
+
+    return replace(edited, servers=[keep(server) for server in edited.servers], paused_until=current.paused_until)
