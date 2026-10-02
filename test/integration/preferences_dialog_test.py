@@ -5,7 +5,7 @@ from PySide6 import QtCore
 from PySide6.QtCore import QItemSelectionModel, Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
-from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, ServerSettings, SortKey
+from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
 from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
 from test.fake_conf import ConfigBuilder
@@ -322,3 +322,28 @@ def test_should_return_the_symbolic_icons_choice(qtbot, mocker):
     dialog.ui.symbolicIconsCheckbox.setChecked(True)
 
     assert dialog.open().symbolic_icons
+
+
+@pytest.mark.functional
+def test_should_keep_the_default_polling_interval(qtbot):
+    dialog = PreferencesDialog(AppSettings(interval_seconds=120), FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    assert dialog.edited_settings().interval_seconds == 120
+
+
+@pytest.mark.functional
+def test_should_offer_polling_intervals_from_10_seconds_to_an_hour(qtbot):
+    dialog = PreferencesDialog(AppSettings(), FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    spin_box = dialog.ui.pollingIntervalSpinBox
+    assert (spin_box.minimum(), spin_box.maximum()) == (10, 3600)
+
+
+@pytest.mark.functional
+def test_should_clamp_a_stored_polling_interval_above_an_hour(qtbot):
+    dialog = PreferencesDialog(AppSettings(interval_seconds=5000), FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    assert dialog.edited_settings().interval_seconds == 3600

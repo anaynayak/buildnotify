@@ -287,10 +287,10 @@
             <string> seconds</string>
            </property>
            <property name="minimum">
-            <number>1</number>
+            <number>10</number>
            </property>
            <property name="maximum">
-            <number>60</number>
+            <number>3600</number>
            </property>
            <property name="singleStep">
             <number>1</number>

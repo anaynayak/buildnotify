@@ -14,6 +14,7 @@
 ### Fixed
 - Saving Preferences no longer cancels a pause set from the tray while the dialog was open
 - Saving Preferences no longer reverts servers or projects muted or unmuted from the tray while the dialog was open
+- Saving Preferences no longer lowers the default 120 s polling interval to 60 s. The interval can be set from 10 seconds to an hour
 
 ### Tech
 - `just demo` runs the app against local fixture feeds with throwaway settings and no keychain

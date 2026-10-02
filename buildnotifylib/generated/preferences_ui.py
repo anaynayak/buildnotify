@@ -187,8 +187,8 @@ class Ui_Preferences(object):
         self.pollingIntervalSpinBox.setMinimumSize(QSize(130, 0))
         self.pollingIntervalSpinBox.setMaximumSize(QSize(130, 16777215))
         self.pollingIntervalSpinBox.setWrapping(False)
-        self.pollingIntervalSpinBox.setMinimum(1)
-        self.pollingIntervalSpinBox.setMaximum(60)
+        self.pollingIntervalSpinBox.setMinimum(10)
+        self.pollingIntervalSpinBox.setMaximum(3600)
         self.pollingIntervalSpinBox.setSingleStep(1)
 
         self.gridLayout_5.addWidget(self.pollingIntervalSpinBox, 4, 1, 1, 1)
