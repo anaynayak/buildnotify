@@ -44,9 +44,9 @@ The status icons are plain SVG files in `buildnotifylib/resources/icons` and shi
 
 ## CI and releases
 
-CI runs lint, format, mypy and the generated UI check, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel and installs it into a clean venv.
+CI runs lint, format, mypy and the generated UI check, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
 
-Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing.
+Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing. The tag must match `VERSION` in `buildnotifylib/version.py`, so `VERSION = "3.0.0"` is released by the tag `v3.0.0`. A mismatch fails the release before anything is built.
 
 ## Flatpak
 
