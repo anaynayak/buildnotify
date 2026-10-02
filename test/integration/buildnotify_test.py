@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget
 
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.buildnotify import BuildNotify
-from buildnotifylib.core.projects import ProjectsPopulator
+from buildnotifylib.projects_populator import ProjectsPopulator
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, fake_content
 

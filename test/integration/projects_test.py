@@ -7,8 +7,9 @@ from PyQt5.QtCore import QThread
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.diff import Change, diff, labels
-from buildnotifylib.core.projects import ProjectLoader, ProjectsPopulator
+from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import AppSettings
+from buildnotifylib.projects_populator import ProjectsPopulator
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, fake_content
 

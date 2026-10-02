@@ -11,9 +11,9 @@ from buildnotifylib.app_ui import AppUi
 from buildnotifylib.build_icons import BuildIcons
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.projects import ProjectsPopulator
 from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 from buildnotifylib.core.timed_event import TimedEvent
+from buildnotifylib.projects_populator import ProjectsPopulator
 
 
 class BuildNotify:
