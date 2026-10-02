@@ -23,6 +23,7 @@ GLOBAL_KEYS = {
     "custom_script_enabled": "notifications/custom_script_enabled",
     "show_last_build_label": "show_last_build_label",
     "symbolic_icons": "tray/symbolic_icons",
+    "server_prompt_shown": "first_run/server_prompt_shown",
 }
 SORT_KEY = "sort_key"
 PAUSED_UNTIL = "notifications/paused_until"

@@ -594,6 +594,37 @@ def test_should_save_nothing_when_adding_a_server_is_cancelled(mute_menu, qtbot,
 
 
 @pytest.mark.functional
+def test_should_open_the_server_dialog_once_on_first_run(mute_menu, mocker):
+    app_menu = mute_menu()
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+    dialog.return_value.open.return_value = None
+
+    app_menu.offer_first_server()
+    app_menu.offer_first_server()
+
+    dialog.assert_called_once()
+    assert reopened(app_menu).server_prompt_shown is True
+
+
+@pytest.mark.functional
+def test_should_not_open_the_server_dialog_on_first_run_once_prompted(mute_menu, mocker):
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+
+    mute_menu(server_prompt_shown=True).offer_first_server()
+
+    dialog.assert_not_called()
+
+
+@pytest.mark.functional
+def test_should_not_open_the_server_dialog_on_first_run_with_servers(mute_menu, mocker):
+    dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")
+
+    mute_menu(ServerSettings(CI)).offer_first_server()
+
+    dialog.assert_not_called()
+
+
+@pytest.mark.functional
 def test_should_mute_a_server_from_the_menu_and_persist_it(mute_menu):
     app_menu = mute_menu(ServerSettings(CI))
     app_menu.update([built("api")])

@@ -162,6 +162,13 @@ class AppMenu(QtCore.QObject):
             self.store.save(keep_mutes(settings, self.store.settings))
             self.reload_data.emit()
 
+    def offer_first_server(self) -> None:
+        settings = self.store.settings
+        if settings.servers or settings.server_prompt_shown:
+            return
+        self.store.save(replace(settings, server_prompt_shown=True))
+        self.add_server_clicked()
+
     def add_server_clicked(self) -> None:
         server = self.open_server_dialog()
         settings = self.store.settings

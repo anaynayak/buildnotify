@@ -140,3 +140,17 @@ def test_should_poll_through_the_injected_connection(qapp, mocker):
     app_notification.assert_called_once_with(b.store, app_ui.return_value.tray, hook)
     assert b.poller.parent() is qapp
     Poller.start.assert_called_once_with()
+
+
+def test_should_offer_a_first_server_once_the_app_runs(qtbot, qapp, mocker):
+    mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
+    app_ui = mocker.patch("buildnotifylib.ui.buildnotify.AppUi")
+    mocker.patch("buildnotifylib.ui.buildnotify.AppNotification")
+    b = BuildNotify(qapp, ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
+    mocker.patch.object(Poller, "start")
+
+    b.run_app()
+
+    offer = app_ui.return_value.app_menu.offer_first_server
+    qtbot.waitUntil(lambda: offer.called)
+    offer.assert_called_once_with()

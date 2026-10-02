@@ -7,6 +7,7 @@
 - Mute a server or a project from the tray menu's `Mute` submenu, or pause all notifications for an hour. Muted projects stay in the menu and the tray count, marked `(muted)`, but get no notifications and don't run the custom script. Mutes and the pause survive a restart
 - Settings move to schema version 5, which adds a muted flag to each server. Existing servers start unmuted
 - With no servers the tray menu says "No servers yet" and offers "Add a server...", which opens the server dialog. Pause and Mute are hidden until a server is configured, and the tooltip says "No servers configured" instead of "No failing builds"
+- On the first launch with no servers, the server dialog opens once. A `first_run/server_prompt_shown` setting stops it opening again
 
 ### Changed
 - The server dialog is a single page with Cancel and Save. Save works without loading the server first, so a server that is down can be added, and all of its projects are included. Load is now Test connection, which shows the project count or a short error next to the button and lists the projects below. Editing a server without testing it keeps its excluded projects. Changing the URL, repository or source type clears the test result and its project list

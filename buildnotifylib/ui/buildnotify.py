@@ -60,6 +60,7 @@ class BuildNotify:
         self.app_ui.reload_data.connect(self.poller.reload)
         self.app_notification = AppNotification(self.store, self.app_ui.tray, self.hook)
         self.poller.start()
+        QTimer.singleShot(0, self.app_ui.app_menu.offer_first_server)
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
         self.app_notification.update_projects(integration_status)

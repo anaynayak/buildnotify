@@ -80,6 +80,7 @@ class AppSettings:
     sort_key: SortKey = SortKey.LAST_BUILD_TIME
     show_last_build_label: bool = False
     symbolic_icons: bool = False
+    server_prompt_shown: bool = False
     notifications: dict[str, bool] = field(default_factory=dict)
     paused_until: datetime | None = None
 

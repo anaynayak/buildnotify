@@ -64,6 +64,7 @@ def full_settings() -> AppSettings:
         sort_key=SortKey.NAME,
         show_last_build_label=True,
         symbolic_icons=True,
+        server_prompt_shown=True,
         notifications={"successfulBuild": True, "brokenBuild": False},
         paused_until=datetime(2026, 10, 2, 13, 30, tzinfo=UTC),
     )
