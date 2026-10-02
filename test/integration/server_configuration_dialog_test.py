@@ -223,3 +223,12 @@ def test_should_keep_saved_skip_ssl_verification_when_editing(qtbot):
     qtbot.addWidget(dialog)
 
     assert dialog.get_server_config().skip_ssl_verification is True
+
+
+@pytest.mark.functional
+def test_should_raise_not_implemented_error_for_unknown_authentication_type(qtbot):
+    dialog = ServerConfigurationDialog(None, ConfigBuilder().build())
+    qtbot.addWidget(dialog)
+
+    with pytest.raises(NotImplementedError):
+        dialog.set_authentication_type(99)

@@ -68,8 +68,8 @@ class ServerConfigurationDialog(QDialog):
             self.ui.passwordLabel.setText('Bearer token')
             self.ui.password.setPlaceholderText("Do not include the 'Bearer' keyword")
         else:
-            raise NotImplemented('Unsupported value: "%s". An implementation is missing.'
-                                 % self.ui.authentication_type.currentText())
+            raise NotImplementedError('Unsupported value: "%s". An implementation is missing.'
+                                      % self.ui.authentication_type.currentText())
 
     def fetch_data(self):
         if '' == self.ui.addServerUrl.text():
