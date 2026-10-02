@@ -4,7 +4,6 @@ from buildnotifylib.core.continous_integration_server import ContinuousIntegrati
 from buildnotifylib.core.projects import OverallIntegrationStatus, ProjectLoader
 from buildnotifylib.serverconfig import ServerConfig
 from .project_builder import ProjectBuilder
-from io import StringIO
 
 
 class OverallIntegrationStatusTest(unittest.TestCase):

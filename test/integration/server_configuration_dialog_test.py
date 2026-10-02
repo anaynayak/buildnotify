@@ -151,8 +151,8 @@ def test_should_fail_for_bad_url(qtbot, mocker):
 @pytest.mark.functional
 @pytest.mark.requireshead
 def test_should_disable_authentication_if_keystore_is_unavailable(qtbot, mocker):
-    m = mocker.patch.object(Keystore, 'is_available',
-                            return_value=False)
+    mocker.patch.object(Keystore, 'is_available',
+                        return_value=False)
     with requests_mock.Mocker() as r:
         url = 'http://localhost:8080/cc.xml'
         r.get(url, text=fake_content())
