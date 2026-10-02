@@ -1,3 +1,4 @@
+import os
 import sys
 
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
@@ -13,6 +14,7 @@ from buildnotifylib.core.repeat_timed_event import RepeatTimedEvent
 
 class BuildNotify(object):
     TRAY_RETRIES = 5
+    EXIT_WAIT_MS = 2000
 
     def __init__(self, app: QApplication, conf=None, interval=2000):
         self.conf = conf if conf is not None else Config()
@@ -59,9 +61,10 @@ class BuildNotify(object):
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
-    def wait_for_workers(self):
-        if hasattr(self, 'projects_populator'):
-            self.projects_populator.wait()
+    def wait_for_workers(self) -> bool:
+        if not hasattr(self, 'projects_populator'):
+            return True
+        return self.projects_populator.wait(self.EXIT_WAIT_MS)
 
     @staticmethod
     def start():
@@ -69,8 +72,11 @@ class BuildNotify(object):
         app.setQuitOnLastWindowClosed(False)
         buildnotify = BuildNotify(app)
         exit_code = buildnotify.app.exec_()
-        buildnotify.wait_for_workers()
-        sys.exit(exit_code)
+        if not buildnotify.wait_for_workers():
+            sys.stdout.flush()
+            os._exit(exit_code)
+        else:
+            sys.exit(exit_code)
 
 
 if __name__ == '__main__':
