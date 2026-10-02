@@ -24,6 +24,8 @@ jobs:
         run: uv run --locked ruff check
       - name: Format
         run: uv run --locked ruff format --check
+      - name: Types
+        run: uv run --locked mypy
       - name: Test
         run: uv run --locked pytest -q
       - name: Test install
