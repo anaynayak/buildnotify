@@ -9,6 +9,9 @@ def rank(project: Project) -> tuple[Status, Activity]:
     return project.status, project.activity
 
 
+SUMMARY_NAMES = 5
+
+
 class OverallIntegrationStatus:
     def __init__(self, servers: Sequence[ServerSnapshot]):
         self.servers = list(servers)
@@ -22,6 +25,14 @@ class OverallIntegrationStatus:
 
     def get_failing_builds(self) -> list[Project]:
         return [project for project in self.get_projects() if project.status is Status.FAILURE]
+
+    def failing_summary(self) -> str:
+        names = [project.label() for project in self.get_failing_builds()]
+        if not names:
+            return "No failing builds"
+        listed = ", ".join(names[:SUMMARY_NAMES])
+        more = f" and {len(names) - SUMMARY_NAMES} more" if len(names) > SUMMARY_NAMES else ""
+        return f"{len(names)} failing: {listed}{more}"
 
     def get_projects(self) -> list[Project]:
         return [project for server in self.servers for project in server.projects]

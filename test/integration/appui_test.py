@@ -25,7 +25,22 @@ def test_should_update_tooltip_on_poll(qtbot):
 
     widget.update_projects(OverallIntegrationStatus(servers))
 
-    assert re.compile(r"Last checked: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d").match(str(widget.tray.toolTip())) is not None
+    assert re.compile(r"Last checked: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d$").search(widget.tray.toolTip()) is not None
+
+
+@pytest.mark.functional
+def test_should_list_failing_projects_in_tooltip(qtbot):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    projects = tuple(
+        ProjectBuilder({"name": name, "lastBuildStatus": status, "activity": "Sleeping"}).build()
+        for name, status in [("api", "Failure"), ("docs", "Success"), ("web", "Failure")]
+    )
+
+    widget.update_projects(OverallIntegrationStatus([ServerSnapshot("someurl", projects)]))
+
+    assert widget.tray.toolTip().splitlines()[0] == "2 failing: api, web"
 
 
 def test_should_hide_tray_when_app_is_quitting(qtbot, qapp):

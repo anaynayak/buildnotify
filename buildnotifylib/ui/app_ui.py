@@ -37,4 +37,4 @@ class AppUi(QtCore.QObject):
         count = len(integration_status.get_failing_builds())
         self.tray.setIcon(self.build_icons.for_aggregate_status(integration_status.get_build_status(), count))
         self.app_menu.update(integration_status.get_projects())
-        self.tray.setToolTip("Last checked: " + strftime("%Y-%m-%d %H:%M:%S"))
+        self.tray.setToolTip(f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}")

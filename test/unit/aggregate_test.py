@@ -109,3 +109,26 @@ def test_overall_status_should_not_depend_on_order(items):
 
 def test_should_have_no_status_without_projects():
     assert aggregate_status([]) is None
+
+
+def test_should_summarise_failing_builds():
+    status = overall_status(("Failure", "Sleeping"), ("Success", "Sleeping"), ("Failure", "Building"))
+
+    assert status.failing_summary() == "2 failing: p0, p2"
+
+
+def test_should_summarise_a_green_board():
+    assert overall_status(("Success", "Sleeping")).failing_summary() == "No failing builds"
+
+
+def test_should_name_failing_builds_with_their_prefix():
+    project = ProjectBuilder({"name": "api", "lastBuildStatus": "Failure", "activity": "Sleeping"}, prefix="go").build()
+    status = OverallIntegrationStatus([ServerSnapshot("someurl", (project,))])
+
+    assert status.failing_summary() == "1 failing: [go] api"
+
+
+def test_should_cap_the_names_in_the_summary():
+    status = overall_status(*[("Failure", "Sleeping")] * 7)
+
+    assert status.failing_summary() == "7 failing: p0, p1, p2, p3, p4 and 2 more"
