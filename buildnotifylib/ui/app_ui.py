@@ -35,6 +35,7 @@ class AppUi(QtCore.QObject):
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
         count = len(integration_status.get_failing_builds())
-        self.tray.setIcon(self.build_icons.for_aggregate_status(integration_status.get_build_status(), count))
+        status = integration_status.get_build_status()
+        self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, self.widget.devicePixelRatio()))
         self.app_menu.update(integration_status.get_projects())
         self.tray.setToolTip(f"{integration_status.failing_summary()}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}")

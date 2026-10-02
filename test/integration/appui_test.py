@@ -62,3 +62,16 @@ def test_should_hand_the_injected_connection_to_the_menu(qtbot):
     widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), connection)
 
     assert widget.app_menu.connection is connection
+
+
+def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    mocker.patch.object(widget.widget, "devicePixelRatio", return_value=2.0)
+    icon = mocker.spy(widget.build_icons, "for_aggregate_status")
+    project = ProjectBuilder({"name": "api", "lastBuildStatus": "Failure", "activity": "Sleeping"}).build()
+
+    widget.update_projects(OverallIntegrationStatus([ServerSnapshot("someurl", (project,))]))
+
+    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0)
