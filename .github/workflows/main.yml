@@ -24,8 +24,6 @@ jobs:
       - name: Types
         run: uv run --locked mypy
 
-  # No Windows job: pyqt5-qt5 5.15.19 (locked) ships no Windows wheels.
-  # Revisit after the PySide6 migration.
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -35,6 +33,8 @@ jobs:
         python: ["3.11", "3.12", "3.13", "3.14"]
         include:
           - os: macos-latest
+            python: "3.14"
+          - os: windows-latest
             python: "3.14"
     env:
       QT_QPA_PLATFORM: offscreen

@@ -1,11 +1,13 @@
 import os
 import subprocess
+import sys
 
 import pytest
 
 from buildnotifylib.adapters.hooks import ShellScriptHook, substitute_placeholders
 
 POPEN = "buildnotifylib.adapters.hooks.subprocess.Popen"
+posix_shell = pytest.mark.skipif(sys.platform == "win32", reason="runs printf in a POSIX shell")
 
 
 def run_and_wait(mocker, script, status, projects):
@@ -37,6 +39,7 @@ def test_should_quote_legacy_placeholders(mocker):
     assert popen.call_args.args[0] == "my-hook 'Broken builds' 'it'\"'\"'s; rm -rf ~'"
 
 
+@posix_shell
 @pytest.mark.parametrize("payload", ["$(touch {m})", "`touch {m}`", "x; touch {m}", "x'; touch {m}; '"])
 def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
     marker = tmp_path / "injected"
@@ -50,6 +53,7 @@ def test_should_not_execute_malicious_project_name(mocker, tmp_path, payload):
     assert output.read_text() == name + name
 
 
+@posix_shell
 @pytest.mark.parametrize("template", ['"#projects#"', "'#projects#'", '"Broken: #projects#"', "'Broken: #projects#'"])
 @pytest.mark.parametrize("payload", ["$(touch {m})", "`touch {m}`", 'x"; touch {m}; "', "x'; touch {m}; '"])
 def test_should_not_execute_malicious_project_name_in_quoted_placeholder(mocker, tmp_path, template, payload):
