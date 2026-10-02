@@ -13,8 +13,9 @@ from test.project_builder import ProjectBuilder
 @pytest.mark.functional
 def test_should_update_tooltip_on_poll(qtbot):
     conf = ConfigBuilder().build()
-    widget = AppUi(QtWidgets.QWidget(), conf, BuildIcons())
-    qtbot.addWidget(widget)
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, conf, BuildIcons())
     project1 = ProjectBuilder({
         'name': 'a',
         'lastBuildStatus': 'Success',
@@ -25,4 +26,4 @@ def test_should_update_tooltip_on_poll(qtbot):
 
     widget.update_projects(OverallIntegrationStatus(servers))
 
-    assert re.compile("Last checked: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d").match(str(widget.tray.toolTip())) is not None
+    assert re.compile(r"Last checked: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d").match(str(widget.tray.toolTip())) is not None
