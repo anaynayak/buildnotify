@@ -192,3 +192,25 @@ def test_request_should_skip_verification_on_request():
         m.get(API, text="{}")
         HttpConnection().request(API, 3, {}, verify=False)
         assert m.last_request.verify is False
+
+
+@pytest.mark.parametrize(
+    "location",
+    ["https://elsewhere.example.com/runs", "http://api.github.com/runs", "https://api.github.com.evil.example/"],
+)
+def test_request_should_drop_the_token_on_a_redirect_to_another_host_or_scheme(location):
+    with requests_mock.Mocker() as m:
+        m.get("https://api.github.com/repos/o/r/actions/runs", status_code=302, headers={"Location": location})
+        m.get(location, json={"workflow_runs": []})
+        HttpConnection().request("https://api.github.com/repos/o/r/actions/runs", 3, {"Authorization": "Bearer secret"})
+        assert m.request_history[0].headers["Authorization"] == "Bearer secret"
+        assert "Authorization" not in m.request_history[1].headers
+
+
+def test_cctray_fetch_should_drop_basic_auth_on_a_redirect_to_another_host():
+    with requests_mock.Mocker() as m:
+        m.get("http://ci.example.com/cc.xml", status_code=302, headers={"Location": "http://other.example.com/cc.xml"})
+        m.get("http://other.example.com/cc.xml", text="<Projects/>")
+        server = ServerSettings("http://ci.example.com/cc.xml", username="user", password="pass")
+        HttpConnection().connect(server, 3)
+        assert "Authorization" not in m.request_history[1].headers
