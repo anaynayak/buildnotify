@@ -221,7 +221,7 @@ class AppMenu(QtCore.QObject):
         menu_item_label = project.label(self.store.settings.show_last_build_label)
         build_time = project.build_time
         if self.store.settings.notify("lastBuildTimeForProject") and build_time is not None:
-            menu_item_label = menu_item_label + ", " + humanize.relative(build_time, datetime.now(tz=build_time.tzinfo))
+            menu_item_label = menu_item_label + ", " + humanize.compact(build_time, datetime.now(tz=build_time.tzinfo))
         if muted:
             menu_item_label += " (muted)"
 

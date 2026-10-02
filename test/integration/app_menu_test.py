@@ -76,7 +76,7 @@ def test_should_suffix_build_time(qtbot):
     app_menu.menu.show()
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
-        "Project 1, 1 year ago",
+        "Project 1, 1y",
         "",
         "Pause notifications for 1 hour",
         "Mute",
@@ -104,7 +104,7 @@ def test_should_show_future_build_time_as_in(qtbot):
 
     app_menu.update([project1])
 
-    assert str(app_menu.menu.actions()[0].text()) == "Project 1, in 5 hours"
+    assert str(app_menu.menu.actions()[0].text()) == "Project 1, in 5h"
 
 
 @pytest.mark.functional
@@ -375,7 +375,7 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
     app_menu.update([broken, recent])
 
     assert [str(a.text()) for a in app_menu.menu.actions()] == [
-        "Recent, 1 minute ago",
+        "Recent, now",
         "Broken",
         "",
         "Pause notifications for 1 hour",

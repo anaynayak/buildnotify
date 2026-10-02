@@ -66,7 +66,7 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 
 ## Tray Menu
 
-1. Each project is represented with an icon indicating the last build status.
+1. Each project is represented with an icon indicating the last build status, followed by how long ago it last built, such as `18m`, `11h` or `3d`.
 2. If the build is still in progress, an activity indicator icon is used to indicate the server activity.
 3. All projects in the configured CI servers contribute to the overall build status which is displayed in the tray.
 4. The tray tooltip lists failing projects, such as `2 failing: api, web`, above the last checked time. When every server is down and none has projects from an earlier fetch, it says `Can't reach any server` instead.
