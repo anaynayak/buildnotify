@@ -21,3 +21,4 @@ reports
 .ruff_cache
 .mypy_cache
 .pytest_cache
+backlog/

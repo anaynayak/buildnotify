@@ -4,7 +4,7 @@ A system tray app (Python 3, PyQt5 today, PySide6 after Phase 4) that polls cctr
 and shows build status and notifications. Library code lives in `buildnotifylib/`, and tests
 live in `test/`.
 
-The work is tracked in Backlog.md (`backlog/`). The full review behind the plan is
+The work is tracked in Backlog.md (`backlog/`, local only and gitignored). The full review behind the plan is
 `docs/modernization-review.html`. It is local only and gitignored, so don't commit it.
 
 ## Commands
@@ -26,7 +26,7 @@ with `QT_QPA_PLATFORM=offscreen`.
    `backlog task edit <id> -s "In Progress"`.
 3. Implement it, and tick each AC with `--check-ac <n>` as it is met.
 4. Close the task with `backlog task edit <id> -s Done --final-summary "<2-4 lines>"`.
-   Commit the task file together with the code that completes it.
+   `backlog/` is gitignored and local only, so never `git add` or commit anything under it.
 5. If you can't finish a task, add a note with `--append-notes` saying what is blocked and why.
    Leave the task In Progress and move on only if the next task doesn't depend on it.
    Things that need the user go in `backlog/docs/user-actions.md`.
