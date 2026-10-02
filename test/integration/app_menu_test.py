@@ -388,4 +388,18 @@ def test_should_pass_the_injected_connection_to_preferences(qtbot, mocker):
 
     app_menu.preferences_clicked(None)
 
-    preferences.assert_called_once_with(conf.settings, connection, app_menu.menu)
+    preferences.assert_called_once_with(conf.settings, connection, app_menu.menu, keystore_available=True)
+
+
+def test_should_tell_preferences_the_keystore_is_unavailable(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    parent = QWidget()
+    qtbot.addWidget(parent)
+    mocker.patch.object(conf.keystore, "is_available", return_value=False)
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
+    preferences = mocker.patch("buildnotifylib.ui.app_menu.PreferencesDialog")
+    preferences.return_value.open.return_value = None
+
+    app_menu.preferences_clicked(None)
+
+    assert preferences.call_args.kwargs == {"keystore_available": False}

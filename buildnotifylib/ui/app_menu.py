@@ -63,7 +63,9 @@ class AppMenu(QtCore.QObject):
         )
 
     def preferences_clicked(self, widget: QWidget):
-        dialog = PreferencesDialog(self.store.settings, self.connection, self.menu)
+        dialog = PreferencesDialog(
+            self.store.settings, self.connection, self.menu, keystore_available=self.store.keystore.is_available()
+        )
         settings = dialog.open()
         dialog.deleteLater()
         if settings is not None:

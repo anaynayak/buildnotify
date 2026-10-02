@@ -141,6 +141,9 @@ class DictKeystore:
     def __init__(self) -> None:
         self.passwords: dict[tuple[str, str], str] = {}
 
+    def is_available(self):
+        return True
+
     def save(self, url, username, password):
         self.passwords[(url, username)] = password
 

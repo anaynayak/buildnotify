@@ -279,7 +279,21 @@ def test_should_open_the_server_dialog_with_the_injected_connection(qtbot, mocke
 
     dialog.add_server()
 
-    server_dialog.assert_called_once_with(None, conf.settings.timeout_seconds, connection, dialog)
+    server_dialog.assert_called_once_with(
+        None, conf.settings.timeout_seconds, connection, dialog, keystore_available=True
+    )
+
+
+def test_should_pass_keystore_availability_to_the_server_dialog(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()), keystore_available=False)
+    qtbot.addWidget(dialog)
+    server_dialog = mocker.patch("buildnotifylib.ui.dialogs.preferences.ServerConfigurationDialog")
+    server_dialog.return_value.open.return_value = None
+
+    dialog.add_server()
+
+    assert server_dialog.call_args.kwargs == {"keystore_available": False}
 
 
 @pytest.mark.functional

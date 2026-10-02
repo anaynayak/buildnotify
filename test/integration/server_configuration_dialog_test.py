@@ -7,7 +7,6 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
 
-from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.settings import ServerSettings
 from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigurationDialog
@@ -141,13 +140,12 @@ def test_should_fail_for_bad_url(qtbot, mocker):
 
 @pytest.mark.functional
 @pytest.mark.requireshead
-def test_should_disable_authentication_if_keystore_is_unavailable(qtbot, mocker):
-    mocker.patch.object(Keystore, "is_available", return_value=False)
+def test_should_disable_authentication_if_keystore_is_unavailable(qtbot):
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
         r.get(url, text=fake_content())
 
-        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
+        dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection(), keystore_available=False)
         dialog.show()
         qtbot.addWidget(dialog)
 

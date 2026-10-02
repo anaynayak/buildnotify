@@ -10,8 +10,15 @@ from buildnotifylib.ui.dialogs.server_configuration_dialog import ServerConfigur
 
 
 class PreferencesDialog(QDialog):
-    def __init__(self, settings: AppSettings, connection: Connection, parent: QWidget | None = None):
+    def __init__(
+        self,
+        settings: AppSettings,
+        connection: Connection,
+        parent: QWidget | None = None,
+        keystore_available: bool = True,
+    ):
         super().__init__(parent)
+        self.keystore_available = keystore_available
         self.settings = settings
         self.connection = connection
         self.servers = {server.url: server for server in settings.servers}
@@ -85,7 +92,9 @@ class PreferencesDialog(QDialog):
         return edited_url != url and edited_url in self.get_urls()
 
     def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
-        dialog = ServerConfigurationDialog(server, self.settings.timeout_seconds, self.connection, self)
+        dialog = ServerConfigurationDialog(
+            server, self.settings.timeout_seconds, self.connection, self, keystore_available=self.keystore_available
+        )
         edited = dialog.open()
         dialog.deleteLater()
         return edited

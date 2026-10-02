@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt, QThreadPool, QTimer, pyqtSignal
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
-from buildnotifylib.adapters.credentials import Keystore
 from buildnotifylib.adapters.http import is_ssl_error
 from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import Connection
@@ -26,6 +25,7 @@ class ServerConfigurationDialog(QDialog):
         timeout: int,
         connection: Connection,
         parent: QWidget | None = None,
+        keystore_available: bool = True,
     ):
         super().__init__(parent)
         self.connection = connection
@@ -59,7 +59,7 @@ class ServerConfigurationDialog(QDialog):
         self.deadline.setSingleShot(True)
         self.deadline.timeout.connect(self.expire)
 
-        if not Keystore.is_available():
+        if not keystore_available:
             self.ui.authenticationSettings.setTitle("Authentication (keyring dependency missing)")
             self.ui.authentication_type.setEnabled(False)
             self.ui.username.setEnabled(False)
