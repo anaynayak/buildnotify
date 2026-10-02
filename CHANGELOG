@@ -10,6 +10,7 @@
 ### Changed
 - The server dialog is titled "Add server" for a new server and "Edit server - <name>" when editing one
 - A feed URL typed without a scheme, such as `ci.example.org/cc.xml`, gets `https://` added instead of an error
+- Server dialog validation errors show under the field instead of in a message box, when the field loses focus or on Load. "Path to cctray.xml" is now "Feed URL", and an empty one says "Enter the feed URL."
 - The failing count on the tray icon is a red badge in the bottom-right corner, so it no longer covers the icon. Counts above 99 show as 99+
 - Bearer and GitHub tokens are stored in the keyring under the username `token` instead of an empty username, which keyring deprecates. Tokens saved by earlier versions are still read, and move to the new entry the next time settings are saved
 

@@ -29,7 +29,7 @@ from buildnotifylib.ui.dialogs.server.auth_form import AuthForm, Credentials
 from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
 from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
 from buildnotifylib.ui.poller import Deadline, Fetch
-from buildnotifylib.ui.widgets.forms import add_row, form_layout, section
+from buildnotifylib.ui.widgets.forms import MessageLabel, add_row, form_layout, section
 
 KINDS = [SourceKind.CCTRAY, SourceKind.GITHUB]
 REPOSITORY = re.compile(r"[\w.-]+/[\w.-]+")
@@ -110,6 +110,9 @@ class ServerConfigurationDialog(QDialog):
         add_row(self.misc, self.tr("Display prefix"), self.prefix)
         self.load_button = QPushButton(self.tr("Load"))
         self.cctray.url.returnPressed.connect(self.load_button.click)
+        for field in (self.cctray.url, self.github.repository):
+            field.editingFinished.connect(self.validate)
+            field.textChanged.connect(self.clear_valid_error)
 
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -173,9 +176,7 @@ class ServerConfigurationDialog(QDialog):
         self.show_kind(index)
 
     def fetch_data(self):
-        error = self.url_error()
-        if error:
-            QMessageBox.critical(self, self.tr("Invalid input"), error)
+        if not self.validate():
             return
 
         self.load_button.setEnabled(False)
@@ -195,13 +196,28 @@ class ServerConfigurationDialog(QDialog):
         error = TimeoutError("no response before the load deadline")
         self.load_data(ServerSnapshot(self.project_loader.server_config.url, error=error))
 
+    def validate(self) -> bool:
+        error = self.url_error()
+        if error:
+            self.source_message().show_error(error)
+        else:
+            self.source_message().clear_message()
+        return error is None
+
+    def clear_valid_error(self) -> None:
+        if self.url_error() is None:
+            self.source_message().clear_message()
+
+    def source_message(self) -> MessageLabel:
+        return self.github.message if self.kind() is SourceKind.GITHUB else self.cctray.message
+
     def url_error(self) -> str | None:
         if self.kind() is SourceKind.GITHUB:
             valid = REPOSITORY.fullmatch(self.github.value().repository)
             return None if valid else self.tr("Enter the repository as owner/name.")
         url = self.cctray.value()
         if "" == url:
-            return self.tr("Path field cannot be empty.")
+            return self.tr("Enter the feed URL.")
         if not url.lower().startswith(("http://", "https://")):
             return self.tr("Only http:// and https:// URLs are supported.")
         return None

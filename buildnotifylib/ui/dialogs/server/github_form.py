@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from PySide6.QtWidgets import QGroupBox, QLineEdit, QWidget
 
-from buildnotifylib.ui.widgets.forms import add_row, form_layout
+from buildnotifylib.ui.widgets.forms import add_message, add_row, form_layout
 
 
 @dataclass(frozen=True)
@@ -23,6 +23,7 @@ class GithubForm(QGroupBox):
         self.branch = self.line_edit(self.tr("All branches"))
         layout = form_layout()
         add_row(layout, self.tr("Repository"), self.repository)
+        self.message = add_message(layout)
         add_row(layout, self.tr("Workflow"), self.workflow)
         add_row(layout, self.tr("Branch"), self.branch)
         self.setLayout(layout)

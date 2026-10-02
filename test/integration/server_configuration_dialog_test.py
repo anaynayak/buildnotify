@@ -131,23 +131,6 @@ def test_should_preload_info(qtbot):
 
 @pytest.mark.functional
 @pytest.mark.requireshead
-def test_should_fail_for_bad_url(qtbot, mocker):
-    url = "file:///badpath"
-    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
-    dialog.show()
-    qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.No)
-
-    qtbot.mouseClick(dialog.load_button, QtCore.Qt.MouseButton.LeftButton)
-
-    def alert_shown():
-        m.assert_called_once_with(dialog, ANY, ANY)
-
-    qtbot.wait_until(alert_shown)
-
-
-@pytest.mark.functional
-@pytest.mark.requireshead
 def test_should_disable_authentication_if_keystore_is_unavailable(qtbot):
     with requests_mock.Mocker() as r:
         url = "http://localhost:8080/cc.xml"
@@ -241,11 +224,13 @@ def test_should_reject_file_urls_with_a_clear_message(qtbot, mocker):
     url = "file:///tmp/cctray.xml"
     dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
+    m = mocker.patch.object(QMessageBox, "critical")
 
     dialog.fetch_data()
 
-    m.assert_called_once_with(dialog, "Invalid input", "Only http:// and https:// URLs are supported.")
+    m.assert_not_called()
+    assert dialog.cctray.message.error
+    assert dialog.cctray.message.text() == "Only http:// and https:// URLs are supported."
     assert dialog.load_button.isEnabled()
     assert not hasattr(dialog, "project_loader")
 
@@ -382,11 +367,13 @@ def test_should_ask_for_an_owner_and_name(qtbot, mocker, repository):
     qtbot.addWidget(dialog)
     dialog.source_kind.setCurrentIndex(1)
     dialog.github.repository.setText(repository)
-    m = mocker.patch.object(QMessageBox, "critical", return_value=QMessageBox.StandardButton.Ok)
+    m = mocker.patch.object(QMessageBox, "critical")
 
     dialog.fetch_data()
 
-    m.assert_called_once_with(dialog, "Invalid input", "Enter the repository as owner/name.")
+    m.assert_not_called()
+    assert dialog.github.message.error
+    assert dialog.github.message.text() == "Enter the repository as owner/name."
 
 
 @pytest.mark.functional
@@ -513,3 +500,25 @@ def test_should_default_a_url_without_a_scheme_to_https(qtbot, typed, url):
     assert dialog.cctray.url.text() == url
     assert dialog.get_server_config().url == url
     assert connection.urls == [url]
+
+
+@pytest.mark.functional
+def test_should_show_an_error_under_an_empty_url_when_it_loses_focus(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    dialog.cctray.url.editingFinished.emit()
+
+    assert not dialog.cctray.message.isHidden()
+    assert dialog.cctray.message.text() == "Enter the feed URL."
+
+
+@pytest.mark.functional
+def test_should_clear_the_url_error_once_the_url_is_valid(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+    dialog.cctray.url.editingFinished.emit()
+
+    dialog.cctray.url.setText("ci.example.org/cc.xml")
+
+    assert dialog.cctray.message.isHidden()
