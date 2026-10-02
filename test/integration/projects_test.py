@@ -70,8 +70,8 @@ def test_should_read_server_configs_on_the_gui_thread(qtbot, mocker, trigger):
 
 def cctray(status):
     return (
-        '<Projects><Project name="proj1" activity="Sleeping" lastBuildStatus="%s" lastBuildLabel="1" '
-        'lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/></Projects>' % status
+        f'<Projects><Project name="proj1" activity="Sleeping" lastBuildStatus="{status}" lastBuildLabel="1" '
+        'lastBuildTime="2009-06-12T06:54:35" webUrl="http://local/url"/></Projects>'
     )
 
 

@@ -80,7 +80,7 @@ class OverallIntegrationStatusTest(unittest.TestCase):
 
 def overall_status(*statuses):
     projects = [
-        ProjectBuilder({"name": "p%d" % i, "lastBuildStatus": status, "activity": activity}).build()
+        ProjectBuilder({"name": f"p{i}", "lastBuildStatus": status, "activity": activity}).build()
         for i, (status, activity) in enumerate(statuses)
     ]
     return OverallIntegrationStatus([ContinuousIntegrationServer("someurl", projects)])

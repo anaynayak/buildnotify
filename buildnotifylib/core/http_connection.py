@@ -6,7 +6,7 @@ from buildnotifylib.version import VERSION
 
 class HttpConnection:
     def __init__(self):
-        self.user_agent = "BuildNotify/%s" % VERSION
+        self.user_agent = f"BuildNotify/{VERSION}"
         self.session = requests.Session()
 
     def connect(self, server: ServerConfig, timeout: float | None, additional_headers: dict[str, str] = None) -> bytes:

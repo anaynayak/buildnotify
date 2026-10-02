@@ -68,7 +68,7 @@ class ServerConfigurationDialog(QDialog):
             self.ui.password.setPlaceholderText("Do not include the 'Bearer' keyword")
         else:
             raise NotImplementedError(
-                'Unsupported value: "%s". An implementation is missing.' % self.ui.authentication_type.currentText()
+                f'Unsupported value: "{self.ui.authentication_type.currentText()}". An implementation is missing.'
             )
 
     def fetch_data(self):
@@ -124,7 +124,7 @@ class ServerConfigurationDialog(QDialog):
             reply = QMessageBox.question(
                 self,
                 "Failed to fetch projects",
-                "<b>SSL error, retry without verification?:</b> %s" % self.qtText(str(response.error)),
+                f"<b>SSL error, retry without verification?:</b> {self.qtText(str(response.error))}",
                 QMessageBox.Yes,
                 QMessageBox.No,
             )
@@ -134,9 +134,7 @@ class ServerConfigurationDialog(QDialog):
             return
 
         if response.failed():
-            QMessageBox.critical(
-                self, "Failed to fetch projects", "<b>Error:</b> %s" % self.qtText(str(response.error))
-            )
+            QMessageBox.critical(self, "Failed to fetch projects", f"<b>Error:</b> {self.qtText(str(response.error))}")
 
     def project_checked(self, item: QStandardItem):
         if item.hasChildren():

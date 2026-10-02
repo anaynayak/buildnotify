@@ -30,7 +30,7 @@ def test_should_send_user_agent_without_platform_details():
     with requests_mock.Mocker() as m:
         m.get("http://localhost:8080/cc.xml", text="content")
         HttpConnection().connect(ServerConfig("localhost:8080/cc.xml", [], "", "", None, None), 3)
-        assert m.last_request.headers["User-Agent"] == "BuildNotify/%s" % VERSION
+        assert m.last_request.headers["User-Agent"] == f"BuildNotify/{VERSION}"
 
 
 def bearer_config(username):

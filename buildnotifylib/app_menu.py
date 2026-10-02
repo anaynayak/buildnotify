@@ -51,10 +51,11 @@ class AppMenu(QtCore.QObject):
     def about_clicked(self, widget: QWidget):
         QMessageBox.about(
             self.menu,
-            "About BuildNotify %s" % VERSION,
-            "<b>BuildNotify %s</b> has been developed using PyQt5 and serves as a build notification tool for cruise control. In case of any suggestions/bugs,"
-            % VERSION
-            + 'please visit <a href="https://git.io/buildnotify">https://git.io/buildnotify</a> and provide your feedback.',
+            f"About BuildNotify {VERSION}",
+            f"<b>BuildNotify {VERSION}</b> has been developed using PyQt5 and serves as a build notification tool "
+            "for cruise control. In case of any suggestions/bugs,"
+            'please visit <a href="https://git.io/buildnotify">https://git.io/buildnotify</a> '
+            "and provide your feedback.",
         )
 
     def preferences_clicked(self, widget: QWidget):

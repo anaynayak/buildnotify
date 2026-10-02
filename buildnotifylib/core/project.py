@@ -30,9 +30,9 @@ class Project:
         label = self.name
 
         if self.prefix:
-            label = "[%s] %s" % (self.prefix, self.name)
+            label = f"[{self.prefix}] {self.name}"
         if show_last_build_label:
-            label = "%s (%s)" % (label, self.last_build_label)
+            label = f"{label} ({self.last_build_label})"
 
         return label
 

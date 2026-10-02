@@ -38,7 +38,7 @@ def test_should_show_configured_urls(qtbot):
 @pytest.mark.functional
 def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
     url = "http://localhost:8080/cc.xml"
-    conf = ConfigBuilder().server(url, {"timezone/%s" % url: "EDT"}).build()
+    conf = ConfigBuilder().server(url, {f"timezone/{url}": "EDT"}).build()
     dialog = ServerConfigurationDialog(url, conf)
     qtbot.addWidget(dialog)
 
@@ -109,8 +109,8 @@ def test_should_preload_info(qtbot):
             .server(
                 url,
                 {
-                    "excludes/%s" % url: ["cleanup-artifacts-B"],
-                    "timezone/%s" % url: "US/Eastern",
+                    f"excludes/{url}": ["cleanup-artifacts-B"],
+                    f"timezone/{url}": "US/Eastern",
                 },
             )
             .build()
@@ -223,7 +223,7 @@ def test_should_read_widgets_on_the_gui_thread_when_fetching(qtbot, mocker):
 @pytest.mark.functional
 def test_should_keep_saved_skip_ssl_verification_when_editing(qtbot):
     url = "https://localhost:8080/cc.xml"
-    conf = ConfigBuilder().server(url, {"skip_ssl_verification/%s" % url: True}).build()
+    conf = ConfigBuilder().server(url, {f"skip_ssl_verification/{url}": True}).build()
     dialog = ServerConfigurationDialog(url, conf)
     qtbot.addWidget(dialog)
 

@@ -21,14 +21,14 @@ class DistanceOfTime:
 
         buckets = [
             (1, "1 minute"),
-            (45, "%s minutes" % distance_in_minutes),
+            (45, f"{distance_in_minutes} minutes"),
             (90, "1 hour"),
-            (1440, "%d hours" % (round(distance_in_minutes / 60.0))),
+            (1440, f"{round(distance_in_minutes / 60.0)} hours"),
             (2880, "1 day"),
-            (43200, "%d days" % (round(distance_in_minutes / 1440))),
+            (43200, f"{round(distance_in_minutes / 1440)} days"),
             (86400, "1 month"),
-            (525600, "%d months" % (round(distance_in_minutes / 43200))),
+            (525600, f"{round(distance_in_minutes / 43200)} months"),
             (1051200, "1 year"),
         ]
-        default_bucket = "over %d years" % (round(distance_in_minutes / 525600))
+        default_bucket = f"over {round(distance_in_minutes / 525600)} years"
         return next((desc for (time, desc) in buckets if distance_in_minutes <= time), default_bucket)

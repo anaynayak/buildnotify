@@ -113,25 +113,25 @@ class ProjectLoader:
         self.connection = connection
 
     def get_data(self) -> Response:
-        print("checking %s" % self.server_config.url)
+        print(f"checking {self.server_config.url}")
         try:
             headers = {}
             if self.server_config.authentication_type == ServerConfig.AUTH_BEARER_TOKEN:
-                headers["Authorization"] = "Bearer %s" % self.server_config.password
+                headers["Authorization"] = f"Bearer {self.server_config.password}"
 
             data = self.connection.connect(self.server_config, self.timeout, headers)
             projects = self.parse(data)
         except Exception as ex:
             print(ex)
             return Response(ContinuousIntegrationServer(self.server_config.url, [], True), ex)
-        print("processed %s" % self.server_config.url)
+        print(f"processed {self.server_config.url}")
         return Response(ContinuousIntegrationServer(self.server_config.url, projects))
 
     def parse(self, data) -> list[Project]:
         dom = minidom.parseString(data)
         root = dom.documentElement.tagName
         if root != "Projects":
-            raise ValueError("Not a cctray feed: expected <Projects> as the root element, got <%s>" % root)
+            raise ValueError(f"Not a cctray feed: expected <Projects> as the root element, got <{root}>")
         projects = []
         for node in dom.getElementsByTagName("Project"):
             projects.append(
