@@ -12,7 +12,7 @@ from buildnotifylib.core.ports import FetchError
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
-from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
+from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 from test.utils import FakeConnection, fake_content

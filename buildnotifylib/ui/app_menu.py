@@ -25,7 +25,7 @@ from buildnotifylib.core.mute import (
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import AppSettings, SortKey
 from buildnotifylib.ui.build_icons import BuildIcons
-from buildnotifylib.ui.dialogs.preferences import PreferencesDialog
+from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from buildnotifylib.version import VERSION
 
 

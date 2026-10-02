@@ -25,7 +25,7 @@ from buildnotifylib.core.model import ServerSnapshot  # noqa: E402
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind  # noqa: E402
 from buildnotifylib.ui import app_menu  # noqa: E402
 from buildnotifylib.ui.build_icons import TRAY_SIZE, BuildIcons  # noqa: E402
-from buildnotifylib.ui.dialogs.preferences import PreferencesDialog  # noqa: E402
+from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog  # noqa: E402
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -99,8 +99,8 @@ def preferences(settings: AppSettings) -> None:
     dialog = PreferencesDialog(settings, HttpConnection())
     dialog.resize(560, 420)
     for index, name in enumerate(["servers.png", "notifications.png", "misc.png"]):
-        dialog.ui.tabWidget.setCurrentIndex(index)
-        dialog.ui.tabWidget.currentWidget().adjustSize()
+        dialog.tabs.setCurrentIndex(index)
+        dialog.tabs.currentWidget().adjustSize()
         dialog.grab().save(str(OUT / name))
         print(f"wrote docs/images/{name}")
 
