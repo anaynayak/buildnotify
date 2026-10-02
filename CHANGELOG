@@ -1,7 +1,61 @@
-## Unreleased
+## [3.0.0] - Unreleased
+
+### Breaking changes
+- Python 3.11 or newer is required
+- PyQt5 is replaced by PySide6 (>= 6.8)
+- Server URLs must use http:// or https://. file:// URLs are rejected in the server dialog, since they could never be fetched
+- Custom script `#status#` and `#projects#` placeholders are now shell-quoted, with quoting that follows the surrounding quotes. Scripts that relied on the raw, unquoted text need updating
+- On Windows a custom script that uses `#status#` or `#projects#` is not run. Use the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables instead
+- Settings move to a versioned layout on first start. 2.x can't read them afterwards
+- Install with `uv tool install buildnotify` or `pipx install buildnotify`. The setuptools, paver, tox and Vagrant files are gone
 
 ### Added
 - Option to show last build label by @Deuchnord
+- `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables for the custom script
+- Automatic migration of 2.x settings, keeping the old keys until the new ones are saved
+- `--settings PATH` to use an INI settings file, and `--debug` to log every fetch
+- Failing projects listed in the tray tooltip
+- Symbolic tray icons that differ by shape, with a preference to turn them on
+- The tray count overlay is sharp on HiDPI screens
+- All servers are polled in parallel
+- User-Agent is `BuildNotify/<version>`, without the OS and kernel version
+
+### Fixed
+- Shell injection through project names in the custom script
+- Crash on non-XML server responses
+- Feeds without a `<Projects>` root are reported as errors instead of showing 0 projects
+- Feeds are parsed with defusedxml
+- Keyring errors no longer crash polling, and the keyring is only touched when credentials are set
+- lastBuildTime parsing with timezone offsets, using zoneinfo
+- Fetches no longer run on the GUI thread when preferences are saved
+- A reload during a fetch triggers a new fetch instead of being dropped
+- The overall status ranks every failure above every success, and Exception counts as a failure
+- New builds are detected by build time as well as label
+- Last known projects are kept while a server is unavailable, and the connectivity back-off resets on recovery
+- A new failing project is notified as broken
+- The custom script text is kept when the script is disabled
+- Server list editing: empty lists are saved, Remove with no selection is ignored, edited URLs update the list, duplicates are rejected, and removed servers lose their settings and keyring entry
+- Added servers are saved only when Preferences is accepted
+- Editing a server keeps its SSL verification setting
+- Bearer authentication sends only the Bearer token
+- The server dialog's Load has a total deadline
+- The SSL retry prompt shows a No button and defaults to No
+- The no-tray message is shown, and startup waits for the tray
+- Quitting goes through the event loop, waits a bounded time for fetch threads and hides the tray icon at once
+- The preferences and server dialogs are deleted after they close
+- Future build times read "in ..." instead of "... ago", and the 30-day boundary is fixed
+
+### Tech
+- pyproject.toml with hatchling, uv and uv.lock
+- ruff for lint and format, mypy in CI with strict typing for core and adapters
+- justfile and pre-commit hooks
+- CI on Python 3.11-3.14 on Linux, plus macOS and Windows
+- PyPI releases from v* tags with trusted publishing
+- Weekly grouped Dependabot updates
+- Pure core model, cctray parser, aggregate, diff, back-off and humanize, with adapters for http, credentials, settings and hooks
+- UI modules generated with pyside6-uic through `just ui` and checked in CI
+- Icons load from package data instead of a Qt resource module
+- Hermetic tests: no real keychain or QSettings
 
 ## [2.1.0] - 2021-01-03
 
