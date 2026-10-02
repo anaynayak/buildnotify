@@ -237,3 +237,17 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
                                                                 "About",
                                                                 "Preferences",
                                                                 "Exit"]
+
+
+@pytest.mark.functional
+def test_should_quit_the_application_on_exit(qtbot, mocker):
+    parent = QWidget()
+    app_menu = AppMenu(parent, ConfigBuilder().build(), BuildIcons())
+    qtbot.addWidget(parent)
+    quit_app = mocker.patch('buildnotifylib.app_menu.QApplication.quit')
+    sys_exit = mocker.patch('sys.exit')
+
+    app_menu.exit(None)
+
+    quit_app.assert_called_once()
+    sys_exit.assert_not_called()

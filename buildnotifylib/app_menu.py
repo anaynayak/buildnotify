@@ -1,11 +1,10 @@
-import sys
 import webbrowser
 from functools import partial
 from typing import List, Callable, Tuple
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox, QAction, QMenu, QWidget
+from PyQt5.QtWidgets import QMessageBox, QAction, QMenu, QWidget, QApplication
 from buildnotifylib.core.project import Project
 
 from buildnotifylib.build_icons import BuildIcons
@@ -64,7 +63,7 @@ class AppMenu(QtCore.QObject):
             self.reload_data.emit()
 
     def exit(self, widget: QWidget):
-        sys.exit()
+        QApplication.quit()
 
     def create_menu_item(self, project: Project, icon: QIcon):
         menu_item_label = project.label(self.conf.get_show_last_build_label())

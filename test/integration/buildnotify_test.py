@@ -71,3 +71,31 @@ def test_should_run_app_once_when_tray_is_available(mocker):
         b.delayed_start(count)
 
     run_app.assert_called_once()
+
+
+def test_should_wait_for_workers_after_the_event_loop_ends(mocker):
+    calls = mocker.MagicMock()
+    app = calls.app
+    app.exec_.return_value = 3
+    mocker.patch('buildnotifylib.buildnotify.QApplication', return_value=app)
+    b = mocker.MagicMock()
+    b.app = app
+    b.wait_for_workers = calls.wait_for_workers
+    mocker.patch('buildnotifylib.buildnotify.BuildNotify', return_value=b)
+    sys_exit = mocker.patch('sys.exit')
+
+    BuildNotify.start()
+
+    assert calls.mock_calls[-2:] == [mocker.call.app.exec_(), mocker.call.wait_for_workers()]
+    sys_exit.assert_called_once_with(3)
+
+
+def test_should_wait_for_the_populator_thread(mocker):
+    mocker.patch('buildnotifylib.buildnotify.QSystemTrayIcon.isSystemTrayAvailable', return_value=False)
+    b = BuildNotify(mocker.MagicMock(), ConfigBuilder().build(), 60000)
+    b.wait_for_workers()
+    b.projects_populator = mocker.MagicMock()
+
+    b.wait_for_workers()
+
+    b.projects_populator.wait.assert_called_once()

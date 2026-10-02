@@ -59,12 +59,18 @@ class BuildNotify(object):
         self.timed_event.set_interval(self.conf.get_interval_in_millis())
         self.timed_event.start()
 
+    def wait_for_workers(self):
+        if hasattr(self, 'projects_populator'):
+            self.projects_populator.wait()
+
     @staticmethod
     def start():
         app = QApplication(sys.argv)
         app.setQuitOnLastWindowClosed(False)
         buildnotify = BuildNotify(app)
-        sys.exit(buildnotify.app.exec_())
+        exit_code = buildnotify.app.exec_()
+        buildnotify.wait_for_workers()
+        sys.exit(exit_code)
 
 
 if __name__ == '__main__':
