@@ -884,3 +884,66 @@ def test_should_name_the_package_to_install_when_there_is_no_keyring(qtbot):
     assert dialog.auth.message.isVisible()
     assert "can't be stored" in dialog.auth.message.text()
     assert "'keyring'" in dialog.auth.message.text()
+
+
+def accepted_certificate_dialog(qtbot, mocker, m, url="https://localhost:8080/cc.xml"):
+    m.get(url, [{"exc": requests.exceptions.SSLError("bad-certificate")}, {"text": fake_content()}])
+    dialog = ServerConfigurationDialog(ServerSettings(url), TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+    question = mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.projects_loaded)
+    return dialog, question
+
+
+@pytest.mark.functional
+def test_should_word_the_certificate_prompt_for_the_host(qtbot, mocker):
+    with requests_mock.Mocker() as m:
+        _, question = accepted_certificate_dialog(qtbot, mocker, m)
+
+    text = question.call_args.args[2]
+    assert "certificate for localhost:8080 isn't trusted" in text
+    assert "Connect anyway?" in text
+    assert "turns off certificate checks for this server" in text
+
+
+@pytest.mark.functional
+def test_should_show_that_certificate_checks_are_off_after_accepting(qtbot, mocker):
+    with requests_mock.Mocker() as m:
+        dialog, _ = accepted_certificate_dialog(qtbot, mocker, m)
+
+    assert not dialog.certificate_status.isHidden()
+    assert dialog.certificate_status.text() == "Certificate checks off for localhost:8080"
+    assert not dialog.certificate_undo.isHidden()
+
+
+@pytest.mark.functional
+def test_should_hide_the_certificate_indicator_when_checks_are_on(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.certificate_status.isHidden()
+    assert dialog.certificate_undo.isHidden()
+
+
+@pytest.mark.functional
+def test_should_undo_the_certificate_skip_from_the_indicator(qtbot, mocker):
+    with requests_mock.Mocker() as m:
+        dialog, _ = accepted_certificate_dialog(qtbot, mocker, m)
+
+    dialog.certificate_undo.click()
+
+    assert dialog.get_server_config().skip_ssl_verification is False
+    assert dialog.certificate_status.isHidden()
+    assert dialog.certificate_undo.isHidden()
+
+
+@pytest.mark.functional
+def test_should_show_the_indicator_for_a_stored_certificate_skip(qtbot):
+    url = "https://localhost:8080/cc.xml"
+    dialog = ServerConfigurationDialog(ServerSettings(url, skip_ssl_verification=True), TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert not dialog.certificate_status.isHidden()
+    dialog.cctray.url.setText("https://other.example.org/cc.xml")
+    assert dialog.certificate_status.isHidden()

@@ -53,9 +53,11 @@ class ServerConfigurationDialog(QDialog):
     ):
         super().__init__(parent)
         self.connection = connection
+        self.unverified_host: str | None = None
         layout = QVBoxLayout(self)
         layout.addWidget(self.source_section())
         layout.addLayout(self.test_row())
+        layout.addLayout(self.certificate_row())
         layout.addWidget(self.projects_section())
         layout.addWidget(self.buttons())
 
@@ -85,6 +87,7 @@ class ServerConfigurationDialog(QDialog):
         self.show_kind(self.source_kind.currentIndex())
         self.refresh_validity()
         self.unverified_host = self.source_host() if self.server.skip_ssl_verification else None
+        self.refresh_certificate_row()
 
     def source_section(self) -> QWidget:
         self.source_kind = QComboBox()
@@ -104,6 +107,7 @@ class ServerConfigurationDialog(QDialog):
             field.editingFinished.connect(self.validate)
             field.textChanged.connect(self.refresh_validity)
             field.textChanged.connect(self.forget_test)
+            field.textChanged.connect(self.refresh_certificate_row)
 
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -122,6 +126,31 @@ class ServerConfigurationDialog(QDialog):
         row.addWidget(self.test_status, 1)
         row.addStretch()
         return row
+
+    def certificate_row(self) -> QHBoxLayout:
+        self.certificate_status = MessageLabel()
+        self.certificate_undo = QPushButton(self.tr("Turn checks back on"))
+        self.certificate_undo.setAutoDefault(False)
+        self.certificate_undo.clicked.connect(self.restore_certificate_checks)
+        row = QHBoxLayout()
+        row.addWidget(self.certificate_status, 1)
+        row.addWidget(self.certificate_undo)
+        return row
+
+    def refresh_certificate_row(self) -> None:
+        unchecked = self.unverified_host is not None and self.skip_ssl_verification()
+        if unchecked:
+            self.certificate_status.show_error(
+                self.tr("Certificate checks off for {}").format(self.source_host())
+            )
+        else:
+            self.certificate_status.clear_message()
+        self.certificate_undo.setVisible(unchecked)
+
+    def restore_certificate_checks(self) -> None:
+        self.unverified_host = None
+        self.refresh_certificate_row()
+        self.forget_test()
 
     def projects_section(self) -> QWidget:
         self.projects_view = QTreeView()
@@ -323,13 +352,17 @@ class ServerConfigurationDialog(QDialog):
         self.test_status.show_error(summarize(error))
         if isinstance(error, CertificateError) and self.retry_without_verification(error):
             self.unverified_host = self.source_host()
+            self.refresh_certificate_row()
             self.fetch_data()
 
     def retry_without_verification(self, error: Exception) -> bool:
         reply = QMessageBox.question(
             self,
             self.tr("Failed to fetch projects"),
-            self.tr("<b>SSL error, retry without verification?:</b> {}").format(self.qtText(str(error))),
+            self.tr(
+                "<b>The certificate for {} isn't trusted.</b> Connect anyway?"
+                " This turns off certificate checks for this server.<br>{}"
+            ).format(self.source_host(), self.qtText(str(error))),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
