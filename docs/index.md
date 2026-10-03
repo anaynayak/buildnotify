@@ -1,10 +1,9 @@
 # BuildNotify
 
-[![PyPI](https://img.shields.io/pypi/v/buildnotify.svg?maxAge=86400)](https://pypi.org/project/buildnotify/)
-[![PyPI](https://img.shields.io/pypi/l/Buildnotify.svg)](https://github.com/anaynayak/buildnotify/blob/main/LICENSE)
-[![PyPI status](https://img.shields.io/pypi/status/buildnotify.svg)](https://pypi.org/project/buildnotify/)
+[![PyPI version](https://img.shields.io/pypi/v/buildnotify.svg)](https://pypi.org/project/buildnotify/)
+[![MIT licence](https://img.shields.io/github/license/anaynayak/buildnotify.svg)](https://github.com/anaynayak/buildnotify/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/anaynayak/buildnotify.svg)](https://github.com/anaynayak/buildnotify/issues)
-[![CI](https://github.com/anaynayak/buildnotify/actions/workflows/main.yml/badge.svg)](https://github.com/anaynayak/buildnotify/actions/workflows/main.yml)
+[![CI status](https://github.com/anaynayak/buildnotify/actions/workflows/main.yml/badge.svg)](https://github.com/anaynayak/buildnotify/actions/workflows/main.yml)
 
 BuildNotify is a CCMenu/CCTray equivalent for Linux, macOS and Windows. It resides in your system tray and notifies you of the build status for different projects on your continuous integration servers. BuildNotify is largely inspired from the awesome CCMenu available for Mac.
 
