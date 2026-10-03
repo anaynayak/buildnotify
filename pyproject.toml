@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "System tray build monitor for cctray.xml feeds and GitHub Actions, on Linux, macOS and Windows"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "GPL-3.0-only"
+license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Anay Nayak", email = "anayak007@gmail.com" }]
 keywords = ["cctray", "ccmenu", "buildnotify", "ubuntu", "linux", "cruisecontrol", "continuous integration", "ci", "github actions"]

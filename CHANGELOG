@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Fixed
+- Declare the licence as MIT. LICENSE has always contained the MIT text, but its heading and the 3.0.0 package metadata said GPL v3.
+
 ### Security
 - Fuzzing of the cctray and GitHub runs parsers with ClusterFuzzLite
 - CodeQL analysis of the Python code
