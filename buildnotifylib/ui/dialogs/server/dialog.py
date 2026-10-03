@@ -129,17 +129,21 @@ class ServerConfigurationDialog(QDialog):
         self.projects_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.projects_view.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.projects_view.setHeaderHidden(True)
+        self.projects_view.setTextElideMode(Qt.TextElideMode.ElideMiddle)
         self.projects_filter = QLineEdit()
         self.projects_filter.setPlaceholderText(self.tr("Filter projects"))
         self.projects_filter.setClearButtonEnabled(True)
         self.projects_filter.textChanged.connect(self.apply_filter)
-        self.show_picker(False)
         self.projects_hint = MessageLabel()
         self.projects_hint.show_hint(self.tr("All projects are included. Test the connection to choose projects."))
         layout = QVBoxLayout()
         layout.addWidget(self.projects_hint)
         layout.addWidget(self.projects_filter)
         layout.addWidget(self.projects_view)
+        self.projects_note = MessageLabel()
+        self.projects_note.show_hint(self.tr("New projects in this feed are included automatically."))
+        layout.addWidget(self.projects_note)
+        self.show_picker(False)
         return section(self.tr("Projects"), layout)
 
     def buttons(self) -> QDialogButtonBox:
@@ -271,11 +275,12 @@ class ServerConfigurationDialog(QDialog):
     def show_projects(self, response: ServerSnapshot) -> None:
         projects_model = QtGui.QStandardItemModel()
         projects_model.itemChanged.connect(self.project_checked)
-        self.projects_list = QtGui.QStandardItem(self.tr("All"))
+        self.projects_list = QtGui.QStandardItem()
         self.projects_list.setCheckable(True)
         for project in response.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
+            item.setToolTip(project.name)
             check = Qt.CheckState.Unchecked if project.name in self.server.excluded_projects else Qt.CheckState.Checked
             item.setCheckState(check)
             self.projects_list.appendRow(item)
@@ -292,9 +297,16 @@ class ServerConfigurationDialog(QDialog):
         self.show_picker(True)
         self.apply_filter()
 
+    def header(self) -> str:
+        total = self.projects_list.rowCount()
+        children = (self.projects_list.child(row, 0) for row in range(total))
+        included = sum(1 for child in children if child.checkState() == Qt.CheckState.Checked)
+        return self.tr("All ({} of {})").format(included, total)
+
     def show_picker(self, visible: bool) -> None:
         self.projects_view.setVisible(visible)
         self.projects_filter.setVisible(visible)
+        self.projects_note.setVisible(visible)
 
     def apply_filter(self) -> None:
         needle = self.projects_filter.text().strip().lower()
@@ -351,6 +363,7 @@ class ServerConfigurationDialog(QDialog):
         else:
             state = Qt.CheckState.PartiallyChecked
         self.projects_list.setCheckState(state)
+        self.projects_list.setText(self.header())
 
     def server_url(self) -> str:
         return self.cctray.value()

@@ -797,3 +797,28 @@ def test_should_toggle_only_the_visible_projects(qtbot):
 
     assert dialog.excluded_projects() == ["orbit-I", "orbit-M", "orbit-R", "orbit-S"]
     assert dialog.projects_list.checkState() == Qt.CheckState.PartiallyChecked
+
+
+@pytest.mark.functional
+def test_should_count_the_included_projects_in_the_header(qtbot):
+    dialog = picker_dialog(qtbot, ["orbit-I", "orbit-M"])
+    assert dialog.projects_list.text() == "All (5 of 7)"
+
+    dialog.projects_list.setCheckState(Qt.CheckState.Checked)
+    assert dialog.projects_list.text() == "All (7 of 7)"
+
+
+@pytest.mark.functional
+def test_should_say_that_new_projects_are_included(qtbot):
+    dialog = picker_dialog(qtbot)
+
+    assert not dialog.projects_note.isHidden()
+    assert "new projects" in dialog.projects_note.text().lower()
+
+
+@pytest.mark.functional
+def test_should_show_the_full_name_as_a_tooltip(qtbot):
+    dialog = picker_dialog(qtbot)
+
+    assert dialog.projects_list.child(2).toolTip() == "ganymaticPack»R3.0-I"
+    assert dialog.projects_view.textElideMode() == Qt.TextElideMode.ElideMiddle
