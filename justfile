@@ -22,6 +22,10 @@ fmt:
 types:
     uv run --locked mypy
 
+# Regenerate the hashed requirements for the fuzz build, pinned to uv.lock versions
+fuzz-reqs:
+    uv export --no-dev --no-emit-project --no-hashes --no-header --no-annotate | uv pip compile .clusterfuzzlite/requirements.in -c /dev/stdin --generate-hashes --no-header --no-annotate -o .clusterfuzzlite/requirements.txt -q
+
 # Build the sdist and wheel into dist/
 build:
     uv build

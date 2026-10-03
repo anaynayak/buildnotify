@@ -23,6 +23,10 @@ jobs:
         run: uv run --locked ruff format --check
       - name: Types
         run: uv run --locked mypy
+      - name: Fuzz requirements are up to date
+        run: |
+          uv export --no-dev --no-emit-project --no-hashes --no-header --no-annotate | uv pip compile .clusterfuzzlite/requirements.in -c /dev/stdin --generate-hashes --no-header --no-annotate -o .clusterfuzzlite/requirements.txt -q
+          git diff --exit-code .clusterfuzzlite/requirements.txt
 
   reproducible:
     runs-on: ubuntu-latest
