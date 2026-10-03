@@ -724,3 +724,49 @@ def test_should_drop_a_running_test_once_the_dialog_closes(qtbot):
     qtbot.wait(50)
 
     assert not dialog.projects_loaded
+
+
+def picker_dialog(qtbot, excluded=()):
+    dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS, list(excluded)), TIMEOUT, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    dialog.fetch_data()
+    qtbot.waitUntil(lambda: dialog.projects_loaded)
+    return dialog
+
+
+def child_states(dialog):
+    root = dialog.projects_list
+    return [root.child(i).checkState() for i in range(root.rowCount())]
+
+
+@pytest.mark.functional
+def test_should_reflect_the_children_in_the_all_box(qtbot):
+    dialog = picker_dialog(qtbot)
+    assert dialog.projects_list.checkState() == Qt.CheckState.Checked
+
+    dialog.projects_list.child(1).setCheckState(Qt.CheckState.Unchecked)
+    assert dialog.projects_list.checkState() == Qt.CheckState.PartiallyChecked
+
+    for i in range(dialog.projects_list.rowCount()):
+        dialog.projects_list.child(i).setCheckState(Qt.CheckState.Unchecked)
+    assert dialog.projects_list.checkState() == Qt.CheckState.Unchecked
+
+
+@pytest.mark.functional
+def test_should_start_partially_checked_when_some_are_excluded(qtbot):
+    dialog = picker_dialog(qtbot, ["orbit-I"])
+
+    assert dialog.projects_list.checkState() == Qt.CheckState.PartiallyChecked
+
+
+@pytest.mark.functional
+def test_should_set_every_child_when_all_is_toggled(qtbot):
+    dialog = picker_dialog(qtbot, ["orbit-I"])
+
+    dialog.projects_list.setCheckState(Qt.CheckState.Checked)
+    assert set(child_states(dialog)) == {Qt.CheckState.Checked}
+    assert dialog.excluded_projects() == []
+
+    dialog.projects_list.setCheckState(Qt.CheckState.Unchecked)
+    assert set(child_states(dialog)) == {Qt.CheckState.Unchecked}
+    assert len(dialog.excluded_projects()) == 7

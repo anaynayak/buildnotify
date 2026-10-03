@@ -62,6 +62,7 @@ class ServerConfigurationDialog(QDialog):
         self.timeout = timeout
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
         self.projects_loaded = False
+        self.syncing = False
         self.loads = QThreadPool.globalInstance()
         self.deadline = Deadline(self, self.expire)
         self.timezone.addItems([NONE_TIMEZONE, *sorted(available_timezones())])
@@ -267,6 +268,7 @@ class ServerConfigurationDialog(QDialog):
         projects_model.itemChanged.connect(self.project_checked)
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
         self.projects_list.setCheckable(True)
+        self.projects_list.setUserTristate(True)
         for project in response.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
@@ -274,6 +276,9 @@ class ServerConfigurationDialog(QDialog):
             item.setCheckState(check)
             self.projects_list.appendRow(item)
         projects_model.appendRow(self.projects_list)
+        self.syncing = True
+        self.sync_all_box()
+        self.syncing = False
         self.projects_view.setModel(projects_model)
         self.projects_view.expandToDepth(1)
         self.projects_view.setItemsExpandable(False)
@@ -304,9 +309,32 @@ class ServerConfigurationDialog(QDialog):
         return reply == QMessageBox.StandardButton.Yes
 
     def project_checked(self, item: QStandardItem):
-        if item.hasChildren():
-            for index in range(item.rowCount()):
-                item.child(index, 0).setCheckState(item.checkState())
+        if self.syncing:
+            return
+        self.syncing = True
+        try:
+            if item is self.projects_list:
+                self.check_visible(item.checkState())
+            self.sync_all_box()
+        finally:
+            self.syncing = False
+
+    def check_visible(self, state: Qt.CheckState) -> None:
+        if state == Qt.CheckState.PartiallyChecked:
+            return
+        for row in range(self.projects_list.rowCount()):
+            if not self.projects_view.isRowHidden(row, self.projects_list.index()):
+                self.projects_list.child(row, 0).setCheckState(state)
+
+    def sync_all_box(self) -> None:
+        states = {self.projects_list.child(row, 0).checkState() for row in range(self.projects_list.rowCount())}
+        if states == {Qt.CheckState.Checked}:
+            state = Qt.CheckState.Checked
+        elif states <= {Qt.CheckState.Unchecked}:
+            state = Qt.CheckState.Unchecked
+        else:
+            state = Qt.CheckState.PartiallyChecked
+        self.projects_list.setCheckState(state)
 
     def server_url(self) -> str:
         return self.cctray.value()
