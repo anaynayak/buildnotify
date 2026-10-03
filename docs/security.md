@@ -4,9 +4,9 @@
 
 Passwords and tokens go in the system keyring (Keychain on macOS, Credential Manager on Windows, a Secret Service provider such as GNOME Keyring or KWallet on Linux), through the `keyring` package. Each server has one entry. The service name is the server URL, and the user name is the one you typed, or `token` for a Bearer token.
 
-The settings file never holds a password or token. It holds the server URL, your user name, the project filters and the other options listed in the Reference. It also records whether certificate checks are off for a server.
+The settings file never holds a password or token. It holds the server URL, your user name, the project filters and the other options listed in the [Reference](reference.md#settings-file-location). It also records whether certificate checks are off for a server.
 
-Without a working keyring the server dialog disables the sign-in fields and says so. See Troubleshooting.
+Without a working keyring the server dialog disables the sign-in fields and says so. See [Troubleshooting](troubleshooting.md#the-keyring-is-missing-or-locked).
 
 ## What goes over the network
 
@@ -27,7 +27,7 @@ The custom script is yours. BuildNotify runs it with your privileges, and whatev
 
 ## Certificate checks
 
-Certificates are checked by default. If a server's certificate isn't trusted, the server dialog asks whether to connect anyway. Accepting turns checks off for that server only, shows `Certificate checks off for <host>` in the dialog, and offers a button to turn them back on. See Troubleshooting.
+Certificates are checked by default. If a server's certificate isn't trusted, the server dialog asks whether to connect anyway. Accepting turns checks off for that server only, shows `Certificate checks off for <host>` in the dialog, and offers a button to turn them back on. See [Troubleshooting](troubleshooting.md#certificate-not-trusted).
 
 ## Verifying a release
 
@@ -47,7 +47,7 @@ gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildn
 1. PyPI shows the PEP 740 attestation of each file under "Provenance" on the file's page.
 2. Each release and nightly has a `buildnotify-<version>.intoto.jsonl` asset with the provenance bundle, one JSON bundle per line.
 3. Nightly wheels and sdists have build provenance, so the first command works for them. They have no SBOM.
-4. Builds are reproducible. Check out the tag, run `just repro` and compare the hashes with the ones on PyPI. See Contributing.
+4. Builds are reproducible. Check out the tag, run `just repro` and compare the hashes with the ones on PyPI. See [Contributing](contributing.md).
 
 ## Reporting a vulnerability
 
