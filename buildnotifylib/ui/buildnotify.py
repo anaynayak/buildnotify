@@ -1,8 +1,11 @@
+import os
+
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.no_tray_message import no_tray_message
 from buildnotifylib.core.ports import Connection, Hook
 from buildnotifylib.ui.app_notification import AppNotification
 from buildnotifylib.ui.app_ui import AppUi
@@ -46,7 +49,7 @@ class BuildNotify:
             return
         if not QSystemTrayIcon.isSystemTrayAvailable():
             if event_count == self.TRAY_RETRIES - 1:
-                QMessageBox.critical(None, "BuildNotify", "I couldn't detect any system tray on this system.")
+                QMessageBox.critical(None, "BuildNotify", no_tray_message(os.environ.get("XDG_CURRENT_DESKTOP")))
                 self.app.exit(1)
             return
         self.ready = True

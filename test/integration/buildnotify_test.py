@@ -41,7 +41,8 @@ def test_should_consolidate_build_status(qtbot, mocker):
         qtbot.waitUntil(projects_loaded)
 
 
-def no_tray_app(mocker):
+def no_tray_app(mocker, desktop="GNOME"):
+    mocker.patch.dict("os.environ", {"XDG_CURRENT_DESKTOP": desktop})
     mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
     critical = mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.critical")
     app = mocker.MagicMock()
@@ -68,8 +69,18 @@ def test_should_show_no_tray_message_and_exit_after_last_retry(mocker):
         b.delayed_start(count)
 
     critical.assert_called_once()
+    assert "BuildNotify needs a system tray." in critical.call_args.args[2]
     app.exit.assert_called_once_with(1)
     run_app.assert_not_called()
+
+
+def test_should_name_the_appindicator_extension_on_gnome_in_the_dialog(mocker):
+    b, app, critical, run_app = no_tray_app(mocker, "ubuntu:GNOME")
+
+    for count in range(5):
+        b.delayed_start(count)
+
+    assert "AppIndicator" in critical.call_args.args[2]
 
 
 @pytest.mark.functional
