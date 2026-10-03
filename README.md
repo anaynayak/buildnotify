@@ -36,6 +36,16 @@ uvx buildnotify
 
 The Ubuntu and Debian packages are pretty old, so use the PyPI package to get the latest release. See the [installation page](https://anaynayak.github.io/buildnotify/installation.html) for requirements and the GNOME tray note.
 
+## Verifying a release
+
+Releases are built by GitHub Actions from a tag and published to PyPI with trusted publishing. Each file has build provenance and SBOM attestations. After downloading the wheel, check it with the [GitHub CLI](https://cli.github.com/):
+
+```sh
+gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildnotify
+```
+
+PyPI also lists the PEP 740 attestation for each file. See [Development](DEVELOPMENT.md#verifying-a-release) for the SBOM check and reproducible builds.
+
 ## Command line options
 
 1. `--settings PATH` reads and writes settings in this INI file instead of the default location.

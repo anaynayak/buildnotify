@@ -12,6 +12,8 @@ just lint          # ruff check + ruff format --check
 just fmt           # ruff fixes + formatting
 just types         # mypy
 just build         # sdist + wheel into dist/
+just repro         # build twice from the same commit and compare sha256
+just sbom          # CycloneDX SBOM of the runtime dependencies into sbom.cdx.json
 just demo          # run the app against local fixture feeds; pass app args, e.g. just demo --debug
 just screenshots   # render docs/images offscreen from fixture data
 ```
@@ -39,6 +41,27 @@ The status icons are plain SVG files in `buildnotifylib/resources/icons` and shi
 CI runs lint, format and mypy, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
 
 Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing. The tag must match `VERSION` in `buildnotifylib/version.py`, so `VERSION = "3.0.0"` is released by the tag `v3.0.0`. A mismatch fails the release before anything is built.
+
+The release build also:
+
+1. Sets `SOURCE_DATE_EPOCH` to the commit time (`git log -1 --format=%ct`), so the same commit gives the same sdist and wheel. CI runs `scripts/repro-check.sh` (`just repro`) to build twice and compare sha256.
+2. Writes a CycloneDX SBOM of the runtime dependencies from `uv.lock` with `uv export --format cyclonedx1.5`, and uploads it as the `sbom` artifact.
+3. Attests build provenance for `dist/*` with `actions/attest-build-provenance`, and attests the SBOM against the same files with `actions/attest-sbom`.
+4. Publishes to PyPI with PEP 740 attestations through `pypa/gh-action-pypi-publish`.
+
+Every action in `.github/workflows` is pinned to a full commit SHA with the version in a trailing comment. Dependabot's `github-actions` entry proposes updates to both.
+
+### Verifying a release
+
+Download the wheel or sdist from PyPI or the GitHub release, then:
+
+```shell
+gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildnotify
+gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildnotify \
+  --predicate-type https://cyclonedx.org/bom
+```
+
+The first command checks the build provenance, the second the SBOM attestation. PyPI also shows the PEP 740 attestation on each file's page under "Provenance". To check a build yourself, check out the tag, run `just repro` and compare the hashes with the ones on PyPI.
 
 ## Flatpak
 
