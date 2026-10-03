@@ -1,4 +1,5 @@
 import re
+import sys
 
 import pytest
 import requests_mock
@@ -41,10 +42,20 @@ def test_should_consolidate_build_status(qtbot, mocker):
         qtbot.waitUntil(projects_loaded)
 
 
+def mock_message_box(mocker):
+    shown = mocker.MagicMock()
+
+    def exec_(box):
+        shown(box)
+
+    mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.exec", exec_)
+    return shown
+
+
 def no_tray_app(mocker, desktop="GNOME"):
     mocker.patch.dict("os.environ", {"XDG_CURRENT_DESKTOP": desktop})
     mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    critical = mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.critical")
+    critical = mock_message_box(mocker)
     app = mocker.MagicMock()
     b = BuildNotify(app, ConfigBuilder().build(), idle_connection(), NoHook(), 60000)
     run_app = mocker.patch.object(b, "run_app")
@@ -69,9 +80,21 @@ def test_should_show_no_tray_message_and_exit_after_last_retry(mocker):
         b.delayed_start(count)
 
     critical.assert_called_once()
-    assert "BuildNotify needs a system tray." in critical.call_args.args[2]
+    assert "BuildNotify needs a system tray." in critical.call_args.args[0].text()
     app.exit.assert_called_once_with(1)
     run_app.assert_not_called()
+
+
+def test_should_show_the_no_tray_message_with_the_app_icon_and_title(qapp, mocker):
+    b, app, critical, run_app = no_tray_app(mocker)
+
+    for count in range(5):
+        b.delayed_start(count)
+
+    box = critical.call_args.args[0]
+    if sys.platform != "darwin":  # Qt ignores QMessageBox titles on macOS
+        assert box.windowTitle() == "BuildNotify"
+    assert not box.windowIcon().isNull()
 
 
 def test_should_name_the_appindicator_extension_on_gnome_in_the_dialog(mocker):
@@ -80,13 +103,13 @@ def test_should_name_the_appindicator_extension_on_gnome_in_the_dialog(mocker):
     for count in range(5):
         b.delayed_start(count)
 
-    assert "AppIndicator" in critical.call_args.args[2]
+    assert "AppIndicator" in critical.call_args.args[0].text()
 
 
 @pytest.mark.functional
 def test_should_retry_the_tray_on_a_timer_then_show_the_no_tray_message(qtbot, mocker):
     mocker.patch("buildnotifylib.ui.buildnotify.QSystemTrayIcon.isSystemTrayAvailable", return_value=False)
-    critical = mocker.patch("buildnotifylib.ui.buildnotify.QMessageBox.critical")
+    critical = mock_message_box(mocker)
     app = mocker.MagicMock()
 
     b = BuildNotify(app, ConfigBuilder().build(), idle_connection(), NoHook(), 10)

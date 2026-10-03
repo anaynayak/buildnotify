@@ -49,12 +49,19 @@ class BuildNotify:
             return
         if not QSystemTrayIcon.isSystemTrayAvailable():
             if event_count == self.TRAY_RETRIES - 1:
-                QMessageBox.critical(None, "BuildNotify", no_tray_message(os.environ.get("XDG_CURRENT_DESKTOP")))
+                self.show_no_tray_message()
                 self.app.exit(1)
             return
         self.ready = True
         self.tray_timer.stop()
         self.run_app()
+
+    def show_no_tray_message(self):
+        text = no_tray_message(os.environ.get("XDG_CURRENT_DESKTOP"))
+        box = QMessageBox(QMessageBox.Icon.Critical, "BuildNotify", text)
+        box.setWindowTitle("BuildNotify")
+        box.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
+        box.exec()
 
     def run_app(self):
         self.poller = Poller(self.store, self.connection, self.app)

@@ -6,7 +6,7 @@ Python 3.11 or newer and a desktop with a system tray. The steps specified in th
 
 ## I don't see the tray icon on GNOME
 
-GNOME Shell needs the [AppIndicator and KStatusNotifierItem Support](https://extensions.gnome.org/extension/615/appindicator-support/) extension to show tray icons. Ubuntu ships it enabled. Without a tray, BuildNotify says "I couldn't detect any system tray on this system." and exits.
+GNOME Shell needs the [AppIndicator and KStatusNotifierItem Support](https://extensions.gnome.org/extension/615/appindicator-support/) extension to show tray icons. Ubuntu ships it enabled. Without a tray, BuildNotify says "BuildNotify needs a system tray. I couldn't detect one on this system." and exits with code 1. On GNOME the message also names the extension. Install and enable it (`gnome-shell-extension-appindicator` on Debian and Ubuntu), then start BuildNotify again.
 
 ## Why is BuildNotify not a gnome-applet anymore?
 
