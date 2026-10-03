@@ -10,7 +10,7 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.core.ports import CannotConnect, FetchError
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SortKey
-from buildnotifylib.ui.app_menu import MAX_LABEL_CHARS, AppMenu
+from buildnotifylib.ui.app_menu import MAX_LABEL_CHARS, OVERFLOW, AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from test.fake_conf import ConfigBuilder
@@ -635,6 +635,15 @@ def submenu(app_menu):
     return action(app_menu.menu, "Mute").menu()
 
 
+def server_toggle(app_menu, title):
+    actions = submenu(app_menu).actions()
+    return actions[texts_of(actions).index(title) + 1]
+
+
+def texts_of(actions):
+    return [a.text() for a in actions]
+
+
 def reopened(app_menu):
     path = app_menu.store.qsettings.fileName()
     return SettingsStore(QtCore.QSettings(path, QtCore.QSettings.Format.IniFormat), Keystore()).settings
@@ -657,15 +666,30 @@ def test_should_mark_muted_projects_with_an_icon_but_keep_them_in_the_menu(mute_
 
 
 @pytest.mark.functional
-def test_should_list_servers_and_projects_to_mute(mute_menu):
+def test_should_give_the_mute_menu_a_section_per_server(mute_menu):
     app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER, muted=True))
 
-    app_menu.update([built("api"), built("web")])
+    app_menu.update([built("api"), built("web"), built("docs", OTHER)])
 
     menu = submenu(app_menu)
-    assert sorted(texts(menu)) == sorted(["ci/cc.xml", "other/cc.xml", "", "api", "web"])
+    assert texts(menu) == ["ci/cc.xml", "Mute server", "api", "web", "other/cc.xml", "Mute server", "docs"]
     checked = {a.text(): a.isChecked() for a in menu.actions() if a.isCheckable()}
-    assert checked == {"ci/cc.xml": False, "other/cc.xml": True, "api": True, "web": False}
+    assert checked == {"Mute server": True, "api": True, "web": False, "docs": False}
+    assert [a.isChecked() for a in menu.actions() if a.text() == "Mute server"] == [False, True]
+
+
+@pytest.mark.functional
+def test_should_use_a_mute_submenu_per_server_when_there_are_many_projects(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), ServerSettings(OTHER))
+
+    app_menu.update([built(f"a{i}") for i in range(OVERFLOW)] + [built("docs", OTHER)])
+
+    menu = submenu(app_menu)
+    assert texts(menu) == ["ci/cc.xml", "other/cc.xml"]
+    first = action(menu, "ci/cc.xml").menu()
+    assert texts(first)[:2] == ["Mute server", ""] and len(texts(first)) == OVERFLOW + 2
+    action(first, "a0").trigger()
+    assert app_menu.store.settings.servers[0].muted_projects == ["a0"]
 
 
 @pytest.mark.functional
@@ -748,13 +772,13 @@ def test_should_mute_a_server_from_the_menu_and_persist_it(mute_menu):
     app_menu = mute_menu(ServerSettings(CI))
     app_menu.update([built("api")])
 
-    action(submenu(app_menu), "ci/cc.xml").trigger()
+    server_toggle(app_menu, "ci/cc.xml").trigger()
 
     assert app_menu.store.settings.servers[0].muted
     assert reopened(app_menu).servers[0].muted
     assert texts(app_menu.menu)[1] == "api"
     assert app_menu.menu.actions()[1].toolTip() == "api (muted)"
-    assert action(submenu(app_menu), "ci/cc.xml").isChecked()
+    assert server_toggle(app_menu, "ci/cc.xml").isChecked()
 
 
 @pytest.mark.functional
@@ -827,7 +851,7 @@ def test_should_keep_mutes_toggled_while_preferences_is_open(mute_menu, mocker):
     snapshot = app_menu.store.settings
 
     def mute_from_the_tray():
-        action(submenu(app_menu), "other/cc.xml").trigger()
+        server_toggle(app_menu, "other/cc.xml").trigger()
         action(submenu(app_menu), "api").trigger()
         action(submenu(app_menu), "web").trigger()
         return replace(snapshot, interval_seconds=30)
@@ -969,7 +993,7 @@ def test_should_keep_mutes_toggled_while_editing_a_server(mute_menu, mocker):
     edit = action(app_menu.menu.actions()[0].menu(), "Edit server...")
 
     def mute_from_the_tray():
-        action(submenu(app_menu), "ci/cc.xml").trigger()
+        server_toggle(app_menu, "ci/cc.xml").trigger()
         action(submenu(app_menu), "api").trigger()
         return ServerSettings(CI, prefix="new")
 
