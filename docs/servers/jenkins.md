@@ -9,7 +9,7 @@ Jenkins publishes a cctray feed through the CCTray XML plugin.
 ## URL pattern
 
 1. `https://<host>/cc.xml` lists every job. This path is on [cctray.org](https://cctray.org/servers/).
-2. `https://<host>/view/<name>/cc.xml` limits the feed to one view. The `/view/<name>` form is not confirmed on cctray.org.
+2. `https://<host>/view/<name>/cc.xml` limits the feed to one view. The [CCtray XML plugin](https://plugins.jenkins.io/cctray-xml/) provides `cc.xml` for Jenkins views, so the same path under `/view/<name>/` serves one view.
 
 ## Sign in
 

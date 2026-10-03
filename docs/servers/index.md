@@ -10,7 +10,7 @@ BuildNotify reads any server that publishes a cctray.xml feed, and it can watch 
 | --- | --- | --- |
 | [Crow CI](crow.md) | `https://<host>/api/v1/badges/<owner>/<repo>/cc.xml` | Checked against a live Crow server. The Woodpecker path `/api/badges/...` returns HTML on Crow. |
 | [Woodpecker CI](woodpecker.md) | `https://<host>/api/badges/<owner>/<repo>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
-| [Jenkins](jenkins.md) | `https://<host>/cc.xml` or `https://<host>/view/<name>/cc.xml` | `/cc.xml` is on [cctray.org](https://cctray.org/servers/) and needs the CCTray XML plugin. The `/view/<name>` form is not confirmed there. |
+| [Jenkins](jenkins.md) | `https://<host>/cc.xml` or `https://<host>/view/<name>/cc.xml` | `/cc.xml` is on [cctray.org](https://cctray.org/servers/) and needs the [CCtray XML plugin](https://plugins.jenkins.io/cctray-xml/), which also serves each view. |
 | [GoCD](gocd.md) | `https://<host>/go/cctray.xml` | [cctray.org](https://cctray.org/servers/) |
 | [Concourse](other.md) | `https://<host>/api/v1/teams/<team>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
 | [Drone CI](other.md) | `https://<host>/api/badges/<owner>/<name>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
