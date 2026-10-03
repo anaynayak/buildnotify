@@ -4,7 +4,7 @@
 
 1. Python 3.11 or newer.
 2. PySide6 6.8 or newer. It is installed along with BuildNotify from PyPI.
-3. A desktop with a system tray. Without one, BuildNotify says "I couldn't detect any system tray on this system." and exits.
+3. A desktop with a system tray. Without one, BuildNotify says "BuildNotify needs a system tray. I couldn't detect one on this system." and exits.
 
 ### GNOME
 
