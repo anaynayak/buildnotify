@@ -123,6 +123,7 @@ class AppMenu(QtCore.QObject):
     def create_default_menu_items(self):
         if self.store.settings.servers:
             self.menu.addSeparator()
+            self.menu.addAction("Check now").triggered.connect(self.reload_data)
             self.add_pause_action()
             self.menu.addMenu(self.create_mute_menu())
         else:

@@ -44,6 +44,7 @@ def test_should_set_menu_items_for_projects(qtbot):
         "Passing (1)",
         "Project 1",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -80,6 +81,7 @@ def test_should_suffix_build_time(qtbot):
         "Passing (1)",
         "Project 1, 1y",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -146,6 +148,7 @@ def test_should_sort_by_name(qtbot):
         "AProject",
         "BProject",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -203,6 +206,7 @@ def test_should_add_display_prefix(qtbot):
         "AProject",
         "[R1] BProject",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -277,6 +281,7 @@ def test_should_consider_prefix_for_sorting(qtbot):
         "[R2] AProject",
         "[R2] CProject",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -323,6 +328,7 @@ def test_should_show_recent_build_first(qtbot):
         "AProject",
         "BProject",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -385,6 +391,7 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
         "Recent, now",
         "Broken",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -491,6 +498,7 @@ def test_should_show_an_enabled_row_with_a_short_error_and_its_time_for_an_unava
         "Passing (1)",
         "Project 1",
         "",
+        "Check now",
         "Pause notifications for 1 hour",
         "Mute",
         "About",
@@ -953,3 +961,14 @@ def test_should_keep_mutes_toggled_while_editing_a_server(mute_menu, mocker):
 
     [server] = reopened(app_menu).servers
     assert (server.prefix, server.muted, server.muted_projects) == ("new", True, ["api"])
+
+
+@pytest.mark.functional
+def test_check_now_reloads(qtbot):
+    conf = ConfigBuilder().server("someurl").build()
+    parent = QWidget()
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
+    qtbot.addWidget(parent)
+    action = next(a for a in app_menu.menu.actions() if a.text() == "Check now")
+    with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
+        action.trigger()
