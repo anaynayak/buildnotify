@@ -1,3 +1,4 @@
+import sys
 import webbrowser
 from collections import Counter
 from collections.abc import Callable, Sequence
@@ -13,6 +14,7 @@ from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core import humanize
 from buildnotifylib.core.diff import key
 from buildnotifylib.core.errors import details, phrase, server_label, server_name
+from buildnotifylib.core.menu_labels import about_html, labels
 from buildnotifylib.core.model import Project, ServerSnapshot
 from buildnotifylib.core.mute import (
     Clock,
@@ -32,6 +34,8 @@ from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.version import VERSION
+
+PLATFORM = sys.platform
 
 OVERFLOW = 15
 """Above this many project rows, Passing projects move into a submenu."""
@@ -128,9 +132,10 @@ class AppMenu(QtCore.QObject):
             self.menu.addMenu(self.create_mute_menu())
         else:
             self.add_empty_state()
-        self.menu.addAction(QAction("About", self.menu, triggered=self.about_clicked))
-        self.menu.addAction(QAction("Preferences", self.menu, triggered=self.preferences_clicked))
-        self.menu.addAction(QAction("Exit", self.menu, triggered=self.exit))
+        text = labels(PLATFORM)
+        self.menu.addAction(QAction(text.about, self.menu, triggered=self.about_clicked))
+        self.menu.addAction(QAction(text.preferences, self.menu, triggered=self.preferences_clicked))
+        self.menu.addAction(QAction(text.quit, self.menu, triggered=self.exit))
 
     def add_empty_state(self) -> None:
         self.menu.addAction("No servers yet").setEnabled(False)
@@ -175,10 +180,7 @@ class AppMenu(QtCore.QObject):
         QMessageBox.about(
             self.menu,
             f"About BuildNotify {VERSION}",
-            f"<b>BuildNotify {VERSION}</b> has been developed using PySide6 and serves as a build notification tool "
-            "for cruise control. In case of any suggestions/bugs,"
-            'please visit <a href="https://git.io/buildnotify">https://git.io/buildnotify</a> '
-            "and provide your feedback.",
+            about_html(VERSION),
         )
 
     def preferences_clicked(self, widget: QWidget):

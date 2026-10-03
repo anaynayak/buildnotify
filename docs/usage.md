@@ -90,6 +90,7 @@ On Windows, `cmd.exe` has no quoting that makes `&`, `|`, `^` and `%` safe, so a
 5. The tray tooltip lists failing projects, such as `2 failing: api, web`, with the server count, any pause (`Notifications paused until 11:00`) and the last checked time below it. When every server is down and none has projects from an earlier fetch, it says `Can't reach any server` instead.
 6. Clicking on any project in the tray menu would take you to the project page on the CI server.
 7. A server that can't be reached gets a row at the top of the menu with its menu prefix (or its host), a short reason and the time it happened, such as `jenkins: can't connect (10:00)` or `ci.example.org: sign-in failed (10:00)`. The row opens a submenu with the full error, a hint when there is one, `Retry now`, which checks every server again, and `Edit server...`, which opens the server dialog. Its projects from the last successful fetch stay in the list.
+8. The bottom of the menu has `Check now`, which polls every server immediately instead of waiting for the polling interval, then the pause and mute items, `Preferences...` (`Settings...` on macOS), `About BuildNotify` and `Quit BuildNotify` (`Exit` on Windows). The About box describes the app and links to the project page.
 
 ![Tray menu](images/projectlist.png)
 

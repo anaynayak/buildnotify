@@ -18,6 +18,11 @@ from test.project_builder import ProjectBuilder
 from test.utils import FakeConnection, fake_content
 
 
+@pytest.fixture(autouse=True)
+def linux_labels(monkeypatch):
+    monkeypatch.setattr("buildnotifylib.ui.app_menu.PLATFORM", "linux")
+
+
 @pytest.mark.functional
 def test_should_set_menu_items_for_projects(qtbot):
     conf = ConfigBuilder().server("someurl").build()
@@ -47,9 +52,9 @@ def test_should_set_menu_items_for_projects(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -84,9 +89,9 @@ def test_should_suffix_build_time(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -151,9 +156,9 @@ def test_should_sort_by_name(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -209,9 +214,9 @@ def test_should_add_display_prefix(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -284,9 +289,9 @@ def test_should_consider_prefix_for_sorting(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -331,9 +336,9 @@ def test_should_show_recent_build_first(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -394,9 +399,9 @@ def test_should_sort_and_label_projects_with_unparseable_build_time(qtbot):
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
 
 
@@ -501,9 +506,9 @@ def test_should_show_an_enabled_row_with_a_short_error_and_its_time_for_an_unava
         "Check now",
         "Pause notifications for 1 hour",
         "Mute",
-        "About",
-        "Preferences",
-        "Exit",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
     ]
     assert actions[0].isEnabled()
 
@@ -663,7 +668,14 @@ def test_should_show_an_empty_state_without_servers(mute_menu):
 
     app_menu.update([])
 
-    assert texts(app_menu.menu) == ["No servers yet", "Add a server...", "", "About", "Preferences", "Exit"]
+    assert texts(app_menu.menu) == [
+        "No servers yet",
+        "Add a server...",
+        "",
+        "About BuildNotify",
+        "Preferences...",
+        "Quit BuildNotify",
+    ]
     assert not action(app_menu.menu, "No servers yet").isEnabled()
 
 
@@ -972,3 +984,17 @@ def test_check_now_reloads(qtbot):
     action = next(a for a in app_menu.menu.actions() if a.text() == "Check now")
     with qtbot.waitSignal(app_menu.reload_data, timeout=1000):
         action.trigger()
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize(
+    ("platform", "tail"),
+    [
+        ("darwin", ["About BuildNotify", "Settings...", "Quit BuildNotify"]),
+        ("win32", ["About BuildNotify", "Preferences...", "Exit"]),
+    ],
+)
+def test_menu_labels_per_platform(mute_menu, monkeypatch, platform, tail):
+    monkeypatch.setattr("buildnotifylib.ui.app_menu.PLATFORM", platform)
+
+    assert texts(mute_menu().menu)[-3:] == tail

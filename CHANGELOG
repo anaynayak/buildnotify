@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- A `Check now` item in the tray menu polls every server immediately. Menu items now read `Preferences...` (`Settings...` on macOS), `About BuildNotify` and `Quit BuildNotify` (`Exit` on Windows), and the About box describes cctray feeds and GitHub Actions and links to the project page
 - Tray icons tell more states apart. Success while building now has a ring, so it no longer looks like plain success, and the same ring marks failure while building. When every server is down and none has projects from an earlier fetch, the icon is a hollow slashed square (a slashed circle in the symbolic set) instead of the grey used for an unknown status. The tooltip also shows the server count and `Notifications paused until HH:MM` while paused
 - The server dialog's sign-in choices are `None`, `Username and password` and `Token`. `None` hides both fields and saves no credentials. Without a keyring, the dialog says credentials can't be stored and names the `keyring` package to install. A saved cctray bearer token is labelled as a token instead of `Password`
 - The certificate prompt now names the host and says it turns off certificate checks for that server. After accepting, the dialog shows `Certificate checks off for <host>` with a `Turn checks back on` button
