@@ -21,8 +21,9 @@ from PySide6.QtWidgets import QApplication, QWidget  # noqa: E402
 from buildnotifylib.adapters.http import HttpConnection  # noqa: E402
 from buildnotifylib.core import cctray  # noqa: E402
 from buildnotifylib.core.aggregate import OverallIntegrationStatus  # noqa: E402
+from buildnotifylib.core.github import GitHubSource, RateLimits  # noqa: E402
 from buildnotifylib.core.model import ServerSnapshot  # noqa: E402
-from buildnotifylib.core.ports import CannotConnect  # noqa: E402
+from buildnotifylib.core.ports import CannotConnect, Response  # noqa: E402
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind  # noqa: E402
 from buildnotifylib.ui import app_menu  # noqa: E402
 from buildnotifylib.ui.build_icons import TRAY_SIZE, BuildIcons  # noqa: E402
@@ -30,6 +31,7 @@ from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog  # no
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
+GITHUB_RUNS = ROOT / "test" / "fixtures" / "github"
 FEEDS = ROOT / "test" / "fixtures" / "cctray"
 OUT = ROOT / "docs" / "images"
 NOW = datetime(2026, 9, 30, 10, 0, tzinfo=UTC)
@@ -38,6 +40,10 @@ GOCD = ServerSettings("https://gocd.example.org/go/cctray.xml", prefix="gocd")
 OFFLINE = ServerSettings("https://ci.example.org/cctray.xml")
 GITHUB = ServerSettings(
     "", kind=SourceKind.GITHUB, repository="octo-org/hello-world", workflow="ci.yml", branch="main", prefix="gh"
+)
+HELLO = ServerSettings("", kind=SourceKind.GITHUB, repository="octo-org/hello-world", workflow="ci.yml", branch="main")
+STOREFRONT = ServerSettings(
+    "", kind=SourceKind.GITHUB, repository="octo-org/storefront", workflow="ci.yml", branch="main"
 )
 SERVERS = [JENKINS, GOCD, OFFLINE, GITHUB]
 TRAY_STATES = [
@@ -77,9 +83,29 @@ def snapshot(server: ServerSettings, feed: str) -> ServerSnapshot:
     return ServerSnapshot(server.url, tuple(projects))
 
 
+class RunsFixture:
+    """Answers every GitHub request with the same recorded workflow runs."""
+
+    def request(self, url, timeout, headers, verify=True):
+        return Response(200, {}, (GITHUB_RUNS / "runs.json").read_bytes())
+
+
+def github_snapshot(server: ServerSettings) -> ServerSnapshot:
+    source = GitHubSource(server, 10, RunsFixture(), RateLimits(clock=lambda: NOW))  # type: ignore[arg-type]
+    return ServerSnapshot(server.url, tuple(source.fetch()))
+
+
 def status() -> OverallIntegrationStatus:
     offline = ServerSnapshot(OFFLINE.url, error=CannotConnect("Could not connect to ci.example.org"), error_at=NOW)
-    return OverallIntegrationStatus([snapshot(JENKINS, "jenkins.xml"), snapshot(GOCD, "gocd.xml"), offline])
+    return OverallIntegrationStatus(
+        [
+            snapshot(JENKINS, "jenkins.xml"),
+            snapshot(GOCD, "gocd.xml"),
+            offline,
+            github_snapshot(HELLO),
+            github_snapshot(STOREFRONT),
+        ]
+    )
 
 
 def save(widget: QWidget, name: str) -> None:
@@ -144,7 +170,7 @@ def main() -> None:
     app.setStyle("Fusion")
     settings = AppSettings(servers=SERVERS, interval_seconds=60)
     icons = BuildIcons()
-    tray_menu(settings, icons)
+    tray_menu(AppSettings(servers=[*SERVERS, HELLO, STOREFRONT], interval_seconds=60), icons)
     empty_tray_menu(icons)
     preferences(settings)
     server_dialog(JENKINS, "server-cctray.png")
