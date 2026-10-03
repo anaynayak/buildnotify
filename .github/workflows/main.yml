@@ -28,6 +28,16 @@ jobs:
           uv export --no-dev --no-emit-project --no-hashes --no-header --no-annotate | uv pip compile .clusterfuzzlite/requirements.in -c /dev/stdin --generate-hashes --no-header --no-annotate -o .clusterfuzzlite/requirements.txt -q
           git diff --exit-code .clusterfuzzlite/requirements.txt
 
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Build the docs
+        run: uv run --locked --group docs mkdocs build --strict
+
   reproducible:
     runs-on: ubuntu-latest
     steps:
