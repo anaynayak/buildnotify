@@ -33,3 +33,11 @@ demo *args:
 # Render the docs screenshots offscreen into docs/images
 screenshots:
     uv run --locked python scripts/screenshots.py
+
+# Build twice and fail if the sdist or wheel hashes differ
+repro:
+    scripts/repro-check.sh
+
+# Write a CycloneDX SBOM of the runtime dependencies from uv.lock to sbom.cdx.json
+sbom:
+    uv export --locked --no-dev --no-emit-project --format cyclonedx1.5 -o sbom.cdx.json
