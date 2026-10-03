@@ -40,7 +40,13 @@ The status icons are plain SVG files in `buildnotifylib/resources/icons` and shi
 
 CI runs lint, format and mypy, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
 
+Pushing to `main` runs `.github/workflows/nightly.yml`. It rewrites `buildnotifylib/version.py` in the CI workspace to `<VERSION>.dev<run number>` (the committed file never changes), builds the sdist and wheel, and attests their provenance. It then replaces the rolling `nightly` pre-release, deleting it and its tag and recreating both at the pushed commit with the wheel, sdist and Flatpak bundle. The release is marked as a pre-release and never as Latest. The notes link to the commit and to the Unreleased section of the CHANGELOG. This workflow has no PyPI step, and the `nightly` tag doesn't match the `v*` filter of `release.yml`.
+
+Both `nightly.yml` and `release.yml` call `flatpak.yml` as a reusable workflow, so the bundle they publish comes from the same build and lint that pull requests get. The job uploads it as the `flatpak` artifact. `flatpak.yml` no longer runs on its own for pushes to `main`.
+
 Pushing a `v*` tag builds the sdist and wheel and publishes them to PyPI with trusted publishing. The tag must match `VERSION` in `buildnotifylib/version.py`, so `VERSION = "3.0.0"` is released by the tag `v3.0.0`. A mismatch fails the release before anything is built.
+
+Once the build and the Flatpak job pass, the tag also gets a GitHub Release. Its notes are that version's section of the CHANGELOG, extracted by `scripts/changelog_section.py` (`python3 scripts/changelog_section.py v3.0.0`), and it fails if the section is missing or empty. The assets are the wheel, the sdist, `sbom.cdx.json` and `BuildNotify.flatpak`. The PyPI publish job is separate and still waits for approval on the `pypi` environment.
 
 The release build also:
 
@@ -61,7 +67,7 @@ gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildn
   --predicate-type https://cyclonedx.org/bom
 ```
 
-The first command checks the build provenance, the second the SBOM attestation. PyPI also shows the PEP 740 attestation on each file's page under "Provenance". To check a build yourself, check out the tag, run `just repro` and compare the hashes with the ones on PyPI.
+The first command checks the build provenance, the second the SBOM attestation. PyPI also shows the PEP 740 attestation on each file's page under "Provenance". Nightly wheels and sdists have build provenance too, so the first command works for them. They have no SBOM. To check a build yourself, check out the tag, run `just repro` and compare the hashes with the ones on PyPI.
 
 ## Flatpak
 
@@ -80,7 +86,7 @@ flatpak run io.github.anaynayak.BuildNotify
 
 The desktop file, icon and AppStream metainfo at the repo root are named after the app id and ship in the wheel under `share/`. Check them with `desktop-file-validate` and `appstreamcli validate`.
 
-CI builds the Flatpak in `.github/workflows/flatpak.yml` on every push to `main` and every pull request. It runs `flatpak-builder-lint` on the manifest and on the built repo, so lint errors fail the job. The same checks run locally with:
+CI builds the Flatpak in `.github/workflows/flatpak.yml` on every pull request, and for every push to `main` and tag through the workflows that call it. It runs `flatpak-builder-lint` on the manifest and on the built repo, so lint errors fail the job. The same checks run locally with:
 
 ```shell
 flatpak install flathub org.flatpak.Builder
@@ -89,7 +95,7 @@ flatpak-builder --force-clean --repo=repo build-dir packaging/flatpak/io.github.
 flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
 ```
 
-To try a CI build, open the run on the Actions tab, download the `BuildNotify.flatpak` artifact and unzip it. Then install and run it:
+To try a CI build, open the run on the Actions tab, download the `flatpak` artifact and unzip it. For a push to `main` or a tag, take `BuildNotify.flatpak` from the nightly or release page instead. Then install and run it:
 
 ```shell
 flatpak install --user BuildNotify.flatpak
