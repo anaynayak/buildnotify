@@ -11,7 +11,7 @@ BuildNotify shows a notification when a build fails, is fixed, fails again or pa
 
 ## Custom script
 
-BuildNotify can run a script each time it shows a notification. Turn on "Execute script for notifications" and enter the command. It runs through the platform shell (`/bin/sh` on Linux and macOS, `cmd.exe` on Windows).
+BuildNotify can run a script each time it shows a notification. Turn on "Run a script on each notification" and enter the command. It runs through the platform shell (`/bin/sh` on Linux and macOS, `cmd.exe` on Windows).
 
 The script gets two environment variables:
 
