@@ -139,3 +139,40 @@ def test_should_give_each_preferences_page_unique_mnemonics(qtbot, tab):
     tab_titles = [dialog.tabs.tabText(i) for i in range(dialog.tabs.count())]
     footer = [b.text() for b in dialog.button_box.buttons()]
     assert_mnemonics(dialog, tab_titles + footer)
+
+
+def has_name(widget: QWidget, dialog: QDialog) -> bool:
+    if widget.accessibleName() or (isinstance(widget, QAbstractButton) and widget.text()):
+        return True
+    return any(label.buddy() is widget for label in dialog.findChildren(QLabel))
+
+
+def unnamed_stops(dialog: QDialog) -> list[str]:
+    """Focusable controls a screen reader would announce with no name: no accessible name, text or buddy label."""
+    stops = [
+        w
+        for w in dialog.findChildren(QWidget)
+        if w.isVisibleTo(dialog)
+        and w.focusPolicy().value & 1
+        and w.focusProxy() is None
+        and not isinstance(w.parent(), QAbstractSpinBox)
+        and type(w).__name__ not in ("QTabBar", "QScrollBar")
+    ]
+    unnamed = [w for w in stops if not has_name(w, dialog)]
+    return [f"{type(w).__name__}:{getattr(w, 'placeholderText', lambda: '')()}" for w in unnamed]
+
+
+def test_should_name_every_control_in_the_server_dialog(qtbot):
+    dialog = server_dialog(qtbot, ServerSettings("http://localhost/cc.xml", username="u", password="p"))
+    dialog.show()
+    dialog.show_picker(True)
+    assert unnamed_stops(dialog) == []
+
+
+@pytest.mark.parametrize("tab", range(4))
+def test_should_name_every_control_on_each_preferences_page(qtbot, tab):
+    dialog = PreferencesDialog(AppSettings(servers=[ServerSettings("http://h/cc.xml")]), FakeConnection(""))
+    qtbot.addWidget(dialog)
+    dialog.tabs.setCurrentIndex(tab)
+    dialog.show()
+    assert unnamed_stops(dialog) == []

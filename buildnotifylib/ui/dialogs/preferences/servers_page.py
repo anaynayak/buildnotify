@@ -37,6 +37,7 @@ class ServersPage(QWidget):
         self.project_counts = project_counts or {}
         self.servers: dict[str, ServerSettings] = {}
         self.server_list = QListView()
+        self.server_list.setAccessibleName(self.tr("Monitored servers"))
         self.server_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.add_button = QPushButton(self.tr("A&dd..."))
         self.configure_button = QPushButton(self.tr("&Edit..."))
