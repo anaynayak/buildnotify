@@ -28,7 +28,7 @@ from buildnotifylib.ui.dialogs.server.auth_form import NONE, TOKEN, AuthForm, Cr
 from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
 from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
 from buildnotifylib.ui.poller import Deadline, Fetch
-from buildnotifylib.ui.widgets.forms import MessageLabel, add_row, form_layout, section
+from buildnotifylib.ui.widgets.forms import CollapsibleSection, MessageLabel, add_row, form_layout, section
 
 KINDS = [SourceKind.CCTRAY, SourceKind.GITHUB]
 REPOSITORY = re.compile(r"[\w.-]+/[\w.-]+")
@@ -57,8 +57,8 @@ class ServerConfigurationDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.addWidget(self.source_section())
         layout.addLayout(self.test_row())
-        layout.addLayout(self.certificate_row())
         layout.addWidget(self.projects_section())
+        layout.addWidget(self.advanced_section())
         layout.addWidget(self.buttons())
 
         self.timeout = timeout
@@ -88,6 +88,7 @@ class ServerConfigurationDialog(QDialog):
         self.refresh_validity()
         self.unverified_host = self.source_host() if self.server.skip_ssl_verification else None
         self.refresh_certificate_row()
+        self.expand_advanced_if_changed()
 
     def source_section(self) -> QWidget:
         self.source_kind = QComboBox()
@@ -101,7 +102,6 @@ class ServerConfigurationDialog(QDialog):
         self.prefix = QLineEdit()
         self.prefix.setPlaceholderText(self.tr("e.g. branch/release"))
         self.misc = form_layout()
-        add_row(self.misc, self.tr("Ser&ver timezone"), self.timezone)
         add_row(self.misc, self.tr("&Display prefix"), self.prefix)
         for field in (self.cctray.url, self.github.repository):
             field.editingFinished.connect(self.validate)
@@ -127,6 +127,20 @@ class ServerConfigurationDialog(QDialog):
         row.addStretch()
         return row
 
+    def advanced_section(self) -> CollapsibleSection:
+        self.timezone_form = form_layout()
+        add_row(self.timezone_form, self.tr("Ser&ver timezone"), self.timezone)
+        content = QVBoxLayout()
+        content.setContentsMargins(0, 0, 0, 0)
+        content.addLayout(self.timezone_form)
+        content.addLayout(self.certificate_row())
+        self.advanced = CollapsibleSection(self.tr("&Advanced"), content)
+        return self.advanced
+
+    def expand_advanced_if_changed(self) -> None:
+        if self.timezone.currentIndex() > 0 or self.unverified_host is not None:
+            self.advanced.set_expanded(True)
+
     def certificate_row(self) -> QHBoxLayout:
         self.certificate_status = MessageLabel()
         self.certificate_undo = QPushButton(self.tr("Tur&n checks back on"))
@@ -144,6 +158,8 @@ class ServerConfigurationDialog(QDialog):
         else:
             self.certificate_status.clear_message()
         self.certificate_undo.setVisible(unchecked)
+        if unchecked:
+            self.advanced.set_expanded(True)
 
     def restore_certificate_checks(self) -> None:
         self.unverified_host = None
@@ -203,7 +219,7 @@ class ServerConfigurationDialog(QDialog):
         github = KINDS[index] is SourceKind.GITHUB
         self.github.setVisible(github)
         self.cctray.setVisible(not github)
-        self.misc.setRowVisible(self.timezone, not github)
+        self.timezone_form.setRowVisible(self.timezone, not github)
         self.auth.show_type(not github)
         if github:
             self.auth.show_token_field()

@@ -1,7 +1,8 @@
 """Helpers for building forms in code: labelled rows, titled sections and an inline message."""
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import QFormLayout, QGroupBox, QLabel, QLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QGroupBox, QLabel, QLayout, QToolButton, QVBoxLayout, QWidget
 
 ERROR_COLOUR = QColor("#c62828")
 
@@ -29,6 +30,34 @@ def section(title: str, layout: QLayout) -> QGroupBox:
     box = QGroupBox(title)
     box.setLayout(layout)
     return box
+
+
+class CollapsibleSection(QWidget):
+    """A disclosure button that shows or hides the layout under it."""
+
+    def __init__(self, title: str, content: QLayout, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.toggle = QToolButton()
+        self.toggle.setText(title)
+        self.toggle.setCheckable(True)
+        self.toggle.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.toggle.setAutoRaise(True)
+        self.body = QWidget()
+        self.body.setLayout(content)
+        self.toggle.toggled.connect(self.set_expanded)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.toggle, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.body)
+        self.set_expanded(False)
+
+    def is_expanded(self) -> bool:
+        return self.toggle.isChecked()
+
+    def set_expanded(self, expanded: bool) -> None:
+        self.toggle.setChecked(expanded)
+        self.toggle.setArrowType(Qt.ArrowType.DownArrow if expanded else Qt.ArrowType.RightArrow)
+        self.body.setVisible(expanded)
 
 
 class MessageLabel(QLabel):

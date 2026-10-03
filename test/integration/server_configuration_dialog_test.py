@@ -997,3 +997,45 @@ def test_should_guide_the_user_to_create_a_github_token(qtbot):
 
     dialog.source_kind.setCurrentIndex(0)
     assert dialog.auth.token_help.isHidden()
+
+
+def open_dialog(qtbot, server=None):
+    dialog = ServerConfigurationDialog(server, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+    dialog.show()
+    return dialog
+
+
+def test_should_collapse_advanced_when_everything_is_default(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml"))
+
+    assert dialog.advanced.toggle.text() == "&Advanced"
+    assert not dialog.advanced.is_expanded()
+    assert not dialog.timezone.isVisible()
+
+
+def test_should_expand_advanced_when_the_time_zone_is_not_the_default(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml", timezone="Asia/Kolkata"))
+
+    assert dialog.advanced.is_expanded()
+    assert dialog.timezone.isVisible()
+
+
+def test_should_expand_advanced_when_certificate_checks_are_off(qtbot):
+    url = "https://localhost:8080/cc.xml"
+    dialog = open_dialog(qtbot, ServerSettings(url, skip_ssl_verification=True))
+
+    assert dialog.advanced.is_expanded()
+    assert dialog.certificate_undo.isVisible()
+
+
+def test_should_expand_advanced_when_a_retry_without_verification_is_accepted(qtbot, mocker):
+    url = "https://localhost:8080/cc.xml"
+    with requests_mock.Mocker() as m:
+        m.get(url, [{"exc": requests.exceptions.SSLError("bad")}, {"text": fake_content()}])
+        dialog = open_dialog(qtbot, ServerSettings(url))
+        mocker.patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes)
+        dialog.fetch_data()
+        qtbot.waitUntil(lambda: dialog.projects_loaded)
+
+    assert dialog.advanced.is_expanded()

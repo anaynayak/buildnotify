@@ -47,6 +47,7 @@ def server_dialog(qtbot, server):
 
 def test_should_tab_through_every_cctray_field_in_visual_order(qtbot):
     dialog = server_dialog(qtbot, ServerSettings("http://localhost/cc.xml", username="u", password="p"))
+    dialog.advanced.set_expanded(True)
     walked = tab_walk(dialog)
     expected = [
         dialog.source_kind,
