@@ -70,6 +70,7 @@ class ServerConfigurationDialog(QDialog):
         self.timezone.addItem(self.tr("Use the feed's offset"), NONE_TIMEZONE)
         self.timezone.addItems(sorted(available_timezones()))
         completer = self.timezone.completer()
+        assert completer is not None
         completer.setFilterMode(Qt.MatchFlag.MatchContains)
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
