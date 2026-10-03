@@ -1,5 +1,7 @@
 # BuildNotify
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/anaynayak/buildnotify/badge)](https://scorecard.dev/viewer/?uri=github.com/anaynayak/buildnotify)
+
 BuildNotify is a CCMenu/CCTray equivalent for Linux, macOS and Windows. It resides in your system tray and notifies you of the build status for different projects on your continuous integration servers. BuildNotify is largely inspired from the awesome CCMenu available for Mac.
 
 ## Features
