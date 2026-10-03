@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- Muted servers and projects no longer affect the tray icon colour, the failing count or the badge, and every project on a muted server is left out too. They stay in the menu marked `(muted)`, and the tooltip adds `N muted`. Unmuting updates the tray at once. Pausing notifications still doesn't change the icon. This reverses the earlier rule that muted projects still counted
 - Preferences, the server dialog, the About box and the no-tray message open centred on the screen under the mouse pointer, kept inside the usable area, instead of in a corner of the primary screen
 - The server dialog hides the `Advanced` section for GitHub servers, where it had held only the time zone, which applies to cctray feeds. It comes back when you switch to cctray, with the time zone you had chosen
 - The tray menu's Failing, Building, Passing and Unknown headers are disabled rows with separators between groups, and the `Mute` submenu uses one submenu per server. Native macOS menus don't draw Qt section titles, so both had gone missing or shown as unlabelled groups. A server with no projects shows a single `Mute <server>` checkbox

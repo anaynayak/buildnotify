@@ -107,9 +107,9 @@ The tray icon shows the overall status: success, success while building (with a 
 
 The `Mute` submenu has one submenu per server, named after the server. Each holds a `Mute whole server` checkbox, a separator and a checkbox for each of its projects. A server with no projects shows as a single `Mute <server>` checkbox instead. A muted server or project gets no notifications, and the custom script does not run for it. Muting a server also mutes all its projects and its connectivity notifications.
 
-Muted projects stay in the menu, shown with a dimmed icon and a `(muted)` suffix, and still count towards the tray icon, the failing count and the tooltip. Muting only silences notifications. To hide a project completely, untick it in the server dialog.
+Muted projects stay in the menu, shown with a dimmed icon and a `(muted)` suffix, but they don't count towards the tray icon colour, the failing count or the badge. The same goes for every project on a muted server. If the only failures are muted, the icon shows the state of the remaining projects, or the plain no-projects icon when none are left. The tooltip adds `N muted` so muted projects are not invisible. Unmuting brings them back into the count straight away, without waiting for the next poll. To hide a project completely, untick it in the server dialog.
 
-`Pause notifications for 1 hour` silences every notification and the custom script until the hour is up. The menu then shows `Resume notifications (paused until 14:05)`, which ends the pause early. Mutes and the pause end time are kept in the settings, so they survive a restart, and a pause that ran out while BuildNotify was closed is over when it starts again.
+`Pause notifications for 1 hour` silences every notification and the custom script until the hour is up. It doesn't change the tray icon or the count. The menu then shows `Resume notifications (paused until 14:05)`, which ends the pause early. Mutes and the pause end time are kept in the settings, so they survive a restart, and a pause that ran out while BuildNotify was closed is over when it starts again.
 
 ## Command line options
 
