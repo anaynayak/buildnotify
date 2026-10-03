@@ -42,6 +42,20 @@ The sort order applies within each section of the tray menu. `Failing first`, th
 
 Both dialogs work from the keyboard. Tab moves through the fields in reading order, the underlined letter in a label or button is its Alt shortcut, Enter saves and Esc cancels. In the server list, `Ins` adds, `Enter` edits and `Del` removes.
 
+## Supported servers
+
+BuildNotify reads any server that publishes a cctray.xml feed. [cctray.org/servers](https://cctray.org/servers/) keeps the full list. These are the feed URLs for common servers. Replace the placeholders in angle brackets.
+
+| Server | Feed URL | Source |
+| --- | --- | --- |
+| Crow CI | `https://<host>/api/v1/badges/<owner>/<repo>/cc.xml` | Checked against a live Crow server. The Woodpecker path `/api/badges/...` returns HTML on Crow. |
+| Woodpecker CI | `https://<host>/api/badges/<owner>/<repo>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
+| Jenkins | `https://<host>/cc.xml` or `https://<host>/view/<name>/cc.xml` | `/cc.xml` is on [cctray.org](https://cctray.org/servers/) and needs the CCTray XML plugin. The `/view/<name>` form is not confirmed there. |
+| GoCD | `https://<host>/go/cctray.xml` | [cctray.org](https://cctray.org/servers/) |
+| Concourse | `https://<host>/api/v1/teams/<team>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
+| Drone CI | `https://<host>/api/badges/<owner>/<name>/cc.xml` | [cctray.org](https://cctray.org/servers/) |
+| GitHub Actions | No feed. Set Source to `GitHub Actions`. | See [GitHub Actions](#github-actions). |
+
 ## GitHub Actions
 
 BuildNotify can also watch GitHub Actions without a cctray feed. In the server dialog, set Source to `GitHub Actions` and fill in:
