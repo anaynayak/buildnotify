@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- Muted projects show a dimmed icon in the tray menu instead of a `(muted)` suffix, and the tooltip says `(muted)`. The `Mute` submenu has a section per server with a `Mute server` toggle followed by that server's projects. With more than 15 projects each server gets its own submenu
 - The server dialog's time zone and certificate checks sit in a collapsed `Advanced` section that opens by itself when either is set. The field is now `Time zone for feed times`, its default entry reads `Use the feed's offset` (stored as before), and you can type part of a zone name, such as `Kolkata`, to find it
 - Labels and buttons in Preferences and the server dialog have Alt-key mnemonics, such as `Alt+S` for Save, with none repeated on a page. The project filter, project list and server list have names for screen readers
 - A `Check now` item in the tray menu polls every server immediately. Menu items now read `Preferences...` (`Settings...` on macOS), `About BuildNotify` and `Quit BuildNotify` (`Exit` on Windows), and the About box describes cctray feeds and GitHub Actions and links to the project page
