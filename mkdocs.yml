@@ -33,6 +33,7 @@ nav:
       - Notifications and custom script: guide/notifications.md
       - Muting and pausing: guide/muting.md
       - Preferences and the server dialog: guide/preferences.md
+  - Security and privacy: security.md
   - FAQ: faq.md
 
 theme:
