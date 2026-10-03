@@ -39,7 +39,7 @@ def assert_visual(walked: list[QWidget], dialog: QDialog) -> None:
     assert rows == sorted(rows), [(w.objectName() or type(w).__name__, p) for w, p in zip(walked, rows, strict=True)]
 
 
-def server_dialog(qtbot, server: ServerSettings) -> ServerConfigurationDialog:
+def server_dialog(qtbot, server):
     dialog = ServerConfigurationDialog(server, TIMEOUT, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     return dialog
@@ -109,7 +109,7 @@ def mnemonics(texts: list[str]) -> list[str]:
     return [found.group(1).lower() if (found := MNEMONIC.search(text)) else "" for text in texts]
 
 
-def assert_mnemonics(dialog: QDialog, extra: list[str] = ()) -> None:
+def assert_mnemonics(dialog: QDialog, extra: tuple[str, ...] | list[str] = ()) -> None:
     dialog.show()
     texts = labelled_texts(dialog)
     keys = mnemonics(texts)
@@ -211,7 +211,7 @@ def test_should_not_save_the_server_dialog_on_enter_in_the_test_button_row(qtbot
     assert not dialog.test_button.autoDefault()
 
 
-def preferences(qtbot) -> PreferencesDialog:
+def preferences(qtbot):
     settings = AppSettings(servers=[ServerSettings("http://h/cc.xml")])
     return shown(qtbot, PreferencesDialog(settings, FakeConnection("")))
 
@@ -220,7 +220,8 @@ def preferences(qtbot) -> PreferencesDialog:
 def test_should_save_preferences_on_enter(qtbot, tab):
     dialog = preferences(qtbot)
     dialog.tabs.setCurrentIndex(tab)
-    field = {1: dialog.menu_page.show_last_build_time, 2: dialog.notifications_page.script, 3: dialog.advanced_page.interval}
+    pages = (dialog.menu_page, dialog.notifications_page, dialog.advanced_page)
+    field = dict(zip((1, 2, 3), (pages[0].show_last_build_time, pages[1].script, pages[2].interval), strict=True))
     press(qtbot, field[tab], Qt.Key.Key_Return)
     assert dialog.result() == QDialog.DialogCode.Accepted
 

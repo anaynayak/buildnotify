@@ -38,6 +38,8 @@ The Advanced tab sets how often servers are checked and how long to wait before 
 
 The sort order applies within each section of the tray menu. `Failing first`, the default for new installs, puts projects that are building at the top of their section and then shows the newest builds first. Name and last build time sort the whole section that way. An install from an earlier version keeps the sort order it had.
 
+Both dialogs work from the keyboard. Tab moves through the fields in reading order, the underlined letter in a label or button is its Alt shortcut, Enter saves and Esc cancels. In the server list, `Ins` adds, `Enter` edits and `Del` removes.
+
 ## GitHub Actions
 
 BuildNotify can also watch GitHub Actions without a cctray feed. In the server dialog, set Source to `GitHub Actions` and fill in:
