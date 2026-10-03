@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.mute import Clock, system_clock
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import BuildIcons
@@ -18,11 +19,12 @@ UNREACHABLE = "Can't reach any server"
 class AppUi(QtCore.QObject):
     reload_data = QtCore.Signal()
 
-    def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection):
+    def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection, clock: Clock = system_clock):
         super().__init__(parent)
         self.widget = QWidget()
         self.store = store
         self.build_icons = build_icons
+        self.clock = clock
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None, store.settings.symbolic_icons), self.widget)
         self.tray.show()
         if not store.settings.servers:
@@ -54,4 +56,13 @@ class AppUi(QtCore.QObject):
         if not self.store.settings.servers:
             return NO_SERVERS
         summary = UNREACHABLE if integration_status.unreachable() else integration_status.failing_summary()
-        return f"{summary}\nLast checked: {strftime('%Y-%m-%d %H:%M:%S')}"
+        lines = [summary, self.server_count()]
+        until = self.store.settings.paused_until
+        if until is not None and until > self.clock():
+            lines.append(f"Notifications paused until {until.astimezone().strftime('%H:%M')}")
+        lines.append(f"Last checked: {strftime('%Y-%m-%d %H:%M:%S')}")
+        return "\n".join(lines)
+
+    def server_count(self) -> str:
+        count = len(self.store.settings.servers)
+        return f"{count} server" + ("" if count == 1 else "s")

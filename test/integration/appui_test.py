@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from PySide6 import QtWidgets
@@ -176,3 +177,36 @@ def test_should_pick_unreachable_icon_state_when_every_server_is_down(qtbot):
     down = OverallIntegrationStatus([ServerSnapshot("someurl", error=TimeoutError("Timed out"))])
 
     assert widget.icon_state(down) == "unreachable"
+
+
+TOOLTIP_NOW = datetime(2026, 10, 3, 10, 0, tzinfo=timezone.utc)
+
+
+def tooltip_for(qtbot, conf):
+    widget = AppUi(QtWidgets.QWidget(), conf, BuildIcons(), FakeConnection(fake_content()), clock=lambda: TOOLTIP_NOW)
+    project = ProjectBuilder({"name": "a", "lastBuildStatus": "Success", "activity": "Sleeping"}).build()
+    widget.update_projects(snapshot(project))
+    return widget.tray.toolTip()
+
+
+@pytest.mark.functional
+def test_should_say_when_notifications_are_paused_in_the_tooltip(qtbot):
+    until = TOOLTIP_NOW + timedelta(minutes=30)
+    tip = tooltip_for(qtbot, ConfigBuilder(paused_until=until).server("someurl").build())
+
+    assert f"Notifications paused until {until.astimezone().strftime('%H:%M')}" in tip.splitlines()
+
+
+@pytest.mark.functional
+def test_should_not_mention_a_pause_that_has_expired(qtbot):
+    until = TOOLTIP_NOW - timedelta(minutes=30)
+
+    assert "paused" not in tooltip_for(qtbot, ConfigBuilder(paused_until=until).server("someurl").build())
+
+
+@pytest.mark.functional
+def test_should_show_the_server_count_in_the_tooltip(qtbot):
+    conf = ConfigBuilder().server("someurl").server("other").build()
+
+    assert "2 servers" in tooltip_for(qtbot, conf).splitlines()
+    assert "1 server" in tooltip_for(qtbot, ConfigBuilder().server("someurl").build()).splitlines()
