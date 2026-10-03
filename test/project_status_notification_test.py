@@ -315,3 +315,18 @@ def test_should_warn_about_broken_builds(mocker):
     show, _ = _break_builds(mocker, ConfigBuilder(servers=[ServerSettings(CI)]).build())
 
     assert [call.args[0].warning for call in show.call_args_list] == [True]
+
+
+def test_should_use_the_disambiguated_label_in_notifications_and_the_tooltip_summary(mocker):
+    other = "http://other/cc.xml"
+    store = ConfigBuilder(servers=[ServerSettings(CI), ServerSettings(other)]).build()
+    app_notification = AppNotification(store, None, RecordingHook(), lambda: NOW)
+    show = mocker.patch.object(app_notification.notification, "show")
+    passing = [ServerSnapshot(CI, (_status("Success", "1"),)), ServerSnapshot(other, (_status("Success", "1", other),))]
+    failing = [ServerSnapshot(CI, (_status("Failure", "2"),)), ServerSnapshot(other, (_status("Success", "1", other),))]
+
+    app_notification.update_projects(OverallIntegrationStatus(passing))
+    app_notification.update_projects(OverallIntegrationStatus(failing))
+
+    assert titles(show) == ["Build failed: [ci] proj1"]
+    assert OverallIntegrationStatus(failing).failing_summary() == "1 failing: [ci] proj1"
