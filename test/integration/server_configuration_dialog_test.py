@@ -372,7 +372,7 @@ def test_should_show_github_fields_when_github_is_selected(qtbot):
     assert dialog.cctray.isHidden()
     assert dialog.auth.authentication_type.isHidden()
     assert dialog.auth.username.isHidden()
-    assert dialog.timezone.isHidden()
+    assert dialog.advanced.isHidden()
     assert dialog.auth.password_label.text().replace("&", "") == "Token"
 
     dialog.source_kind.setCurrentIndex(0)
@@ -1054,6 +1054,34 @@ def test_should_keep_none_as_the_stored_value_of_the_default_entry(qtbot):
 
     assert dialog.timezone.currentText() == FEED_OFFSET
     assert dialog.get_server_config().timezone == "None"
+
+
+def test_should_hide_advanced_for_github_and_show_it_again_for_cctray(qtbot):
+    dialog = open_dialog(qtbot, None)
+    assert dialog.advanced.isVisible()
+
+    dialog.source_kind.setCurrentIndex(1)
+    assert not dialog.advanced.isVisible()
+
+    dialog.source_kind.setCurrentIndex(0)
+    assert dialog.advanced.isVisible()
+
+
+def test_should_hide_advanced_when_opening_a_github_server(qtbot):
+    dialog = open_dialog(qtbot, github_server())
+
+    assert not dialog.advanced.isVisible()
+
+
+def test_should_keep_the_time_zone_across_kind_switches(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml", timezone="Asia/Kolkata"))
+
+    dialog.source_kind.setCurrentIndex(1)
+    assert dialog.get_server_config().timezone == "None"
+    dialog.source_kind.setCurrentIndex(0)
+
+    assert dialog.timezone.currentText() == "Asia/Kolkata"
+    assert dialog.get_server_config().timezone == "Asia/Kolkata"
 
 
 def completions(dialog, text):

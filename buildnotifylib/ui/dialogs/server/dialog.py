@@ -232,7 +232,7 @@ class ServerConfigurationDialog(QDialog):
         github = KINDS[index] is SourceKind.GITHUB
         self.github.setVisible(github)
         self.cctray.setVisible(not github)
-        self.timezone_form.setRowVisible(self.timezone, not github)
+        self.advanced.setVisible(not github)
         self.auth.show_type(not github)
         if github:
             self.auth.show_token_field()
