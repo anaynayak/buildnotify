@@ -268,7 +268,6 @@ class ServerConfigurationDialog(QDialog):
         projects_model.itemChanged.connect(self.project_checked)
         self.projects_list = QtGui.QStandardItem(self.tr("All"))
         self.projects_list.setCheckable(True)
-        self.projects_list.setUserTristate(True)
         for project in response.projects:
             item = QtGui.QStandardItem(project.name)
             item.setCheckable(True)
