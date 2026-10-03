@@ -1,7 +1,7 @@
 name: nightly
 
-# Every push to main builds dev-versioned artifacts and replaces the rolling `nightly`
-# pre-release. It never publishes to PyPI, and the `nightly` tag doesn't match release.yml's v*.
+# Every push to main builds dev-versioned artifacts and replaces the rolling `dev`
+# pre-release. It never publishes to PyPI, and the `dev` tag doesn't match release.yml's v*.
 on:
   push:
     branches: [main]
@@ -97,8 +97,8 @@ jobs:
             "" \
             "Commit: https://github.com/$GH_REPO/commit/$SHA" \
             "Changes since the last release: see Unreleased in https://github.com/$GH_REPO/blob/$SHA/CHANGELOG" > notes.md
-          gh release delete nightly --cleanup-tag --yes || true
-          gh release create nightly assets/* \
+          gh release delete dev --cleanup-tag --yes || true
+          gh release create dev assets/* \
             --target "$SHA" \
             --title "Nightly ($(echo "$SHA" | cut -c1-7))" \
             --notes-file notes.md \

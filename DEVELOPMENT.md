@@ -40,7 +40,7 @@ The status icons are plain SVG files in `buildnotifylib/resources/icons` and shi
 
 CI runs lint, format and mypy, then the tests on Python 3.11 to 3.14 on Ubuntu and on Python 3.14 on macOS and Windows. On Linux it also builds the wheel, installs it into a clean venv and checks that every tray icon loads.
 
-Pushing to `main` runs `.github/workflows/nightly.yml`. It rewrites `buildnotifylib/version.py` in the CI workspace to the next patch version with a dev suffix, for example `3.0.1.dev42` when `VERSION` is `3.0.0` (the committed file never changes). Nightlies therefore sort after the last release, so `uv` and `pip` treat them as newer, builds the sdist and wheel, and attests their provenance. It then replaces the rolling `nightly` pre-release, deleting it and its tag and recreating both at the pushed commit with the wheel, sdist and Flatpak bundle. The release is marked as a pre-release and never as Latest. The notes link to the commit and to the Unreleased section of the CHANGELOG. This workflow has no PyPI step, and the `nightly` tag doesn't match the `v*` filter of `release.yml`.
+Pushing to `main` runs `.github/workflows/nightly.yml`. It rewrites `buildnotifylib/version.py` in the CI workspace to the next patch version with a dev suffix, for example `3.0.1.dev42` when `VERSION` is `3.0.0` (the committed file never changes). Nightlies therefore sort after the last release, so `uv` and `pip` treat them as newer, builds the sdist and wheel, and attests their provenance. It then replaces the rolling pre-release tagged `dev`, deleting it and its tag and recreating both at the pushed commit with the wheel, sdist and Flatpak bundle. The release is marked as a pre-release and never as Latest. The notes link to the commit and to the Unreleased section of the CHANGELOG. This workflow has no PyPI step, and the `nightly` tag doesn't match the `v*` filter of `release.yml`.
 
 Both `nightly.yml` and `release.yml` call `flatpak.yml` as a reusable workflow, so the bundle they publish comes from the same build and lint that pull requests get. The job uploads it as the `flatpak` artifact. `flatpak.yml` no longer runs on its own for pushes to `main`.
 
@@ -103,3 +103,5 @@ flatpak run io.github.anaynayak.BuildNotify
 ```
 
 The runtime comes from Flathub, so add that remote first if you haven't. The manifest builds from the checked-out tree (`type: dir`), which Flathub won't accept, so expect the manifest lint to flag it until the source points at a release tag.
+
+Keep "Enable release immutability" off in the repository settings. The `dev` pre-release is deleted and recreated on every push to `main`, which immutable releases forbid. A tag name used by an immutable release can never be reused, which is why the rolling tag moved from `nightly` to `dev`.
