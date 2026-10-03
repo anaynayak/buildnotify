@@ -1,3 +1,7 @@
+---
+description: Add and edit servers in BuildNotify, choose which projects to watch, and set the menu, notification and sort preferences.
+---
+
 # Preferences and the server dialog
 
 Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`. A url typed without one, such as `ci.example.org/cc.xml`, gets `https://`.

@@ -1,3 +1,7 @@
+---
+description: Watch Crow CI repositories in BuildNotify through the per-repository cctray feed.
+---
+
 # Crow CI
 
 Crow CI publishes a cctray feed for each repository.

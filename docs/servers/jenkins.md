@@ -1,3 +1,7 @@
+---
+description: Watch Jenkins builds in BuildNotify through the CCTray XML plugin feed, with the URL pattern and sign-in options.
+---
+
 # Jenkins
 
 Jenkins publishes a cctray feed through the CCTray XML plugin.

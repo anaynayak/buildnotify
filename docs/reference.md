@@ -1,3 +1,7 @@
+---
+description: Every BuildNotify preference, command line option, settings file location and custom script variable in one place.
+---
+
 # Reference
 
 Every setting, option and variable in one place. For how to use them, see [Preferences and the server dialog](guide/preferences.md).

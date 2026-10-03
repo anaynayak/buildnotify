@@ -1,3 +1,7 @@
+---
+description: An overview of using BuildNotify: the tray icon and menu, notifications, muting, and preferences.
+---
+
 # How to use
 
 Once installed, launch BuildNotify with `buildnotify`. You should see a new icon in the notification tray. Right click it to configure BuildNotify. On Linux and Windows a left click opens the same menu.

@@ -1,3 +1,7 @@
+---
+description: Mute a server or project, or pause all BuildNotify notifications for an hour.
+---
+
 # Muting and pausing
 
 The `Mute` submenu has one submenu per server, named after the server. Each holds a `Mute whole server` checkbox, a separator and a checkbox for each of its projects. A server with no projects shows as a single `Mute <server>` checkbox instead. A muted server or project gets no notifications, and the custom script does not run for it. Muting a server also mutes all its projects and its connectivity notifications.

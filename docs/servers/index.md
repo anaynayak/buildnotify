@@ -1,3 +1,7 @@
+---
+description: Feed URLs and sources for the CI servers BuildNotify supports: Jenkins, GoCD, Woodpecker, Crow CI, GitHub Actions and other cctray servers.
+---
+
 # Servers
 
 BuildNotify reads any server that publishes a cctray.xml feed, and it can watch GitHub Actions directly. [cctray.org/servers](https://cctray.org/servers/) keeps the full list of servers with a feed. Replace the placeholders in angle brackets.

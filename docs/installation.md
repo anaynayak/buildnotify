@@ -1,3 +1,7 @@
+---
+description: Install BuildNotify on Linux, macOS or Windows with uv or pipx, as a Flatpak bundle, or as a development build.
+---
+
 # Installation instructions
 
 ## Requirements

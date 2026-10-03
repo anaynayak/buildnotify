@@ -1,3 +1,7 @@
+---
+description: Answers to common BuildNotify questions about requirements, supported servers, settings and notifications.
+---
+
 # FAQ
 
 ## What all do I need to run this on my machine?

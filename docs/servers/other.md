@@ -1,3 +1,7 @@
+---
+description: Use BuildNotify with any server that publishes a cctray.xml feed, such as Concourse and Drone CI.
+---
+
 # Other cctray servers
 
 Any server that publishes a cctray.xml feed works. [cctray.org/servers](https://cctray.org/servers/) lists the servers and their feed paths. Two are listed here.

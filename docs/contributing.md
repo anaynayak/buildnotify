@@ -1,3 +1,7 @@
+---
+description: Set up a local BuildNotify checkout, run the tests and linters, and send a pull request.
+---
+
 # Contributing
 
 Bug reports and pull requests are welcome at [github.com/anaynayak/buildnotify](https://github.com/anaynayak/buildnotify). Report a security problem privately, as described in [Security and privacy](security.md#reporting-a-vulnerability). The project follows the [code of conduct](https://github.com/anaynayak/buildnotify/blob/main/CODE_OF_CONDUCT.md).

@@ -1,3 +1,7 @@
+---
+description: Install BuildNotify, add your first CI server and see its build status in the system tray in a few minutes.
+---
+
 # Quick start
 
 ## 1. Install

@@ -1,3 +1,7 @@
+---
+description: Watch GoCD pipelines in BuildNotify through the built-in cctray feed, with the URL pattern and sign-in options.
+---
+
 # GoCD
 
 GoCD serves a cctray feed from its own server. No plugin is needed.

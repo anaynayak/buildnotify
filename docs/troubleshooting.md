@@ -1,3 +1,7 @@
+---
+description: Fix common BuildNotify problems: no tray icon on GNOME, untrusted certificates, sign-in failures and unreachable servers.
+---
+
 # Troubleshooting
 
 ## No tray icon on GNOME

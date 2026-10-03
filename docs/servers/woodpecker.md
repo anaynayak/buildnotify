@@ -1,3 +1,7 @@
+---
+description: Watch Woodpecker CI repositories in BuildNotify through the badge API cctray feed.
+---
+
 # Woodpecker CI
 
 Woodpecker publishes a cctray feed for each repository through its badge API.

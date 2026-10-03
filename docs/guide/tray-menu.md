@@ -1,3 +1,7 @@
+---
+description: How the BuildNotify tray icon, tooltip and menu show failing, building, passing and unknown projects.
+---
+
 # Tray and menu
 
 1. Projects are grouped under `Failing`, `Building`, `Passing` and `Unknown` headers, each with a count, such as `Failing (2)`. A section with no projects is left out. A failing project that is building again stays under `Failing`. With more than 15 projects, the passing ones move into a `Passing (N)` submenu, while failing and building projects stay in the menu itself.

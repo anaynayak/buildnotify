@@ -1,3 +1,7 @@
+---
+description: How BuildNotify stores credentials in the system keyring, what it sends over the network, and how to report a vulnerability.
+---
+
 # Security and privacy
 
 ## Where credentials are stored

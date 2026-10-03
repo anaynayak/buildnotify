@@ -1,3 +1,7 @@
+---
+description: Choose which BuildNotify notifications to show and run a custom script on each one, with the environment variables it gets.
+---
+
 # Notifications and custom script
 
 ## Notifications

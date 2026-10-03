@@ -1,3 +1,7 @@
+---
+description: Watch GitHub Actions workflows in BuildNotify directly through the GitHub API, with a token, workflow and branch filters.
+---
+
 # GitHub Actions
 
 BuildNotify can watch GitHub Actions without a cctray feed.

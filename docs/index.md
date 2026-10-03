@@ -1,3 +1,7 @@
+---
+description: BuildNotify is a system tray app that shows CI build status and notifies you when a build breaks or is fixed. Works with Jenkins, GoCD, Woodpecker, GitHub Actions and any cctray feed.
+---
+
 # BuildNotify
 
 [![PyPI version](https://img.shields.io/pypi/v/buildnotify.svg)](https://pypi.org/project/buildnotify/)
