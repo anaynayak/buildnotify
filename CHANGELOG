@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Security
+- CodeQL analysis of the Python code
 - `SECURITY.md` with the supported versions, how to report a vulnerability and the disclosure timeline
 - Releases and nightlies carry a `buildnotify-<version>.intoto.jsonl` provenance asset
 
