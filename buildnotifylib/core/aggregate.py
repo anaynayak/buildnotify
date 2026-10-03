@@ -1,5 +1,8 @@
+from collections import defaultdict
 from collections.abc import Sequence
+from dataclasses import replace
 
+from buildnotifylib.core.errors import server_name
 from buildnotifylib.core.model import Activity, Project, ServerSnapshot, Status
 
 
@@ -12,9 +15,24 @@ def rank(project: Project) -> tuple[Status, Activity]:
 SUMMARY_NAMES = 5
 
 
+def disambiguated(servers: Sequence[ServerSnapshot]) -> list[ServerSnapshot]:
+    """Display only: name the server on unprefixed rows whose label also appears on another server."""
+    homes: dict[str, set[str]] = defaultdict(set)
+    for server in servers:
+        for project in server.projects:
+            homes[project.label()].add(server.url)
+    return [replace(server, projects=tuple(named(project, homes) for project in server.projects)) for server in servers]
+
+
+def named(project: Project, homes: dict[str, set[str]]) -> Project:
+    if project.prefix or len(homes[project.label()]) < 2:
+        return project
+    return replace(project, prefix=server_name(project.server_url))
+
+
 class OverallIntegrationStatus:
     def __init__(self, servers: Sequence[ServerSnapshot]):
-        self.servers = list(servers)
+        self.servers = disambiguated(servers)
 
     def get_build_status(self) -> str | None:
         ranks = [rank(project) for project in self.get_projects()]

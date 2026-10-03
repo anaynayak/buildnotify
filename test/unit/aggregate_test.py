@@ -142,3 +142,33 @@ def test_should_be_unreachable_only_when_every_server_is_down_with_nothing_cache
     assert not OverallIntegrationStatus([down, up]).unreachable()
     assert not OverallIntegrationStatus([down, cached]).unreachable()
     assert not OverallIntegrationStatus([]).unreachable()
+
+
+def snapshot(url, name, prefix=None):
+    return ServerSnapshot(url, (ProjectBuilder({"name": name}, url=url, prefix=prefix).build(),))
+
+
+def labels(*snapshots):
+    return [project.label() for project in OverallIntegrationStatus(snapshots).get_projects()]
+
+
+def test_should_name_the_server_only_when_a_project_name_collides_across_servers():
+    found = labels(snapshot("http://ci-a.example:8080/cc.xml", "web"), snapshot("http://ci-b.example/cc.xml", "web"))
+
+    assert found == ["[ci-a.example:8080] web", "[ci-b.example] web"]
+
+
+def test_should_leave_unique_names_and_prefixed_rows_alone():
+    found = labels(
+        snapshot("http://a/cc.xml", "web"),
+        snapshot("http://b/cc.xml", "api"),
+        snapshot("http://c/cc.xml", "web", prefix="c"),
+    )
+
+    assert found == ["web", "api", "[c] web"]
+
+
+def test_should_not_treat_a_repeated_name_on_one_server_as_a_collision():
+    both = ServerSnapshot("http://a/cc.xml", snapshot("http://a/cc.xml", "web").projects * 2)
+
+    assert labels(both, snapshot("http://b/cc.xml", "api")) == ["web", "web", "api"]
