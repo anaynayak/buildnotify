@@ -10,6 +10,7 @@ EXCLAIM_BELOW = 20
 RASTER_SIZE = QtCore.QSize(128, 128)
 SYMBOLIC = "-symbolic"
 MUTED_OPACITY = 0.35
+TRAY_RATIOS = (1.0, 2.0)
 
 
 class BuildIcons:
@@ -46,18 +47,13 @@ class BuildIcons:
         self,
         status,
         count: int,
-        device_pixel_ratio: float = 1.0,
         symbolic: bool = False,
         size: QtCore.QSize = TRAY_SIZE,
     ) -> QtGui.QIcon:
-        if count == 0:
-            return self.for_status(status, symbolic)
-        pixmap = self.for_status(status, symbolic).pixmap(size, device_pixel_ratio)
-        draw_count(pixmap, count, size)
-        return QtGui.QIcon(pixmap)
+        return tray_icon(self.for_status(status, symbolic), count, size)
 
     def for_muted(self, status) -> QtGui.QIcon:
-        return dimmed(self.for_status(status))
+        return tray_icon(self.for_status(status), 0, TRAY_SIZE, MUTED_OPACITY)
 
     def icon_name(self, status: str, symbolic: bool = False) -> str:
         return self.all_status.get(status, self.unavailable) + (SYMBOLIC if symbolic else "")
@@ -98,16 +94,28 @@ def badge_rect(count: int, device_pixel_ratio: float, size: QtCore.QSize = TRAY_
     return QtCore.QRectF(size.width() - width, size.height() - height, width, height)
 
 
-def dimmed(icon: QtGui.QIcon) -> QtGui.QIcon:
-    source = icon.pixmap(TRAY_SIZE)
+def tray_icon(source: QtGui.QIcon, count: int, size: QtCore.QSize, opacity: float = 1.0) -> QtGui.QIcon:
+    """Every tray state goes through here, so macOS gets the same logical size with 1x and 2x pixmaps."""
+    icon = QtGui.QIcon()
+    for ratio in TRAY_RATIOS:
+        pixmap = source.pixmap(size, ratio)
+        if opacity < 1.0:
+            pixmap = faded(pixmap, opacity)
+        if count:
+            draw_count(pixmap, count, size)
+        icon.addPixmap(pixmap)
+    return icon
+
+
+def faded(source: QtGui.QPixmap, opacity: float) -> QtGui.QPixmap:
     pixmap = QtGui.QPixmap(source.size())
     pixmap.setDevicePixelRatio(source.devicePixelRatio())
     pixmap.fill(QtCore.Qt.GlobalColor.transparent)
     painter = QtGui.QPainter(pixmap)
-    painter.setOpacity(MUTED_OPACITY)
+    painter.setOpacity(opacity)
     painter.drawPixmap(0, 0, source)
     painter.end()
-    return QtGui.QIcon(pixmap)
+    return pixmap
 
 
 def draw_count(pixmap: QtGui.QPixmap, count: int, size: QtCore.QSize = TRAY_SIZE) -> None:

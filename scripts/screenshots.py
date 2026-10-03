@@ -157,7 +157,7 @@ def tray_icons(icons: BuildIcons) -> None:
         top = row * (size + gap)
         painter.fillRect(QRect(0, top, canvas.width(), size + gap), QColor(panel))
         for column, (state, count) in enumerate(TRAY_STATES):
-            icon = icons.for_aggregate_status(state, count, 2.0, symbolic=symbolic)
+            icon = icons.for_aggregate_status(state, count, symbolic=symbolic)
             target = QRect(QPoint(gap + column * (size + gap), gap // 2 + top), TRAY_SIZE * 2)
             icon.paint(painter, target, Qt.AlignmentFlag.AlignCenter)
     painter.end()

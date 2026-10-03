@@ -78,7 +78,7 @@ def test_should_hand_the_injected_connection_to_the_menu(qtbot):
     assert widget.app_menu.connection is connection
 
 
-def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker, monkeypatch):
+def test_should_build_the_tray_icon_with_the_same_arguments_whatever_the_screen_ratio(qtbot, mocker, monkeypatch):
     monkeypatch.setattr("buildnotifylib.ui.app_ui.sys.platform", "linux")
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)
@@ -89,7 +89,7 @@ def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker, mo
 
     widget.update_projects(OverallIntegrationStatus([ServerSnapshot("someurl", (project,))]))
 
-    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0, symbolic=False, size=TRAY_SIZE)
+    icon.assert_called_once_with("Failure.Sleeping", 1, symbolic=False, size=TRAY_SIZE)
 
 
 @pytest.mark.parametrize("symbolic", [False, True])

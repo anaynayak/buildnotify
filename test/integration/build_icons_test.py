@@ -1,5 +1,5 @@
 import pytest
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QPoint, QRect, QSize
 from PySide6.QtGui import QColor, QIcon, QImage
 
 from buildnotifylib.ui.build_icons import BADGE_RING, TRAY_SIZE, BuildIcons, badge_label, badge_rect
@@ -55,9 +55,9 @@ def test_should_keep_symbolic_icons_sharp_on_hidpi(qtbot):
 
 @pytest.mark.functional
 def test_should_draw_the_count_over_a_symbolic_icon(qtbot):
-    icon = BuildIcons().for_aggregate_status("Failure.Sleeping", 2, 2.0, symbolic=True)
+    icon = BuildIcons().for_aggregate_status("Failure.Sleeping", 2, symbolic=True)
 
-    assert icon.availableSizes() == [QSize(44, 44)]
+    assert icon.availableSizes() == [QSize(22, 22), QSize(44, 44)]
 
 
 @pytest.fixture
@@ -92,18 +92,10 @@ def test_should_not_swap_a_missing_symbolic_theme_icon_for_the_coloured_one(qtbo
 
 
 @pytest.mark.functional
-@pytest.mark.parametrize("ratio, pixels", [(1.0, 22), (2.0, 44), (1.5, 33)])
-def test_should_render_the_count_overlay_at_the_device_pixel_ratio(qtbot, ratio, pixels):
-    icon = BuildIcons().for_aggregate_status("Failure.Sleeping", 2, device_pixel_ratio=ratio)
-
-    assert icon.availableSizes() == [QSize(pixels, pixels)]
-
-
-@pytest.mark.functional
 def test_should_draw_the_count_over_the_status_icon(qtbot):
     icons = BuildIcons()
     plain = icons.for_status("Failure.Sleeping").pixmap(QSize(22, 22), 2.0).toImage()
-    counted = icons.for_aggregate_status("Failure.Sleeping", 3, device_pixel_ratio=2.0).pixmap(QSize(22, 22), 2.0)
+    counted = icons.for_aggregate_status("Failure.Sleeping", 3).pixmap(QSize(22, 22), 2.0)
 
     assert counted.toImage() != plain
 
@@ -146,7 +138,7 @@ def pixel(icon: QIcon, x: float, y: float, ratio: float) -> QColor:
 def test_should_leave_the_icon_centre_clear_of_the_badge(qtbot, symbolic, ratio):
     icons = BuildIcons()
     plain = icons.for_status("Failure.Sleeping", symbolic)
-    counted = icons.for_aggregate_status("Failure.Sleeping", 3, ratio, symbolic=symbolic)
+    counted = icons.for_aggregate_status("Failure.Sleeping", 3, symbolic=symbolic)
 
     assert pixel(counted, 10.5, 10.5, ratio) == pixel(plain, 10.5, 10.5, ratio)
     assert pixel(counted, 5, 5, ratio) == pixel(plain, 5, 5, ratio)
@@ -155,7 +147,7 @@ def test_should_leave_the_icon_centre_clear_of_the_badge(qtbot, symbolic, ratio)
 @pytest.mark.functional
 @pytest.mark.parametrize("symbolic", [False, True])
 def test_should_knock_out_a_ring_around_the_badge(qtbot, symbolic):
-    counted = BuildIcons().for_aggregate_status("Failure.Sleeping", 3, 2.0, symbolic=symbolic)
+    counted = BuildIcons().for_aggregate_status("Failure.Sleeping", 3, symbolic=symbolic)
     rect = badge_rect(3, 2.0)
     ring = pixel(counted, int(rect.center().x()), rect.top() - BADGE_RING / 2, 2.0)
 
@@ -230,5 +222,62 @@ def test_should_draw_the_small_badge_without_digits_at_16_px(qtbot):
     small = QSize(16, 16)
     icon = icons.for_aggregate_status("Failure.Sleeping", 12, size=small)
 
-    assert icon.availableSizes() == [small]
+    assert icon.availableSizes() == [small, small * 2]
     assert badge_rect(12, 1.0, small).width() == badge_rect(1, 1.0, small).width()
+
+
+TRAY_STATES = ["Success.Sleeping", "Failure.Building", "unavailable", "unreachable"]
+
+
+def tray_icons(icons: BuildIcons, symbolic: bool) -> dict[str, QIcon]:
+    """Every icon the tray can be given: launch, after a poll, with a badge, and muted."""
+    built = {"launch": icons.for_aggregate_status(None, 0, symbolic=symbolic)}
+    for status in TRAY_STATES:
+        built[f"plain {status}"] = icons.for_aggregate_status(status, 0, symbolic=symbolic)
+        built[f"badge {status}"] = icons.for_aggregate_status(status, 3, symbolic=symbolic)
+    if not symbolic:
+        built["muted"] = icons.for_muted("Failure.Sleeping")
+    return built
+
+
+def content_bounds(icon: QIcon, ratio: float) -> QRect:
+    image = icon.pixmap(TRAY_SIZE, ratio).toImage().convertToFormat(QImage.Format.Format_ARGB32)
+    points = [(x, y) for y in range(image.height()) for x in range(image.width()) if image.pixelColor(x, y).alpha()]
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    return QRect(QPoint(min(xs), min(ys)), QPoint(max(xs), max(ys)))
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_should_offer_the_same_sizes_for_every_tray_state(qtbot, symbolic):
+    sizes = {name: icon.availableSizes() for name, icon in tray_icons(BuildIcons(), symbolic).items()}
+
+    assert len({tuple((s.width(), s.height()) for s in value) for value in sizes.values()}) == 1, sizes
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("symbolic", [False, True])
+@pytest.mark.parametrize("ratio", [1.0, 2.0])
+def test_should_render_every_tray_state_at_the_same_logical_size(qtbot, symbolic, ratio):
+    for name, icon in tray_icons(BuildIcons(), symbolic).items():
+        pixmap = icon.pixmap(TRAY_SIZE, ratio)
+        assert pixmap.size() == TRAY_SIZE * ratio, name
+        assert pixmap.devicePixelRatio() == ratio, name
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("ratio", [1.0, 2.0])
+def test_should_not_add_a_transparent_margin_to_any_tray_state(qtbot, ratio):
+    full = QRect(QPoint(0, 0), TRAY_SIZE * ratio)
+    for name, icon in tray_icons(BuildIcons(), False).items():
+        assert content_bounds(icon, ratio) == full, name
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("ratio", [1.0, 2.0])
+def test_should_keep_the_muted_icon_the_same_extent_as_the_plain_one(qtbot, ratio):
+    icons = BuildIcons()
+
+    assert content_bounds(icons.for_muted("Failure.Sleeping"), ratio) == content_bounds(
+        icons.for_aggregate_status("Failure.Sleeping", 0), ratio
+    )

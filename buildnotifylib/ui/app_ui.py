@@ -33,7 +33,7 @@ class AppUi(QtCore.QObject):
         self.build_icons = build_icons
         self.clock = clock
         self.last_status: OverallIntegrationStatus | None = None
-        self.tray = QSystemTrayIcon(self.build_icons.for_status(None, store.settings.symbolic_icons), self.widget)
+        self.tray = QSystemTrayIcon(self.launch_icon(), self.widget)
         self.tray.show()
         if not store.settings.servers:
             self.tray.setToolTip(NO_SERVERS)
@@ -45,6 +45,13 @@ class AppUi(QtCore.QObject):
         app = QApplication.instance()
         if app is not None:
             app.aboutToQuit.connect(self.tray.hide)
+
+    def launch_icon(self):
+        symbolic = self.store.settings.symbolic_icons
+        return self.build_icons.for_aggregate_status(None, 0, symbolic=symbolic, size=self.tray_size())
+
+    def tray_size(self):
+        return SMALL_TRAY_SIZE if sys.platform == "win32" else TRAY_SIZE
 
     def show_menu(self, reason):
         if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.ActivationReason.Trigger:
@@ -61,9 +68,8 @@ class AppUi(QtCore.QObject):
         self.last_status = integration_status
         count = len(integration_status.get_failing_builds(self.mutes()))
         status = self.icon_state(integration_status)
-        ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
-        size = SMALL_TRAY_SIZE if sys.platform == "win32" else TRAY_SIZE
-        icon = self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic, size=size)
+        symbolic = self.store.settings.symbolic_icons
+        icon = self.build_icons.for_aggregate_status(status, count, symbolic=symbolic, size=self.tray_size())
         self.tray.setIcon(icon)
         self.app_menu.update(integration_status.get_projects(), integration_status.unavailable_servers())
         self.tray.setToolTip(self.tooltip(integration_status))

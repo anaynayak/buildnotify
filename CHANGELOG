@@ -47,6 +47,7 @@
 - Bearer and GitHub tokens are stored in the keyring under the username `token` instead of an empty username, which keyring deprecates. Tokens saved by earlier versions are still read, and move to the new entry the next time settings are saved
 
 ### Fixed
+- The tray icon keeps the same size in every state on macOS. After a poll the icon with a count badge or a muted dimming was a single 22 px picture while the launch icon was a 128 px one, so the menu bar scaled them differently and the icon looked smaller. Every state is now built the same way, with 1x and 2x pictures of the same size
 - GitHub Actions servers no longer list Dependabot's dynamic runs (event `dynamic`, workflow path under `dynamic/`), which added a new row for every run with its run number in the name
 - Accepting the certificate prompt in the server dialog turns off certificate checks only for that host. Changing the feed URL to another host turns them back on
 - Saving Preferences no longer cancels a pause set from the tray while the dialog was open
