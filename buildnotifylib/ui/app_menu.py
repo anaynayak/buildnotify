@@ -80,13 +80,16 @@ class AppMenu(QtCore.QObject):
             self.passing_menu.deleteLater()
             self.passing_menu = None
         mutes = Mutes.from_settings(self.store.settings)
-        for section, members in grouped(self.sorted_projects(projects)):
+        for index, (section, members) in enumerate(grouped(self.sorted_projects(projects))):
             title = f"{section} ({len(members)})"
-            self.menu.addSection(title)
             target = self.menu
+            if index:
+                self.menu.addSeparator()
             if section is Section.PASSING and len(projects) > OVERFLOW:
                 target = self.passing_menu = self.menu.addMenu(title)
                 target.setToolTipsVisible(True)
+            else:
+                add_header(self.menu, title)
             for project in members:
                 self.create_menu_item(target, project, mutes.mutes(project))
 
@@ -263,6 +266,11 @@ class AppMenu(QtCore.QObject):
 
     def open_url(self, url: str):
         webbrowser.open(url)
+
+
+def add_header(menu: QMenu, title: str) -> None:
+    """A disabled row, since native macOS menus don't draw QMenu section titles."""
+    menu.addAction(title).setEnabled(False)
 
 
 def elided(menu: QMenu, label: str) -> str:

@@ -884,20 +884,24 @@ def test_should_group_projects_under_status_headers_with_counts(mute_menu):
 
     app_menu.update(projects)
 
-    assert texts(app_menu.menu)[:11] == [
+    assert texts(app_menu.menu)[:14] == [
         "Failing (2)",
         "api",
         "e2e",
+        "",
         "Building (1)",
         "deploy",
+        "",
         "Passing (2)",
         "docs",
         "web",
+        "",
         "Unknown (1)",
         "new",
         "",
     ]
-    headers = [a for a in app_menu.menu.actions() if a.isSeparator() and a.text()]
+    assert not [a for a in app_menu.menu.actions() if a.isSeparator() and a.text()]
+    headers = [a for a in app_menu.menu.actions() if a.text().endswith(")") and not a.isEnabled()]
     assert [a.text() for a in headers] == ["Failing (2)", "Building (1)", "Passing (2)", "Unknown (1)"]
 
 
@@ -908,6 +912,7 @@ def test_should_omit_empty_sections(mute_menu):
     app_menu.update([project_with("api", "Success")])
 
     assert texts(app_menu.menu)[:3] == ["Passing (1)", "api", ""]
+    assert not action(app_menu.menu, "Passing (1)").isEnabled()
 
 
 def many(count, status, activity="Sleeping"):
@@ -930,17 +935,18 @@ def test_should_collapse_passing_projects_into_a_submenu_above_the_threshold(mut
 
     app_menu.update(many(2, "Failure") + many(1, "Success", "Building") + many(13, "Success"))
 
-    assert texts(app_menu.menu)[:8] == [
+    assert texts(app_menu.menu)[:9] == [
         "Failing (2)",
         "failure-00",
         "failure-01",
+        "",
         "Building (1)",
         "success-00",
-        "Passing (13)",
+        "",
         "Passing (13)",
         "",
     ]
-    passing = app_menu.menu.actions()[6].menu()
+    passing = app_menu.menu.actions()[7].menu()
     assert texts(passing) == [f"success-{n:02}" for n in range(13)]
 
 
@@ -950,7 +956,7 @@ def test_should_open_a_project_from_the_passing_submenu(mute_menu, mocker):
     browser = mocker.patch("buildnotifylib.ui.app_menu.webbrowser.open")
     app_menu.update(many(16, "Success"))
 
-    action(app_menu.menu.actions()[1].menu(), "success-03").trigger()
+    action(action(app_menu.menu, "Passing (16)").menu(), "success-03").trigger()
 
     browser.assert_called_once_with("http://ci/success-03")
 
