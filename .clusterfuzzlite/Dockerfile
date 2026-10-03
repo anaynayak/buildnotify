@@ -1,4 +1,4 @@
-FROM gcr.io/oss-fuzz-base/base-builder-python@sha256:38a48455c198e5c2b5071426b11b764ecd52b60cd68c88e1a5685decc42f15d4
+FROM gcr.io/oss-fuzz-base/base-builder-python@sha256:cfcc123c40d4ecab777ac0f32f868177cb752950bf9f5d880f55e452adda5106
 COPY . $SRC/buildnotify
 WORKDIR $SRC/buildnotify
 COPY .clusterfuzzlite/build.sh $SRC/
