@@ -36,6 +36,8 @@ nav:
   - Security and privacy: security.md
   - Reference: reference.md
   - Troubleshooting: troubleshooting.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
   - FAQ: faq.md
 
 theme:
@@ -68,6 +70,9 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+  - pymdownx.snippets:
+      base_path: ['.']
+      check_paths: true
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
