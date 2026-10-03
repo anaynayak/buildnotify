@@ -4,12 +4,14 @@ site_url: https://anaynayak.github.io/buildnotify/
 repo_url: https://github.com/anaynayak/buildnotify
 repo_name: anaynayak/buildnotify
 
+# Pages build as installation.html etc., so the old Jekyll URLs keep working.
+use_directory_urls: false
+
 docs_dir: docs
 site_dir: site
 
-# Not part of the site: the Jekyll config, review reports and the rewrite draft.
+# Not part of the site: review reports and the rewrite draft.
 exclude_docs: |
-  _config.yml
   *.html
   rust-gpui-rewrite-analysis.md
 
@@ -21,6 +23,8 @@ nav:
 
 theme:
   name: material
+  logo: images/buildnotify.svg
+  favicon: images/buildnotify.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
