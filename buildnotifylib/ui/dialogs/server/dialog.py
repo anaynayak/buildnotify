@@ -24,7 +24,7 @@ from buildnotifylib.core.model import NONE_TIMEZONE, ServerSnapshot
 from buildnotifylib.core.ports import CertificateError, Connection
 from buildnotifylib.core.projects import ProjectLoader
 from buildnotifylib.core.settings import ServerSettings, SourceKind
-from buildnotifylib.ui.dialogs.server.auth_form import AuthForm, Credentials
+from buildnotifylib.ui.dialogs.server.auth_form import NONE, TOKEN, AuthForm, Credentials
 from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
 from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
 from buildnotifylib.ui.poller import Deadline, Fetch
@@ -80,8 +80,7 @@ class ServerConfigurationDialog(QDialog):
         if not keystore_available:
             self.auth.disable_keyring()
 
-        self.auth.authentication_type.currentIndexChanged.connect(self.auth.set_authentication_type)
-        self.cctray_authentication_type = ServerSettings.AUTH_USERNAME_PASSWORD
+        self.cctray_authentication_type = NONE
         self.source_kind.currentIndexChanged.connect(self.switch_kind)
         self.show_kind(self.source_kind.currentIndex())
         self.refresh_validity()
@@ -182,7 +181,7 @@ class ServerConfigurationDialog(QDialog):
     def switch_kind(self, index: int):
         if KINDS[index] is SourceKind.GITHUB:
             self.cctray_authentication_type = self.auth.authentication_type.currentIndex()
-            self.auth.select_silently(ServerSettings.AUTH_BEARER_TOKEN)
+            self.auth.select_silently(TOKEN)
             self.auth.password.setText("")
         else:
             self.auth.select_silently(self.cctray_authentication_type)

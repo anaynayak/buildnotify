@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QDialog, QMessageBox
 from buildnotifylib.adapters.http import HttpConnection
 from buildnotifylib.core.ports import Response
 from buildnotifylib.core.settings import ServerSettings, SourceKind
-from buildnotifylib.ui.dialogs.server.auth_form import AuthForm, Credentials
+from buildnotifylib.ui.dialogs.server.auth_form import NONE, PASSWORD, TOKEN, AuthForm, Credentials
 from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
@@ -440,7 +440,7 @@ def test_should_restore_the_cctray_authentication_type_after_switching_back(qtbo
     dialog.source_kind.setCurrentIndex(1)
     dialog.source_kind.setCurrentIndex(0)
 
-    assert dialog.auth.authentication_type.currentIndex() == ServerSettings.AUTH_USERNAME_PASSWORD
+    assert dialog.auth.authentication_type.currentIndex() == PASSWORD
     assert not dialog.auth.username.isHidden()
     assert dialog.auth.password_label.text() == "Password"
 
@@ -824,3 +824,53 @@ def test_should_show_the_full_name_as_a_tooltip(qtbot):
 
     assert dialog.projects_list.child(2).toolTip() == "ganymaticPack»R3.0-I"
     assert dialog.projects_view.textElideMode() == Qt.TextElideMode.ElideMiddle
+
+
+def test_should_offer_none_password_and_token_sign_in(qtbot):
+    auth = AuthForm()
+    qtbot.addWidget(auth)
+    items = [auth.authentication_type.itemText(i) for i in range(auth.authentication_type.count())]
+    assert items == ["None", "Username and password", "Token"]
+
+
+def test_should_hide_both_fields_and_save_blank_credentials_for_none(qtbot):
+    auth = AuthForm()
+    qtbot.addWidget(auth)
+    auth.set_value(Credentials(ServerSettings.AUTH_USERNAME_PASSWORD, "alice", "secret"))
+
+    auth.authentication_type.setCurrentIndex(NONE)
+
+    assert auth.username.isHidden() and auth.password.isHidden()
+    assert auth.value() == Credentials(ServerSettings.AUTH_USERNAME_PASSWORD, "", "")
+
+
+def test_should_start_a_new_server_with_no_sign_in(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection())
+    qtbot.addWidget(dialog)
+
+    assert dialog.auth.authentication_type.currentIndex() == NONE
+    assert dialog.auth.username.isHidden() and dialog.auth.password.isHidden()
+
+
+def test_should_show_username_and_password_fields_for_password_sign_in(qtbot):
+    auth = AuthForm()
+    qtbot.addWidget(auth)
+    auth.set_value(Credentials(ServerSettings.AUTH_USERNAME_PASSWORD, "alice", "secret"))
+
+    assert auth.authentication_type.currentIndex() == PASSWORD
+    assert not auth.username.isHidden() and not auth.password.isHidden()
+    assert auth.password_label.text() == "Password"
+
+
+def test_should_label_a_stored_bearer_token_as_a_token(qtbot):
+    auth = AuthForm()
+    qtbot.addWidget(auth)
+    credentials = Credentials(ServerSettings.AUTH_BEARER_TOKEN, "", "tok")
+
+    auth.set_value(credentials)
+
+    assert auth.authentication_type.currentIndex() == TOKEN
+    assert auth.username.isHidden() and not auth.password.isHidden()
+    assert auth.password_label.text() == "Bearer token"
+    assert auth.password.placeholderText() != ""
+    assert auth.value() == credentials
