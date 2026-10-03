@@ -38,15 +38,16 @@ the ruff, ruff-format and uv-lock hooks.
 
 ## Rules
 
-1. **Small commits on `main`.** Use short imperative subjects that match the history
-   ("Fix ...", "Add ...", "Remove ..."). One behaviour per commit. Tests go in the same commit
-   as the fix. Every commit must leave the suite green.
-2. **Subagents never push, tag, publish, or write to GitHub.** That includes PRs, issues,
+1. **Small commits, merged through a pull request.** `main` is protected by the `protect main`
+   ruleset: no direct pushes, no force pushes, and a PR needs the `lint`, `reproducible`,
+   `analyze` and all `test (...)` checks green and up to date with `main` (0 approvals, since a
+   solo maintainer can't approve their own PR). Work on a short-lived branch, use short
+   imperative commit subjects ("Fix ...", "Add ...", "Remove ..."), one behaviour per commit,
+   tests in the same commit as the fix, and every commit green.
+2. **Subagents never push, open PRs, tag, publish, or write to GitHub.** That includes issues,
    comments and workflow enable/disable. Record these steps in `backlog/docs/user-actions.md`.
-   Only the main loop session pushes `main`, and only once the whole backlog is done (the user
-   asked for this on 2026-10-02). A green local `just lint && just types && just test` is
-   enough between tasks. At the end it pushes, watches CI and fixes failures until `main` is
-   green. It never tags or publishes.
+   Only the main session pushes a branch, opens the PR, waits for the required checks and
+   merges it. It never tags or publishes.
 3. **Tests must be hermetic.** They never touch the real keychain or the user's QSettings
    (`test/conftest.py` handles this). Never launch the app for a manual or smoke run against the
    real settings: on macOS, HOME/XDG overrides don't isolate QSettings. Use `--settings <tmp.ini>`
