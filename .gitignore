@@ -24,3 +24,4 @@ backlog/
 .hypothesis/
 sbom.cdx.json
 site/
+!overrides/*.html
