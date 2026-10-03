@@ -38,9 +38,9 @@ class AuthForm(QGroupBox):
         self.password = QLineEdit()
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         self.form = form_layout()
-        add_row(self.form, self.tr("Sign in"), self.authentication_type)
-        self.username_label = add_row(self.form, self.tr("Username"), self.username)
-        self.password_label = add_row(self.form, self.tr("Password"), self.password)
+        add_row(self.form, self.tr("Sign &in"), self.authentication_type)
+        self.username_label = add_row(self.form, self.tr("&Username"), self.username)
+        self.password_label = add_row(self.form, self.tr("&Password"), self.password)
         self.message = add_message(self.form)
         self.token_help = add_message(self.form)
         self.token_help.setTextFormat(Qt.TextFormat.RichText)
@@ -72,10 +72,10 @@ class AuthForm(QGroupBox):
         self.form.setRowVisible(self.username, mode == PASSWORD)
         self.form.setRowVisible(self.password, mode != NONE)
         if mode == TOKEN:
-            self.password_label.setText(self.tr("Bearer token"))
+            self.password_label.setText(self.tr("B&earer token"))
             self.password.setPlaceholderText(self.tr("Do not include the 'Bearer' keyword"))
         else:
-            self.password_label.setText(self.tr("Password"))
+            self.password_label.setText(self.tr("&Password"))
             self.password.setPlaceholderText("")
 
     def show_type(self, visible: bool) -> None:
@@ -84,7 +84,7 @@ class AuthForm(QGroupBox):
     def show_token_field(self) -> None:
         self.username.setText("")
         self.show_mode(TOKEN)
-        self.password_label.setText(self.tr("Token"))
+        self.password_label.setText(self.tr("&Token"))
         self.password.setPlaceholderText(self.tr("Optional for public repositories"))
         self.token_help.show_hint(
             self.tr(

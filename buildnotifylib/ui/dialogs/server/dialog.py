@@ -93,7 +93,7 @@ class ServerConfigurationDialog(QDialog):
         self.source_kind = QComboBox()
         self.source_kind.addItems([self.tr("cctray feed"), self.tr("GitHub Actions")])
         kind_row = form_layout()
-        add_row(kind_row, self.tr("Source"), self.source_kind)
+        add_row(kind_row, self.tr("S&ource"), self.source_kind)
         self.github = GithubForm()
         self.cctray = CctrayForm()
         self.auth = AuthForm()
@@ -101,8 +101,8 @@ class ServerConfigurationDialog(QDialog):
         self.prefix = QLineEdit()
         self.prefix.setPlaceholderText(self.tr("e.g. branch/release"))
         self.misc = form_layout()
-        add_row(self.misc, self.tr("Server timezone"), self.timezone)
-        add_row(self.misc, self.tr("Display prefix"), self.prefix)
+        add_row(self.misc, self.tr("Ser&ver timezone"), self.timezone)
+        add_row(self.misc, self.tr("&Display prefix"), self.prefix)
         for field in (self.cctray.url, self.github.repository):
             field.editingFinished.connect(self.validate)
             field.textChanged.connect(self.refresh_validity)
@@ -118,7 +118,7 @@ class ServerConfigurationDialog(QDialog):
         return page
 
     def test_row(self) -> QHBoxLayout:
-        self.test_button = QPushButton(self.tr("Test connection"))
+        self.test_button = QPushButton(self.tr("Test &connection"))
         self.test_button.setAutoDefault(False)
         self.test_status = MessageLabel()
         row = QHBoxLayout()
@@ -129,7 +129,7 @@ class ServerConfigurationDialog(QDialog):
 
     def certificate_row(self) -> QHBoxLayout:
         self.certificate_status = MessageLabel()
-        self.certificate_undo = QPushButton(self.tr("Turn checks back on"))
+        self.certificate_undo = QPushButton(self.tr("Tur&n checks back on"))
         self.certificate_undo.setAutoDefault(False)
         self.certificate_undo.clicked.connect(self.restore_certificate_checks)
         row = QHBoxLayout()
@@ -175,6 +175,7 @@ class ServerConfigurationDialog(QDialog):
     def buttons(self) -> QDialogButtonBox:
         box = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Save)
         self.save_button = box.button(QDialogButtonBox.StandardButton.Save)
+        self.save_button.setText(self.tr("&Save"))
         self.cancel_button = box.button(QDialogButtonBox.StandardButton.Cancel)
         box.accepted.connect(self.save)
         box.rejected.connect(self.reject)

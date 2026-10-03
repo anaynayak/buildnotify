@@ -26,8 +26,8 @@ class AdvancedPage(QWidget):
         form = QFormLayout()
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
         self.labels = [
-            add_row(form, self.tr("Check every:"), self.interval),
-            add_row(form, self.tr("Give up after:"), self.timeout),
+            add_row(form, self.tr("&Check every:"), self.interval),
+            add_row(form, self.tr("&Give up after:"), self.timeout),
         ]
         layout = QVBoxLayout(self)
         layout.addLayout(form)

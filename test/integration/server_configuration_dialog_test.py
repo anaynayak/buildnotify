@@ -372,7 +372,7 @@ def test_should_show_github_fields_when_github_is_selected(qtbot):
     assert dialog.auth.authentication_type.isHidden()
     assert dialog.auth.username.isHidden()
     assert dialog.timezone.isHidden()
-    assert dialog.auth.password_label.text() == "Token"
+    assert dialog.auth.password_label.text().replace("&", "") == "Token"
 
     dialog.source_kind.setCurrentIndex(0)
 
@@ -442,7 +442,7 @@ def test_should_restore_the_cctray_authentication_type_after_switching_back(qtbo
 
     assert dialog.auth.authentication_type.currentIndex() == PASSWORD
     assert not dialog.auth.username.isHidden()
-    assert dialog.auth.password_label.text() == "Password"
+    assert dialog.auth.password_label.text().replace("&", "") == "Password"
 
 
 @pytest.mark.functional
@@ -859,7 +859,7 @@ def test_should_show_username_and_password_fields_for_password_sign_in(qtbot):
 
     assert auth.authentication_type.currentIndex() == PASSWORD
     assert not auth.username.isHidden() and not auth.password.isHidden()
-    assert auth.password_label.text() == "Password"
+    assert auth.password_label.text().replace("&", "") == "Password"
 
 
 def test_should_label_a_stored_bearer_token_as_a_token(qtbot):
@@ -871,7 +871,7 @@ def test_should_label_a_stored_bearer_token_as_a_token(qtbot):
 
     assert auth.authentication_type.currentIndex() == TOKEN
     assert auth.username.isHidden() and not auth.password.isHidden()
-    assert auth.password_label.text() == "Bearer token"
+    assert auth.password_label.text().replace("&", "") == "Bearer token"
     assert auth.password.placeholderText() != ""
     assert auth.value() == credentials
 

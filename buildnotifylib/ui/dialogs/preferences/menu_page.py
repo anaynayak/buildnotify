@@ -19,15 +19,15 @@ class MenuPage(QWidget):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.show_last_build_time = QCheckBox(self.tr("Show last build time"))
-        self.show_last_build_label = QCheckBox(self.tr("Show build label"))
-        self.tray_colour = QRadioButton(self.tr("Colour"))
-        self.tray_shapes = QRadioButton(self.tr("Shapes"))
+        self.show_last_build_time = QCheckBox(self.tr("Show last build &time"))
+        self.show_last_build_label = QCheckBox(self.tr("Show build &label"))
+        self.tray_colour = QRadioButton(self.tr("&Colour"))
+        self.tray_shapes = QRadioButton(self.tr("S&hapes"))
         self.tray_colour.setChecked(True)
         self.sort_buttons = {
-            SortKey.STATUS: QRadioButton(self.tr("Failing first")),
-            SortKey.NAME: QRadioButton(self.tr("Name")),
-            SortKey.LAST_BUILD_TIME: QRadioButton(self.tr("Last build time")),
+            SortKey.STATUS: QRadioButton(self.tr("&Failing first")),
+            SortKey.NAME: QRadioButton(self.tr("Nam&e")),
+            SortKey.LAST_BUILD_TIME: QRadioButton(self.tr("Last &build time")),
         }
         self.sort_buttons[SortKey.STATUS].setChecked(True)
 
@@ -48,7 +48,7 @@ class MenuPage(QWidget):
         tray.addWidget(self.tray_colour)
         tray.addWidget(self.tray_shapes)
         tray.addStretch()
-        tray_label = QLabel(self.tr("Tray icon:"))
+        tray_label = QLabel(self.tr("Tra&y icon:"))
         tray_label.setBuddy(self.tray_colour)
         form.addRow(tray_label, tray)
         return form

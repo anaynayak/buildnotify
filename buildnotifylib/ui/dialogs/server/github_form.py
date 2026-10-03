@@ -34,10 +34,10 @@ class GithubForm(QGroupBox):
         self.workflow = self.line_edit(self.tr("All workflows, or a file such as ci.yml"))
         self.branch = self.line_edit(self.tr("All branches"))
         layout = form_layout()
-        add_row(layout, self.tr("Repository"), self.repository)
+        add_row(layout, self.tr("&Repository"), self.repository)
         self.message = add_message(layout)
-        add_row(layout, self.tr("Workflow"), self.workflow)
-        add_row(layout, self.tr("Branch"), self.branch)
+        add_row(layout, self.tr("&Workflow"), self.workflow)
+        add_row(layout, self.tr("&Branch"), self.branch)
         self.setLayout(layout)
         self.repository.editingFinished.connect(self.tidy_repository)
 

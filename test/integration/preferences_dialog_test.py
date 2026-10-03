@@ -457,7 +457,7 @@ def test_should_offer_the_servers_menu_notifications_and_advanced_tabs(qtbot):
     dialog = PreferencesDialog(ConfigBuilder().build().settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
 
-    assert [dialog.tabs.tabText(index) for index in range(dialog.tabs.count())] == [
+    assert [dialog.tabs.tabText(index).replace("&", "") for index in range(dialog.tabs.count())] == [
         "Servers",
         "Menu",
         "Notifications",
@@ -480,7 +480,7 @@ def two_server_page(qtbot):
 def test_server_buttons_should_read_add_edit_and_remove(qtbot):
     page, _dialog = two_server_page(qtbot)
 
-    assert [page.add_button.text(), page.configure_button.text(), page.remove_button.text()] == [
+    assert [button.text().replace("&", "") for button in (page.add_button, page.configure_button, page.remove_button)] == [
         "Add...",
         "Edit...",
         "Remove",

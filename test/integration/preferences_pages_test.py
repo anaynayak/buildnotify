@@ -73,14 +73,14 @@ def test_notifications_page_should_use_the_event_wording(qtbot):
     page = NotificationsPage()
     qtbot.addWidget(page)
 
-    assert [box.text() for box in page.events.values()] == [
+    assert [box.text().replace("&", "") for box in page.events.values()] == [
         "Passes",
         "Fails",
         "Is fixed",
         "Fails again",
         "A server can't be reached",
     ]
-    assert page.script_enabled.text() == "Run a script on each notification"
+    assert page.script_enabled.text().replace("&", "") == "Run a script on each notification"
 
 
 @pytest.mark.functional
@@ -88,10 +88,10 @@ def test_menu_page_should_use_the_sentence_case_wording(qtbot):
     page = MenuPage()
     qtbot.addWidget(page)
 
-    assert page.show_last_build_time.text() == "Show last build time"
-    assert page.show_last_build_label.text() == "Show build label"
-    assert [button.text() for button in page.sort_buttons.values()] == ["Failing first", "Name", "Last build time"]
-    assert (page.tray_colour.text(), page.tray_shapes.text()) == ("Colour", "Shapes")
+    assert page.show_last_build_time.text().replace("&", "") == "Show last build time"
+    assert page.show_last_build_label.text().replace("&", "") == "Show build label"
+    assert [button.text().replace("&", "") for button in page.sort_buttons.values()] == ["Failing first", "Name", "Last build time"]
+    assert (page.tray_colour.text().replace("&", ""), page.tray_shapes.text().replace("&", "")) == ("Colour", "Shapes")
 
 
 @pytest.mark.functional
@@ -99,7 +99,7 @@ def test_advanced_page_should_label_the_interval_and_timeout(qtbot):
     page = AdvancedPage()
     qtbot.addWidget(page)
 
-    assert page.form_labels() == ["Check every:", "Give up after:"]
+    assert [label.replace("&", "") for label in page.form_labels()] == ["Check every:", "Give up after:"]
     assert (page.interval.minimum(), page.interval.maximum()) == (10, 3600)
 
 

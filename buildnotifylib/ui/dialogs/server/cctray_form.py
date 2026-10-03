@@ -10,7 +10,7 @@ class CctrayForm(QWidget):
         super().__init__(parent)
         self.url = QLineEdit()
         self.url.setPlaceholderText("http://[host]:[port]/dashboard/cctray.xml")
-        self.url_label = QLabel(self.tr("Feed URL"))
+        self.url_label = QLabel(self.tr("&Feed URL"))
         self.url_label.setBuddy(self.url)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

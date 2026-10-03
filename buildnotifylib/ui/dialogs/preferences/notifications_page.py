@@ -17,11 +17,11 @@ class NotificationsPage(QWidget):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.successful_builds = QCheckBox(self.tr("Passes"))
-        self.broken_builds = QCheckBox(self.tr("Fails"))
-        self.fixed_builds = QCheckBox(self.tr("Is fixed"))
-        self.still_failing_builds = QCheckBox(self.tr("Fails again"))
-        self.connectivity_issues = QCheckBox(self.tr("A server can't be reached"))
+        self.successful_builds = QCheckBox(self.tr("&Passes"))
+        self.broken_builds = QCheckBox(self.tr("Fai&ls"))
+        self.fixed_builds = QCheckBox(self.tr("&Is fixed"))
+        self.still_failing_builds = QCheckBox(self.tr("Fails a&gain"))
+        self.connectivity_issues = QCheckBox(self.tr("A server can't &be reached"))
         self.events = dict(
             successfulBuild=self.successful_builds,
             brokenBuild=self.broken_builds,
@@ -29,7 +29,7 @@ class NotificationsPage(QWidget):
             stillFailingBuild=self.still_failing_builds,
             connectivityIssues=self.connectivity_issues,
         )
-        self.script_enabled = QCheckBox(self.tr("Run a script on each notification"))
+        self.script_enabled = QCheckBox(self.tr("&Run a script on each notification"))
         self.script = QLineEdit()
         self.script.setPlaceholderText(self.tr('e.g. notify-send "$BUILDNOTIFY_STATUS"'))
         self.script.setEnabled(False)
@@ -54,7 +54,7 @@ class NotificationsPage(QWidget):
         return grid
 
     def script_layout(self) -> QVBoxLayout:
-        label = QLabel(self.tr("Script"))
+        label = QLabel(self.tr("S&cript"))
         label.setBuddy(self.script)
         row = QHBoxLayout()
         row.addWidget(label)

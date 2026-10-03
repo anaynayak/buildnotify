@@ -38,9 +38,9 @@ class ServersPage(QWidget):
         self.servers: dict[str, ServerSettings] = {}
         self.server_list = QListView()
         self.server_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.add_button = QPushButton(self.tr("Add..."))
-        self.configure_button = QPushButton(self.tr("Edit..."))
-        self.remove_button = QPushButton(self.tr("Remove"))
+        self.add_button = QPushButton(self.tr("A&dd..."))
+        self.configure_button = QPushButton(self.tr("&Edit..."))
+        self.remove_button = QPushButton(self.tr("&Remove"))
 
         buttons = QHBoxLayout()
         buttons.addStretch()
