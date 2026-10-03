@@ -12,7 +12,9 @@ On the first launch with no servers, the server dialog opens once. Until a serve
 
 Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`. A url typed without one, such as `ci.example.org/cc.xml`, gets `https://`.
 
-Add a new server by clicking the `+` sign. Each server can use a username and password or a Bearer token. Both are kept in the system keyring.
+Add a new server by clicking the `+` sign. Under Sign in, choose `None`, `Username and password` or `Token` (a Bearer token, without the `Bearer` keyword). Credentials are kept in the system keyring. Without one, the dialog says so and asks you to install the `keyring` package.
+
+If a server's certificate isn't trusted, the dialog asks whether to connect anyway. Accepting turns off certificate checks for that server only. The dialog then shows `Certificate checks off for <host>` with a `Turn checks back on` button, and checks come back on if you change the host.
 
 Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want. The `All (N of M)` box shows a partial state while some are unticked, and ticking it sets every project the filter field currently shows. Projects added to the feed later are included automatically.
 
@@ -40,7 +42,7 @@ The sort order applies within each section of the tray menu. `Failing first`, th
 
 BuildNotify can also watch GitHub Actions without a cctray feed. In the server dialog, set Source to `GitHub Actions` and fill in:
 
-1. Repository: `owner/name`, such as `octo-org/hello-world`.
+1. Repository: `owner/name`, such as `octo-org/hello-world`, or a pasted `https://github.com/owner/name` URL.
 2. Workflow (optional): a workflow file such as `ci.yml`, or its name. Leave it empty for all workflows.
 3. Branch (optional): leave it empty for all branches.
 4. Token: a personal access token that can read Actions on the repository. A fine-grained token needs the "Actions: read" permission. Public repositories work without a token, but GitHub then allows only 60 requests an hour. The token is kept in the system keyring.

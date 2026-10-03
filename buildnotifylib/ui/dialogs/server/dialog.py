@@ -140,9 +140,7 @@ class ServerConfigurationDialog(QDialog):
     def refresh_certificate_row(self) -> None:
         unchecked = self.unverified_host is not None and self.skip_ssl_verification()
         if unchecked:
-            self.certificate_status.show_error(
-                self.tr("Certificate checks off for {}").format(self.source_host())
-            )
+            self.certificate_status.show_error(self.tr("Certificate checks off for {}").format(self.source_host()))
         else:
             self.certificate_status.clear_message()
         self.certificate_undo.setVisible(unchecked)

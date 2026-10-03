@@ -1,6 +1,9 @@
 ## [Unreleased]
 
 ### Added
+- The server dialog's sign-in choices are `None`, `Username and password` and `Token`. `None` hides both fields and saves no credentials. Without a keyring, the dialog says credentials can't be stored and names the `keyring` package to install. A saved cctray bearer token is labelled as a token instead of `Password`
+- The certificate prompt now names the host and says it turns off certificate checks for that server. After accepting, the dialog shows `Certificate checks off for <host>` with a `Turn checks back on` button
+- The GitHub form links to token creation, says the token needs Actions: read and that GitHub allows 60 requests an hour without one, and accepts a pasted `https://github.com/owner/name` URL as the repository
 - The server dialog's project list has a filter field, an `All (N of M)` box that shows a partial state when some projects are unticked, a note that new projects in the feed are included automatically, and middle-elided names with the full name as a tooltip
 - A `Failing first` sort order, the default for new installs, puts building projects first within each tray menu section, then the newest builds. Existing installs keep their sort order
 - Unavailable servers get a menu row with their last error and when it happened. The error is one short line with the host but no full URL or credentials

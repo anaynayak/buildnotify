@@ -5,8 +5,10 @@ from PySide6.QtWidgets import QGroupBox, QLineEdit, QWidget
 
 from buildnotifylib.ui.widgets.forms import add_message, add_row, form_layout
 
-
-GITHUB_URL = re.compile(r"(?:https?://)?(?:www\.)?github\.com/([\w.-]+)/([\w.-]+?)(?:\.git)?(?:[/?#].*)?", re.IGNORECASE)
+GITHUB_URL = re.compile(
+    r"(?:https?://)?(?:www\.)?github\.com/([\w.-]+)/([\w.-]+?)(?:\.git)?(?:[/?#].*)?",
+    re.IGNORECASE,
+)
 
 
 def repository_name(text: str) -> str:
@@ -54,4 +56,5 @@ class GithubForm(QGroupBox):
         self.branch.setText(source.branch)
 
     def value(self) -> GithubSource:
-        return GithubSource(repository_name(self.repository.text()), self.workflow.text().strip(), self.branch.text().strip())
+        repository = repository_name(self.repository.text())
+        return GithubSource(repository, self.workflow.text().strip(), self.branch.text().strip())
