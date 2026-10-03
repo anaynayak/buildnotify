@@ -19,11 +19,11 @@ I audited the code for this page. The only HTTP client is `requests`, used in `b
 1. The feed URL of each cctray server you configured.
 2. `https://api.github.com/repos/<owner>/<name>/actions/runs` for each GitHub Actions server, and the next-page link GitHub returns, which `buildnotifylib/core/github.py` follows only when it points at `https://api.github.com/`.
 
-Every request has the header `User-Agent: BuildNotify/<version>`, with no operating system details. A GitHub token is sent as an `Authorization: Bearer` header to `api.github.com` only. Username and password go to the feed URL you entered. `requests` follows HTTP redirects, and the code doesn't turn that off.
+Every request has the header `User-Agent: BuildNotify/<version>`, with no operating system details. A GitHub token is sent as an `Authorization: Bearer` header to `api.github.com` only. A cctray user name and password go to the feed URL you entered as HTTP basic auth, and a cctray token goes there as an `Authorization: Bearer` header. `requests` follows HTTP redirects, and the code doesn't turn that off. On a redirect to another host, `requests` drops the `Authorization` header.
 
 I found nothing else:
 
-1. No update check, telemetry or analytics. A search of `buildnotifylib/` and `scripts/` for `urllib`, `http.client`, `socket`, `smtplib` and similar finds only URL parsing, and `socket` in `scripts/demo.py`, which serves local fixtures for `just demo`.
+1. No update check, telemetry or analytics. A search of `buildnotifylib/` and `scripts/` for `urllib`, `http.client`, `socket`, `smtplib` and similar finds only URL parsing, `socket` in `buildnotifylib/adapters/http.py`, used only to recognise a DNS lookup error, and `socket` in `scripts/demo.py`, which serves local fixtures for `just demo`.
 2. No Qt network code. Nothing imports `QtNetwork` or `QtWebEngine`.
 3. `webbrowser.open` in `buildnotifylib/ui/app_menu.py` and `buildnotifylib/ui/notifications.py` hands a project URL to your browser when you click a project or a notification. BuildNotify itself makes no request to that URL. The About box and the GitHub token help in the server dialog contain links that your browser opens when you click them.
 
