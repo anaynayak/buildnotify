@@ -16,7 +16,7 @@ Well, it turns out that there are a lot more desktop environments other than Gno
 
 Yes. The application is written with Qt so that it can work across different environments, and the tests run on Linux, macOS and Windows. If it worked for your XYZ configuration, do let me know.
 
-On Windows, a custom script has to read the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables. Scripts that use `#status#` or `#projects#` are not run there. See [Custom script](usage.md#custom-script).
+On Windows, a custom script has to read the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables. Scripts that use `#status#` or `#projects#` are not run there. See [Custom script](guide/notifications.md#custom-script).
 
 ## Why Qt? Why not Xyz?
 
