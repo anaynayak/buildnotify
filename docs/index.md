@@ -8,8 +8,10 @@
 BuildNotify is a CCMenu/CCTray equivalent for Linux, macOS and Windows. It resides in your system tray and notifies you of the build status for different projects on your continuous integration servers. BuildNotify is largely inspired from the awesome CCMenu available for Mac.
 
 1. [Installation](installation.md)
-2. [Frequently asked questions](faq.md)
-3. [Configuration and usage](usage.md)
+2. [Quick start](quickstart.md)
+3. [Servers](servers/index.md)
+4. [Guides](usage.md)
+5. [Frequently asked questions](faq.md)
 
 # Features
 
