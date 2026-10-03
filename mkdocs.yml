@@ -35,6 +35,7 @@ nav:
       - Preferences and the server dialog: guide/preferences.md
   - Security and privacy: security.md
   - Reference: reference.md
+  - Troubleshooting: troubleshooting.md
   - FAQ: faq.md
 
 theme:
