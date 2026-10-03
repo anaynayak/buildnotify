@@ -1,10 +1,13 @@
 import unittest
+from datetime import UTC, datetime
 
 from hypothesis import given
 from hypothesis import strategies as st
 
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
+from buildnotifylib.core.diff import Change, diff
 from buildnotifylib.core.model import Activity, ServerSnapshot, Status
+from buildnotifylib.core.mute import Mutes, audible
 from test.project_builder import ProjectBuilder
 from test.strategies import project_lists
 
@@ -172,3 +175,31 @@ def test_should_not_treat_a_repeated_name_on_one_server_as_a_collision():
     both = ServerSnapshot("http://a/cc.xml", snapshot("http://a/cc.xml", "web").projects * 2)
 
     assert labels(both, snapshot("http://b/cc.xml", "api")) == ["web", "web", "api"]
+
+
+def failing(url, name, status):
+    attrs = {"name": name, "lastBuildStatus": status, "activity": "Sleeping"}
+    return ServerSnapshot(url, (ProjectBuilder(attrs, url=url).build(),))
+
+
+def test_should_keep_matching_mutes_and_diffs_by_server_and_name_when_the_label_changes():
+    a, b = "http://a/cc.xml", "http://b/cc.xml"
+    before = OverallIntegrationStatus([failing(a, "web", "Success")])
+    after = OverallIntegrationStatus([failing(a, "web", "Failure"), failing(b, "web", "Success")])
+    mutes = Mutes(projects=frozenset({(a, "web")}))
+
+    events = [e for e in diff(before.get_projects(), after.get_projects()) if e.project.server_url == a]
+
+    assert [(e.change, e.project.label()) for e in events] == [(Change.BROKEN, "[a] web")]
+    assert audible(events, mutes, datetime.now(UTC)) == []
+    assert [e.project.label() for e in audible(events, Mutes(), datetime.now(UTC))] == ["[a] web"]
+
+
+def test_should_not_report_a_row_as_new_when_only_its_label_changed():
+    a, b = "http://a/cc.xml", "http://b/cc.xml"
+    before = OverallIntegrationStatus([failing(a, "web", "Failure")])
+    after = OverallIntegrationStatus([failing(a, "web", "Failure"), failing(b, "web", "Failure")])
+
+    events = diff(before.get_projects(), after.get_projects())
+
+    assert [(e.change, e.project.server_url) for e in events] == [(Change.BROKEN, b)]
