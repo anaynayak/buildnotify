@@ -641,13 +641,19 @@ def reopened(app_menu):
 
 
 @pytest.mark.functional
-def test_should_mark_muted_projects_but_keep_them_in_the_menu(mute_menu):
+def test_should_mark_muted_projects_with_an_icon_but_keep_them_in_the_menu(mute_menu):
     app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER, muted=True))
 
     app_menu.update([built("api"), built("web"), built("docs", OTHER)])
 
-    assert texts(app_menu.menu)[0] == "Passing (3)"
-    assert sorted(texts(app_menu.menu)[1:4]) == ["api (muted)", "docs (muted)", "web"]
+    rows = {a.text(): a for a in app_menu.menu.actions()[1:4]}
+    assert sorted(rows) == ["api", "docs", "web"]
+    assert rows["api"].toolTip() == "api (muted)"
+    assert rows["docs"].toolTip() == "docs (muted)"
+    assert rows["web"].toolTip() == "web"
+    plain = rows["web"].icon().pixmap(22, 22).toImage()
+    assert rows["api"].icon().pixmap(22, 22).toImage() != plain
+    assert rows["docs"].icon().pixmap(22, 22).toImage() == rows["api"].icon().pixmap(22, 22).toImage()
 
 
 @pytest.mark.functional
@@ -746,7 +752,8 @@ def test_should_mute_a_server_from_the_menu_and_persist_it(mute_menu):
 
     assert app_menu.store.settings.servers[0].muted
     assert reopened(app_menu).servers[0].muted
-    assert texts(app_menu.menu)[1] == "api (muted)"
+    assert texts(app_menu.menu)[1] == "api"
+    assert app_menu.menu.actions()[1].toolTip() == "api (muted)"
     assert action(submenu(app_menu), "ci/cc.xml").isChecked()
 
 
@@ -937,12 +944,12 @@ def test_should_elide_a_long_label_in_the_middle_and_keep_the_build_time(mute_me
 
     row = app_menu.menu.actions()[1]
     assert row.text().startswith("platform-team >> ")
-    assert row.text().endswith("nightly-e2e, 18m (muted)")
+    assert row.text().endswith("nightly-e2e, 18m")
     assert "\N{HORIZONTAL ELLIPSIS}" in row.text() and len(row.text()) < len(LONG)
     metrics = app_menu.menu.fontMetrics()
-    label = row.text().removesuffix(", 18m (muted)")
+    label = row.text().removesuffix(", 18m")
     assert metrics.horizontalAdvance(label) <= metrics.averageCharWidth() * MAX_LABEL_CHARS
-    assert row.toolTip() == LONG
+    assert row.toolTip() == f"{LONG} (muted)"
     assert app_menu.menu.toolTipsVisible()
 
 

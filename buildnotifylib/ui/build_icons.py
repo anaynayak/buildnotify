@@ -7,6 +7,7 @@ ICONS = files("buildnotifylib") / "resources" / "icons"
 TRAY_SIZE = QtCore.QSize(22, 22)
 RASTER_SIZE = QtCore.QSize(128, 128)
 SYMBOLIC = "-symbolic"
+MUTED_OPACITY = 0.35
 
 
 class BuildIcons:
@@ -48,6 +49,9 @@ class BuildIcons:
         draw_count(pixmap, count)
         return QtGui.QIcon(pixmap)
 
+    def for_muted(self, status) -> QtGui.QIcon:
+        return dimmed(self.for_status(status))
+
     def icon_name(self, status: str, symbolic: bool = False) -> str:
         return self.all_status.get(status, self.unavailable) + (SYMBOLIC if symbolic else "")
 
@@ -82,6 +86,18 @@ def badge_rect(count: int, device_pixel_ratio: float) -> QtCore.QRectF:
     extra_digits = len(badge_label(count)) - 1
     width = min(snap(height * (1 + BADGE_DIGIT_WIDTH * extra_digits)), TRAY_SIZE.width())
     return QtCore.QRectF(TRAY_SIZE.width() - width, TRAY_SIZE.height() - height, width, height)
+
+
+def dimmed(icon: QtGui.QIcon) -> QtGui.QIcon:
+    source = icon.pixmap(TRAY_SIZE)
+    pixmap = QtGui.QPixmap(source.size())
+    pixmap.setDevicePixelRatio(source.devicePixelRatio())
+    pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+    painter = QtGui.QPainter(pixmap)
+    painter.setOpacity(MUTED_OPACITY)
+    painter.drawPixmap(0, 0, source)
+    painter.end()
+    return QtGui.QIcon(pixmap)
 
 
 def draw_count(pixmap: QtGui.QPixmap, count: int) -> None:

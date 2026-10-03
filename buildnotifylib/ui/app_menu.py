@@ -245,15 +245,13 @@ class AppMenu(QtCore.QObject):
         suffix = ""
         if self.store.settings.notify("lastBuildTimeForProject") and build_time is not None:
             suffix = ", " + humanize.compact(build_time, datetime.now(tz=build_time.tzinfo))
-        if muted:
-            suffix += " (muted)"
-
-        icon = self.build_icons.for_status(project.get_build_status())
+        status = project.get_build_status()
+        icon = self.build_icons.for_muted(status) if muted else self.build_icons.for_status(status)
         action = menu.addAction(icon, shown + suffix)
         action.setIconVisibleInMenu(True)
         action.triggered.connect(partial(self.open_url, url=project.url))
-        if shown != full_label:
-            action.setToolTip(full_label)
+        if shown != full_label or muted:
+            action.setToolTip(full_label + (" (muted)" if muted else ""))
 
     def open_url(self, url: str):
         webbrowser.open(url)
