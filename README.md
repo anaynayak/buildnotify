@@ -30,15 +30,15 @@ uvx buildnotify
 
 The Ubuntu and Debian packages are pretty old, so use the PyPI package to get the latest release. See the [installation page](https://anaynayak.github.io/buildnotify/installation.html) for requirements and the GNOME tray note.
 
-## Installing a nightly
+## Installing a development build
 
-Every push to `main` replaces the [nightly pre-release](https://github.com/anaynayak/buildnotify/releases/tag/dev) with a wheel, an sdist and a Flatpak bundle. These builds are untested by users and may be broken. The wheel has a `.devN` version, so uv and pip only pick it up when you ask for it:
+Every push to `main` replaces the [dev pre-release](https://github.com/anaynayak/buildnotify/releases/tag/dev) with a wheel, an sdist and a Flatpak bundle. These builds are untested by users and may be broken. The wheel has a `.devN` version, so uv and pip only pick it up when you ask for it:
 
 ```sh
 uv tool install --prerelease allow https://github.com/anaynayak/buildnotify/releases/download/dev/<wheel file name>
 ```
 
-Take the exact file name from the release page. A nightly is never published to PyPI.
+Take the exact file name from the release page. Development builds are never published to PyPI.
 
 ## Verifying a release
 

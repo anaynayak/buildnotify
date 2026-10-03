@@ -49,8 +49,8 @@ gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildn
 ```
 
 1. PyPI shows the PEP 740 attestation of each file under "Provenance" on the file's page.
-2. Each release and nightly has a `buildnotify-<version>.intoto.jsonl` asset with the provenance bundle, one JSON bundle per line.
-3. Nightly wheels and sdists have build provenance, so the first command works for them. They have no SBOM.
+2. Each release and development build has a `buildnotify-<version>.intoto.jsonl` asset with the provenance bundle, one JSON bundle per line.
+3. Development build wheels and sdists have build provenance, so the first command works for them. They have no SBOM.
 4. Builds are reproducible. Check out the tag, run `just repro` and compare the hashes with the ones on PyPI. See [Contributing](contributing.md).
 
 ## Reporting a vulnerability
