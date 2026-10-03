@@ -770,3 +770,30 @@ def test_should_set_every_child_when_all_is_toggled(qtbot):
     dialog.projects_list.setCheckState(Qt.CheckState.Unchecked)
     assert set(child_states(dialog)) == {Qt.CheckState.Unchecked}
     assert len(dialog.excluded_projects()) == 7
+
+
+def visible_names(dialog):
+    root = dialog.projects_list
+    return [root.child(i).text() for i in range(root.rowCount()) if not dialog.projects_view.isRowHidden(i, root.index())]
+
+
+@pytest.mark.functional
+def test_should_narrow_the_list_by_substring(qtbot):
+    dialog = picker_dialog(qtbot)
+
+    dialog.projects_filter.setText("ORBIT")
+    assert visible_names(dialog) == ["orbit-I", "orbit-M", "orbit-R", "orbit-S"]
+
+    dialog.projects_filter.setText("")
+    assert len(visible_names(dialog)) == 7
+
+
+@pytest.mark.functional
+def test_should_toggle_only_the_visible_projects(qtbot):
+    dialog = picker_dialog(qtbot)
+    dialog.projects_filter.setText("orbit")
+
+    dialog.projects_list.setCheckState(Qt.CheckState.Unchecked)
+
+    assert dialog.excluded_projects() == ["orbit-I", "orbit-M", "orbit-R", "orbit-S"]
+    assert dialog.projects_list.checkState() == Qt.CheckState.PartiallyChecked

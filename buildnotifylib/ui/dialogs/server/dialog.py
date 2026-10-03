@@ -129,11 +129,16 @@ class ServerConfigurationDialog(QDialog):
         self.projects_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.projects_view.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.projects_view.setHeaderHidden(True)
-        self.projects_view.hide()
+        self.projects_filter = QLineEdit()
+        self.projects_filter.setPlaceholderText(self.tr("Filter projects"))
+        self.projects_filter.setClearButtonEnabled(True)
+        self.projects_filter.textChanged.connect(self.apply_filter)
+        self.show_picker(False)
         self.projects_hint = MessageLabel()
         self.projects_hint.show_hint(self.tr("All projects are included. Test the connection to choose projects."))
         layout = QVBoxLayout()
         layout.addWidget(self.projects_hint)
+        layout.addWidget(self.projects_filter)
         layout.addWidget(self.projects_view)
         return section(self.tr("Projects"), layout)
 
@@ -188,7 +193,7 @@ class ServerConfigurationDialog(QDialog):
         self.test_button.setEnabled(True)
         self.test_status.clear_message()
         self.projects_loaded = False
-        self.projects_view.hide()
+        self.show_picker(False)
         self.projects_hint.show()
 
     def done(self, result: int) -> None:
@@ -284,7 +289,19 @@ class ServerConfigurationDialog(QDialog):
         self.projects_view.setRootIsDecorated(False)
         self.projects_loaded = True
         self.projects_hint.hide()
-        self.projects_view.show()
+        self.show_picker(True)
+        self.apply_filter()
+
+    def show_picker(self, visible: bool) -> None:
+        self.projects_view.setVisible(visible)
+        self.projects_filter.setVisible(visible)
+
+    def apply_filter(self) -> None:
+        needle = self.projects_filter.text().strip().lower()
+        root = self.projects_list.index()
+        for row in range(self.projects_list.rowCount()):
+            name = self.projects_list.child(row, 0).text().lower()
+            self.projects_view.setRowHidden(row, root, needle not in name)
 
     def qtText(self, txt: str) -> str:
         return QtGui.Qt.convertFromPlainText(txt)
