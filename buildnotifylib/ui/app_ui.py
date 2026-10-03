@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 
 from buildnotifylib.adapters.settings_store import SettingsStore
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
-from buildnotifylib.core.mute import Clock, system_clock
+from buildnotifylib.core.mute import Clock, Mutes, system_clock
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.ui.app_menu import AppMenu
 from buildnotifylib.ui.build_icons import SMALL_TRAY_SIZE, TRAY_SIZE, BuildIcons
@@ -32,12 +32,14 @@ class AppUi(QtCore.QObject):
         self.store = store
         self.build_icons = build_icons
         self.clock = clock
+        self.last_status: OverallIntegrationStatus | None = None
         self.tray = QSystemTrayIcon(self.build_icons.for_status(None, store.settings.symbolic_icons), self.widget)
         self.tray.show()
         if not store.settings.servers:
             self.tray.setToolTip(NO_SERVERS)
         self.app_menu = AppMenu(self.widget, store, self.build_icons, connection)
         self.app_menu.reload_data.connect(self.reload_data)
+        self.app_menu.mutes_changed.connect(self.refresh)
         self.tray.setContextMenu(self.app_menu.menu)
         self.tray.activated.connect(self.show_menu)
         app = QApplication.instance()
@@ -48,8 +50,16 @@ class AppUi(QtCore.QObject):
         if not sys.platform.startswith("darwin") and reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.app_menu.menu.popup(QCursor.pos())
 
+    def mutes(self) -> Mutes:
+        return Mutes.from_settings(self.store.settings)
+
+    def refresh(self):
+        if self.last_status is not None:
+            self.update_projects(self.last_status)
+
     def update_projects(self, integration_status: OverallIntegrationStatus):
-        count = len(integration_status.get_failing_builds())
+        self.last_status = integration_status
+        count = len(integration_status.get_failing_builds(self.mutes()))
         status = self.icon_state(integration_status)
         ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
         size = SMALL_TRAY_SIZE if sys.platform == "win32" else TRAY_SIZE
@@ -59,13 +69,16 @@ class AppUi(QtCore.QObject):
         self.tray.setToolTip(self.tooltip(integration_status))
 
     def icon_state(self, integration_status: OverallIntegrationStatus) -> str | None:
-        return "unreachable" if integration_status.unreachable() else integration_status.get_build_status()
+        return "unreachable" if integration_status.unreachable() else integration_status.get_build_status(self.mutes())
 
     def tooltip(self, integration_status: OverallIntegrationStatus) -> str:
         if not self.store.settings.servers:
             return NO_SERVERS
-        summary = UNREACHABLE if integration_status.unreachable() else integration_status.failing_summary()
+        summary = UNREACHABLE if integration_status.unreachable() else integration_status.failing_summary(self.mutes())
         lines = [summary, self.server_count()]
+        muted = integration_status.muted_count(self.mutes())
+        if muted:
+            lines.append(f"{muted} muted")
         until = self.store.settings.paused_until
         if until is not None and until > self.clock():
             lines.append(f"Notifications paused until {until.astimezone().strftime('%H:%M')}")

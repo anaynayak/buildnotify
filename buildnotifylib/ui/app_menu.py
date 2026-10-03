@@ -46,6 +46,7 @@ MAX_LABEL_CHARS = 45
 
 class AppMenu(QtCore.QObject):
     reload_data = QtCore.Signal()
+    mutes_changed = QtCore.Signal()
 
     def __init__(
         self,
@@ -184,6 +185,7 @@ class AppMenu(QtCore.QObject):
     def change(self, settings: AppSettings):
         self.store.save(settings)
         self.update(self.projects, self.unavailable)
+        self.mutes_changed.emit()
 
     def about_clicked(self, widget: QWidget):
         box = QMessageBox(self.menu)

@@ -203,3 +203,52 @@ def test_should_not_report_a_row_as_new_when_only_its_label_changed():
     events = diff(before.get_projects(), after.get_projects())
 
     assert [(e.change, e.project.server_url) for e in events] == [(Change.BROKEN, b)]
+
+
+def muted_status():
+    a, b = "http://a/cc.xml", "http://b/cc.xml"
+    status = OverallIntegrationStatus(
+        [
+            ServerSnapshot(a, (project(a, "api", "Failure"), project(a, "web", "Success"))),
+            ServerSnapshot(b, (project(b, "docs", "Failure"), project(b, "site", "Success"))),
+        ]
+    )
+    return status, a, b
+
+
+def project(url, name, status):
+    return ProjectBuilder({"name": name, "lastBuildStatus": status, "activity": "Sleeping"}, url=url).build()
+
+
+def test_should_ignore_muted_projects_in_the_failing_count_and_summary():
+    status, a, _ = muted_status()
+    mutes = Mutes(projects=frozenset({(a, "api")}))
+
+    assert [p.name for p in status.get_failing_builds(mutes)] == ["docs"]
+    assert status.failing_summary(mutes) == "1 failing: docs"
+    assert status.muted_count(mutes) == 1
+
+
+def test_should_ignore_every_project_on_a_muted_server():
+    status, a, _ = muted_status()
+    mutes = Mutes(servers=frozenset({a}))
+
+    assert [p.name for p in status.get_failing_builds(mutes)] == ["docs"]
+    assert status.muted_count(mutes) == 2
+
+
+def test_should_show_the_icon_for_the_unmuted_projects_when_failures_are_muted():
+    status, a, b = muted_status()
+
+    assert status.get_build_status(Mutes(projects=frozenset({(a, "api"), (b, "docs")}))) == "Success.Sleeping"
+    assert status.get_build_status(Mutes(servers=frozenset({a, b}))) is None
+    assert status.failing_summary(Mutes(servers=frozenset({a, b}))) == "No failing builds"
+
+
+def test_should_not_let_the_pause_change_the_status():
+    status, _, _ = muted_status()
+    paused = Mutes(paused_until=datetime(2999, 1, 1, tzinfo=UTC))
+
+    assert status.get_build_status(paused) == status.get_build_status()
+    assert len(status.get_failing_builds(paused)) == 2
+    assert status.muted_count(paused) == 0

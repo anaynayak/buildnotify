@@ -4,6 +4,7 @@ from dataclasses import replace
 
 from buildnotifylib.core.errors import server_name
 from buildnotifylib.core.model import Activity, Project, ServerSnapshot, Status
+from buildnotifylib.core.mute import Mutes
 
 
 def rank(project: Project) -> tuple[Status, Activity]:
@@ -13,6 +14,7 @@ def rank(project: Project) -> tuple[Status, Activity]:
 
 
 SUMMARY_NAMES = 5
+NO_MUTES = Mutes()
 
 
 def disambiguated(servers: Sequence[ServerSnapshot]) -> list[ServerSnapshot]:
@@ -34,18 +36,25 @@ class OverallIntegrationStatus:
     def __init__(self, servers: Sequence[ServerSnapshot]):
         self.servers = disambiguated(servers)
 
-    def get_build_status(self) -> str | None:
-        ranks = [rank(project) for project in self.get_projects()]
+    def counted(self, mutes: Mutes) -> list[Project]:
+        """The projects that set the icon and the failing count: everything not muted."""
+        return [project for project in self.get_projects() if not mutes.mutes(project)]
+
+    def muted_count(self, mutes: Mutes) -> int:
+        return len(self.get_projects()) - len(self.counted(mutes))
+
+    def get_build_status(self, mutes: Mutes = NO_MUTES) -> str | None:
+        ranks = [rank(project) for project in self.counted(mutes)]
         if not ranks:
             return None
         status, activity = min(ranks, key=lambda pair: (pair[0].priority, pair[1].priority))
         return f"{status}.{activity}"
 
-    def get_failing_builds(self) -> list[Project]:
-        return [project for project in self.get_projects() if project.status is Status.FAILURE]
+    def get_failing_builds(self, mutes: Mutes = NO_MUTES) -> list[Project]:
+        return [project for project in self.counted(mutes) if project.status is Status.FAILURE]
 
-    def failing_summary(self) -> str:
-        names = [project.label() for project in self.get_failing_builds()]
+    def failing_summary(self, mutes: Mutes = NO_MUTES) -> str:
+        names = [project.label() for project in self.get_failing_builds(mutes)]
         if not names:
             return "No failing builds"
         listed = ", ".join(names[:SUMMARY_NAMES])

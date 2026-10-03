@@ -1,4 +1,5 @@
 import re
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -228,3 +229,43 @@ def test_should_draw_16_px_tray_icons_on_windows(qtbot, mocker, monkeypatch):
     widget.update_projects(OverallIntegrationStatus([]))
 
     assert icon.call_args.kwargs["size"] == SMALL_TRAY_SIZE
+
+
+def muted_ui(qtbot, **server_fields):
+    conf = ConfigBuilder().server("http://someurl", **server_fields).build()
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, conf, BuildIcons(), FakeConnection(fake_content()))
+    projects = [
+        ProjectBuilder(
+            {"name": name, "lastBuildStatus": "Failure", "activity": "Sleeping"}, url="http://someurl"
+        ).build()
+        for name in ("api", "web")
+    ]
+    status = OverallIntegrationStatus([ServerSnapshot("http://someurl", tuple(projects))])
+    widget.update_projects(status)
+    widget.parent_widget = parent  # the parent owns the C++ object, so it must outlive the helper
+    return widget
+
+
+@pytest.mark.functional
+def test_should_leave_muted_projects_out_of_the_tooltip_count_and_say_how_many_are_muted(qtbot):
+    widget = muted_ui(qtbot, muted_projects=["api"])
+
+    lines = widget.tray.toolTip().splitlines()
+
+    assert lines[0] == "1 failing: web"
+    assert "1 muted" in lines
+
+
+@pytest.mark.functional
+def test_should_restore_the_count_at_once_when_a_server_is_unmuted(qtbot):
+    widget = muted_ui(qtbot, muted=True)
+    assert widget.tray.toolTip().splitlines()[0] == "No failing builds"
+    assert "2 muted" in widget.tray.toolTip().splitlines()
+
+    settings = widget.store.settings
+    widget.app_menu.change(replace(settings, servers=[replace(settings.servers[0], muted=False)]))
+
+    assert widget.tray.toolTip().splitlines()[0] == "2 failing: api, web"
+    assert "muted" not in widget.tray.toolTip()
