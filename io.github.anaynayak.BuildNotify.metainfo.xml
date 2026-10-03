@@ -87,10 +87,13 @@
       <description>
         <p>A rewrite on PySide6 and Python 3.11 or newer.</p>
         <ul>
+          <li>GitHub Actions workflows can be watched alongside cctray feeds</li>
+          <li>Mute a server or project, or pause notifications for an hour</li>
+          <li>Unreachable servers show their last error in the tray menu</li>
+          <li>The tray menu groups projects into Failing, Building, Passing and Unknown</li>
+          <li>Clearer tray icons, notification titles and server dialog</li>
           <li>Settings from 2.x are migrated on first start</li>
           <li>All servers are polled in parallel</li>
-          <li>Failing projects are listed in the tray tooltip</li>
-          <li>Optional symbolic tray icons that differ by shape</li>
           <li>The custom script gets BUILDNOTIFY_STATUS and BUILDNOTIFY_PROJECTS environment variables</li>
         </ul>
       </description>

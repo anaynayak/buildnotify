@@ -1,14 +1,36 @@
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-02
+
+### Breaking changes
+- Python 3.11 or newer is required
+- PyQt5 is replaced by PySide6 (>= 6.8)
+- Server URLs must use http:// or https://. file:// URLs are rejected in the server dialog, since they could never be fetched
+- Custom script `#status#` and `#projects#` placeholders are now shell-quoted, with quoting that follows the surrounding quotes. Scripts that relied on the raw, unquoted text need updating
+- On Windows a custom script that uses `#status#` or `#projects#` is not run. Use the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables instead
+- Settings move to a versioned layout on first start. 2.x can't read them afterwards
+- Install with `uv tool install buildnotify` or `pipx install buildnotify`. The setuptools, paver, tox and Vagrant files are gone
+- The snap is retired. Flatpak replaces it
+
 ### Added
-- Muted servers and projects no longer affect the tray icon colour, the failing count or the badge, and every project on a muted server is left out too. They stay in the menu marked `(muted)`, and the tooltip adds `N muted`. Unmuting updates the tray at once. Pausing notifications still doesn't change the icon. This reverses the earlier rule that muted projects still counted
+- Option to show last build label by @Deuchnord
+- `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables for the custom script
+- Automatic migration of 2.x settings, keeping the old keys until the new ones are saved
+- `--settings PATH` to use an INI settings file, and `--debug` to log every fetch
+- Failing projects listed in the tray tooltip
+- Symbolic tray icons that differ by shape, with a preference to turn them on
+- The tray count overlay is sharp on HiDPI screens
+- All servers are polled in parallel
+- User-Agent is `BuildNotify/<version>`, without the OS and kernel version
+- Flatpak manifest (`packaging/flatpak`) and AppStream metadata under the `io.github.anaynayak.BuildNotify` app id. The desktop file and icon are renamed to match
 - Preferences, the server dialog, the About box and the no-tray message open centred on the screen under the mouse pointer, kept inside the usable area, instead of in a corner of the primary screen
 - The server dialog hides the `Advanced` section for GitHub servers, where it had held only the time zone, which applies to cctray feeds. It comes back when you switch to cctray, with the time zone you had chosen
-- The tray menu's Failing, Building, Passing and Unknown headers are disabled rows with separators between groups, and the `Mute` submenu uses one submenu per server. Native macOS menus don't draw Qt section titles, so both had gone missing or shown as unlabelled groups. A server with no projects shows a single `Mute <server>` checkbox
+- Mute a server or a project from the tray menu's `Mute` submenu, which has one submenu per server with a `Mute whole server` toggle followed by that server's projects. You can also pause all notifications for an hour. Muted servers and projects, including every project on a muted server, get no notifications, don't run the custom script, and don't affect the tray icon colour, the failing count or the badge. They stay in the menu with a dimmed icon and a `(muted)` suffix, and the tooltip adds `N muted`. Unmuting updates the tray at once. Pausing notifications doesn't change the icon. Mutes and the pause survive a restart
+- Settings move to schema version 5, which gives each server a source type and a muted flag. Existing servers become cctray feeds and start unmuted
+- The tray menu's Failing, Building, Passing and Unknown headers are disabled rows with separators between groups,. Native macOS menus don't draw Qt section titles, so they had gone missing or shown as unlabelled groups. A server with no projects shows a single `Mute <server>` checkbox
 - Project rows say which server they belong to. A GitHub server with no prefix labels its rows with the repository name, such as `[hello-world] CI (main)`, and an explicit prefix still wins. A cctray project with no prefix whose name also appears on another server gets that server's host in brackets. Notifications and the tooltip use the same label; muting and change detection still go by server and project name
 - Symbolic tray icons keep at least 3:1 contrast on both light (`#f0f0f0`) and dark (`#2b2b2b`) panels: the failure cross is now a lighter red and the grey a little darker. Below 20 px, which includes the 16 px icons used on Windows, the tray badge shows `!` instead of a count that would be unreadable
 - When no system tray is found, the message says `BuildNotify needs a system tray` and, on GNOME, names the AppIndicator and KStatusNotifierItem Support extension. The box shows the BuildNotify icon and title. BuildNotify still exits with code 1
-- Muted projects show a dimmed icon in the tray menu instead of a `(muted)` suffix, and the tooltip says `(muted)`. The `Mute` submenu has one submenu per server with a `Mute whole server` toggle followed by that server's projects
 - The server dialog's time zone and certificate checks sit in a collapsed `Advanced` section that opens by itself when either is set. The field is now `Time zone for feed times`, its default entry reads `Use the feed's offset` (stored as before), and you can type part of a zone name, such as `Kolkata`, to find it
 - Labels and buttons in Preferences and the server dialog have Alt-key mnemonics, such as `Alt+S` for Save, with none repeated on a page. The project filter, project list and server list have names for screen readers
 - A `Check now` item in the tray menu polls every server immediately. Menu items now read `Preferences...` (`Settings...` on macOS), `About BuildNotify` and `Quit BuildNotify` (`Exit` on Windows), and the About box describes cctray feeds and GitHub Actions and links to the project page
@@ -20,9 +42,6 @@
 - A `Failing first` sort order, the default for new installs, puts building projects first within each tray menu section, then the newest builds. Existing installs keep their sort order
 - Unavailable servers get a menu row with their last error and when it happened. The error is one short line with the host but no full URL or credentials
 - GitHub Actions servers: pick "GitHub Actions" in the server dialog and enter a repository, with optional workflow and branch filters. The latest run of each workflow and branch shows as a project. When a workflow filter matches no finished run in the newest 100 runs, BuildNotify reads up to 4 older pages to find one. The token stays in the system keyring, and BuildNotify waits out GitHub's rate limits on every server that uses the same token. A server with no token, for a public repository, writes nothing to the keyring
-- Settings move to schema version 4, which gives each server a source type. Existing servers become cctray feeds
-- Mute a server or a project from the tray menu's `Mute` submenu, or pause all notifications for an hour. Muted projects stay in the menu and the tray count, marked `(muted)`, but get no notifications and don't run the custom script. Mutes and the pause survive a restart
-- Settings move to schema version 5, which adds a muted flag to each server. Existing servers start unmuted
 - With no servers the tray menu says "No servers yet" and offers "Add a server...", which opens the server dialog. Pause and Mute are hidden until a server is configured, and the tooltip says "No servers configured" instead of "No failing builds"
 - On the first launch with no servers, the server dialog opens once. A `first_run/server_prompt_shown` setting stops it opening again
 - Clicking a notification about one project opens its page. Clicking one about several projects or a server opens the tray menu
@@ -54,39 +73,6 @@
 - Saving Preferences no longer reverts servers or projects muted or unmuted from the tray while the dialog was open
 - Saving Preferences no longer lowers the default 120 s polling interval to 60 s. The interval can be set from 10 seconds to an hour
 - Configure in Preferences is enabled when a server is selected with the keyboard, not only with a mouse click, and Enter opens the selected server for editing
-
-### Tech
-- `just demo` runs the app against local fixture feeds with throwaway settings and no keychain
-- `just screenshots` renders the docs images offscreen from fixture data
-- The release workflow fails when the tag doesn't match the version in `buildnotifylib/version.py`
-- The Flatpak bundle drops Qt WebEngine and NumPy
-- The Preferences and server dialogs are built in Python code. The Qt Designer `.ui` files, the generated modules and `just ui` are gone
-
-## [3.0.0] - 2026-10-02
-
-### Breaking changes
-- Python 3.11 or newer is required
-- PyQt5 is replaced by PySide6 (>= 6.8)
-- Server URLs must use http:// or https://. file:// URLs are rejected in the server dialog, since they could never be fetched
-- Custom script `#status#` and `#projects#` placeholders are now shell-quoted, with quoting that follows the surrounding quotes. Scripts that relied on the raw, unquoted text need updating
-- On Windows a custom script that uses `#status#` or `#projects#` is not run. Use the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables instead
-- Settings move to a versioned layout on first start. 2.x can't read them afterwards
-- Install with `uv tool install buildnotify` or `pipx install buildnotify`. The setuptools, paver, tox and Vagrant files are gone
-- The snap is retired. Flatpak replaces it
-
-### Added
-- Option to show last build label by @Deuchnord
-- `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables for the custom script
-- Automatic migration of 2.x settings, keeping the old keys until the new ones are saved
-- `--settings PATH` to use an INI settings file, and `--debug` to log every fetch
-- Failing projects listed in the tray tooltip
-- Symbolic tray icons that differ by shape, with a preference to turn them on
-- The tray count overlay is sharp on HiDPI screens
-- All servers are polled in parallel
-- User-Agent is `BuildNotify/<version>`, without the OS and kernel version
-- Flatpak manifest (`packaging/flatpak`) and AppStream metadata under the `io.github.anaynayak.BuildNotify` app id. The desktop file and icon are renamed to match
-
-### Fixed
 - Shell injection through project names in the custom script
 - Crash on non-XML server responses
 - Feeds without a `<Projects>` root are reported as errors instead of showing 0 projects
@@ -112,6 +98,11 @@
 - Future build times read "in ..." instead of "... ago", and the 30-day boundary is fixed
 
 ### Tech
+- `just demo` runs the app against local fixture feeds with throwaway settings and no keychain
+- `just screenshots` renders the docs images offscreen from fixture data
+- The release workflow fails when the tag doesn't match the version in `buildnotifylib/version.py`
+- The Flatpak bundle drops Qt WebEngine and NumPy
+- The Preferences and server dialogs are built in Python code. The Qt Designer `.ui` files, the generated modules and `just ui` are gone
 - pyproject.toml with hatchling, uv and uv.lock
 - ruff for lint and format, mypy in CI with strict typing for core and adapters
 - justfile and pre-commit hooks
@@ -119,7 +110,6 @@
 - PyPI releases from v* tags with trusted publishing
 - Weekly grouped Dependabot updates
 - Pure core model, cctray parser, aggregate, diff, back-off and humanize, with adapters for http, credentials, settings and hooks
-- UI modules generated with pyside6-uic through `just ui` and checked in CI
 - Icons load from package data instead of a Qt resource module
 - Hermetic tests: no real keychain or QSettings
 
