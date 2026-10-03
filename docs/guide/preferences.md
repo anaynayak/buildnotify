@@ -32,10 +32,4 @@ The sort order applies within each section of the tray menu. `Failing first`, th
 
 Both dialogs work from the keyboard. Tab moves through the fields in reading order, the underlined letter in a label or button is its Alt shortcut, Enter saves and Esc cancels. In the server list, `Ins` adds, `Enter` edits and `Del` removes.
 
-
-## Command line options
-
-1. `--settings PATH` reads and writes settings in this INI file instead of the default location. It is handy for trying a configuration without touching your real one.
-2. `--debug` logs every fetch.
-
-By default the settings live in `~/.config/BuildNotify/BuildNotify.conf` on Linux, in the macOS preferences, and in the registry under `HKEY_CURRENT_USER\Software\BuildNotify\BuildNotify` on Windows.
+The full list of fields, ranges and defaults, the command line options and the settings file locations are in the [Reference](../reference.md).
