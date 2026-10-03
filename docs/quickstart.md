@@ -34,7 +34,7 @@ The tray icon shows the overall status, and the menu lists your projects grouped
 
 ![Tray menu](images/projectlist.png)
 
-BuildNotify notifies you when a build fails, is fixed, fails again or passes. Next:
+BuildNotify notifies you when a build fails, is fixed or fails again. Notifications for passing builds are off until you turn them on in Preferences. Next:
 
 1. [Tray and menu](guide/tray-menu.md)
 2. [Notifications and custom script](guide/notifications.md)

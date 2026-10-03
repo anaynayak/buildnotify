@@ -6,7 +6,7 @@ description: Choose which BuildNotify notifications to show and run a custom scr
 
 ## Notifications
 
-BuildNotify shows a notification when a build fails, is fixed, fails again or passes, and when a server can't be reached. Each kind can be turned off in Preferences.
+BuildNotify shows a notification when a build fails, is fixed or fails again, and when a server can't be reached. A notification for each passing build is off by default. Turn each kind on or off on the Notifications tab of Preferences.
 
 1. A notification about one project names it in the title, such as `Build failed: [jenkins] nightly-e2e`, with the build label below. Clicking it opens the project page.
 2. A notification about several projects counts them, such as `3 builds failed`, and lists up to three names followed by `and N more`. Clicking it opens the tray menu.
