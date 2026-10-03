@@ -16,7 +16,7 @@ Add a new server by clicking the `+` sign. Each server can use a username and pa
 
 Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want.
 
-The Servers tab of Preferences lists the monitored servers.
+The Servers tab of Preferences lists the monitored servers, one row each with its name (the prefix, else the host), source kind, target and the number of projects found by the last poll. GitHub rows show the repository and `workflow@branch`. `Add...` (Insert), `Edit...` (Enter or double-click) and `Remove` (Delete) change the list, and Remove asks first.
 
 ![Servers tab](images/servers.png)
 

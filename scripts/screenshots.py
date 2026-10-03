@@ -104,7 +104,8 @@ def empty_tray_menu(icons: BuildIcons) -> None:
 
 
 def preferences(settings: AppSettings) -> None:
-    dialog = PreferencesDialog(settings, HttpConnection())
+    counts = {server.url: 4 for server in settings.servers}
+    dialog = PreferencesDialog(settings, HttpConnection(), project_counts=counts)
     dialog.resize(560, 420)
     for index, name in enumerate(["servers.png", "menu.png", "notifications.png", "advanced.png"]):
         dialog.tabs.setCurrentIndex(index)

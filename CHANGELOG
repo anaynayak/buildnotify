@@ -13,6 +13,7 @@
 - A "<server> is reachable again" notification follows a connectivity notification once the server answers. The custom script runs for it with `BUILDNOTIFY_STATUS` set to `Connectivity restored`
 
 ### Changed
+- The Servers tab shows each server as a row with its name (prefix, else host), source kind, target (host, or repository with workflow@branch) and the project count from the last poll. The buttons read `Add...`, `Edit...` and `Remove`, with Insert, Enter and Delete shortcuts, and Remove asks for confirmation
 - Preferences is split into Servers, Menu, Notifications and Advanced tabs, with sentence-case labels, OK and Cancel buttons, and the request timeout and custom script example exposed. The docs screenshots follow the new tabs
 - The tray menu groups projects under Failing, Building, Passing and Unknown headers with counts, so the status no longer depends on the icon colour alone. Empty sections are left out
 - With more than 15 projects, passing projects collapse into a `Passing (N)` submenu so the tray menu fits on screen. Failing and building projects stay top level
