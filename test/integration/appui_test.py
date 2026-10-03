@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from PySide6 import QtWidgets
@@ -143,6 +143,11 @@ def test_should_summarise_cached_projects_when_all_servers_are_down(qtbot):
     assert widget.tray.toolTip().splitlines()[0] == "No failing builds"
 
 
+def make_ui():
+    conf = ConfigBuilder().server("someurl").build()
+    return AppUi(QtWidgets.QWidget(), conf, BuildIcons(), FakeConnection(fake_content()))
+
+
 def snapshot(*projects, url="someurl"):
     return OverallIntegrationStatus([ServerSnapshot(url, tuple(projects))])
 
@@ -158,7 +163,7 @@ def snapshot(*projects, url="someurl"):
     ],
 )
 def test_should_pick_the_icon_state_for_each_aggregate_status(qtbot, status, activity, expected):
-    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+    widget = make_ui()
     project = ProjectBuilder({"name": "a", "lastBuildStatus": status, "activity": activity}).build()
 
     assert widget.icon_state(snapshot(project)) == expected
@@ -166,20 +171,20 @@ def test_should_pick_the_icon_state_for_each_aggregate_status(qtbot, status, act
 
 @pytest.mark.functional
 def test_should_pick_unknown_icon_state_when_there_are_no_projects(qtbot):
-    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+    widget = make_ui()
 
     assert widget.icon_state(snapshot()) is None
 
 
 @pytest.mark.functional
 def test_should_pick_unreachable_icon_state_when_every_server_is_down(qtbot):
-    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+    widget = make_ui()
     down = OverallIntegrationStatus([ServerSnapshot("someurl", error=TimeoutError("Timed out"))])
 
     assert widget.icon_state(down) == "unreachable"
 
 
-TOOLTIP_NOW = datetime(2026, 10, 3, 10, 0, tzinfo=timezone.utc)
+TOOLTIP_NOW = datetime(2026, 10, 3, 10, 0, tzinfo=UTC)
 
 
 def tooltip_for(qtbot, conf):

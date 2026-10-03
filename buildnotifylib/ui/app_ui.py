@@ -19,7 +19,14 @@ UNREACHABLE = "Can't reach any server"
 class AppUi(QtCore.QObject):
     reload_data = QtCore.Signal()
 
-    def __init__(self, parent: QApplication, store: SettingsStore, build_icons: BuildIcons, connection: Connection, clock: Clock = system_clock):
+    def __init__(
+        self,
+        parent: QApplication,
+        store: SettingsStore,
+        build_icons: BuildIcons,
+        connection: Connection,
+        clock: Clock = system_clock,
+    ):
         super().__init__(parent)
         self.widget = QWidget()
         self.store = store

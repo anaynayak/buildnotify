@@ -165,10 +165,12 @@ def test_should_knock_out_a_ring_around_the_badge(qtbot, symbolic):
 @pytest.mark.functional
 def test_should_tell_colour_icons_apart_by_building_state(qtbot):
     icons = BuildIcons()
-    pairs = [("buildnotify-success", "buildnotify-success-building"), ("buildnotify-failure", "buildnotify-failure-building")]
 
-    for sleeping, building in pairs:
-        assert icons.fallback(sleeping).pixmap(TRAY_SIZE).toImage() != icons.fallback(building).pixmap(TRAY_SIZE).toImage()
+    def image(name):
+        return icons.fallback(name).pixmap(TRAY_SIZE).toImage()
+
+    for colour in ("success", "failure"):
+        assert image(f"buildnotify-{colour}") != image(f"buildnotify-{colour}-building")
 
 
 def test_should_use_a_different_icon_for_unreachable_than_for_unknown():
@@ -184,5 +186,6 @@ def test_should_tell_unreachable_from_unknown_in_both_icon_sets(qtbot):
     icons = BuildIcons()
 
     for suffix in ("", "-symbolic"):
-        unknown, unreachable = (icons.fallback(f"buildnotify-{name}{suffix}").pixmap(TRAY_SIZE).toImage() for name in ("inactive", "unreachable"))
+        unknown = icons.fallback(f"buildnotify-inactive{suffix}").pixmap(TRAY_SIZE).toImage()
+        unreachable = icons.fallback(f"buildnotify-unreachable{suffix}").pixmap(TRAY_SIZE).toImage()
         assert unknown != unreachable

@@ -46,6 +46,7 @@ TRAY_STATES = [
     ("Failure.Sleeping", 1),
     ("Failure.Building", 2),
     (None, 0),
+    ("unreachable", 0),
 ]
 
 
