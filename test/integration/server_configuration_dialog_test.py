@@ -727,7 +727,8 @@ def test_should_drop_a_running_test_once_the_dialog_closes(qtbot):
 
 
 def picker_dialog(qtbot, excluded=()):
-    dialog = ServerConfigurationDialog(ServerSettings(URL_JENKINS, list(excluded)), TIMEOUT, FakeConnection(fake_content()))
+    server = ServerSettings(URL_JENKINS, list(excluded))
+    dialog = ServerConfigurationDialog(server, TIMEOUT, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
     dialog.fetch_data()
     qtbot.waitUntil(lambda: dialog.projects_loaded)
@@ -774,7 +775,8 @@ def test_should_set_every_child_when_all_is_toggled(qtbot):
 
 def visible_names(dialog):
     root = dialog.projects_list
-    return [root.child(i).text() for i in range(root.rowCount()) if not dialog.projects_view.isRowHidden(i, root.index())]
+    view = dialog.projects_view
+    return [root.child(i).text() for i in range(root.rowCount()) if not view.isRowHidden(i, root.index())]
 
 
 @pytest.mark.functional
