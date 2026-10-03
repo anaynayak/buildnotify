@@ -14,20 +14,20 @@ Without a working keyring the server dialog disables the sign-in fields and says
 
 ## What goes over the network
 
-I audited the code for this page. The only HTTP client is `requests`, used in `buildnotifylib/adapters/http.py`. It sends GET requests to two kinds of address:
+The only HTTP client is `requests`, used in `buildnotifylib/adapters/http.py`. It sends GET requests to two kinds of address:
 
 1. The feed URL of each cctray server you configured.
 2. `https://api.github.com/repos/<owner>/<name>/actions/runs` for each GitHub Actions server, and the next-page link GitHub returns, which `buildnotifylib/core/github.py` follows only when it points at `https://api.github.com/`.
 
 Every request has the header `User-Agent: BuildNotify/<version>`, with no operating system details. A GitHub token is sent as an `Authorization: Bearer` header to `api.github.com` only. A cctray user name and password go to the feed URL you entered as HTTP basic auth, and a cctray token goes there as an `Authorization: Bearer` header. `requests` follows HTTP redirects, and the code doesn't turn that off. On a redirect to another host, `requests` drops the `Authorization` header.
 
-I found nothing else:
+BuildNotify makes no other network requests:
 
-1. No update check, telemetry or analytics. A search of `buildnotifylib/` and `scripts/` for `urllib`, `http.client`, `socket`, `smtplib` and similar finds only URL parsing, `socket` in `buildnotifylib/adapters/http.py`, used only to recognise a DNS lookup error, and `socket` in `scripts/demo.py`, which serves local fixtures for `just demo`.
+1. No update check, telemetry or analytics. `buildnotifylib/` and `scripts/` use no `urllib`, `http.client` or `smtplib` request code. The only related imports are URL parsing, `socket` in `buildnotifylib/adapters/http.py`, used only to recognise a DNS lookup error, and `socket` in `scripts/demo.py`, which serves local fixtures for `just demo`.
 2. No Qt network code. Nothing imports `QtNetwork` or `QtWebEngine`.
 3. `webbrowser.open` in `buildnotifylib/ui/app_menu.py` and `buildnotifylib/ui/notifications.py` hands a project URL to your browser when you click a project or a notification. BuildNotify itself makes no request to that URL. The About box and the GitHub token help in the server dialog contain links that your browser opens when you click them.
 
-The custom script is yours. BuildNotify runs it with your privileges, and whatever it does is outside this audit.
+The custom script is yours. BuildNotify runs it with your privileges, and BuildNotify has no control over what it does.
 
 ## Certificate checks
 
