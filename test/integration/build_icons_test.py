@@ -160,3 +160,12 @@ def test_should_knock_out_a_ring_around_the_badge(qtbot, symbolic):
     ring = pixel(counted, int(rect.center().x()), rect.top() - BADGE_RING / 2, 2.0)
 
     assert ring.alpha() == 0
+
+
+@pytest.mark.functional
+def test_should_tell_colour_icons_apart_by_building_state(qtbot):
+    icons = BuildIcons()
+    pairs = [("buildnotify-success", "buildnotify-success-building"), ("buildnotify-failure", "buildnotify-failure-building")]
+
+    for sleeping, building in pairs:
+        assert icons.fallback(sleeping).pixmap(TRAY_SIZE).toImage() != icons.fallback(building).pixmap(TRAY_SIZE).toImage()
