@@ -46,6 +46,10 @@ demo *args:
 screenshots:
     uv run --locked python scripts/screenshots.py
 
+# Render docs/images/social-card.png for the docs og:image
+social-card:
+    uv run --locked python scripts/social_card.py
+
 # Build twice and fail if the sdist or wheel hashes differ
 repro:
     scripts/repro-check.sh
