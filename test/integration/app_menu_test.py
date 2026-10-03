@@ -431,7 +431,24 @@ def test_should_pass_the_injected_connection_to_preferences(qtbot, mocker):
 
     app_menu.preferences_clicked(None)
 
-    preferences.assert_called_once_with(conf.settings, connection, app_menu.menu, keystore_available=True)
+    preferences.assert_called_once_with(
+        conf.settings, connection, app_menu.menu, keystore_available=True, project_counts={}
+    )
+
+
+def test_should_tell_preferences_how_many_projects_each_server_had(qtbot, mocker):
+    conf = ConfigBuilder().build()
+    parent = QWidget()
+    qtbot.addWidget(parent)
+    app_menu = AppMenu(parent, conf, BuildIcons(), FakeConnection(fake_content()))
+    projects = [ProjectBuilder({"name": f"p{n}"}).server("someurl").build() for n in range(2)]
+    app_menu.update(projects)
+    preferences = mocker.patch("buildnotifylib.ui.app_menu.PreferencesDialog")
+    preferences.return_value.open.return_value = None
+
+    app_menu.preferences_clicked(None)
+
+    assert preferences.call_args.kwargs["project_counts"] == {"someurl": 2}
 
 
 def test_should_tell_preferences_the_keystore_is_unavailable(qtbot, mocker):
@@ -445,7 +462,7 @@ def test_should_tell_preferences_the_keystore_is_unavailable(qtbot, mocker):
 
     app_menu.preferences_clicked(None)
 
-    assert preferences.call_args.kwargs == {"keystore_available": False}
+    assert preferences.call_args.kwargs == {"keystore_available": False, "project_counts": {}}
 
 
 @pytest.fixture

@@ -1,9 +1,11 @@
+from urllib.parse import urlparse
+
 from PySide6.QtCore import QEvent, QModelIndex, QObject, QPersistentModelIndex, QStringListModel, Qt
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QAbstractItemView, QHBoxLayout, QListView, QPushButton, QVBoxLayout, QWidget
 
 from buildnotifylib.core.ports import Connection
-from buildnotifylib.core.settings import ServerSettings
+from buildnotifylib.core.settings import ServerSettings, SourceKind
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.ui.widgets.forms import section
 
@@ -19,11 +21,13 @@ class ServersPage(QWidget):
         connection: Connection,
         keystore_available: bool = True,
         parent: QWidget | None = None,
+        project_counts: dict[str, int] | None = None,
     ):
         super().__init__(parent)
         self.timeout = timeout
         self.connection = connection
         self.keystore_available = keystore_available
+        self.project_counts = project_counts or {}
         self.servers: dict[str, ServerSettings] = {}
         self.server_list = QListView()
         self.server_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -54,10 +58,10 @@ class ServersPage(QWidget):
 
     def set_value(self, servers: list[ServerSettings]) -> None:
         self.servers = {server.url: server for server in servers}
-        self.set_urls(list(self.servers))
+        self.refresh()
 
     def value(self) -> list[ServerSettings]:
-        return [self.servers[url] for url in self.get_urls()]
+        return list(self.servers.values())
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         if watched is self.server_list and is_enter(event):
@@ -65,8 +69,9 @@ class ServersPage(QWidget):
             return True
         return super().eventFilter(watched, event)
 
-    def set_urls(self, urls: list[str]) -> None:
-        self.server_list.setModel(QStringListModel(urls))
+    def refresh(self) -> None:
+        rows = [row_text(server, self.project_counts.get(url)) for url, server in self.servers.items()]
+        self.server_list.setModel(QStringListModel(rows))
         self.server_list.selectionModel().currentChanged.connect(self.current_changed)
         self.current_changed(QModelIndex())
 
@@ -77,36 +82,40 @@ class ServersPage(QWidget):
         return self.server_list.model()  # type: ignore[return-value]
 
     def get_urls(self) -> list[str]:
-        return self.model().stringList()
+        return list(self.servers)
+
+    def current_url(self) -> str | None:
+        row = self.server_list.selectionModel().currentIndex().row()
+        urls = self.get_urls()
+        return urls[row] if 0 <= row < len(urls) else None
 
     def add_server(self) -> None:
         server = self.open_server_dialog(None)
-        if server is None or server.url in self.get_urls():
+        if server is None or server.url in self.servers:
             return
         self.servers[server.url] = server
-        self.set_urls([*self.get_urls(), server.url])
+        self.refresh()
 
     def remove_element(self) -> None:
-        index = self.server_list.selectionModel().currentIndex()
-        if not index.isValid():
+        url = self.current_url()
+        if url is None:
             return
-        urls = self.get_urls()
-        urls.pop(index.row())
-        self.set_urls(urls)
+        del self.servers[url]
+        self.refresh()
 
     def configure_projects(self) -> None:
-        index = self.server_list.selectionModel().currentIndex()
-        url = index.data()
-        if not url:
+        url = self.current_url()
+        if url is None:
             return
-        server = self.open_server_dialog(self.servers.get(url, ServerSettings(url)))
+        server = self.open_server_dialog(self.servers[url])
         if server is None or self.duplicates_another(url, server.url):
             return
-        self.servers[server.url] = server
-        self.model().setData(index, server.url)
+        replaced = [server if key == url else old for key, old in self.servers.items()]
+        self.servers = {each.url: each for each in replaced}
+        self.refresh()
 
     def duplicates_another(self, url: str, edited_url: str) -> bool:
-        return edited_url != url and edited_url in self.get_urls()
+        return edited_url != url and edited_url in self.servers
 
     def open_server_dialog(self, server: ServerSettings | None) -> ServerSettings | None:
         dialog = ServerConfigurationDialog(
@@ -119,3 +128,21 @@ class ServersPage(QWidget):
 
 def is_enter(event: QEvent) -> bool:
     return isinstance(event, QKeyEvent) and event.type() == QEvent.Type.KeyPress and event.key() in ENTER_KEYS
+
+
+def server_name(server: ServerSettings) -> str:
+    return server.prefix or urlparse(server.url).hostname or server.url
+
+
+def server_target(server: ServerSettings) -> str:
+    if server.kind is not SourceKind.GITHUB:
+        return urlparse(server.url).netloc or server.url
+    workflow = "@".join(part for part in (server.workflow, server.branch) if part)
+    return " ".join(part for part in (server.repository, workflow) if part)
+
+
+def row_text(server: ServerSettings, project_count: int | None = None) -> str:
+    parts = [server_name(server), str(server.kind), server_target(server)]
+    if project_count is not None:
+        parts.append(f"{project_count} project" + ("" if project_count == 1 else "s"))
+    return " - ".join(parts)

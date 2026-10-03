@@ -19,7 +19,7 @@ def test_should_show_configured_urls(qtbot):
     conf = ConfigBuilder().server("file://" + file_path).build()
     dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
     qtbot.addWidget(dialog)
-    assert [str(s) for s in dialog.servers_page.server_list.model().stringList()] == ["file://" + file_path]
+    assert dialog.servers_page.get_urls() == ["file://" + file_path]
 
 
 @pytest.mark.functional
@@ -69,7 +69,7 @@ def test_should_prefill_server_config(qtbot, mocker):
     dialog.servers_page.server_list.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
     dialog.servers_page.server_list.setCurrentIndex(index)
 
-    m = mocker.patch.object(ServerConfigurationDialog, "open")
+    m = mocker.patch.object(ServerConfigurationDialog, "open", return_value=None)
 
     qtbot.mouseClick(dialog.servers_page.configure_button, Qt.MouseButton.LeftButton)
 
@@ -91,7 +91,7 @@ def test_should_remove_configured_servers(qtbot):
 
     qtbot.mouseClick(dialog.servers_page.remove_button, Qt.MouseButton.LeftButton)
 
-    assert [str(s) for s in dialog.servers_page.server_list.model().stringList()] == []
+    assert dialog.servers_page.get_urls() == []
 
 
 @pytest.mark.functional

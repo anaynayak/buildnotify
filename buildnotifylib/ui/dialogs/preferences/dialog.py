@@ -19,11 +19,14 @@ class PreferencesDialog(QDialog):
         connection: Connection,
         parent: QWidget | None = None,
         keystore_available: bool = True,
+        project_counts: dict[str, int] | None = None,
     ):
         super().__init__(parent)
         self.settings = settings
         self.setWindowTitle(self.tr("Preferences"))
-        self.servers_page = ServersPage(settings.timeout_seconds, connection, keystore_available)
+        self.servers_page = ServersPage(
+            settings.timeout_seconds, connection, keystore_available, project_counts=project_counts
+        )
         self.notifications_page = NotificationsPage()
         self.menu_page = MenuPage()
         self.advanced_page = AdvancedPage()

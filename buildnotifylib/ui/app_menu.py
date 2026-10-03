@@ -1,4 +1,5 @@
 import webbrowser
+from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import replace
 from datetime import datetime
@@ -180,8 +181,13 @@ class AppMenu(QtCore.QObject):
         )
 
     def preferences_clicked(self, widget: QWidget):
+        counts = Counter(project.server_url for project in self.projects)
         dialog = PreferencesDialog(
-            self.store.settings, self.connection, self.menu, keystore_available=self.store.keystore.is_available()
+            self.store.settings,
+            self.connection,
+            self.menu,
+            keystore_available=self.store.keystore.is_available(),
+            project_counts=dict(counts),
         )
         settings = dialog.open()
         dialog.deleteLater()
