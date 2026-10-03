@@ -30,6 +30,14 @@ fuzz-reqs:
 build:
     uv build
 
+# Build the docs site into site/ and fail on any warning
+docs:
+    uv run --locked --group docs mkdocs build --strict
+
+# Serve the docs site locally with live reload
+docs-serve:
+    uv run --locked --group docs mkdocs serve
+
 # Run the app against local fixture feeds with throwaway settings and no keychain
 demo *args:
     uv run --locked python scripts/demo.py {{args}}
@@ -37,6 +45,10 @@ demo *args:
 # Render the docs screenshots offscreen into docs/images
 screenshots:
     uv run --locked python scripts/screenshots.py
+
+# Render docs/images/social-card.png for the docs og:image
+social-card:
+    uv run --locked python scripts/social_card.py
 
 # Build twice and fail if the sdist or wheel hashes differ
 repro:

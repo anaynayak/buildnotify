@@ -1,12 +1,16 @@
+---
+description: Answers to common BuildNotify questions about requirements, supported servers, settings and notifications.
+---
+
 # FAQ
 
 ## What all do I need to run this on my machine?
 
 Python 3.11 or newer and a desktop with a system tray. The steps specified in the [Installation](installation.md) page should help you get started.
 
-## I don't see the tray icon on GNOME
+## I don't see the tray icon
 
-GNOME Shell needs the [AppIndicator and KStatusNotifierItem Support](https://extensions.gnome.org/extension/615/appindicator-support/) extension to show tray icons. Ubuntu ships it enabled. Without a tray, BuildNotify says "BuildNotify needs a system tray. I couldn't detect one on this system." and exits with code 1. On GNOME the message also names the extension. Install and enable it (`gnome-shell-extension-appindicator` on Debian and Ubuntu), then start BuildNotify again.
+See [Troubleshooting](troubleshooting.md#no-tray-icon-on-gnome).
 
 ## Why is BuildNotify not a gnome-applet anymore?
 
@@ -16,7 +20,7 @@ Well, it turns out that there are a lot more desktop environments other than Gno
 
 Yes. The application is written with Qt so that it can work across different environments, and the tests run on Linux, macOS and Windows. If it worked for your XYZ configuration, do let me know.
 
-On Windows, a custom script has to read the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables. Scripts that use `#status#` or `#projects#` are not run there. See [Custom script](usage.md#custom-script).
+On Windows, a custom script has to read the `BUILDNOTIFY_STATUS` and `BUILDNOTIFY_PROJECTS` environment variables. Scripts that use `#status#` or `#projects#` are not run there. See [Custom script](guide/notifications.md#custom-script).
 
 ## Why Qt? Why not Xyz?
 
@@ -28,7 +32,7 @@ Qt saved me from the pain of writing environment specific code as currently ther
 
 ## Can I point BuildNotify at a local file:// feed?
 
-No. The HTTP client can't fetch `file://` urls, so 2.x accepted them and then failed with a connection error. 3.0 rejects them in the server dialog and accepts only `http://` and `https://`. Serve the file over HTTP instead, for example with `python3 -m http.server`.
+No. The HTTP client can't fetch `file://` URLs, so 2.x accepted them and then failed with a connection error. 3.0 rejects them in the server dialog and accepts only `http://` and `https://`. Serve the file over HTTP instead, for example with `python3 -m http.server`.
 
 ## Will upgrading lose my servers?
 

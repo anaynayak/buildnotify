@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://anaynayak.github.io/buildnotify/sitemap.xml

@@ -1,0 +1,84 @@
+site_name: BuildNotify
+site_description: BuildNotify is a system tray app that shows CI build status and notifies you when a build breaks or is fixed.
+site_url: https://anaynayak.github.io/buildnotify/
+repo_url: https://github.com/anaynayak/buildnotify
+repo_name: anaynayak/buildnotify
+
+# Pages build as installation.html etc., so the old Jekyll URLs keep working.
+use_directory_urls: false
+
+docs_dir: docs
+site_dir: site
+
+# Not part of the site: review reports and the rewrite draft.
+exclude_docs: |
+  *.html
+  rust-gpui-rewrite-analysis.md
+
+# Strict builds fail on these too. MkDocs only logs broken anchors at info level by default.
+validation:
+  anchors: warn
+  unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Install: installation.md
+  - Quick start: quickstart.md
+  - Servers:
+      - Overview: servers/index.md
+      - Jenkins: servers/jenkins.md
+      - GoCD: servers/gocd.md
+      - Woodpecker CI: servers/woodpecker.md
+      - Crow CI: servers/crow.md
+      - GitHub Actions: servers/github-actions.md
+      - Other cctray servers: servers/other.md
+  - Guides:
+      - Overview: usage.md
+      - Tray and menu: guide/tray-menu.md
+      - Notifications and custom script: guide/notifications.md
+      - Muting and pausing: guide/muting.md
+      - Preferences and the server dialog: guide/preferences.md
+  - Security and privacy: security.md
+  - Reference: reference.md
+  - Troubleshooting: troubleshooting.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+  - FAQ: faq.md
+
+theme:
+  name: material
+  custom_dir: overrides
+  logo: images/buildnotify.svg
+  favicon: images/buildnotify.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.tabs.link
+    - navigation.sections
+    - search.suggest
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.snippets:
+      base_path: ['.']
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
