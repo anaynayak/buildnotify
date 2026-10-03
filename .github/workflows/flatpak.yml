@@ -30,4 +30,14 @@ jobs:
       - name: Lint manifest
         run: flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest packaging/flatpak/io.github.anaynayak.BuildNotify.yml
       - name: Lint repo
-        run: flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
+        # Flathub mirrors screenshots during its own build, so these two errors only
+        # clear there. Fail on anything else.
+        run: |
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo > lint.json || true
+          cat lint.json
+          flatpak run --command=python3 org.flatpak.Builder -c '
+          import json, sys
+          expected = {"appstream-external-screenshot-url", "appstream-screenshots-not-mirrored-in-ostree"}
+          unexpected = set(json.load(sys.stdin).get("errors", [])) - expected
+          sys.exit(f"Unexpected lint errors: {sorted(unexpected)}" if unexpected else 0)
+          ' < lint.json
