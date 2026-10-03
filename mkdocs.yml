@@ -15,6 +15,11 @@ exclude_docs: |
   *.html
   rust-gpui-rewrite-analysis.md
 
+# Strict builds fail on these too. MkDocs only logs broken anchors at info level by default.
+validation:
+  anchors: warn
+  unrecognized_links: warn
+
 nav:
   - Home: index.md
   - Install: installation.md
