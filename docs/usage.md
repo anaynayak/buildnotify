@@ -14,7 +14,7 @@ Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in t
 
 Add a new server by clicking the `+` sign. Each server can use a username and password or a Bearer token. Both are kept in the system keyring.
 
-Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want.
+Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want. The `All (N of M)` box shows a partial state while some are unticked, and ticking it sets every project the filter field currently shows. Projects added to the feed later are included automatically.
 
 The Servers tab of Preferences lists the monitored servers, one row each with its name (the prefix, else the host), source kind, target and the number of projects found by the last poll. GitHub rows show the repository and `workflow@branch`. `Add...` (Insert), `Edit...` (Enter or double-click) and `Remove` (Delete) change the list, and Remove asks first.
 
