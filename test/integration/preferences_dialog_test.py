@@ -7,9 +7,15 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
 from buildnotifylib.core.settings import DEFAULT_NOTIFICATIONS, AppSettings, ServerSettings, SortKey
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
+from buildnotifylib.ui.dialogs.preferences.servers_page import ServersPage
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from test.fake_conf import ConfigBuilder
 from test.utils import FakeConnection, fake_content
+
+
+@pytest.fixture(autouse=True)
+def confirm_removals(mocker):
+    return mocker.patch.object(ServersPage, "confirm_removal", return_value=True)
 
 
 @pytest.mark.functional
@@ -457,3 +463,91 @@ def test_should_offer_the_servers_menu_notifications_and_advanced_tabs(qtbot):
         "Notifications",
         "Advanced",
     ]
+
+
+def two_server_page(qtbot):
+    conf = ConfigBuilder().server("http://one/cctray.xml").server("http://two/cctray.xml").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+    dialog.show()
+    select_row(dialog, 0)
+    dialog.servers_page.server_list.setFocus()
+    return dialog.servers_page, dialog
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_server_buttons_should_read_add_edit_and_remove(qtbot):
+    page, _dialog = two_server_page(qtbot)
+
+    assert [page.add_button.text(), page.configure_button.text(), page.remove_button.text()] == [
+        "Add...",
+        "Edit...",
+        "Remove",
+    ]
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_insert_should_add_a_server(qtbot, mocker):
+    page, _dialog = two_server_page(qtbot)
+    stub_server_dialog(mocker, "http://new/cctray.xml")
+
+    qtbot.keyClick(page.server_list, Qt.Key.Key_Insert)
+
+    assert page.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml", "http://new/cctray.xml"]
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+@pytest.mark.parametrize("key", [Qt.Key.Key_Return, Qt.Key.Key_Enter])
+def test_enter_should_edit_the_selected_server(qtbot, mocker, key):
+    page, _dialog = two_server_page(qtbot)
+    stub_server_dialog(mocker, "http://edited/cctray.xml")
+
+    qtbot.keyClick(page.server_list, key)
+
+    assert page.get_urls() == ["http://edited/cctray.xml", "http://two/cctray.xml"]
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_double_click_should_edit_the_selected_server(qtbot, mocker):
+    page, _dialog = two_server_page(qtbot)
+    stub_server_dialog(mocker, "http://edited/cctray.xml")
+
+    page.server_list.doubleClicked.emit(page.server_list.model().index(0, 0))
+
+    assert page.get_urls() == ["http://edited/cctray.xml", "http://two/cctray.xml"]
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_delete_should_remove_the_selected_server_after_confirmation(qtbot, confirm_removals):
+    page, _dialog = two_server_page(qtbot)
+
+    qtbot.keyClick(page.server_list, Qt.Key.Key_Delete)
+
+    confirm_removals.assert_called_once()
+    assert page.get_urls() == ["http://two/cctray.xml"]
+
+
+@pytest.mark.functional
+@pytest.mark.requireshead
+def test_should_keep_the_server_when_removal_is_declined(qtbot, confirm_removals):
+    page, _dialog = two_server_page(qtbot)
+    confirm_removals.return_value = False
+
+    qtbot.keyClick(page.server_list, Qt.Key.Key_Delete)
+
+    assert page.get_urls() == ["http://one/cctray.xml", "http://two/cctray.xml"]
+
+
+@pytest.mark.functional
+def test_should_disable_edit_and_remove_without_a_selection(qtbot):
+    conf = ConfigBuilder().server("http://one/cctray.xml").build()
+    dialog = PreferencesDialog(conf.settings, FakeConnection(fake_content()))
+    qtbot.addWidget(dialog)
+
+    assert not dialog.servers_page.configure_button.isEnabled()
+    assert not dialog.servers_page.remove_button.isEnabled()

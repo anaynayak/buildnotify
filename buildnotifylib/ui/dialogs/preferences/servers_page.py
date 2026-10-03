@@ -1,15 +1,22 @@
+from collections.abc import Callable
 from urllib.parse import urlparse
 
 from PySide6.QtCore import QEvent, QModelIndex, QObject, QPersistentModelIndex, QStringListModel, Qt
 from PySide6.QtGui import QKeyEvent
-from PySide6.QtWidgets import QAbstractItemView, QHBoxLayout, QListView, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QListView,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.core.settings import ServerSettings, SourceKind
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
 from buildnotifylib.ui.widgets.forms import section
-
-ENTER_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter)
 
 
 class ServersPage(QWidget):
@@ -31,13 +38,13 @@ class ServersPage(QWidget):
         self.servers: dict[str, ServerSettings] = {}
         self.server_list = QListView()
         self.server_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.configure_button = QPushButton(self.tr("Configure"))
-        self.remove_button = self.small_button("-", self.tr("Remove"))
-        self.add_button = self.small_button("+", self.tr("Add"))
+        self.add_button = QPushButton(self.tr("Add..."))
+        self.configure_button = QPushButton(self.tr("Edit..."))
+        self.remove_button = QPushButton(self.tr("Remove"))
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        for button in (self.configure_button, self.remove_button, self.add_button):
+        for button in (self.add_button, self.configure_button, self.remove_button):
             buttons.addWidget(button)
         servers = QVBoxLayout()
         servers.addWidget(self.server_list)
@@ -50,12 +57,6 @@ class ServersPage(QWidget):
         self.remove_button.clicked.connect(self.remove_element)
         self.configure_button.clicked.connect(self.configure_projects)
 
-    @staticmethod
-    def small_button(text: str, tooltip: str) -> QPushButton:
-        button = QPushButton(text)
-        button.setToolTip(tooltip)
-        return button
-
     def set_value(self, servers: list[ServerSettings]) -> None:
         self.servers = {server.url: server for server in servers}
         self.refresh()
@@ -64,10 +65,20 @@ class ServersPage(QWidget):
         return list(self.servers.values())
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
-        if watched is self.server_list and is_enter(event):
-            self.configure_projects()
-            return True
+        if watched is self.server_list and isinstance(event, QKeyEvent) and event.type() == QEvent.Type.KeyPress:
+            action = self.key_actions().get(event.key())
+            if action is not None:
+                action()
+                return True
         return super().eventFilter(watched, event)
+
+    def key_actions(self) -> dict[int, Callable[[], None]]:
+        return {
+            Qt.Key.Key_Insert: self.add_server,
+            Qt.Key.Key_Return: self.configure_projects,
+            Qt.Key.Key_Enter: self.configure_projects,
+            Qt.Key.Key_Delete: self.remove_element,
+        }
 
     def refresh(self) -> None:
         rows = [row_text(server, self.project_counts.get(url)) for url, server in self.servers.items()]
@@ -77,6 +88,7 @@ class ServersPage(QWidget):
 
     def current_changed(self, current: QModelIndex | QPersistentModelIndex, _previous=None) -> None:
         self.configure_button.setEnabled(current.isValid())
+        self.remove_button.setEnabled(current.isValid())
 
     def model(self) -> QStringListModel:
         return self.server_list.model()  # type: ignore[return-value]
@@ -98,10 +110,16 @@ class ServersPage(QWidget):
 
     def remove_element(self) -> None:
         url = self.current_url()
-        if url is None:
+        if url is None or not self.confirm_removal(self.servers[url]):
             return
         del self.servers[url]
         self.refresh()
+
+    def confirm_removal(self, server: ServerSettings) -> bool:
+        answer = QMessageBox.question(
+            self.window(), self.tr("Remove server"), self.tr("Remove %1?").replace("%1", server_name(server))
+        )
+        return answer == QMessageBox.StandardButton.Yes
 
     def configure_projects(self) -> None:
         url = self.current_url()
@@ -124,10 +142,6 @@ class ServersPage(QWidget):
         edited = dialog.open()
         dialog.deleteLater()
         return edited
-
-
-def is_enter(event: QEvent) -> bool:
-    return isinstance(event, QKeyEvent) and event.type() == QEvent.Type.KeyPress and event.key() in ENTER_KEYS
 
 
 def server_name(server: ServerSettings) -> str:
