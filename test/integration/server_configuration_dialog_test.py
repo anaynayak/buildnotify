@@ -21,6 +21,7 @@ from test.utils import FakeConnection, GatedConnection, fake_content
 
 TIMEOUT = 10
 QWIDGETSIZE_MAX = 16777215
+FEED_OFFSET = "Use the feed's offset"
 
 
 @pytest.mark.functional
@@ -41,7 +42,7 @@ def test_should_show_configured_urls(qtbot):
         assert model.item(0, 0).child(0, 0).checkState() == Qt.CheckState.Checked
         assert model.item(0, 0).child(0, 0).text() == "cleanup-artifacts-B"
 
-        assert dialog.timezone.currentText() == "None"
+        assert dialog.timezone.currentText() == FEED_OFFSET
 
 
 @pytest.mark.functional
@@ -50,7 +51,7 @@ def test_should_fall_back_to_none_for_unknown_stored_timezone(qtbot):
     dialog = ServerConfigurationDialog(ServerSettings(url, timezone="EDT"), TIMEOUT, HttpConnection())
     qtbot.addWidget(dialog)
 
-    assert dialog.timezone.currentText() == "None"
+    assert dialog.timezone.currentText() == FEED_OFFSET
 
 
 @pytest.mark.functional
@@ -59,7 +60,7 @@ def test_should_list_zoneinfo_timezones_sorted(qtbot):
     qtbot.addWidget(dialog)
     zones = [dialog.timezone.itemText(i) for i in range(dialog.timezone.count())]
 
-    assert zones[0] == "None"
+    assert zones[0] == FEED_OFFSET
     assert "Asia/Kolkata" in zones
     assert zones[1:] == sorted(zones[1:])
 
@@ -1039,3 +1040,17 @@ def test_should_expand_advanced_when_a_retry_without_verification_is_accepted(qt
         qtbot.waitUntil(lambda: dialog.projects_loaded)
 
     assert dialog.advanced.is_expanded()
+
+
+def test_should_label_the_time_zone_field_for_feed_times(qtbot):
+    dialog = open_dialog(qtbot, None)
+
+    assert dialog.timezone_form.labelForField(dialog.timezone).text() == "Time &zone for feed times"
+
+
+def test_should_keep_none_as_the_stored_value_of_the_default_entry(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml", timezone="Asia/Kolkata"))
+    dialog.timezone.setCurrentIndex(0)
+
+    assert dialog.timezone.currentText() == FEED_OFFSET
+    assert dialog.get_server_config().timezone == "None"

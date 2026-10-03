@@ -67,7 +67,8 @@ class ServerConfigurationDialog(QDialog):
         self.syncing = False
         self.loads = QThreadPool.globalInstance()
         self.deadline = Deadline(self, self.expire)
-        self.timezone.addItems([NONE_TIMEZONE, *sorted(available_timezones())])
+        self.timezone.addItem(self.tr("Use the feed's offset"), NONE_TIMEZONE)
+        self.timezone.addItems(sorted(available_timezones()))
 
         if server is not None:
             self.server = server
@@ -129,13 +130,16 @@ class ServerConfigurationDialog(QDialog):
 
     def advanced_section(self) -> CollapsibleSection:
         self.timezone_form = form_layout()
-        add_row(self.timezone_form, self.tr("Ser&ver timezone"), self.timezone)
+        add_row(self.timezone_form, self.tr("Time &zone for feed times"), self.timezone)
         content = QVBoxLayout()
         content.setContentsMargins(0, 0, 0, 0)
         content.addLayout(self.timezone_form)
         content.addLayout(self.certificate_row())
         self.advanced = CollapsibleSection(self.tr("&Advanced"), content)
         return self.advanced
+
+    def timezone_value(self) -> str:
+        return self.timezone.currentData() or self.timezone.currentText()
 
     def expand_advanced_if_changed(self) -> None:
         if self.timezone.currentIndex() > 0 or self.unverified_host is not None:
@@ -440,7 +444,7 @@ class ServerConfigurationDialog(QDialog):
         return ServerSettings(
             self.server_url(),
             excluded_projects,
-            self.timezone.currentText(),
+            self.timezone_value(),
             self.prefix.text(),
             credentials.username,
             credentials.password,
