@@ -1,10 +1,11 @@
 name: Flatpak
 
+# Pushes to main and v* tags build the bundle through nightly.yml and release.yml, which call this
+# workflow, so the published Flatpak is the one that passed these checks.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -22,6 +23,7 @@ jobs:
       - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
         with:
           bundle: BuildNotify.flatpak
+          artifact-name: flatpak
           manifest-path: packaging/flatpak/io.github.anaynayak.BuildNotify.yml
           cache-key: flatpak-builder-${{ github.sha }}
           repo-dir: repo
