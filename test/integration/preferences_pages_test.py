@@ -90,7 +90,8 @@ def test_menu_page_should_use_the_sentence_case_wording(qtbot):
 
     assert page.show_last_build_time.text().replace("&", "") == "Show last build time"
     assert page.show_last_build_label.text().replace("&", "") == "Show build label"
-    assert [button.text().replace("&", "") for button in page.sort_buttons.values()] == ["Failing first", "Name", "Last build time"]
+    sort_labels = [button.text().replace("&", "") for button in page.sort_buttons.values()]
+    assert sort_labels == ["Failing first", "Name", "Last build time"]
     assert (page.tray_colour.text().replace("&", ""), page.tray_shapes.text().replace("&", "")) == ("Colour", "Shapes")
 
 

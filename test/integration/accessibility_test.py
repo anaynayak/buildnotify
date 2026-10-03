@@ -35,7 +35,7 @@ def reading_order(widgets: list[QWidget], dialog: QDialog) -> list[tuple[int, in
 
 def assert_visual(walked: list[QWidget], dialog: QDialog) -> None:
     rows = reading_order(walked, dialog)
-    assert rows == sorted(rows), [(w.objectName() or type(w).__name__, p) for w, p in zip(walked, rows)]
+    assert rows == sorted(rows), [(w.objectName() or type(w).__name__, p) for w, p in zip(walked, rows, strict=True)]
 
 
 def server_dialog(qtbot, server: ServerSettings) -> ServerConfigurationDialog:
@@ -112,7 +112,7 @@ def assert_mnemonics(dialog: QDialog, extra: list[str] = ()) -> None:
     dialog.show()
     texts = labelled_texts(dialog)
     keys = mnemonics(texts)
-    assert all(keys), [t for t, k in zip(texts, keys) if not k]
+    assert all(keys), [t for t, k in zip(texts, keys, strict=True) if not k]
     keys += [k for k in mnemonics(list(extra)) if k]
     assert len(keys) == len(set(keys)), sorted(k for k in keys if keys.count(k) > 1)
 

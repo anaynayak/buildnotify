@@ -480,7 +480,7 @@ def two_server_page(qtbot):
 def test_server_buttons_should_read_add_edit_and_remove(qtbot):
     page, _dialog = two_server_page(qtbot)
 
-    assert [button.text().replace("&", "") for button in (page.add_button, page.configure_button, page.remove_button)] == [
+    assert [b.text().replace("&", "") for b in (page.add_button, page.configure_button, page.remove_button)] == [
         "Add...",
         "Edit...",
         "Remove",
