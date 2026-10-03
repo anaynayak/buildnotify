@@ -14,7 +14,9 @@ Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in t
 
 Add a new server by clicking the `+` sign. Under Sign in, choose `None`, `Username and password` or `Token` (a Bearer token, without the `Bearer` keyword). Credentials are kept in the system keyring. Without one, the dialog says so and asks you to install the `keyring` package.
 
-If a server's certificate isn't trusted, the dialog asks whether to connect anyway. Accepting turns off certificate checks for that server only. The dialog then shows `Certificate checks off for <host>` with a `Turn checks back on` button, and checks come back on if you change the host.
+If a server's certificate isn't trusted, the dialog asks whether to connect anyway. Accepting turns off certificate checks for that server only. The dialog then opens `Advanced` and shows `Certificate checks off for <host>` with a `Turn checks back on` button, and checks come back on if you change the host.
+
+The `Advanced` section at the bottom of the dialog holds `Time zone for feed times` and the certificate checks. It stays collapsed unless a time zone is set or certificate checks are off. The time zone defaults to `Use the feed's offset`, and you can type part of a zone name, such as `Kolkata`, to find it.
 
 Save works without testing the server first, so you can add one that is down, and all of its projects are included. Test connection shows how many projects the feed has, or a short error, and then lists them so you can untick the ones you don't want. The `All (N of M)` box shows a partial state while some are unticked, and ticking it sets every project the filter field currently shows. Projects added to the feed later are included automatically.
 
