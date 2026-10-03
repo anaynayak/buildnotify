@@ -874,3 +874,13 @@ def test_should_label_a_stored_bearer_token_as_a_token(qtbot):
     assert auth.password_label.text() == "Bearer token"
     assert auth.password.placeholderText() != ""
     assert auth.value() == credentials
+
+
+def test_should_name_the_package_to_install_when_there_is_no_keyring(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, HttpConnection(), keystore_available=False)
+    qtbot.addWidget(dialog)
+    dialog.show()
+
+    assert dialog.auth.message.isVisible()
+    assert "can't be stored" in dialog.auth.message.text()
+    assert "'keyring'" in dialog.auth.message.text()

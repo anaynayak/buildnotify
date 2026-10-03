@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from PySide6.QtWidgets import QComboBox, QGroupBox, QLineEdit, QWidget
 
 from buildnotifylib.core.settings import ServerSettings
-from buildnotifylib.ui.widgets.forms import add_row, form_layout
+from buildnotifylib.ui.widgets.forms import add_message, add_row, form_layout
 
 
 @dataclass(frozen=True)
@@ -39,6 +39,7 @@ class AuthForm(QGroupBox):
         add_row(self.form, self.tr("Sign in"), self.authentication_type)
         self.username_label = add_row(self.form, self.tr("Username"), self.username)
         self.password_label = add_row(self.form, self.tr("Password"), self.password)
+        self.message = add_message(self.form)
         self.setLayout(self.form)
         self.show_mode(NONE)
         self.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
@@ -89,5 +90,8 @@ class AuthForm(QGroupBox):
 
     def disable_keyring(self) -> None:
         self.setTitle(self.tr("Authentication (keyring dependency missing)"))
+        self.message.show_error(
+            self.tr("Credentials can't be stored without a system keyring. Install the 'keyring' package to sign in.")
+        )
         for widget in (self.authentication_type, self.username, self.password):
             widget.setEnabled(False)
