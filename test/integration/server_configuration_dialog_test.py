@@ -1054,3 +1054,43 @@ def test_should_keep_none_as_the_stored_value_of_the_default_entry(qtbot):
 
     assert dialog.timezone.currentText() == FEED_OFFSET
     assert dialog.get_server_config().timezone == "None"
+
+
+def completions(dialog, text):
+    completer = dialog.timezone.completer()
+    completer.setCompletionPrefix(text)
+    return [completer.completionModel().index(i, 0).data() for i in range(completer.completionCount())]
+
+
+def test_should_complete_time_zones_by_substring(qtbot):
+    dialog = open_dialog(qtbot, None)
+
+    assert dialog.timezone.isEditable()
+    assert "Asia/Kolkata" in completions(dialog, "Kolkata")
+
+
+def test_should_ignore_case_when_completing_time_zones(qtbot):
+    dialog = open_dialog(qtbot, None)
+
+    assert "Asia/Kolkata" in completions(dialog, "kolkata")
+
+
+def test_should_save_a_typed_time_zone(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml"))
+    dialog.timezone.setEditText("Asia/Kolkata")
+
+    assert dialog.get_server_config().timezone == "Asia/Kolkata"
+
+
+def test_should_save_a_time_zone_picked_from_the_list(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml"))
+    dialog.timezone.setCurrentIndex(dialog.timezone.findText("Europe/Paris"))
+
+    assert dialog.get_server_config().timezone == "Europe/Paris"
+
+
+def test_should_save_the_default_when_typed_text_is_not_a_time_zone(qtbot):
+    dialog = open_dialog(qtbot, ServerSettings("http://localhost:8080/cc.xml", timezone="Asia/Kolkata"))
+    dialog.timezone.setEditText("Kolka")
+
+    assert dialog.get_server_config().timezone == "None"

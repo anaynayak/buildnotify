@@ -69,6 +69,9 @@ class ServerConfigurationDialog(QDialog):
         self.deadline = Deadline(self, self.expire)
         self.timezone.addItem(self.tr("Use the feed's offset"), NONE_TIMEZONE)
         self.timezone.addItems(sorted(available_timezones()))
+        completer = self.timezone.completer()
+        completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
         if server is not None:
             self.server = server
@@ -100,6 +103,8 @@ class ServerConfigurationDialog(QDialog):
         self.cctray = CctrayForm()
         self.auth = AuthForm()
         self.timezone = QComboBox()
+        self.timezone.setEditable(True)
+        self.timezone.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
         self.prefix = QLineEdit()
         self.prefix.setPlaceholderText(self.tr("e.g. branch/release"))
         self.misc = form_layout()
@@ -139,7 +144,10 @@ class ServerConfigurationDialog(QDialog):
         return self.advanced
 
     def timezone_value(self) -> str:
-        return self.timezone.currentData() or self.timezone.currentText()
+        index = self.timezone.findText(self.timezone.currentText())
+        if index < 0:
+            return NONE_TIMEZONE
+        return self.timezone.itemData(index) or self.timezone.itemText(index)
 
     def expand_advanced_if_changed(self) -> None:
         if self.timezone.currentIndex() > 0 or self.unverified_host is not None:
