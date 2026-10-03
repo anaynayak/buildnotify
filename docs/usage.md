@@ -4,9 +4,9 @@ description: An overview of using BuildNotify: the tray icon and menu, notificat
 
 # How to use
 
-Once installed, launch BuildNotify with `buildnotify`. You should see a new icon in the notification tray. Right click it to configure BuildNotify. On Linux and Windows a left click opens the same menu.
+Once installed, launch BuildNotify with `buildnotify`. A new icon appears in the system tray. Right-click it to open the menu, where you add servers and open Preferences. On Linux and Windows a left click opens the same menu.
 
-This page is an overview. The details are on these pages:
+Each part has its own page:
 
 1. [Quick start](quickstart.md): install, add the first server, what you will see.
 2. [Servers](servers/index.md): the feed URL and sign in for Jenkins, GoCD, Woodpecker, Crow CI, GitHub Actions and other cctray servers.
