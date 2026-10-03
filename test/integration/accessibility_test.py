@@ -1,6 +1,7 @@
 import re
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QAbstractButton, QAbstractSpinBox, QDialog, QDialogButtonBox, QLabel, QWidget
 
 from buildnotifylib.core.settings import AppSettings, ServerSettings, SourceKind
@@ -176,3 +177,57 @@ def test_should_name_every_control_on_each_preferences_page(qtbot, tab):
     dialog.tabs.setCurrentIndex(tab)
     dialog.show()
     assert unnamed_stops(dialog) == []
+
+
+def shown(qtbot, dialog: QDialog) -> QDialog:
+    qtbot.addWidget(dialog)
+    dialog.show()
+    qtbot.waitExposed(dialog)
+    return dialog
+
+
+def press(qtbot, widget: QWidget, key: Qt.Key) -> None:
+    widget.setFocus()
+    qtbot.keyClick(widget, key)
+
+
+def test_should_save_the_server_dialog_on_enter(qtbot):
+    dialog = shown(qtbot, ServerConfigurationDialog(None, TIMEOUT, FakeConnection("")))
+    dialog.cctray.url.setText("http://localhost/cc.xml")
+    press(qtbot, dialog.cctray.url, Qt.Key.Key_Return)
+    assert dialog.result() == QDialog.DialogCode.Accepted
+
+
+def test_should_cancel_the_server_dialog_on_escape(qtbot):
+    dialog = shown(qtbot, ServerConfigurationDialog(None, TIMEOUT, FakeConnection("")))
+    dialog.cctray.url.setText("http://localhost/cc.xml")
+    press(qtbot, dialog.cctray.url, Qt.Key.Key_Escape)
+    assert dialog.result() == QDialog.DialogCode.Rejected
+
+
+def test_should_not_save_the_server_dialog_on_enter_in_the_test_button_row(qtbot):
+    dialog = shown(qtbot, ServerConfigurationDialog(None, TIMEOUT, FakeConnection("")))
+    assert dialog.save_button.isDefault()
+    assert not dialog.test_button.autoDefault()
+
+
+def preferences(qtbot) -> PreferencesDialog:
+    settings = AppSettings(servers=[ServerSettings("http://h/cc.xml")])
+    return shown(qtbot, PreferencesDialog(settings, FakeConnection("")))
+
+
+@pytest.mark.parametrize("tab", range(1, 4))
+def test_should_save_preferences_on_enter(qtbot, tab):
+    dialog = preferences(qtbot)
+    dialog.tabs.setCurrentIndex(tab)
+    field = {1: dialog.menu_page.show_last_build_time, 2: dialog.notifications_page.script, 3: dialog.advanced_page.interval}
+    press(qtbot, field[tab], Qt.Key.Key_Return)
+    assert dialog.result() == QDialog.DialogCode.Accepted
+
+
+@pytest.mark.parametrize("tab", range(4))
+def test_should_cancel_preferences_on_escape(qtbot, tab):
+    dialog = preferences(qtbot)
+    dialog.tabs.setCurrentIndex(tab)
+    press(qtbot, dialog.tabs.currentWidget(), Qt.Key.Key_Escape)
+    assert dialog.result() == QDialog.DialogCode.Rejected
