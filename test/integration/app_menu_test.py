@@ -636,8 +636,10 @@ def submenu(app_menu):
 
 
 def server_toggle(app_menu, title):
-    actions = submenu(app_menu).actions()
-    return actions[texts_of(actions).index(title) + 1]
+    menu = submenu(app_menu)
+    if f"Mute {title}" in texts(menu):
+        return action(menu, f"Mute {title}")
+    return action(action(menu, title).menu(), "Mute whole server")
 
 
 def texts_of(actions):
@@ -666,20 +668,38 @@ def test_should_mark_muted_projects_with_an_icon_but_keep_them_in_the_menu(mute_
 
 
 @pytest.mark.functional
-def test_should_give_the_mute_menu_a_section_per_server(mute_menu):
+def test_should_give_the_mute_menu_a_submenu_per_server(mute_menu):
     app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]), ServerSettings(OTHER, muted=True))
 
     app_menu.update([built("api"), built("web"), built("docs", OTHER)])
 
     menu = submenu(app_menu)
-    assert texts(menu) == ["ci/cc.xml", "Mute server", "api", "web", "other/cc.xml", "Mute server", "docs"]
-    checked = {a.text(): a.isChecked() for a in menu.actions() if a.isCheckable()}
-    assert checked == {"Mute server": True, "api": True, "web": False, "docs": False}
-    assert [a.isChecked() for a in menu.actions() if a.text() == "Mute server"] == [False, True]
+    assert texts(menu) == ["ci/cc.xml", "other/cc.xml"]
+    assert not any(a.isSeparator() and a.text() for a in menu.actions())
+    first, second = (action(menu, name).menu() for name in ("ci/cc.xml", "other/cc.xml"))
+    assert texts(first) == ["Mute whole server", "", "api", "web"]
+    assert texts(second) == ["Mute whole server", "", "docs"]
+    checked = {a.text(): a.isChecked() for m in (first, second) for a in m.actions() if a.isCheckable()}
+    assert checked == {"Mute whole server": True, "api": True, "web": False, "docs": False}
+    assert [a.isChecked() for a in first.actions() if a.isCheckable()] == [False, True, False]
 
 
 @pytest.mark.functional
-def test_should_use_a_mute_submenu_per_server_when_there_are_many_projects(mute_menu):
+def test_should_show_only_a_toggle_for_a_server_without_projects(mute_menu):
+    app_menu = mute_menu(ServerSettings(CI), ServerSettings(OTHER, muted=True))
+
+    app_menu.update([built("api")])
+
+    menu = submenu(app_menu)
+    assert texts(menu) == ["ci/cc.xml", "Mute other/cc.xml"]
+    toggle = action(menu, "Mute other/cc.xml")
+    assert toggle.menu() is None and toggle.isCheckable() and toggle.isChecked()
+    toggle.trigger()
+    assert not app_menu.store.settings.servers[1].muted
+
+
+@pytest.mark.functional
+def test_should_keep_every_project_in_the_server_submenu_when_there_are_many(mute_menu):
     app_menu = mute_menu(ServerSettings(CI), ServerSettings(OTHER))
 
     app_menu.update([built(f"a{i}") for i in range(OVERFLOW)] + [built("docs", OTHER)])
@@ -687,7 +707,7 @@ def test_should_use_a_mute_submenu_per_server_when_there_are_many_projects(mute_
     menu = submenu(app_menu)
     assert texts(menu) == ["ci/cc.xml", "other/cc.xml"]
     first = action(menu, "ci/cc.xml").menu()
-    assert texts(first)[:2] == ["Mute server", ""] and len(texts(first)) == OVERFLOW + 2
+    assert texts(first)[:2] == ["Mute whole server", ""] and len(texts(first)) == OVERFLOW + 2
     action(first, "a0").trigger()
     assert app_menu.store.settings.servers[0].muted_projects == ["a0"]
 
@@ -786,7 +806,7 @@ def test_should_unmute_a_project_from_the_menu_and_persist_it(mute_menu):
     app_menu = mute_menu(ServerSettings(CI, muted_projects=["api"]))
     app_menu.update([built("api")])
 
-    action(submenu(app_menu), "api").trigger()
+    action(action(submenu(app_menu), "ci/cc.xml").menu(), "api").trigger()
 
     assert reopened(app_menu).servers[0].muted_projects == []
     assert texts(app_menu.menu)[1] == "api"
@@ -852,8 +872,8 @@ def test_should_keep_mutes_toggled_while_preferences_is_open(mute_menu, mocker):
 
     def mute_from_the_tray():
         server_toggle(app_menu, "other/cc.xml").trigger()
-        action(submenu(app_menu), "api").trigger()
-        action(submenu(app_menu), "web").trigger()
+        action(action(submenu(app_menu), "ci/cc.xml").menu(), "api").trigger()
+        action(action(submenu(app_menu), "ci/cc.xml").menu(), "web").trigger()
         return replace(snapshot, interval_seconds=30)
 
     mocker.patch.object(PreferencesDialog, "open", side_effect=mute_from_the_tray)
@@ -1000,7 +1020,7 @@ def test_should_keep_mutes_toggled_while_editing_a_server(mute_menu, mocker):
 
     def mute_from_the_tray():
         server_toggle(app_menu, "ci/cc.xml").trigger()
-        action(submenu(app_menu), "api").trigger()
+        action(action(submenu(app_menu), "ci/cc.xml").menu(), "api").trigger()
         return ServerSettings(CI, prefix="new")
 
     dialog = mocker.patch("buildnotifylib.ui.app_menu.ServerConfigurationDialog")

@@ -158,21 +158,18 @@ class AppMenu(QtCore.QObject):
         if self.mute_menu is not None:
             self.mute_menu.deleteLater()
         menu = self.mute_menu = QMenu("Mute", self.menu)
-        many = len(self.projects) > OVERFLOW
         for server in self.store.settings.servers:
             title = server_label(server.url)
-            if many:
-                self.fill_server_mutes(menu.addMenu(title), server)
+            projects = [p for p in self.sorted_projects(self.projects) if p.server_url == server.url]
+            if projects:
+                self.fill_server_mutes(menu.addMenu(title), server, projects)
             else:
-                menu.addSection(title)
-                self.fill_server_mutes(menu, server)
+                self.add_toggle(menu, f"Mute {title}", server.muted, partial(toggle_server, url=server.url))
         return menu
 
-    def fill_server_mutes(self, menu: QMenu, server: ServerSettings) -> None:
-        self.add_toggle(menu, "Mute server", server.muted, partial(toggle_server, url=server.url))
-        projects = [project for project in self.sorted_projects(self.projects) if project.server_url == server.url]
-        if projects and menu is not self.mute_menu:
-            menu.addSeparator()
+    def fill_server_mutes(self, menu: QMenu, server: ServerSettings, projects: list[Project]) -> None:
+        self.add_toggle(menu, "Mute whole server", server.muted, partial(toggle_server, url=server.url))
+        menu.addSeparator()
         muted = Mutes.from_settings(self.store.settings).projects
         for project in projects:
             self.add_toggle(menu, project.name, key(project) in muted, partial(toggle_project, project=project))
