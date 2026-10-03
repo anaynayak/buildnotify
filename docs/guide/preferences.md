@@ -4,9 +4,9 @@ description: Add and edit servers in BuildNotify, choose which projects to watch
 
 # Preferences and the server dialog
 
-Given a url pointing to cctray.xml, BuildNotify notifies you of any changes in the project status for selected projects in the CI server. The url must start with `http://` or `https://`. A url typed without one, such as `ci.example.org/cc.xml`, gets `https://`.
+A server is a cctray feed URL or a GitHub repository, and BuildNotify watches the projects you tick in it. A feed URL must start with `http://` or `https://`. A URL typed without one, such as `ci.example.org/cc.xml`, gets `https://`.
 
-Add a new server by clicking the `+` sign. Under Sign in, choose `None`, `Username and password` or `Token` (a Bearer token, without the `Bearer` keyword). Credentials are kept in the system keyring. Without one, the dialog says so and asks you to install the `keyring` package.
+Add a server with `Add...` on the Servers tab of Preferences, or with `Add a server...` in the tray menu before the first one exists. Under Sign in, choose `None`, `Username and password` or `Token` (a Bearer token, without the `Bearer` keyword). Credentials are kept in the system keyring. Without one, the dialog says so and asks you to install the `keyring` package.
 
 If a server's certificate isn't trusted, the dialog asks whether to connect anyway. Accepting turns off certificate checks for that server only. The dialog then opens `Advanced` and shows `Certificate checks off for <host>` with a `Turn checks back on` button, and checks come back on if you change the host.
 
