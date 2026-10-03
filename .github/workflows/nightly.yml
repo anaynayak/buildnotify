@@ -32,7 +32,9 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
         run: |
           base=$(python3 -c 'import runpy; print(runpy.run_path("buildnotifylib/version.py")["VERSION"])')
-          echo "VERSION = \"${base}.dev${RUN_NUMBER}\"" > buildnotifylib/version.py
+          # Dev builds of the next patch release, so they sort after the last release.
+          next=$(python3 -c 'import sys; m, n, p = sys.argv[1].split("."); print(f"{m}.{n}.{int(p) + 1}")' "$base")
+          echo "VERSION = \"${next}.dev${RUN_NUMBER}\"" > buildnotifylib/version.py
           cat buildnotifylib/version.py
       - name: Build dist
         run: |
