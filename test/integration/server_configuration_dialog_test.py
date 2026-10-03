@@ -392,7 +392,7 @@ def test_should_round_trip_a_github_server(qtbot):
 
 
 @pytest.mark.functional
-@pytest.mark.parametrize("repository", ["", "hello-world", "octo-org/hello/world", "https://github.com/a/b"])
+@pytest.mark.parametrize("repository", ["", "hello-world", "octo-org/hello/world", "https://gitlab.com/a/b"])
 def test_should_ask_for_an_owner_and_name(qtbot, mocker, repository):
     dialog = ServerConfigurationDialog(None, TIMEOUT, FakeApi())
     qtbot.addWidget(dialog)
@@ -947,3 +947,53 @@ def test_should_show_the_indicator_for_a_stored_certificate_skip(qtbot):
     assert not dialog.certificate_status.isHidden()
     dialog.cctray.url.setText("https://other.example.org/cc.xml")
     assert dialog.certificate_status.isHidden()
+
+
+@pytest.mark.parametrize(
+    "pasted",
+    [
+        "https://github.com/octo-org/hello-world",
+        "https://github.com/octo-org/hello-world/",
+        "https://github.com/octo-org/hello-world.git",
+        "http://www.github.com/octo-org/hello-world/actions/workflows/ci.yml",
+        "github.com/octo-org/hello-world?tab=readme",
+        " octo-org/hello-world ",
+    ],
+)
+def test_should_accept_a_pasted_github_url_as_the_repository(qtbot, pasted):
+    form = GithubForm()
+    qtbot.addWidget(form)
+
+    form.repository.setText(pasted)
+
+    assert form.value().repository == "octo-org/hello-world"
+    form.repository.editingFinished.emit()
+    assert form.repository.text() == "octo-org/hello-world"
+
+
+@pytest.mark.functional
+def test_should_save_a_github_server_from_a_pasted_url(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, FakeApi())
+    qtbot.addWidget(dialog)
+    dialog.source_kind.setCurrentIndex(1)
+
+    dialog.github.repository.setText("https://github.com/octo-org/hello-world")
+
+    assert dialog.save_button.isEnabled()
+    assert dialog.get_server_config().repository == "octo-org/hello-world"
+
+
+@pytest.mark.functional
+def test_should_guide_the_user_to_create_a_github_token(qtbot):
+    dialog = ServerConfigurationDialog(None, TIMEOUT, FakeApi())
+    qtbot.addWidget(dialog)
+    dialog.source_kind.setCurrentIndex(1)
+
+    text = dialog.auth.token_help.text()
+    assert not dialog.auth.token_help.isHidden()
+    assert 'href="https://github.com/settings/personal-access-tokens/new"' in text
+    assert "Actions: read" in text
+    assert "60 requests an hour" in text
+
+    dialog.source_kind.setCurrentIndex(0)
+    assert dialog.auth.token_help.isHidden()

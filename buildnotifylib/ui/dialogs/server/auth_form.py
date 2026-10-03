@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QGroupBox, QLineEdit, QWidget
 
 from buildnotifylib.core.settings import ServerSettings
@@ -14,6 +15,7 @@ class Credentials:
 
 
 NONE, PASSWORD, TOKEN = 0, 1, 2
+TOKEN_URL = "https://github.com/settings/personal-access-tokens/new"
 STORED_TYPE = {NONE: ServerSettings.AUTH_USERNAME_PASSWORD, PASSWORD: ServerSettings.AUTH_USERNAME_PASSWORD}
 STORED_TYPE[TOKEN] = ServerSettings.AUTH_BEARER_TOKEN
 
@@ -40,6 +42,9 @@ class AuthForm(QGroupBox):
         self.username_label = add_row(self.form, self.tr("Username"), self.username)
         self.password_label = add_row(self.form, self.tr("Password"), self.password)
         self.message = add_message(self.form)
+        self.token_help = add_message(self.form)
+        self.token_help.setTextFormat(Qt.TextFormat.RichText)
+        self.token_help.setOpenExternalLinks(True)
         self.setLayout(self.form)
         self.show_mode(NONE)
         self.authentication_type.currentIndexChanged.connect(self.set_authentication_type)
@@ -63,6 +68,7 @@ class AuthForm(QGroupBox):
         self.authentication_type.blockSignals(False)
 
     def show_mode(self, mode: int) -> None:
+        self.token_help.clear_message()
         self.form.setRowVisible(self.username, mode == PASSWORD)
         self.form.setRowVisible(self.password, mode != NONE)
         if mode == TOKEN:
@@ -80,6 +86,12 @@ class AuthForm(QGroupBox):
         self.show_mode(TOKEN)
         self.password_label.setText(self.tr("Token"))
         self.password.setPlaceholderText(self.tr("Optional for public repositories"))
+        self.token_help.show_hint(
+            self.tr(
+                '<a href="{}">Create a token</a>. It needs Actions: read.'
+                " Without a token GitHub allows 60 requests an hour."
+            ).format(TOKEN_URL)
+        )
 
     def set_authentication_type(self, index: int) -> None:
         if index not in STORED_TYPE:
