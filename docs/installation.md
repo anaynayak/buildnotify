@@ -28,7 +28,7 @@ To upgrade, run `uv tool upgrade buildnotify` or `pipx upgrade buildnotify`.
 
 ## Ubuntu and Debian packages
 
-`sudo apt-get install buildnotify` still works, but the package in the archive is pretty old. Thanks to Daniel Lintott for getting BuildNotify integrated into the main debian archive. The old PPA at [https://launchpad.net/~anay/+archive/ppa](https://launchpad.net/~anay/+archive/ppa) is no longer updated. Use the PyPI package to get 3.0.
+Debian last shipped BuildNotify 0.3.5, in buster, and current Debian and Ubuntu releases have no package. Thanks to Daniel Lintott for getting BuildNotify integrated into the main debian archive. The old PPA at [https://launchpad.net/~anay/+archive/ppa](https://launchpad.net/~anay/+archive/ppa) is no longer updated. Use the PyPI package to get 3.0.
 
 ## Upgrading from 2.x
 
