@@ -1,0 +1,33 @@
+name: Flatpak
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.11
+      options: --privileged
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
+        with:
+          bundle: BuildNotify.flatpak
+          manifest-path: packaging/flatpak/io.github.anaynayak.BuildNotify.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          repo-dir: repo
+      - name: Install flatpak-builder-lint
+        run: flatpak install --system --noninteractive flathub org.flatpak.Builder
+      - name: Lint manifest
+        run: flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest packaging/flatpak/io.github.anaynayak.BuildNotify.yml
+      - name: Lint repo
+        run: flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
