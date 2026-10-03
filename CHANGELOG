@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Security
+- `SECURITY.md` with the supported versions, how to report a vulnerability and the disclosure timeline
 - Releases and nightlies carry a `buildnotify-<version>.intoto.jsonl` provenance asset
 
 ## [3.0.0] - 2026-10-02
