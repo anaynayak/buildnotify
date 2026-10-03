@@ -217,3 +217,18 @@ def test_should_keep_symbolic_icons_at_3_to_1_contrast_on_light_and_dark_panels(
     pixels = solid_pixels(icons.fallback(icons.icon_name(status, symbolic=True)))
     assert pixels
     assert min(contrast(colour, QColor(panel)) for colour in pixels) >= 3.0
+
+
+def test_should_show_an_exclamation_mark_instead_of_a_number_below_the_size_threshold():
+    assert badge_label(12, QSize(16, 16)) == "!"
+    assert badge_label(12, QSize(22, 22)) == "12"
+
+
+@pytest.mark.functional
+def test_should_draw_the_small_badge_without_digits_at_16_px(qtbot):
+    icons = BuildIcons()
+    small = QSize(16, 16)
+    icon = icons.for_aggregate_status("Failure.Sleeping", 12, size=small)
+
+    assert icon.availableSizes() == [small]
+    assert badge_rect(12, 1.0, small).width() == badge_rect(1, 1.0, small).width()

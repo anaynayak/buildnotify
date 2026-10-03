@@ -7,7 +7,7 @@ from PySide6 import QtWidgets
 from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.model import ServerSnapshot
 from buildnotifylib.ui.app_ui import AppUi
-from buildnotifylib.ui.build_icons import BuildIcons
+from buildnotifylib.ui.build_icons import SMALL_TRAY_SIZE, TRAY_SIZE, BuildIcons
 from test.fake_conf import ConfigBuilder
 from test.project_builder import ProjectBuilder
 from test.utils import FakeConnection, fake_content
@@ -87,7 +87,7 @@ def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker):
 
     widget.update_projects(OverallIntegrationStatus([ServerSnapshot("someurl", (project,))]))
 
-    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0, symbolic=False)
+    icon.assert_called_once_with("Failure.Sleeping", 1, 2.0, symbolic=False, size=TRAY_SIZE)
 
 
 @pytest.mark.parametrize("symbolic", [False, True])
@@ -215,3 +215,15 @@ def test_should_show_the_server_count_in_the_tooltip(qtbot):
 
     assert "2 servers" in tooltip_for(qtbot, conf).splitlines()
     assert "1 server" in tooltip_for(qtbot, ConfigBuilder().server("someurl").build()).splitlines()
+
+
+def test_should_draw_16_px_tray_icons_on_windows(qtbot, mocker, monkeypatch):
+    parent = QtWidgets.QWidget()
+    qtbot.addWidget(parent)
+    widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
+    icon = mocker.spy(widget.build_icons, "for_aggregate_status")
+    monkeypatch.setattr("buildnotifylib.ui.app_ui.sys.platform", "win32")
+
+    widget.update_projects(OverallIntegrationStatus([]))
+
+    assert icon.call_args.kwargs["size"] == SMALL_TRAY_SIZE

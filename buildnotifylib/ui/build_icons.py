@@ -5,6 +5,8 @@ from PySide6 import QtCore, QtGui
 
 ICONS = files("buildnotifylib") / "resources" / "icons"
 TRAY_SIZE = QtCore.QSize(22, 22)
+SMALL_TRAY_SIZE = QtCore.QSize(16, 16)
+EXCLAIM_BELOW = 20
 RASTER_SIZE = QtCore.QSize(128, 128)
 SYMBOLIC = "-symbolic"
 MUTED_OPACITY = 0.35
@@ -41,12 +43,17 @@ class BuildIcons:
         return QtGui.QIcon(QtGui.QPixmap.fromImage(rasterise((ICONS / f"{name}.svg").read_bytes())))
 
     def for_aggregate_status(
-        self, status, count: int, device_pixel_ratio: float = 1.0, symbolic: bool = False
+        self,
+        status,
+        count: int,
+        device_pixel_ratio: float = 1.0,
+        symbolic: bool = False,
+        size: QtCore.QSize = TRAY_SIZE,
     ) -> QtGui.QIcon:
         if count == 0:
             return self.for_status(status, symbolic)
-        pixmap = self.for_status(status, symbolic).pixmap(TRAY_SIZE, device_pixel_ratio)
-        draw_count(pixmap, count)
+        pixmap = self.for_status(status, symbolic).pixmap(size, device_pixel_ratio)
+        draw_count(pixmap, count, size)
         return QtGui.QIcon(pixmap)
 
     def for_muted(self, status) -> QtGui.QIcon:
@@ -72,20 +79,23 @@ BADGE_DIGIT_WIDTH = 0.45
 BADGE_RING = 1.0
 
 
-def badge_label(count: int) -> str:
+def badge_label(count: int, size: QtCore.QSize = TRAY_SIZE) -> str:
+    """Digits are too small to read below EXCLAIM_BELOW px, so say only that something failed."""
+    if size.height() < EXCLAIM_BELOW:
+        return "!"
     return str(count) if count < 100 else "99+"
 
 
-def badge_rect(count: int, device_pixel_ratio: float) -> QtCore.QRectF:
+def badge_rect(count: int, device_pixel_ratio: float, size: QtCore.QSize = TRAY_SIZE) -> QtCore.QRectF:
     """Bottom-right badge in logical pixels, snapped to whole device pixels."""
 
     def snap(logical: float) -> float:
         return math.ceil(logical * device_pixel_ratio) / device_pixel_ratio
 
-    height = snap(TRAY_SIZE.height() * BADGE_HEIGHT)
-    extra_digits = len(badge_label(count)) - 1
-    width = min(snap(height * (1 + BADGE_DIGIT_WIDTH * extra_digits)), TRAY_SIZE.width())
-    return QtCore.QRectF(TRAY_SIZE.width() - width, TRAY_SIZE.height() - height, width, height)
+    height = snap(size.height() * BADGE_HEIGHT)
+    extra_digits = len(badge_label(count, size)) - 1
+    width = min(snap(height * (1 + BADGE_DIGIT_WIDTH * extra_digits)), size.width())
+    return QtCore.QRectF(size.width() - width, size.height() - height, width, height)
 
 
 def dimmed(icon: QtGui.QIcon) -> QtGui.QIcon:
@@ -100,9 +110,9 @@ def dimmed(icon: QtGui.QIcon) -> QtGui.QIcon:
     return QtGui.QIcon(pixmap)
 
 
-def draw_count(pixmap: QtGui.QPixmap, count: int) -> None:
+def draw_count(pixmap: QtGui.QPixmap, count: int, size: QtCore.QSize = TRAY_SIZE) -> None:
     """Paint in logical pixels; QPainter scales to the pixmap's device pixel ratio."""
-    rect = badge_rect(count, pixmap.devicePixelRatio())
+    rect = badge_rect(count, pixmap.devicePixelRatio(), size)
     radius = rect.height() / 2
     ring = rect.adjusted(-BADGE_RING, -BADGE_RING, BADGE_RING, BADGE_RING)
     painter = QtGui.QPainter(pixmap)
@@ -113,7 +123,7 @@ def draw_count(pixmap: QtGui.QPixmap, count: int) -> None:
     painter.drawRoundedRect(ring, radius + BADGE_RING, radius + BADGE_RING)
     painter.setCompositionMode(QtGui.QPainter.CompositionMode.CompositionMode_SourceOver)
     painter.drawRoundedRect(rect, radius, radius)
-    draw_label(painter, rect, badge_label(count))
+    draw_label(painter, rect, badge_label(count, size))
     painter.end()
 
 

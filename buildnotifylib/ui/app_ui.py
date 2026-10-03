@@ -10,7 +10,7 @@ from buildnotifylib.core.aggregate import OverallIntegrationStatus
 from buildnotifylib.core.mute import Clock, system_clock
 from buildnotifylib.core.ports import Connection
 from buildnotifylib.ui.app_menu import AppMenu
-from buildnotifylib.ui.build_icons import BuildIcons
+from buildnotifylib.ui.build_icons import SMALL_TRAY_SIZE, TRAY_SIZE, BuildIcons
 
 NO_SERVERS = "No servers configured"
 UNREACHABLE = "Can't reach any server"
@@ -52,7 +52,9 @@ class AppUi(QtCore.QObject):
         count = len(integration_status.get_failing_builds())
         status = self.icon_state(integration_status)
         ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
-        self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic))
+        size = SMALL_TRAY_SIZE if sys.platform == "win32" else TRAY_SIZE
+        icon = self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic, size=size)
+        self.tray.setIcon(icon)
         self.app_menu.update(integration_status.get_projects(), integration_status.unavailable_servers())
         self.tray.setToolTip(self.tooltip(integration_status))
 
