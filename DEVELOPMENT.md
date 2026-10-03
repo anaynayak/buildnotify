@@ -79,3 +79,21 @@ flatpak run io.github.anaynayak.BuildNotify
 ```
 
 The desktop file, icon and AppStream metainfo at the repo root are named after the app id and ship in the wheel under `share/`. Check them with `desktop-file-validate` and `appstreamcli validate`.
+
+CI builds the Flatpak in `.github/workflows/flatpak.yml` on every push to `main` and every pull request. It runs `flatpak-builder-lint` on the manifest and on the built repo, so lint errors fail the job. The same checks run locally with:
+
+```shell
+flatpak install flathub org.flatpak.Builder
+flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest packaging/flatpak/io.github.anaynayak.BuildNotify.yml
+flatpak-builder --force-clean --repo=repo build-dir packaging/flatpak/io.github.anaynayak.BuildNotify.yml
+flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
+```
+
+To try a CI build, open the run on the Actions tab, download the `BuildNotify.flatpak` artifact and unzip it. Then install and run it:
+
+```shell
+flatpak install --user BuildNotify.flatpak
+flatpak run io.github.anaynayak.BuildNotify
+```
+
+The runtime comes from Flathub, so add that remote first if you haven't. The manifest builds from the checked-out tree (`type: dir`), which Flathub won't accept, so expect the manifest lint to flag it until the source points at a release tag.
