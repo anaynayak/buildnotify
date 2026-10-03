@@ -6,15 +6,7 @@ BuildNotify is a CCMenu/CCTray equivalent for Linux, macOS and Windows. It resid
 
 ## Features
 
-1. Monitor projects on multiple continuous integration servers that publish a cctray.xml feed, and GitHub Actions workflows.
-2. Access to overall continuous integration status from the system tray.
-3. Access individual project pages through the tray menu.
-4. Receive notifications for fixed/broken/still failing builds.
-5. Easy access to the last build time and build label for each project.
-6. Customize build notifications, or run your own script when a build changes.
-7. Optional single-colour tray icons (Shapes) that differ by shape.
-8. Unreachable servers show in the tray menu with their last error.
-9. Mute a server or project, or pause all notifications for an hour, from the tray menu.
+BuildNotify shows the status of your builds in the system tray, lists projects in a menu grouped by status, and notifies you when a build breaks or is fixed. You can run your own script on a notification, mute a server or project, and pick colour or shape tray icons. It reads cctray.xml feeds and GitHub Actions. The [documentation site](https://anaynayak.github.io/buildnotify/) has the guides.
 
 ![Project list](https://anaynayak.github.io/buildnotify/images/projectlist.png)
 
@@ -72,7 +64,10 @@ GitHub Actions is read directly from the GitHub API, with optional workflow and 
 ## Documentation
 
 1. [Installation](https://anaynayak.github.io/buildnotify/installation.html)
-2. [Configuration and usage](https://anaynayak.github.io/buildnotify/usage.html)
-3. [Frequently asked questions](https://anaynayak.github.io/buildnotify/faq.html)
-4. [Changelog](https://github.com/anaynayak/buildnotify/blob/main/CHANGELOG)
-5. [Development](https://github.com/anaynayak/buildnotify/blob/main/DEVELOPMENT.md)
+2. [Quick start](https://anaynayak.github.io/buildnotify/quickstart.html)
+3. [Reference](https://anaynayak.github.io/buildnotify/reference.html)
+4. [Troubleshooting](https://anaynayak.github.io/buildnotify/troubleshooting.html)
+5. [Security and privacy](https://anaynayak.github.io/buildnotify/security.html)
+6. [Frequently asked questions](https://anaynayak.github.io/buildnotify/faq.html)
+7. [Changelog](https://anaynayak.github.io/buildnotify/changelog.html)
+8. [Contributing](https://anaynayak.github.io/buildnotify/contributing.html)
