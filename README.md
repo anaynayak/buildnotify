@@ -10,7 +10,7 @@ BuildNotify is a CCMenu/CCTray equivalent for Linux, macOS and Windows. It resid
 4. Receive notifications for fixed/broken/still failing builds.
 5. Easy access to the last build time and build label for each project.
 6. Customize build notifications, or run your own script when a build changes.
-7. Optional single-colour symbolic tray icons that differ by shape.
+7. Optional single-colour tray icons (Shapes) that differ by shape.
 8. Unreachable servers show in the tray menu with their last error.
 9. Mute a server or project, or pause all notifications for an hour, from the tray menu.
 

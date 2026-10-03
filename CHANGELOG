@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- Symbolic tray icons keep at least 3:1 contrast on both light (`#f0f0f0`) and dark (`#2b2b2b`) panels: the failure cross is now a lighter red and the grey a little darker. Below 20 px, which includes the 16 px icons used on Windows, the tray badge shows `!` instead of a count that would be unreadable
 - When no system tray is found, the message says `BuildNotify needs a system tray` and, on GNOME, names the AppIndicator and KStatusNotifierItem Support extension. The box shows the BuildNotify icon and title. BuildNotify still exits with code 1
 - Muted projects show a dimmed icon in the tray menu instead of a `(muted)` suffix, and the tooltip says `(muted)`. The `Mute` submenu has a section per server with a `Mute server` toggle followed by that server's projects. With more than 15 projects each server gets its own submenu
 - The server dialog's time zone and certificate checks sit in a collapsed `Advanced` section that opens by itself when either is set. The field is now `Time zone for feed times`, its default entry reads `Use the feed's offset` (stored as before), and you can type part of a zone name, such as `Kolkata`, to find it

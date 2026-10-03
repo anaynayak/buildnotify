@@ -119,16 +119,20 @@ def server_dialog(server: ServerSettings, name: str) -> None:
     save(ServerConfigurationDialog(server, 10, HttpConnection()), name)
 
 
+PANELS = ["#f0f0f0", "#2b2b2b"]
+
+
 def tray_icons(icons: BuildIcons) -> None:
     size, gap = TRAY_SIZE.width() * 2, 12
-    rows = [False, True]
-    canvas = QPixmap(len(TRAY_STATES) * (size + gap) + gap, len(rows) * (size + gap) + gap)
-    canvas.fill(QColor("#2b2b2b"))
+    rows = [(panel, symbolic) for panel in PANELS for symbolic in (False, True)]
+    canvas = QPixmap(len(TRAY_STATES) * (size + gap) + gap, len(rows) * (size + gap))
     painter = QPainter(canvas)
-    for row, symbolic in enumerate(rows):
+    for row, (panel, symbolic) in enumerate(rows):
+        top = row * (size + gap)
+        painter.fillRect(QRect(0, top, canvas.width(), size + gap), QColor(panel))
         for column, (state, count) in enumerate(TRAY_STATES):
             icon = icons.for_aggregate_status(state, count, 2.0, symbolic=symbolic)
-            target = QRect(QPoint(gap + column * (size + gap), gap + row * (size + gap)), TRAY_SIZE * 2)
+            target = QRect(QPoint(gap + column * (size + gap), gap // 2 + top), TRAY_SIZE * 2)
             icon.paint(painter, target, Qt.AlignmentFlag.AlignCenter)
     painter.end()
     canvas.save(str(OUT / "tray-icons.png"))
