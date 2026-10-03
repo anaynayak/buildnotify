@@ -11,6 +11,7 @@ from buildnotifylib.ui.app_notification import AppNotification
 from buildnotifylib.ui.app_ui import AppUi
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.poller import Poller
+from buildnotifylib.ui.widgets.placement import centre_on_cursor_screen
 
 
 class BuildNotify:
@@ -61,6 +62,7 @@ class BuildNotify:
         box = QMessageBox(QMessageBox.Icon.Critical, "BuildNotify", text)
         box.setWindowTitle("BuildNotify")
         box.setWindowIcon(self.build_icons.for_status("Success.Sleeping"))
+        centre_on_cursor_screen(box)
         box.exec()
 
     def run_app(self):

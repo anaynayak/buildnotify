@@ -8,6 +8,7 @@ from buildnotifylib.ui.dialogs.preferences.advanced_page import AdvancedChoices,
 from buildnotifylib.ui.dialogs.preferences.menu_page import MenuChoices, MenuPage
 from buildnotifylib.ui.dialogs.preferences.notifications_page import NotificationChoices, NotificationsPage
 from buildnotifylib.ui.dialogs.preferences.servers_page import ServersPage
+from buildnotifylib.ui.widgets.placement import centre_on_cursor_screen
 
 LAST_BUILD_TIME = "lastBuildTimeForProject"
 
@@ -78,6 +79,7 @@ class PreferencesDialog(QDialog):
         )
 
     def open(self) -> AppSettings | None:  # type: ignore
+        centre_on_cursor_screen(self)
         if self.exec() == QDialog.DialogCode.Accepted:
             return self.edited_settings()
         return None

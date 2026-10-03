@@ -29,6 +29,7 @@ from buildnotifylib.ui.dialogs.server.cctray_form import CctrayForm
 from buildnotifylib.ui.dialogs.server.github_form import GithubForm, GithubSource
 from buildnotifylib.ui.poller import Deadline, Fetch
 from buildnotifylib.ui.widgets.forms import CollapsibleSection, MessageLabel, add_row, form_layout, section
+from buildnotifylib.ui.widgets.placement import centre_on_cursor_screen
 
 KINDS = [SourceKind.CCTRAY, SourceKind.GITHUB]
 REPOSITORY = re.compile(r"[\w.-]+/[\w.-]+")
@@ -477,6 +478,7 @@ class ServerConfigurationDialog(QDialog):
         )
 
     def open(self) -> ServerSettings | None:  # type: ignore
+        centre_on_cursor_screen(self)
         if self.exec() == QDialog.DialogCode.Accepted:
             return self.get_server_config()
         return None

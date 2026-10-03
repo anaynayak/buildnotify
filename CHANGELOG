@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- Preferences, the server dialog, the About box and the no-tray message open centred on the screen under the mouse pointer, kept inside the usable area, instead of in a corner of the primary screen
 - The server dialog hides the `Advanced` section for GitHub servers, where it had held only the time zone, which applies to cctray feeds. It comes back when you switch to cctray, with the time zone you had chosen
 - The tray menu's Failing, Building, Passing and Unknown headers are disabled rows with separators between groups, and the `Mute` submenu uses one submenu per server. Native macOS menus don't draw Qt section titles, so both had gone missing or shown as unlabelled groups. A server with no projects shows a single `Mute <server>` checkbox
 - Project rows say which server they belong to. A GitHub server with no prefix labels its rows with the repository name, such as `[hello-world] CI (main)`, and an explicit prefix still wins. A cctray project with no prefix whose name also appears on another server gets that server's host in brackets. Notifications and the tooltip use the same label; muting and change detection still go by server and project name

@@ -33,6 +33,7 @@ from buildnotifylib.core.settings import AppSettings, ServerSettings
 from buildnotifylib.ui.build_icons import BuildIcons
 from buildnotifylib.ui.dialogs.preferences.dialog import PreferencesDialog
 from buildnotifylib.ui.dialogs.server.dialog import ServerConfigurationDialog
+from buildnotifylib.ui.widgets.placement import centre_on_cursor_screen
 from buildnotifylib.version import VERSION
 
 PLATFORM = sys.platform
@@ -185,11 +186,12 @@ class AppMenu(QtCore.QObject):
         self.update(self.projects, self.unavailable)
 
     def about_clicked(self, widget: QWidget):
-        QMessageBox.about(
-            self.menu,
-            f"About BuildNotify {VERSION}",
-            about_html(VERSION),
-        )
+        box = QMessageBox(self.menu)
+        box.setWindowTitle(f"About BuildNotify {VERSION}")
+        box.setText(about_html(VERSION))
+        box.setIconPixmap(QApplication.windowIcon().pixmap(64, 64))
+        centre_on_cursor_screen(box)
+        box.exec()
 
     def preferences_clicked(self, widget: QWidget):
         counts = Counter(project.server_url for project in self.projects)
