@@ -255,7 +255,7 @@ class AppMenu(QtCore.QObject):
             suffix = ", " + humanize.compact(build_time, datetime.now(tz=build_time.tzinfo))
         status = project.get_build_status()
         icon = self.build_icons.for_muted(status) if muted else self.build_icons.for_status(status)
-        action = menu.addAction(icon, shown + suffix)
+        action = menu.addAction(icon, shown + suffix + (" (muted)" if muted else ""))
         action.setIconVisibleInMenu(True)
         action.triggered.connect(partial(self.open_url, url=project.url))
         if shown != full_label or muted:

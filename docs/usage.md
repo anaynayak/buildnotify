@@ -106,7 +106,7 @@ The tray icon shows the overall status: success, success while building (with a 
 
 The `Mute` submenu has a section for each server, headed by the server name, with a `Mute server` checkbox and then a checkbox for each of its projects. With more than 15 projects, each server becomes its own submenu instead. A muted server or project gets no notifications, and the custom script does not run for it. Muting a server also mutes all its projects and its connectivity notifications.
 
-Muted projects stay in the menu, shown with a dimmed icon and a `(muted)` tooltip, and still count towards the tray icon, the failing count and the tooltip. Muting only silences notifications. To hide a project completely, untick it in the server dialog.
+Muted projects stay in the menu, shown with a dimmed icon and a `(muted)` suffix, and still count towards the tray icon, the failing count and the tooltip. Muting only silences notifications. To hide a project completely, untick it in the server dialog.
 
 `Pause notifications for 1 hour` silences every notification and the custom script until the hour is up. The menu then shows `Resume notifications (paused until 14:05)`, which ends the pause early. Mutes and the pause end time are kept in the settings, so they survive a restart, and a pause that ran out while BuildNotify was closed is over when it starts again.
 
