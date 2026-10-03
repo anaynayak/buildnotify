@@ -20,7 +20,7 @@ BuildNotify can run a script each time it shows a notification. Turn on "Run a s
 The script gets two environment variables:
 
 1. `BUILDNOTIFY_STATUS`: the kind of notification: `Broken builds`, `Fixed builds`, `Build is still failing`, `Yet another successful build`, `Connectivity issues` or `Connectivity restored`. These are the 2.x notification titles, kept so existing scripts still work, and they differ from the titles BuildNotify now shows.
-2. `BUILDNOTIFY_PROJECTS`: every affected project (or server url for connectivity notifications), separated by commas. Unlike the notification, the list is never shortened.
+2. `BUILDNOTIFY_PROJECTS`: every affected project (or server URL for connectivity notifications), separated by commas. Unlike the notification, the list is never shortened.
 
 For example:
 

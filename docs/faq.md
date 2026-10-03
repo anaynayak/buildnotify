@@ -32,7 +32,7 @@ Qt saved me from the pain of writing environment specific code as currently ther
 
 ## Can I point BuildNotify at a local file:// feed?
 
-No. The HTTP client can't fetch `file://` urls, so 2.x accepted them and then failed with a connection error. 3.0 rejects them in the server dialog and accepts only `http://` and `https://`. Serve the file over HTTP instead, for example with `python3 -m http.server`.
+No. The HTTP client can't fetch `file://` URLs, so 2.x accepted them and then failed with a connection error. 3.0 rejects them in the server dialog and accepts only `http://` and `https://`. Serve the file over HTTP instead, for example with `python3 -m http.server`.
 
 ## Will upgrading lose my servers?
 

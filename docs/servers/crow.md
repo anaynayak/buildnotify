@@ -10,11 +10,11 @@ Crow CI publishes a cctray feed for each repository.
 
 `https://<host>/api/v1/badges/<owner>/<repo>/cc.xml`
 
-This was checked against a live Crow server. The Woodpecker path `/api/badges/...` returns HTML on Crow, so a feed url copied from a Woodpecker guide fails.
+This was checked against a live Crow server. The Woodpecker path `/api/badges/...` returns HTML on Crow, so a feed URL copied from a Woodpecker guide fails.
 
 ## Sign in
 
-Choose `None`. The feed is readable without authentication, so anyone who knows the url can read it.
+Choose `None`. The feed is readable without authentication, so anyone who knows the URL can read it.
 
 ## Example
 

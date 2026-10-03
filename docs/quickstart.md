@@ -19,7 +19,7 @@ On the first launch with no servers, the server dialog opens once. Until a serve
 
 ![Tray menu with no servers](images/empty-menu.png)
 
-1. Paste the feed url, such as `https://ci.example.org/cc.xml`. The [Servers](servers/index.md) pages have the url pattern for each CI.
+1. Paste the feed URL, such as `https://ci.example.org/cc.xml`. The [Servers](servers/index.md) pages have the URL pattern for each CI.
 2. Under Sign in, choose `None`, `Username and password` or `Token`.
 3. Click Test connection to see how many projects the feed has, and untick the ones you don't want.
 4. Save.

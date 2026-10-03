@@ -23,4 +23,4 @@ Choose `None`, `Username and password` or `Token` (a Bearer token, without the `
 https://concourse.example.org/api/v1/teams/main/cc.xml
 ```
 
-The url must start with `http://` or `https://`. A url typed without one gets `https://`.
+The URL must start with `http://` or `https://`. A URL typed without one gets `https://`.

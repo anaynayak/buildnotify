@@ -21,4 +21,4 @@ Choose `None` for a Jenkins that allows anonymous reads. Otherwise choose `Usern
 https://jenkins.example.org/view/platform/cc.xml
 ```
 
-Paste the url into the server dialog, run Test connection, and untick the jobs you don't want.
+Paste the URL into the server dialog, run Test connection, and untick the jobs you don't want.
