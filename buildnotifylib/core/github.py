@@ -143,6 +143,7 @@ class GitHubSource:
         raise FetchError(ERRORS.get(response.status, f"GitHub returned HTTP {response.status}"), response.status)
 
     def filtered(self, runs: list[Run]) -> list[Run]:
+        runs = [run for run in runs if not is_dynamic(run)]
         workflow = self.server.workflow
         if not workflow:
             return runs
@@ -163,6 +164,11 @@ class GitHubSource:
             last_build_label=str(finished.get("run_number")) if finished else None,
             prefix=self.server.prefix or self.server.repository.rpartition("/")[2] or None,
         )
+
+
+def is_dynamic(run: Run) -> bool:
+    """Dependabot and similar dynamic runs: one per update, with the run number in the name."""
+    return run.get("event") == "dynamic" or str(run.get("path", "")).startswith("dynamic/")
 
 
 def next_page(response: Response) -> str | None:

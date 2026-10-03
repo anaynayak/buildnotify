@@ -281,3 +281,9 @@ def test_should_let_an_explicit_prefix_override_the_repository_name():
     projects = source(FakeApi(fixture("runs.json")), github(prefix="gh")).fetch()
 
     assert projects[0].label() == "[gh] CI (main)"
+
+
+def test_should_ignore_dependabot_dynamic_runs():
+    projects = source(FakeApi(fixture("runs-dependabot.json"))).fetch()
+
+    assert rows(projects) == [("CI (main)", Status.SUCCESS, Activity.SLEEPING, "12")]

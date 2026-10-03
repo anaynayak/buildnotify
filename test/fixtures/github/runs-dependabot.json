@@ -1,0 +1,65 @@
+{
+  "total_count": 4,
+  "workflow_runs": [
+    {
+      "id": 1605521896,
+      "name": "Configured Graph Update: uv in /. #1605521896",
+      "head_branch": "main",
+      "path": "dynamic/dependabot/dependabot-updates",
+      "display_title": "Configured Graph Update: uv in /. #1605521896",
+      "run_number": 1605521896,
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow_id": 900001,
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/1605521896",
+      "created_at": "2026-10-02T09:00:00Z",
+      "updated_at": "2026-10-02T09:05:00Z"
+    },
+    {
+      "id": 1605488287,
+      "name": "uv in /. - Update #1605488287",
+      "head_branch": "main",
+      "path": "dynamic/dependabot/dependabot-updates",
+      "display_title": "uv in /. - Update #1605488287",
+      "run_number": 1605488287,
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow_id": 900002,
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/1605488287",
+      "created_at": "2026-10-02T09:00:00Z",
+      "updated_at": "2026-10-02T09:05:00Z"
+    },
+    {
+      "id": 1605488001,
+      "name": "github_actions in /. - Update #1605488001",
+      "head_branch": "main",
+      "path": "dynamic/dependabot/dependabot-updates",
+      "display_title": "github_actions in /. - Update #1605488001",
+      "run_number": 1605488001,
+      "event": "dynamic",
+      "status": "in_progress",
+      "conclusion": null,
+      "workflow_id": 900003,
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/1605488001",
+      "created_at": "2026-10-02T09:00:00Z",
+      "updated_at": "2026-10-02T09:05:00Z"
+    },
+    {
+      "id": 30433500,
+      "name": "CI",
+      "head_branch": "main",
+      "path": ".github/workflows/ci.yml",
+      "display_title": "CI",
+      "run_number": 12,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow_id": 159040,
+      "html_url": "https://github.com/octo-org/hello-world/actions/runs/30433500",
+      "created_at": "2026-10-02T09:00:00Z",
+      "updated_at": "2026-10-02T09:05:00Z"
+    }
+  ]
+}
