@@ -91,10 +91,10 @@ Settings are stored with Qt's `QSettings`, under the organisation and applicatio
 
 | Platform | Location |
 | --- | --- |
-| Linux | `~/.config/BuildNotify/BuildNotify.conf` |
+| Linux | `~/.config/BuildNotify/BuildNotify.conf` (inferred from Qt's defaults, not checked on a machine) |
 | Flatpak | `~/.var/app/io.github.anaynayak.BuildNotify/config/BuildNotify/BuildNotify.conf` |
-| macOS | The preferences domain `com.BuildNotify.BuildNotify`, in `~/Library/Preferences` |
-| Windows | The registry key `HKEY_CURRENT_USER\Software\BuildNotify\BuildNotify` |
+| macOS | `~/Library/Preferences/com.buildnotify.BuildNotify.plist` (observed on a Mac) |
+| Windows | The registry key `HKEY_CURRENT_USER\Software\BuildNotify\BuildNotify` (inferred from Qt's defaults, not checked on a machine) |
 | With `--settings PATH` | The INI file at `PATH` |
 
 Passwords and tokens are not in this file. They are in the system keyring, one entry per server. See [Security and privacy](security.md#where-credentials-are-stored).
