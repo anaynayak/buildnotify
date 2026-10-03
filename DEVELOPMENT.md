@@ -67,7 +67,7 @@ gh attestation verify buildnotify-3.0.0-py3-none-any.whl --repo anaynayak/buildn
   --predicate-type https://cyclonedx.org/bom
 ```
 
-The first command checks the build provenance, the second the SBOM attestation. PyPI also shows the PEP 740 attestation on each file's page under "Provenance". Nightly wheels and sdists have build provenance too, so the first command works for them. They have no SBOM. To check a build yourself, check out the tag, run `just repro` and compare the hashes with the ones on PyPI.
+The first command checks the build provenance, the second the SBOM attestation. PyPI also shows the PEP 740 attestation on each file's page under "Provenance". Each release and nightly also carries a `buildnotify-<version>.intoto.jsonl` asset with the provenance bundle, one JSON bundle per line. Nightly wheels and sdists have build provenance too, so the first command works for them. They have no SBOM. To check a build yourself, check out the tag, run `just repro` and compare the hashes with the ones on PyPI.
 
 ## Flatpak
 

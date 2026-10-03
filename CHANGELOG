@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Security
+- Releases and nightlies carry a `buildnotify-<version>.intoto.jsonl` provenance asset
+
 ## [3.0.0] - 2026-10-02
 
 ### Breaking changes
