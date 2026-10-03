@@ -269,3 +269,15 @@ def test_should_stop_paging_on_a_rate_limit():
         source(api, github(workflow="Weekly"), limits=limits).fetch()
     with pytest.raises(FetchError, match="rate limit"):
         source(api, limits=limits).fetch()
+
+
+def test_should_label_rows_with_the_repository_name_when_there_is_no_prefix():
+    projects = source(FakeApi(fixture("runs.json"))).fetch()
+
+    assert projects[0].label() == "[hello-world] CI (main)"
+
+
+def test_should_let_an_explicit_prefix_override_the_repository_name():
+    projects = source(FakeApi(fixture("runs.json")), github(prefix="gh")).fetch()
+
+    assert projects[0].label() == "[gh] CI (main)"

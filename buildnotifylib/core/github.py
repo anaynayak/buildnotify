@@ -161,7 +161,7 @@ class GitHubSource:
             last_build_time=time,
             build_time=parse_build_time(time, NONE_TIMEZONE),
             last_build_label=str(finished.get("run_number")) if finished else None,
-            prefix=self.server.prefix,
+            prefix=self.server.prefix or self.server.repository.rpartition("/")[2] or None,
         )
 
 
