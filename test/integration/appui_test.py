@@ -77,7 +77,8 @@ def test_should_hand_the_injected_connection_to_the_menu(qtbot):
     assert widget.app_menu.connection is connection
 
 
-def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker):
+def test_should_render_the_tray_icon_at_the_screen_pixel_ratio(qtbot, mocker, monkeypatch):
+    monkeypatch.setattr("buildnotifylib.ui.app_ui.sys.platform", "linux")
     parent = QtWidgets.QWidget()
     qtbot.addWidget(parent)
     widget = AppUi(parent, ConfigBuilder().build(), BuildIcons(), FakeConnection(fake_content()))
