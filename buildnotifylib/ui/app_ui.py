@@ -41,11 +41,14 @@ class AppUi(QtCore.QObject):
 
     def update_projects(self, integration_status: OverallIntegrationStatus):
         count = len(integration_status.get_failing_builds())
-        status = integration_status.get_build_status()
+        status = self.icon_state(integration_status)
         ratio, symbolic = self.widget.devicePixelRatio(), self.store.settings.symbolic_icons
         self.tray.setIcon(self.build_icons.for_aggregate_status(status, count, ratio, symbolic=symbolic))
         self.app_menu.update(integration_status.get_projects(), integration_status.unavailable_servers())
         self.tray.setToolTip(self.tooltip(integration_status))
+
+    def icon_state(self, integration_status: OverallIntegrationStatus) -> str | None:
+        return "unreachable" if integration_status.unreachable() else integration_status.get_build_status()
 
     def tooltip(self, integration_status: OverallIntegrationStatus) -> str:
         if not self.store.settings.servers:

@@ -15,6 +15,7 @@ class BuildIcons:
     failure_sleeping = "buildnotify-failure"
     failure_building = "buildnotify-failure-building"
     unavailable = "buildnotify-inactive"
+    unreachable = "buildnotify-unreachable"
 
     def __init__(self):
         self.all_status = {
@@ -25,6 +26,7 @@ class BuildIcons:
             "Failure.CheckingModifications": self.failure_sleeping,
             "Failure.Building": self.failure_building,
             "unavailable": self.unavailable,
+            "unreachable": self.unreachable,
         }
 
     def for_status(self, status, symbolic: bool = False) -> QtGui.QIcon:

@@ -169,3 +169,20 @@ def test_should_tell_colour_icons_apart_by_building_state(qtbot):
 
     for sleeping, building in pairs:
         assert icons.fallback(sleeping).pixmap(TRAY_SIZE).toImage() != icons.fallback(building).pixmap(TRAY_SIZE).toImage()
+
+
+def test_should_use_a_different_icon_for_unreachable_than_for_unknown():
+    icons = BuildIcons()
+
+    assert icons.icon_name("unreachable") == "buildnotify-unreachable"
+    assert icons.icon_name("unreachable") != icons.icon_name(None)
+    assert icons.icon_name("unreachable", symbolic=True) == "buildnotify-unreachable-symbolic"
+
+
+@pytest.mark.functional
+def test_should_tell_unreachable_from_unknown_in_both_icon_sets(qtbot):
+    icons = BuildIcons()
+
+    for suffix in ("", "-symbolic"):
+        unknown, unreachable = (icons.fallback(f"buildnotify-{name}{suffix}").pixmap(TRAY_SIZE).toImage() for name in ("inactive", "unreachable"))
+        assert unknown != unreachable

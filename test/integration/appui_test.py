@@ -140,3 +140,39 @@ def test_should_summarise_cached_projects_when_all_servers_are_down(qtbot):
     widget.update_projects(OverallIntegrationStatus([snapshot]))
 
     assert widget.tray.toolTip().splitlines()[0] == "No failing builds"
+
+
+def snapshot(*projects, url="someurl"):
+    return OverallIntegrationStatus([ServerSnapshot(url, tuple(projects))])
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize(
+    "status, activity, expected",
+    [
+        ("Success", "Sleeping", "Success.Sleeping"),
+        ("Success", "Building", "Success.Building"),
+        ("Failure", "Sleeping", "Failure.Sleeping"),
+        ("Failure", "Building", "Failure.Building"),
+    ],
+)
+def test_should_pick_the_icon_state_for_each_aggregate_status(qtbot, status, activity, expected):
+    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+    project = ProjectBuilder({"name": "a", "lastBuildStatus": status, "activity": activity}).build()
+
+    assert widget.icon_state(snapshot(project)) == expected
+
+
+@pytest.mark.functional
+def test_should_pick_unknown_icon_state_when_there_are_no_projects(qtbot):
+    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+
+    assert widget.icon_state(snapshot()) is None
+
+
+@pytest.mark.functional
+def test_should_pick_unreachable_icon_state_when_every_server_is_down(qtbot):
+    widget = AppUi(QtWidgets.QWidget(), ConfigBuilder().server("someurl").build(), BuildIcons(), FakeConnection(fake_content()))
+    down = OverallIntegrationStatus([ServerSnapshot("someurl", error=TimeoutError("Timed out"))])
+
+    assert widget.icon_state(down) == "unreachable"
