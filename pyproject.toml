@@ -49,6 +49,9 @@ dev = [
     "mypy>=1.18",
     "hypothesis>=6",
 ]
+docs = [
+    "mkdocs-material>=9.6",
+]
 
 [tool.hatch.version]
 path = "buildnotifylib/version.py"
