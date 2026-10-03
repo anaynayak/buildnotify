@@ -17,8 +17,22 @@ exclude_docs: |
 
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Usage: usage.md
+  - Install: installation.md
+  - Quick start: quickstart.md
+  - Servers:
+      - Overview: servers/index.md
+      - Jenkins: servers/jenkins.md
+      - GoCD: servers/gocd.md
+      - Woodpecker CI: servers/woodpecker.md
+      - Crow CI: servers/crow.md
+      - GitHub Actions: servers/github-actions.md
+      - Other cctray servers: servers/other.md
+  - Guides:
+      - Overview: usage.md
+      - Tray and menu: guide/tray-menu.md
+      - Notifications and custom script: guide/notifications.md
+      - Muting and pausing: guide/muting.md
+      - Preferences and the server dialog: guide/preferences.md
   - FAQ: faq.md
 
 theme:
