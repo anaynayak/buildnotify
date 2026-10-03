@@ -189,3 +189,31 @@ def test_should_tell_unreachable_from_unknown_in_both_icon_sets(qtbot):
         unknown = icons.fallback(f"buildnotify-inactive{suffix}").pixmap(TRAY_SIZE).toImage()
         unreachable = icons.fallback(f"buildnotify-unreachable{suffix}").pixmap(TRAY_SIZE).toImage()
         assert unknown != unreachable
+
+
+def luminance(colour: QColor) -> float:
+    def linear(value: float) -> float:
+        return value / 12.92 if value <= 0.03928 else ((value + 0.055) / 1.055) ** 2.4
+
+    return 0.2126 * linear(colour.redF()) + 0.7152 * linear(colour.greenF()) + 0.0722 * linear(colour.blueF())
+
+
+def contrast(a: QColor, b: QColor) -> float:
+    high, low = sorted((luminance(a), luminance(b)), reverse=True)
+    return (high + 0.05) / (low + 0.05)
+
+
+def solid_pixels(icon: QIcon) -> list[QColor]:
+    image = icon.pixmap(QSize(22, 22)).toImage().convertToFormat(QImage.Format.Format_ARGB32)
+    colours = [image.pixelColor(x, y) for x in range(image.width()) for y in range(image.height())]
+    return [colour for colour in colours if colour.alpha() == 255]
+
+
+@pytest.mark.functional
+@pytest.mark.parametrize("status", sorted(BuildIcons().all_status))
+@pytest.mark.parametrize("panel", ["#f0f0f0", "#2b2b2b"])
+def test_should_keep_symbolic_icons_at_3_to_1_contrast_on_light_and_dark_panels(qtbot, status, panel):
+    icons = BuildIcons()
+    pixels = solid_pixels(icons.fallback(icons.icon_name(status, symbolic=True)))
+    assert pixels
+    assert min(contrast(colour, QColor(panel)) for colour in pixels) >= 3.0
