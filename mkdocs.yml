@@ -1,5 +1,5 @@
 site_name: BuildNotify
-site_description: BuildNotify is a system tray build status notification app.
+site_description: BuildNotify is a system tray app that shows CI build status and notifies you when a build breaks or is fixed.
 site_url: https://anaynayak.github.io/buildnotify/
 repo_url: https://github.com/anaynayak/buildnotify
 repo_name: anaynayak/buildnotify
@@ -42,6 +42,7 @@ nav:
 
 theme:
   name: material
+  custom_dir: overrides
   logo: images/buildnotify.svg
   favicon: images/buildnotify.svg
   palette:
