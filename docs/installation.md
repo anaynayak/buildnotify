@@ -26,6 +26,27 @@ Launch it with `buildnotify`. To try it without installing, run `uvx buildnotify
 
 To upgrade, run `uv tool upgrade buildnotify` or `pipx upgrade buildnotify`.
 
+## Install the Flatpak bundle
+
+Each [release](https://github.com/anaynayak/buildnotify/releases) has a `BuildNotify.flatpak` bundle. Download it and install it for your user:
+
+```commandline
+flatpak install --user BuildNotify.flatpak
+flatpak run io.github.anaynayak.BuildNotify
+```
+
+The bundle needs the KDE runtime, which Flatpak fetches from Flathub if it is configured.
+
+## Install a development build
+
+Every push to `main` replaces the [dev pre-release](https://github.com/anaynayak/buildnotify/releases/tag/dev) with a wheel, an sdist and a Flatpak bundle. These builds may be broken. The wheel has a `.devN` version, so uv and pip only install it when you ask for it:
+
+```commandline
+uv tool install --prerelease allow https://github.com/anaynayak/buildnotify/releases/download/dev/<wheel file name>
+```
+
+Take the exact file name from the release page. Development builds are never published to PyPI.
+
 ## Ubuntu and Debian packages
 
 Debian last shipped BuildNotify 0.3.5, in buster, and current Debian and Ubuntu releases have no package. Thanks to Daniel Lintott for getting BuildNotify integrated into the main debian archive. The old PPA at [https://launchpad.net/~anay/+archive/ppa](https://launchpad.net/~anay/+archive/ppa) is no longer updated. Use the PyPI package to get 3.0.
